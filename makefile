@@ -30,25 +30,25 @@ vec : $(EXE)
 $(EXE) : $(OBJ)
 				$(COMPILER) -o $(EXE) $(OPT) $(OBJ)  $(LIB) 
 
-main-1.o: main-1.cpp access.cpp commons.h
+main-1.o: main-1.cpp 
 				$(COMPILER) $(OPT) -c main-1.cpp
 
-grid.o : grid.cpp grid.h commons.h
+grid.o : grid.cpp 
 				$(COMPILER) $(OPT) -c grid.cpp
 
-structures.o : structures.cpp structures.h commons.h
+structures.o : structures.cpp 
 					$(COMPILER) $(OPT) -c structures.cpp 
 
-current.o : current.cpp current.h commons.h
+current.o : current.cpp
 					$(COMPILER) $(OPT) -c current.cpp
 
-em_field.o: em_field.cpp em_field.h commons.h
+em_field.o: em_field.cpp
 						$(COMPILER) $(OPT) -c em_field.cpp
 
-particle_species.o: particle_species.cpp particle_species.h commons.h
+particle_species.o: particle_species.cpp 
 						$(COMPILER) $(OPT) -c particle_species.cpp 
 
-output_manager.o:  output_manager.cpp  output_manager.h commons.h
+output_manager.o:  output_manager.cpp 
 						$(COMPILER) $(OPT) -c output_manager.cpp
 
 clean :
