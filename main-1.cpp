@@ -161,7 +161,7 @@ int main(int narg, char **args)
 
     PLASMA plasma2;
     plasma2.density_function = box;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
-    plasma2.setXRangeBox(0.8,0.805);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
+    plasma2.setXRangeBox(0.8,0.85);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
     plasma2.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
     plasma2.setZRangeBox(grid.rmin[2],grid.rmax[2]);
     plasma2.setRampLength(0.5);                       //ramp_min_density,void *additional_params
