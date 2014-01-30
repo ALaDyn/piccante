@@ -41,7 +41,6 @@ using namespace std;
 
 #define DIMENSIONALITY 2
 
-
 #include "access.h"
 #include "commons.h"
 #include "grid.h"
@@ -51,9 +50,8 @@ using namespace std;
 #include "particle_species.h"
 #include "output_manager.h"
 
-#define NPROC_ALONG_Y 1
+#define NPROC_ALONG_Y 512
 #define NPROC_ALONG_Z 1
-
 
 #define DIRECTORY_OUTPUT "TEST"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
@@ -71,40 +69,39 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-	grid.setXrange(-30.0, 30.0);
-	grid.setYrange(-20.0, 20.0);
+    grid.setXrange(-40.0, 40.0);
+    grid.setYrange(-40.0, 40.0);
 	grid.setZrange(-1.0, +1.0);
 
-	grid.setNCells(2000, 1500, 0);
+    grid.setNCells(6000, 5000, 0);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
-	grid.enableStretchedGrid();
-	grid.setXandNxLeftStretchedGrid(-10.0, 500);
-	grid.setYandNyLeftStretchedGrid(-5.0, 70);
-	grid.setXandNxRightStretchedGrid(10.0, 500);
-	grid.setYandNyRightStretchedGrid(5.0, 70);
+    grid.enableStretchedGrid();
+    grid.setXandNxLeftStretchedGrid(-20.0,1000);
+    grid.setYandNyLeftStretchedGrid(-15.0,1000);
+    grid.setXandNxRightStretchedGrid(20.0,1000);
+    grid.setYandNyRightStretchedGrid(15.0,1000);
 
-	grid.setBoundaries(xOpen | yOpen | zPBC); //LUNGO Z c'è solo PBC al momento !
+    grid.setBoundaries(xOpen | yOpen | zPBC); //LUNGO Z c'è solo PBC al momento !
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-	grid.setSimulationTime(15.0);
+    grid.setSimulationTime(50.0);
 
-	grid.with_particles = YES;//NO;
-	grid.with_current = YES;//YES;
+    grid.with_particles = YES;//NO;
+    grid.with_current = YES;//YES;
 
-	//grid.setStartMovingWindow(0);
-	//grid.setBetaMovingWindow(BETA);
-	//grid.setFrequencyMovingWindow(FREQUENCY);
+    //grid.setStartMovingWindow(0);
+    grid.setBetaMovingWindow(1.0);
+    //grid.setFrequencyMovingWindow(FREQUENCY);
 
+	grid.setMasterProc(0);	
 
-	grid.setMasterProc(0);
-
-	grid.finalize();
-
-	srand((unsigned int)time(NULL));
+	srand(time(NULL));
 	grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+
+    grid.finalize();
 
 	grid.visualDiag();
 
@@ -115,28 +112,27 @@ int main(int narg, char **args)
 	myfield.setAllValuesToZero();
 
 	laserPulse pulse1;
-	pulse1.type = GAUSSIAN;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
-	pulse1.polarization = P_POLARIZATION;
-	pulse1.t_FWHM = 9.0;
-	pulse1.waist = 3.0;
-	pulse1.focus_position = 0.0;
-	pulse1.laser_pulse_initial_position = -9.01;
-	pulse1.lambda0 = 1.0;
-	pulse1.normalized_amplitude = 5.0;
-	pulse1.rotation = false;
-	pulse1.angle = 2.0*M_PI*(-90.0 / 360.0);
-	pulse1.rotation_center_along_x = 0.0;
+    pulse1.type = GAUSSIAN;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
+    pulse1.polarization = P_POLARIZATION;
+    pulse1.t_FWHM = 10.0;
+    pulse1.laser_pulse_initial_position = -15.0;
+    pulse1.lambda0 = 1.0;
+    pulse1.normalized_amplitude = 8.0;
+    pulse1.waist = 3.0;
+    pulse1.focus_position = 0.0;
+    pulse1.rotation = true;
+    pulse1.angle = 2.0*M_PI*(-30.0 / 360.0);
+    pulse1.rotation_center_along_x = 0.0;
 
-	laserPulse pulse2;
-	pulse2 = pulse1;
-	pulse2.angle = 2.0*M_PI*(15.0 / 360.0);
-	pulse2.laser_pulse_initial_position = -10.0;
+    myfield.addPulse(&pulse1);
 
-	myfield.addPulse(&pulse1);
-	//myfield.addPulse(&pulse2);
+    laserPulse pulse2;
+    pulse2 = pulse1;
+    pulse2.angle = 2.0*M_PI*(30.0 / 360.0);
+
+    myfield.addPulse(&pulse2);
 
 	myfield.boundary_conditions();
-	//myfield.smooth_filter(10);   //DA NON USARE CON GRIGLIA STRETCHATA !
 
 	current.allocate(&grid);
 	current.setAllValuesToZero();
@@ -144,99 +140,104 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
 	PLASMA plasma1;
-	plasma1.density_function = left_linear_ramp;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
-	plasma1.setXRangeBox(0.0, 0.5);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, double Z, double A)
-	plasma1.setYRangeBox(-50.0, 50.0);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
-	plasma1.setZRangeBox(grid.rmin[2], grid.rmax[2]);
-	plasma1.setRampLength(0.25);                       //ramp_min_density,void *additional_params
-	plasma1.setDensityCoefficient(10.0);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
-	plasma1.setRampMinDensity(0.001);                 //double g_phase = paramlist[2];
-	double gratingParams[3] = { 0.2, sqrt(2), 0.0 };
-	plasma1.setAdditionalParams(gratingParams);
+    plasma1.density_function = left_grating;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
+    plasma1.setXRangeBox(0.0,0.8);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
+    plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
+	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
+    plasma1.setRampLength(0.0);                       //ramp_min_density,void *additional_params
+    plasma1.setDensityCoefficient(80);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
+    plasma1.setRampMinDensity(0.0);                 //double g_phase = paramlist[2];
+    double grating_peak_to_valley_depth = 0.2;
+    double grating_lambda = 2.0;
+    double grating_phase = 0.0;
 
-	PLASMA plasma2;
-	plasma2.density_function = box;
-	plasma2.setMinBox(3.0, -20.0, grid.rmin[2]);
-	plasma2.setMaxBox(4.0, 20.0, grid.rmax[2]);
-	plasma2.setDensityCoefficient(0.5);
+    double additionalParams[3];
+    additionalParams[0] = grating_peak_to_valley_depth;
+    additionalParams[1] = grating_lambda;
+    additionalParams[2] = grating_phase ;
+
+    plasma1.setAdditionalParams(additionalParams);
+
+
+    PLASMA plasma2;
+    plasma2.density_function = box;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
+    plasma2.setXRangeBox(0.8,0.805);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
+    plasma2.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
+    plasma2.setZRangeBox(grid.rmin[2],grid.rmax[2]);
+    plasma2.setRampLength(0.5);                       //ramp_min_density,void *additional_params
+    plasma2.setDensityCoefficient(10);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
+    plasma2.setRampMinDensity(0.0);                 //double g_phase = paramlist[2];
+
 
 	SPECIE  electrons1(&grid);
 	electrons1.plasma = plasma1;
-	electrons1.setParticlesPerCellXYZ(5, 5, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(10, 10, 1);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
 	electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
 	species.push_back(&electrons1);
 
 
-	SPECIE electrons2(&grid);
-	electrons2.plasma = plasma1;
-	electrons2.setParticlesPerCellXYZ(100, 1, 1);
-	electrons2.setName("ELE2");
-	electrons2.type = ELECTRON;
-	// electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-	// species.push_back(&electrons2);
-
-
 	SPECIE ions1(&grid);
 	ions1.plasma = plasma1;
-	ions1.setParticlesPerCellXYZ(5, 5, 1);
+    ions1.setParticlesPerCellXYZ(7, 7, 1);
 	ions1.setName("ION1");
-	ions1.type = ION;
-	ions1.Z = 50.0;
-	ions1.A = 100.0;
-	ions1.creation();
-	species.push_back(&ions1);
+    ions1.type = ION;
+    ions1.Z = 6.0;
+    ions1.A = 12.0;
+    ions1.creation();
+    species.push_back(&ions1);
+
+    SPECIE  electrons2(&grid);
+    electrons2.plasma = plasma2;
+    electrons2.setParticlesPerCellXYZ(10, 10, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons2.setName("ELE2");
+    electrons2.type = ELECTRON;
+    electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    species.push_back(&electrons2);
 
 
-	SPECIE  ions2(&grid);
-	ions2.plasma = plasma2;
-	ions2.setParticlesPerCellXYZ(9, 9, 1);       //Se < 1 il nPPC viene sostituito con 1
-	ions2.setName("ION2");
-	ions2.type = ION;
-	ions2.Z = 1.0;
-	ions2.A = 1.0;
-	//    ions2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-	//    species.push_back(&ions2);
+    SPECIE ions2(&grid);
+    ions2.plasma = plasma2;
+    ions2.setParticlesPerCellXYZ(10, 10, 1);
+    ions2.setName("ION2");
+    ions2.type = ION;
+    ions2.Z = 1.0;
+    ions2.A = 1.0;
+    ions2.creation();
+    species.push_back(&ions2);
 
+//	tempDistrib distribution;
+//    distribution.setMaxwell(1.0e-5);
 
-	// WATERBAG        : [P0] -P0< px < + P0, -P0< py < + P0, -P0< pz < + P0 uniforme
-	// WATERBAG_3TEMP  : [P0_X,P0_Y,P0_Z] -P0_X< px < + P0_X, -P0_Y< py < + P0_Y, -P0_Z< pz < + P0_Z uniforme
-	// UNIF_SPHERE     : [P0] -P0 < p < +P0 uniforme
-	// SUPERGAUSSIAN   : [P0, ALPHA] f(p) = C*exp(-abs(p/P0)^(ALPHA))
-	// MAXWELL         : [Ta] Maxwell alla Macchi
-	// JUTTNER         : [a] f(p) = C*exp(-a*gamma(p)) [DA RISCRIVERE]
-	//si può ancora usare electrons.add_momenta(1.0, 0.0, 0);
+//    electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
+//    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
+//    electrons2.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
+//    ions2.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 
-	tempDistrib distribution;
-	distribution.setMaxwell(0.5);
-
-	//electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
-	//   electrons2.add_momenta(rng,-1.0, 0.0, 0.0, distribution);
-	//    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
-	//    ions2.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 	//    //*******************************************FINE DEFINIZIONE CAMPI***********************************************************
 
 	//*******************************************INIZIO DEFINIZIONE DIAGNOSTICHE**************************************************
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
-	//AGGIUNGERE CONTROLLI DIAGS
-	//manager.addEMFieldBinaryFrom(0.0, 2.0);
 
-	//manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
-	//manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
+    manager.addEMFieldBinaryFrom(0.0, 2.0);
 
-	//manager.addCurrentBinaryFrom(0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-	//manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 5.0);
+    manager.addCurrentBinaryFrom(0.0, 5.0);
+
+    manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 5.0);
+    manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 5.0);
+    manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 0.0, 5.0);
+    manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
 
 	manager.addDiagFrom(0.0, 1.0);
 
 	manager.initialize(DIRECTORY_OUTPUT);
-
-	//manager.autoVisualDiag();
-
-
 
 	//*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
 
@@ -245,7 +246,6 @@ int main(int narg, char **args)
 		printf("----- START temporal cicle -----\n");
 		fflush(stdout);
 	}
-
 
 	int Nstep = grid.getTotalNumberOfTimesteps();
 	for (istep = 0; istep <= Nstep; istep++)
@@ -261,12 +261,6 @@ int main(int narg, char **args)
 		myfield.new_halfadvance_B();
 		myfield.boundary_conditions();
 
-
-
-		/*   for(spec_iterator=species.begin(); spec_iterator!=species.end(); spec_iterator++){
-				(*spec_iterator)->density_deposition_standard(&current);
-				}*/
-
 		current.setAllValuesToZero();
 
 		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -277,13 +271,10 @@ int main(int narg, char **args)
 
 		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
 			(*spec_iterator)->position_parallel_pbc();
-		}
-
-		//myfield.boundary_conditions();
+		}		
 
 		myfield.openBoundariesB();
 		myfield.new_advance_E(&current);
-		//myfield.new_advance_E();
 
 		myfield.boundary_conditions();
 
