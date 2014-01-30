@@ -1,0 +1,9 @@
+#! /bin/bash
+mpic++ -c grid.cpp -O3 -o grid.o 
+mpic++ -c structures.cpp -O3 -o structures.o
+mpic++ -c current.cpp -O3 -o current.o
+mpic++ -c em_field.cpp -O3 -o em_field.o
+mpic++ -c particle_species.cpp -O3 -o particle_species.o
+mpic++ -c diag_manager.cpp -O3 -o diag_manager.o
+mpic++ main-1.cpp -O3 grid.o structures.o current.o em_field.o particle_species.o diag_manager.o -lgsl -lgslcblas -o piccante
+rm *.o
