@@ -626,7 +626,7 @@ void SPECIE::position_pbc()
 			ru(2, p) += (mygrid->rmaxloc[2] - mygrid->rminloc[2]);
 	}
 }
-void SPECIE::position_parallel_pbc()
+void SPECIE::   position_parallel_pbc()
 {
 	if (mygrid->with_particles == NO)
 		return;
@@ -714,30 +714,11 @@ void SPECIE::position_parallel_pbc()
 				ru(c, pp + nold - nlost) = recv_buffer[pp*Ncomp + c];
 			}
 		}
-
-
-
-
 	}
 
-	// for(p=0;p<Np;p++)
-	//   {
-
-	// 		if(ru(0,p)> mygrid->rmaxloc[0])
-	// 			ru(0,p)-=(mygrid->rmaxloc[0]-mygrid->rminloc[0]);
-	// 		if(ru(0,p)< mygrid->rminloc[0])
-	// 			ru(0,p)+=(mygrid->rmaxloc[0]-mygrid->rminloc[0]);
-
-	// 		if(ru(1,p)> mygrid->rmaxloc[1])
-	// 			ru(1,p)-=(mygrid->rmaxloc[1]-mygrid->rminloc[1]);
-	// 		if(ru(1,p)< mygrid->rminloc[1])
-	// 			ru(1,p)+=(mygrid->rmaxloc[1]-mygrid->rminloc[1]);
-
-	// 		if(ru(2,p)> mygrid->rmaxloc[2])
-	// 			ru(2,p)-=(mygrid->rmaxloc[2]-mygrid->rminloc[2]);
-	// 		if(ru(2,p)< mygrid->rminloc[2])
-	// 			ru(2,p)+=(mygrid->rmaxloc[2]-mygrid->rminloc[2]);
-	//   }
+    free(sendl_buffer);
+    free(sendr_buffer);
+    free(recv_buffer);
 }
 void SPECIE::position_obc()
 {
