@@ -275,10 +275,10 @@ double box_minus_box(double x, double y, double z, PLASMAparams plist, double Z,
 }
 
 double square_func(double x){
-    if (sin(x)>0){
+    if (cos(x)>0){
         return 1.0;
     }
-    else if (sin(x)<0){
+    else if (cos(x)<0){
         return -1;
     }
     else{
@@ -295,6 +295,43 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
 
     double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
     double xminbound = plist.rminbox[0] + g_depth*(1.0 - square_func(phase));
+
+    if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+        if ((x - xminbound) <= plist.ramp_length){
+            return (plist.density_coefficient - plist.ramp_min_density)*(x - xminbound) / plist.ramp_length + plist.ramp_min_density;
+        }
+        else{
+            return plist.density_coefficient;
+        }
+    }
+    else{
+        return -1;
+    }
+}
+
+double saw_func(double x){
+    if(x<0)
+        x*=-1.0;
+    x -= floor(x/(2.0*M_PI));
+    if(x<M_PI){
+        return (1.0 - 2.0*x/M_PI);
+    }
+    else{
+        return (2.0*x/M_PI - 1.0);
+    }
+}
+
+double left_saw_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
+    double* paramlist = (double*)plist.additional_params;
+    double g_depth = paramlist[0] * 0.5;
+    double g_lambda = paramlist[1];
+    double g_phase = paramlist[2];
+
+    double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
+    double xminbound = plist.rminbox[0] + g_depth*(1.0 - saw_func(phase));
 
     if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
         (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
