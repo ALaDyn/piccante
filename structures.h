@@ -67,6 +67,9 @@ double box_minus_box(double x, double y, double z, PLASMAparams plist, double Z,
 
 double left_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
+double square_func(double x);
+double left_square_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
 
 //************** LASER PULSE TYPES *******
 enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE };
