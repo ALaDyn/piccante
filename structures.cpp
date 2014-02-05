@@ -312,8 +312,8 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
 }
 
 double saw_func(double x){
-    x = abs(x)-floor(abs(x)/(2.0*M_PI))*2.0*M_PI;
-    return 2.0*abs(x-M_PI)/M_PI - 1.0;
+    x = fabs(x)-floor(fabs(x)/(2.0*M_PI))*2.0*M_PI;
+    return 2.0*fabs(x-M_PI)/M_PI - 1.0;
 }
 
 double left_saw_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
