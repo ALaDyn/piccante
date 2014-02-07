@@ -73,6 +73,9 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
 double saw_func(double x);
 double left_saw_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
+double saw_2_func(double x);
+double left_saw_2_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
 
 //************** LASER PULSE TYPES *******
 enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE };
