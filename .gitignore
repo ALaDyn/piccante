@@ -32,6 +32,11 @@
 
 # QtCreator
 *.autosave
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
 
 
 ###############################################

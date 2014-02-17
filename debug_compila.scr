@@ -1,7 +1,0 @@
-#! /bin/bash
-mpic++ -c grid.cpp -O0 -g -Wall -o grid.o 
-mpic++ -c structures.cpp -O0 -g -Wall -o structures.o
-mpic++ -c current.cpp -O0 -g -Wall -o current.o
-mpic++ -c em_field.cpp -O0 -g -Wall -o em_field.o
-mpic++ main-1.cpp -O0 -g -Wall grid.o structures.o current.o em_field.o -lgsl -lgslcblas -o piccante
-rm *.o
