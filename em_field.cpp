@@ -1845,7 +1845,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 	double phi0 = 0;    //phase of the pulse
 	double tprofile, rprofile, tprofile01;
 	double r2, zra, waist, uu;
-	double amp00, amp10, amp01, Pamp00, Pamp10, Pamp01;// Samp00, Samp10, Samp01;
+    double amp00, amp10, amp01, Pamp00, Pamp10, Pamp01, Samp00, Samp10, Samp01;
 	double epsilon, sigma;
 	k0 = 2 * M_PI / lambda;
 	epsilon = 1 / (k0*w0);
@@ -1885,34 +1885,36 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 		amp10 /= sqrt(w0 / waist);
 		amp01 /= sqrt(w0 / waist);
 	}
-	Pamp00 = amp00*sin(phig00); //P-polarisation order 0,0
-	Pamp10 = amp10*cos(phig10); //P-polarisation order 1,0
-	Pamp01 = amp01*cos(phig01); //P-polarisation order 0,1
-	//Pamp01=amp01*(cos(phig01)*cs0+sin(phig01)*ss0);
+    Pamp00 = amp00*sin(phig00); //P-polarisation order 0,0
+    Pamp10 = amp10*cos(phig10); //P-polarisation order 1,0
+    Pamp01 = amp01*cos(phig01); //P-polarisation order 0,1
+    Samp00 = amp00*sin(phig00+M_PI*0.5); //S-polarisation order 0,0
+    Samp10 = amp10*cos(phig10+M_PI*0.5); //S-polarisation order 1,0
+    Samp01 = amp01*cos(phig01+M_PI*0.5); //S-polarisation order 0,1
 
 	if (polarization == P_POLARIZATION){
-		field[0] = (yy*Pamp10);         //Ex
-		field[1] = (Pamp00 - xx*Pamp01); //Ey
-		field[2] = 0;                     //Ez
-		field[3] = 0;//E0*(zz*Pamp10);        //Bx
-		field[4] = 0;                     //By
-		field[5] = field[1];//Bz
+        field[0] = (yy*Pamp10);           //Ex
+        field[1] = (Pamp00 - xx*Pamp01);  //Ey
+        field[2] = 0;                     //Ez
+        field[3] = (zz*Pamp10);           //Bx
+        field[4] = 0;                     //By
+        field[5] = field[1];              //Bz
 	}
 	else if (polarization == S_POLARIZATION){
-		field[0] = (yy*Pamp10);         //Ex
-		field[1] = 0; //Ey
-		field[2] = (Pamp00 - xx*Pamp01);                     //Ez
-		field[3] = 0;//E0*(zz*Pamp10);        //Bx
-		field[4] = -(Pamp00 - xx*Pamp01);                     //By
-		field[5] = 0;//Bz
+        field[0] = (zz*Samp10);           //Ex
+        field[1] = 0;                     //Ey
+        field[2] = (Samp00 - xx*Samp01);  //Ez
+        field[3] = (yy*Samp10);           //Bx
+        field[4] = -field[2];             //By
+        field[5] = 0;                     //Bz
 	}
 	else if (polarization == CIRCULAR_POLARIZATION){
-		field[0] = (yy*Pamp10);         //Ex
+        field[0] = (yy*Pamp10+zz*Samp10)/ sqrt(2); //Ex
 		field[1] = (Pamp00 - xx*Pamp01) / sqrt(2); //Ey
-		field[2] = (Pamp00 - xx*Pamp01) / sqrt(2);                     //Ez
-		field[3] = 0;//E0*(zz*Pamp10);      //Bx
-		field[4] = -(Pamp00 - xx*Pamp01) / sqrt(2);                     //By
-		field[5] = (Pamp00 - xx*Pamp01) / sqrt(2);//Bz
+        field[2] = (Samp00 - xx*Samp01) / sqrt(2); //Ez
+        field[3] = (zz*Pamp10+yy*Samp10)/ sqrt(2); //Bx
+        field[4] = -field[2];                      //By
+        field[5] =  field[1];                      //Bz
 	}
 
 }
