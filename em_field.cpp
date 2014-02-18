@@ -1295,28 +1295,27 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mycos;
+                    B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mysin;
+                    B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx);
+                    E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
 
 
 				}
 
 	}
 	else if (polarization == CIRCULAR_POLARIZATION){
-		amplitude /= sqrt(2.0);
-		for (k = 0; k < Nz; k++)
+        for (k = 0; k < Nz; k++)
 			for (j = 0; j < Ny; j++)
 				for (i = 0; i < Nx; i++)
 				{
@@ -1901,20 +1900,20 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
         field[5] = (Pamp00 - xx*Pamp01);  //Bz
 	}
 	else if (polarization == S_POLARIZATION){
-        field[0] = (zz*Samp10);           //Ex
+        field[0] = (zz*Pamp10);           //Ex
         field[1] = 0;                     //Ey
-        field[2] = (Samp00 - xx*Samp01);  //Ez
+        field[2] = (Pamp00 - xx*Pamp01);  //Ez
         field[3] = -(yy*Samp10);           //Bx
-        field[4] = -(Samp00 - xx*Samp01); //By
+        field[4] = -(Pamp00 - xx*Pamp01); //By
         field[5] = 0;                     //Bz
 	}
 	else if (polarization == CIRCULAR_POLARIZATION){
-        field[0] = (yy*Pamp10+zz*Samp10)/ sqrt(2); //Ex
-		field[1] = (Pamp00 - xx*Pamp01) / sqrt(2); //Ey
-        field[2] =  (Samp00 - xx*Samp01)/ sqrt(2); //Ez
-        field[3] = (zz*Pamp10-yy*Samp10)/ sqrt(2); //Bx
-        field[4] = -(Samp00 - xx*Samp01)/ sqrt(2); //By
-        field[5] =  (Pamp00 - xx*Pamp01)/ sqrt(2); //Bz
+        field[0] = (yy*Pamp10+zz*Samp10); //Ex
+        field[1] = (Pamp00 - xx*Pamp01) ; //Ey
+        field[2] =  (Samp00 - xx*Samp01); //Ez
+        field[3] = (zz*Pamp10-yy*Samp10); //Bx
+        field[4] = -(Samp00 - xx*Samp01); //By
+        field[5] =  (Pamp00 - xx*Pamp01); //Bz
 	}
 
 }
