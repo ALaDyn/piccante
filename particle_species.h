@@ -139,7 +139,7 @@ private:
 	void callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin);
 	void computeParticleMassChargeCoupling();
 	int getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]);
-	void creatParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles);
+    void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles);
 	void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles);
 	int npc;
 
