@@ -106,7 +106,7 @@ void GRID::setCourantFactor(double courant_factor){
 }
 void GRID::setSimulationTime(double tot_time){
 	totalTime = tot_time;
-	totalNumberOfTimesteps = (int)(tot_time / dt);
+    totalNumberOfTimesteps = (int)(tot_time / dt)+2;
 }
 
 double GRID::getTotalTime(){
