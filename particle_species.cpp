@@ -177,7 +177,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 	}
 	return counter;
 }
-void SPECIE::creatParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles){
+void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	int Nx = mygrid->Nloc[0];
@@ -208,6 +208,7 @@ void SPECIE::creatParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3]
 				weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
 				//if(weight<2.4)
 				//   printf("weight=%g\n",weight);
+
 				fflush(stdout);
 
 				xloc -= 0.5*dx;
@@ -222,7 +223,9 @@ void SPECIE::creatParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3]
 					r2(counter) = zloc + dzp*(kp + 0.5);
 					u0(counter) = u1(counter) = u2(counter) = 0;
 					w(counter) = weight;
-					counter++;
+                    if(isTestSpecies)
+                        w(counter)=counter;
+                    counter++;
 				}
 			}
 		}
@@ -326,7 +329,7 @@ void SPECIE::creation()
 	if (mygrid->isStretched())
 		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0);
 	else
-		SPECIE::creatParticlesWithinFrom(plasmarmin, plasmarmax, 0);
+        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, 0);
 
 
 }
@@ -412,7 +415,7 @@ void SPECIE::move_window()
 	if (mygrid->isStretched())
 		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles);
 	else
-		SPECIE::creatParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles);
+        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles);
 
 }
 //void SPECIE::output_bin(ofstream &ff)
