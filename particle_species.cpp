@@ -26,6 +26,7 @@ SPECIE::SPECIE()
 	isTestSpecies = false;
 	spectrum.values = NULL;
 	energyExtremesFlag = false;
+    lastParticle=0;
 }
 SPECIE::SPECIE(GRID *grid)
 {
@@ -177,7 +178,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 	}
 	return counter;
 }
-void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles){
+void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, int disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	int Nx = mygrid->Nloc[0];
@@ -224,7 +225,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 					u0(counter) = u1(counter) = u2(counter) = 0;
 					w(counter) = weight;
                     if(isTestSpecies)
-                        w(counter)=counter;
+                        w(counter)=(double)(counter+disp);
                     counter++;
 				}
 			}
@@ -232,7 +233,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 	}
 }
 
-void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles){
+void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, int disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	double myx, myy, myz;
@@ -287,7 +288,9 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
 											r2(counter) = myz;
 											u0(counter) = u1(counter) = u2(counter) = 0;
 											w(counter) = weight*mydx*mydy*mydz;
-											counter++;
+                                            if(isTestSpecies)
+                                                w(counter)=(double)(counter+disp);
+                                            counter++;
 										}
 									}
 								}
@@ -326,11 +329,24 @@ void SPECIE::creation()
 
 	Np = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
 	allocate_species();
-	if (mygrid->isStretched())
-		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0);
-	else
-        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, 0);
 
+    int* NpartLoc = new int[mygrid->nproc];
+    NpartLoc[mygrid->myid] = Np;
+
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
+    int disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += NpartLoc[pp];
+    for (int pp = 0; pp < mygrid->nproc; pp++)
+        lastParticle += (long)NpartLoc[pp];
+
+
+    if (mygrid->isStretched())
+        SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
+	else
+        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
+
+    delete[] NpartLoc;
 
 }
 //CREATE PARTICLES IN THE NEW STRIPE OF DOMAIN "grown" from the window movement
@@ -410,12 +426,23 @@ void SPECIE::move_window()
 	oldNumberOfParticles = Np;
 	newNumberOfParticles = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
 	Np += newNumberOfParticles;
-	reallocate_species();
+    reallocate_species();
 
-	if (mygrid->isStretched())
-		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles);
+    int* NpartLoc = new int[mygrid->nproc];
+    NpartLoc[mygrid->myid] = newNumberOfParticles;
+
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
+    int disp = (int)lastParticle;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += NpartLoc[pp];
+
+    for (int pp = 0; pp < mygrid->nproc; pp++)
+        lastParticle += (long)NpartLoc[pp];
+
+    if (mygrid->isStretched())
+        SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
 	else
-        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles);
+        SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles,disp);
 
 }
 //void SPECIE::output_bin(ofstream &ff)
