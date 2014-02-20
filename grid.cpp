@@ -419,14 +419,14 @@ void GRID::printProcInformations()
 {
 	printf("master_proc=%i:\n", myid);
 	printf("Nproc   =%6i :     ( %4i, %4i, %4i)\n\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
-	printf("single proc id and 3D coordinates:\n");
-	printf("%6s = (%4s,%4s,%4s)\n", "id", "idx", "idy", "idz");
+//	printf("single proc id and 3D coordinates:\n");
+//	printf("%6s = (%4s,%4s,%4s)\n", "id", "idx", "idy", "idz");
 
-	for (int id = 0; id < nproc; id++){
-		int rid[3];
-		MPI_Cart_coords(cart_comm, id, 3, rid);
-		printf("%6i = (%4i,%4i,%4i)\n", id, rid[0], rid[1], rid[2]);
-	}
+//	for (int id = 0; id < nproc; id++){
+//		int rid[3];
+//		MPI_Cart_coords(cart_comm, id, 3, rid);
+//		printf("%6i = (%4i,%4i,%4i)\n", id, rid[0], rid[1], rid[2]);
+//	}
 }
 void GRID::checkProcNumber(){
 	if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
@@ -452,29 +452,29 @@ void GRID::checkProcNumber(){
 
 }
 void GRID::printGridProcessorInformation(){
-	printf("==========         grid         ==========\n");
-	printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "rmin", "rmax");
+//	printf("==========         grid         ==========\n");
+//	printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "rmin", "rmax");
 
-	int c = 0;
-	printf("X:  #proc=%i\tNx=%i\n", rnproc[c], NGridNodes[c]);
-	for (int pp = 0; pp < rnproc[c]; pp++)
-		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+//    int c = 0;
+//	printf("X:  #proc=%i\tNx=%i\n", rnproc[c], NGridNodes[c]);
+//	for (int pp = 0; pp < rnproc[c]; pp++)
+//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
-	c = 1;
-	printf("Y:  #proc=%i\tNy=%i\n", rnproc[c], NGridNodes[c]);
-	for (int pp = 0; pp < rnproc[c]; pp++)
-		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+//	c = 1;
+//	printf("Y:  #proc=%i\tNy=%i\n", rnproc[c], NGridNodes[c]);
+//	for (int pp = 0; pp < rnproc[c]; pp++)
+//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
-	c = 2;
-	printf("Z:  #proc=%i\tNz=%i\n", rnproc[c], NGridNodes[c]);
-	for (int pp = 0; pp < rnproc[c]; pp++)
-		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+//	c = 2;
+//	printf("Z:  #proc=%i\tNz=%i\n", rnproc[c], NGridNodes[c]);
+//	for (int pp = 0; pp < rnproc[c]; pp++)
+//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
 	printf("========== %20s ==========\n", "");
 	if (flagStretched){
 		printf("Stretched GRID!!!\n");
 		printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "Ximin", "Ximax");
-		c = 0;
+        int c = 0;
 		if (flagStretchedAlong[c]){
 			printf("Stretched Grid along X enabled\n");
 			printf("%20s = %i \n", "NUniformGrid", NUniformGrid[c]);
@@ -484,8 +484,8 @@ void GRID::printGridProcessorInformation(){
 			printf("%20s = [ %g : %g ]\n", "UniformGrid", rminUniformGrid[c], rmaxUniformGrid[c]);
 			printf("%20s = %i\n", "#proc", rnproc[c]);
 			printf("%20s = [ %6g : %6g ]\n", "alpha", leftAlphaStretch[c], rightAlphaStretch[c]);
-			for (int pp = 0; pp < rnproc[c]; pp++)
-				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
+//			for (int pp = 0; pp < rnproc[c]; pp++)
+//				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
 
 		}
 		c = 1;
@@ -498,8 +498,8 @@ void GRID::printGridProcessorInformation(){
 			printf("%20s = [ %g : %g ]\n", "UniformGrid", rminUniformGrid[c], rmaxUniformGrid[c]);
 			printf("%20s = %i\n", "#proc", rnproc[c]);
 			printf("%20s = [ %6g : %6g ]\n", "alpha", leftAlphaStretch[c], rightAlphaStretch[c]);
-			for (int pp = 0; pp < rnproc[c]; pp++)
-				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
+//			for (int pp = 0; pp < rnproc[c]; pp++)
+//				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
 
 		}
 		c = 2;
@@ -512,8 +512,8 @@ void GRID::printGridProcessorInformation(){
 			printf("%20s = [ %g : %g ]\n", "UniformGrid", rminUniformGrid[c], rmaxUniformGrid[c]);
 			printf("%20s = %i\n", "#proc", rnproc[c]);
 			printf("%20s = [ %6g : %6g ]\n", "alpha", leftAlphaStretch[c], rightAlphaStretch[c]);
-			for (int pp = 0; pp < rnproc[c]; pp++)
-				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
+//			for (int pp = 0; pp < rnproc[c]; pp++)
+//				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
 
 		}
 

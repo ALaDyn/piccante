@@ -37,6 +37,7 @@ SPECIE::SPECIE(GRID *grid)
 	isTestSpecies = false;
 	spectrum.values = NULL;
 	energyExtremesFlag = false;
+    lastParticle=0;
 }
 void SPECIE::allocate_species()
 {
@@ -178,7 +179,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 	}
 	return counter;
 }
-void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, int disp){
+void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	int Nx = mygrid->Nloc[0];
@@ -233,7 +234,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 	}
 }
 
-void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, int disp){
+void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	double myx, myy, myz;
@@ -334,7 +335,7 @@ void SPECIE::creation()
     NpartLoc[mygrid->myid] = Np;
 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-    int disp = 0;
+    long disp = 0;
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += NpartLoc[pp];
     for (int pp = 0; pp < mygrid->nproc; pp++)
@@ -432,7 +433,7 @@ void SPECIE::move_window()
     NpartLoc[mygrid->myid] = newNumberOfParticles;
 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-    int disp = (int)lastParticle;
+    long disp = lastParticle;
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += NpartLoc[pp];
 
@@ -443,7 +444,7 @@ void SPECIE::move_window()
         SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
 	else
         SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles,disp);
-
+delete[] NpartLoc;
 }
 //void SPECIE::output_bin(ofstream &ff)
 //{
@@ -2784,6 +2785,13 @@ void SPECIE::reloadDump(std::ifstream &ff){
 
 bool SPECIE::areEnergyExtremesAvailable(){
 	return energyExtremesFlag;
+}
+
+
+void SPECIE::printParticleNumber(){
+    if(mygrid->myid != mygrid->master_proc)
+        return;
+    std::cout << name << " has " << lastParticle << " particles."<< std::endl;
 }
 
 
