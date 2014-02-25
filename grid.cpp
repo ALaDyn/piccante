@@ -372,7 +372,6 @@ void GRID::setGridDeltarNormal(){
 void GRID::setGridDeltarStretched(){
 	switch (accesso.dimensions)
 	{
-		//ALERT GRIGLIA
 	case 3:
 		dr[0] = (rmaxUniformGrid[0] - rminUniformGrid[0]) / (NUniformGrid[0] - 1);
 		dr[1] = (rmaxUniformGrid[1] - rminUniformGrid[1]) / (NUniformGrid[1] - 1);
@@ -831,6 +830,8 @@ void GRID::enableStretchedGrid(){
 		csimax[c] = rmax[c];
 		NRightStretcheGrid[c] = NLeftStretcheGrid[c] = 0;
 		NUniformGrid[c] = NGridNodes[c];
+        leftAlphaStretch[c]=1e200;
+        rightAlphaStretch[c]=1e200;
 	}
 }
 
@@ -959,7 +960,7 @@ void GRID::checkStretchedGridNpointsAlong(int c){
 	if (!flagStretchedAlong[c])
 		return;
 
-	if ((flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
+    if ((flagLeftStretchedAlong[c]) || (flagRightStretchedAlong[c])) {
 		if ((NRightStretcheGrid[c] + NLeftStretcheGrid[c]) >= (NGridNodes[c])) {
 			printf("ERROR!!! stretched Grid along %c enabled\n", c);
 			printf("\tNLeftStretcheGrid[%i]= %i", c, NLeftStretcheGrid[c]);
@@ -967,27 +968,27 @@ void GRID::checkStretchedGridNpointsAlong(int c){
 			printf("\tand NGridNodes[%i]=%i", c, NGridNodes[c]);
 			exit(13);
 		}
-
 	}
+
 	fflush(stdout);
 }
 void GRID::computeNStretchedPointsAlong(int c){
-	if ((flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
+    //if ((flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
 		NUniformGrid[c] = NGridNodes[c] - NRightStretcheGrid[c] - NLeftStretcheGrid[c];
-	}
-	else if ((flagLeftStretchedAlong[c]) && (!flagRightStretchedAlong[c])) {
-		NRightStretcheGrid[c] = 0;
-		NUniformGrid[c] = NGridNodes[c] - NLeftStretcheGrid[c];
-	}
-	else if ((!flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
-		NLeftStretcheGrid[c] = 0;
-		NUniformGrid[c] = NGridNodes[c] - NRightStretcheGrid[c];
-	}
-	else{
-		NRightStretcheGrid[c] = NLeftStretcheGrid[c] = 0;
-		flagStretchedAlong[c] = false;
-		NUniformGrid[c] = NGridNodes[c];
-	}
+    //}
+//	else if ((flagLeftStretchedAlong[c]) && (!flagRightStretchedAlong[c])) {
+//		NRightStretcheGrid[c] = 0;
+//		NUniformGrid[c] = NGridNodes[c] - NLeftStretcheGrid[c];
+//	}
+//	else if ((!flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
+//		NLeftStretcheGrid[c] = 0;
+//		NUniformGrid[c] = NGridNodes[c] - NRightStretcheGrid[c];
+//	}
+//	else{
+//		NRightStretcheGrid[c] = NLeftStretcheGrid[c] = 0;
+//		flagStretchedAlong[c] = false;
+//		NUniformGrid[c] = NGridNodes[c];
+//	}
 	//    printf("Stretched Grid along %i enabled\n",c);
 	//    printf("\tNUniformGrid[%i]=%i \n",c,NUniformGrid[c]);
 	//    printf("\tNLeftStretcheGrid[%i]= %i\n", c,NLeftStretcheGrid[c]);
@@ -1188,7 +1189,6 @@ void GRID::computeDerivativeCorrection()
 	{
 		iStretchingDerivativeCorrection[c] = (double*)malloc((Nloc[c])*sizeof(double));
 		hStretchingDerivativeCorrection[c] = (double*)malloc((Nloc[c])*sizeof(double));
-		//        std::cout<< " MMEEEERDAAAA  1  Nloc["<<c<<"] = " << Nloc[c]<<std::endl;
 
 		for (int i = 0; i < Nloc[c]; i++)
 		{
