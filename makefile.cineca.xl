@@ -6,46 +6,51 @@ OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o outpu
 OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 
 
 GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
-GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include
+GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
+BOOST_LIB = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/lib/
+BOOST_INC = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/include/
 
-LIB = -lgsl -lgslcblas  
+
+LIB = -lgsl -lgslcblas -lboost_system -lboost_filesystem 
 
 all : $(EXE)
 
 scal : COMPILER = scalasca -instrument mpixlcxx
-scal : EXE = aladyn_scalasca
+scal : EXE = piccante.scalasca
 scal : $(EXE)
 
-deb : OPT = -O0 -g -qfullpath
+deb : OPT = -g -qfullpath -qcheck -qflttrap -qinitauto=FF -qkeepparm
+deb : EXE = piccante.debug
 deb : $(EXE)
 
-deb2 : OPT = -qcheck -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
+deb2 : OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -g -qfullpath -qcheck -qflttrap -qinitauto=FF
+deb2 : EXE = piccante.debug
 deb2 : $(EXE)
 
 
 $(EXE) : $(OBJ)
-				$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -I$(GSL_INC) $(LIB) 
+				$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -L$(BOOST_LIB) -I$(GSL_INC) -I$(BOOST_INC) $(LIB) 
 
 main-1.o: main-1.cpp 
-				$(COMPILER) -I$(GSL_INC) $(OPT) -c main-1.cpp
+				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c main-1.cpp
 
 grid.o : grid.cpp 
-				$(COMPILER) -I$(GSL_INC)  $(OPT) -c grid.cpp
+				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c grid.cpp
 
 structures.o : structures.cpp
-					$(COMPILER) -I$(GSL_INC)  $(OPT) -c structures.cpp 
+					$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c structures.cpp 
 
 current.o : current.cpp 
-					$(COMPILER) -I$(GSL_INC)  $(OPT) -c current.cpp
+					$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c current.cpp
 
 em_field.o: em_field.cpp
-						$(COMPILER) -I$(GSL_INC)  $(OPT) -c em_field.cpp
+						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c em_field.cpp
 
 particle_species.o: particle_species.cpp
-						$(COMPILER) -I$(GSL_INC)  $(OPT) -c particle_species.cpp 
+						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c particle_species.cpp 
 
 output_manager.o:  output_manager.cpp 
-						$(COMPILER) -I$(GSL_INC)  $(OPT) -c output_manager.cpp
+						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c output_manager.cpp
 
 clean :
 				rm $(OBJ) *~
