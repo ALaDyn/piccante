@@ -133,8 +133,7 @@ void OUTPUT_MANAGER::createExtremaFiles(){
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
 
     if ( !boost::filesystem::exists(_outputDir) ){
-        //boost::filesystem::create_directories(_outputDir);
-        printf("pippo");
+        boost::filesystem::create_directories(_outputDir);
     }
 	outputDir = _outputDir;
 	prepareOutputMap();
