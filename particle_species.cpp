@@ -179,7 +179,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 	}
 	return counter;
 }
-void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long disp){
+void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	int Nx = mygrid->Nloc[0];
@@ -234,7 +234,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 	}
 }
 
-void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long disp){
+void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	double myx, myy, myz;
@@ -335,11 +335,11 @@ void SPECIE::creation()
     NpartLoc[mygrid->myid] = Np;
 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-    long disp = 0;
+    long long disp = 0;
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += NpartLoc[pp];
     for (int pp = 0; pp < mygrid->nproc; pp++)
-        lastParticle += (long)NpartLoc[pp];
+        lastParticle += (long long )NpartLoc[pp];
 
 
     if (mygrid->isStretched())
@@ -433,12 +433,12 @@ void SPECIE::move_window()
     NpartLoc[mygrid->myid] = newNumberOfParticles;
 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-    long disp = lastParticle;
+    long long disp = lastParticle;
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += NpartLoc[pp];
 
     for (int pp = 0; pp < mygrid->nproc; pp++)
-        lastParticle += (long)NpartLoc[pp];
+        lastParticle += (long long )NpartLoc[pp];
 
     if (mygrid->isStretched())
         SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
@@ -2766,7 +2766,7 @@ void SPECIE::computeKineticEnergyWExtrems(){
 void SPECIE::dump(std::ofstream &ff){
 	ff.write((char*)&Np, sizeof(Np));
 
-	for (long i=0; i < Np; i++){
+    for (long long i=0; i < Np; i++){
 		for(int c = 0; c < Ncomp; c++){
 			ff.write((char*)&ru(c,i),sizeof(double));
 		}
@@ -2776,7 +2776,7 @@ void SPECIE::dump(std::ofstream &ff){
 void SPECIE::reloadDump(std::ifstream &ff){
 	ff.read((char*)&Np, sizeof(Np));
 	SPECIE::reallocate_species();
-	for (long i = 0; i < Np; i++){
+    for (long long i = 0; i < Np; i++){
 		for(int c = 0; c < Ncomp; c++){
 			ff.read((char*)&ru(c,i),sizeof(double));
 		}
