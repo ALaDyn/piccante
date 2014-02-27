@@ -1917,3 +1917,4 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 	}
 
 }
+

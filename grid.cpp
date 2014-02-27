@@ -1292,3 +1292,4 @@ void GRID::emergencyStop(){
 	MPI_Finalize();
 	exit(17);
 }
+

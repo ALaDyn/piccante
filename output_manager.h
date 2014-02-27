@@ -198,3 +198,4 @@ private:
 };
 
 #endif // DIAG_MANAGER_PLUS_H
+

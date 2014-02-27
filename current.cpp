@@ -436,3 +436,4 @@ void CURRENT::eraseDensity(){
 				density(i - acc.edge, j - acc.edge, k - acc.edge) = 0.0;
 			}
 }
+

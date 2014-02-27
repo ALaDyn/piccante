@@ -543,7 +543,9 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+	if (mygrid->myid != mygrid->master_proc){
+		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+	}
 
 
 	//+++++++++++ Start CPU HEADER  +++++++++++++++++++++
@@ -688,8 +690,9 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT,
-		(char*) "native", MPI_INFO_NULL);
+	if (mygrid->myid != mygrid->master_proc){
+		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
+	}
 
 	//****************CPU HEADER
 	{
@@ -849,8 +852,9 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 		exit(33);
 	}
 
-	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT,
-		(char*) "native", MPI_INFO_NULL);
+	if (mygrid->myid != mygrid->master_proc){
+		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
+	}
 
 	//****************CPU HEADER
 	{
@@ -1054,3 +1058,4 @@ void OUTPUT_MANAGER::callDiag(request req){
 
 
 }
+
