@@ -131,10 +131,13 @@ void OUTPUT_MANAGER::createExtremaFiles(){
 }
 
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
-
-//    if ( !boost::filesystem::exists(_outputDir) ){
-//        boost::filesystem::create_directories(_outputDir);
-//    }
+#if defined (USE_BOOST)
+	if (mygrid->myid == mygrid->master_proc){
+		if ( !boost::filesystem::exists(_outputDir) ){
+			boost::filesystem::create_directories(_outputDir);
+		}
+	}
+#endif
 	outputDir = _outputDir;
 	prepareOutputMap();
 
@@ -496,7 +499,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	uniqueN[0] = mygrid->uniquePoints[0];
 	uniqueN[1] = mygrid->uniquePoints[1];
 	uniqueN[2] = mygrid->uniquePoints[2];
-    MPI_Offset disp = 0;
+	MPI_Offset disp = 0;
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
@@ -510,11 +513,11 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	nomefile[fileName.size()] = 0;
 	sprintf(nomefile, "%s", fileName.c_str());
 
-    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
 	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-    if (mygrid->myid == mygrid->master_proc){
-        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+	if (mygrid->myid == mygrid->master_proc){
+		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 		MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
@@ -530,17 +533,17 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	}
 	//*********** END HEADER *****************
 
-    disp = big_header;
+	disp = big_header;
 
-    for (int rank = 0; rank < mygrid->myid; rank++)
-        disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
-    if(disp<0)
-    {
-        std::cout<<"a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary"<<std::endl;
-        std::cout<<"myrank="<<mygrid->myid<<" disp="<<disp<<std::endl;
-        exit(33);
-    }
-    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+	for (int rank = 0; rank < mygrid->myid; rank++)
+		disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
+	if (disp < 0)
+	{
+		std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+		exit(33);
+	}
+	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
 
 	//+++++++++++ Start CPU HEADER  +++++++++++++++++++++
@@ -629,7 +632,7 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	uniqueN[1] = mygrid->uniquePoints[1];
 	uniqueN[2] = mygrid->uniquePoints[2];
 
-    MPI_Offset disp = 0;
+	MPI_Offset disp = 0;
 
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)
@@ -650,8 +653,8 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	//****************FILE HEADER
 
 	if (mygrid->myid == mygrid->master_proc){
-        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 
 		int tNcomp = 1;
@@ -679,13 +682,13 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		disp += small_header +
 		mygrid->proc_totUniquePoints[rank] * sizeof(float);
 
-    if(disp<0)
-    {
-        std::cout<<"a problem occurred when trying to mpi_file_set_view in writeSpecDensityBinary"<<std::endl;
-        std::cout<<"myrank="<<mygrid->myid<<" disp="<<disp<<std::endl;
-        exit(33);
-    }
-    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT,
+	if (disp < 0)
+	{
+		std::cout << "a problem occurred when trying to mpi_file_set_view in writeSpecDensityBinary" << std::endl;
+		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+		exit(33);
+	}
+	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT,
 		(char*) "native", MPI_INFO_NULL);
 
 	//****************CPU HEADER
@@ -792,7 +795,7 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	uniqueN[2] = mygrid->uniquePoints[2];
 
 
-    MPI_Offset disp = 0;
+	MPI_Offset disp = 0;
 
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)+
@@ -812,8 +815,8 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	//****************FILE HEADER
 
 	if (mygrid->myid == mygrid->master_proc){
-        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 
 		int tNcomp = 3;
@@ -838,13 +841,13 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	disp = big_header;
 
 	for (int rank = 0; rank < mygrid->myid; rank++)
-        disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
-    if(disp<0)
-    {
-        std::cout<<"a problem occurred when trying to mpi_file_set_view in writeCurrentBinary"<<std::endl;
-        std::cout<<"myrank="<<mygrid->myid<<" disp="<<disp<<std::endl;
-        exit(33);
-    }
+		disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
+	if (disp < 0)
+	{
+		std::cout << "a problem occurred when trying to mpi_file_set_view in writeCurrentBinary" << std::endl;
+		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+		exit(33);
+	}
 
 	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT,
 		(char*) "native", MPI_INFO_NULL);
@@ -920,9 +923,9 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceBinary(std::string fileName, request req
 
 	MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
 
-    MPI_Offset disp = 0;
+	MPI_Offset disp = 0;
 	for (int pp = 0; pp < mygrid->myid; pp++)
-        disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+		disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
 	MPI_File thefile;
 
 	char *nomefile = new char[fileName.size() + 1];
@@ -945,14 +948,14 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceBinary(std::string fileName, request req
 	for (int i = 0; i < passaggi; i++){
 		for (int p = 0; p < dimensione; p++){
 			for (int c = 0; c < spec->Ncomp; c++){
-				buf[c + p*spec->Ncomp] = (float) spec->ru(c, p + dimensione*i);
+				buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*i);
 			}
 		}
 		MPI_File_write(thefile, buf, dimensione*spec->Ncomp, MPI_FLOAT, &status);
 	}
 	for (int p = 0; p < resto; p++){
 		for (int c = 0; c < spec->Ncomp; c++){
-			buf[c + p*spec->Ncomp] = (float) spec->ru(c, p + dimensione*passaggi);
+			buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
 		}
 	}
 	MPI_File_write(thefile, buf, resto*spec->Ncomp, MPI_FLOAT, &status);

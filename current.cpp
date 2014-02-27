@@ -421,7 +421,7 @@ void CURRENT::set_const_field_nthcomp(double value, int c)
 
 void CURRENT::eraseDensity(){
 	int i, j, k;
-//	int Nx, Ny, Nz;
+	//	int Nx, Ny, Nz;
 
 	int Ngx = N_grid[0];
 	int Ngy = N_grid[1];

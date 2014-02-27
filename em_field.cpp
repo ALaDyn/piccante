@@ -946,7 +946,7 @@ void EM_FIELD::output_Bz(ofstream &ff)
 void EM_FIELD::output_2D_E(ofstream &ff)
 {
 	int i, Nx, Ny, j, k;
-//	double x, y;
+	//	double x, y;
 	k = mygrid->Nloc[2] / 2;
 	Nx = mygrid->Nloc[0];
 	Ny = mygrid->Nloc[1];
@@ -962,7 +962,7 @@ void EM_FIELD::output_2D_E(ofstream &ff)
 void EM_FIELD::output_2D_B(ofstream &ff)
 {
 	int i, Nx, Ny, j, k;
-//	double x, y;
+	//	double x, y;
 	k = mygrid->Nloc[2] / 2;
 	Nx = mygrid->Nloc[0];
 	Ny = mygrid->Nloc[1];
@@ -1043,7 +1043,7 @@ void EM_FIELD::init_output_diag(ofstream &ff)
 }
 void EM_FIELD::output_diag(int istep, ofstream &ff)
 {
-//	double EEnergy[3], BEnergy[3], extrema[14];
+	//	double EEnergy[3], BEnergy[3], extrema[14];
 	computeEnergyAndExtremes();
 
 	if (mygrid->myid == mygrid->master_proc){
@@ -1074,7 +1074,7 @@ void EM_FIELD::init_output_extrems(ofstream &ff)
 }
 void EM_FIELD::output_extrems(int istep, ofstream &ff)
 {
-//	double EEnergy[3], BEnergy[3], extrema[14];
+	//	double EEnergy[3], BEnergy[3], extrema[14];
 	computeEnergyAndExtremes();
 	if (mygrid->myid == mygrid->master_proc){
 		ff << " " << setw(myNarrowWidth) << istep << " " << setw(myNarrowWidth) << mygrid->time;
@@ -1295,27 +1295,27 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
+					B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
+					B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
+					E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
 
 
 				}
 
 	}
 	else if (polarization == CIRCULAR_POLARIZATION){
-        for (k = 0; k < Nz; k++)
+		for (k = 0; k < Nz; k++)
 			for (j = 0; j < Ny; j++)
 				for (i = 0; i < Nx; i++)
 				{
@@ -1345,7 +1345,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mycos;
+					B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
@@ -1353,13 +1353,13 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
 
-                    B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mysin;
+					B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-                    E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx);
+					E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx);
 
 
 				}
@@ -1493,7 +1493,7 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 				auxiliary_rotation(xx, yy, xp, yp, xcenter, angle);
 				xp += xc;
 				gaussian_pulse(acc.dimensions, xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
-                E2(i, j, k) += amplitude*field[2];
+				E2(i, j, k) += amplitude*field[2];
 
 				auxiliary_rotation(xx, yh, xp, yp, xcenter, angle);
 				xp += xc;
@@ -1844,7 +1844,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 	double phi0 = 0;    //phase of the pulse
 	double tprofile, rprofile, tprofile01;
 	double r2, zra, waist, uu;
-    double amp00, amp10, amp01, Pamp00, Pamp10, Pamp01, Samp00, Samp10, Samp01;
+	double amp00, amp10, amp01, Pamp00, Pamp10, Pamp01, Samp00, Samp10, Samp01;
 	double epsilon, sigma;
 	k0 = 2 * M_PI / lambda;
 	epsilon = 1 / (k0*w0);
@@ -1884,36 +1884,36 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 		amp10 /= sqrt(w0 / waist);
 		amp01 /= sqrt(w0 / waist);
 	}
-    Pamp00 = amp00*sin(phig00); //P-polarisation order 0,0
-    Pamp10 = amp10*cos(phig10); //P-polarisation order 1,0
-    Pamp01 = amp01*cos(phig01); //P-polarisation order 0,1
-    Samp00 = amp00*sin(phig00+M_PI*0.5); //S-polarisation order 0,0
-    Samp10 = amp10*cos(phig10+M_PI*0.5); //S-polarisation order 1,0
-    Samp01 = amp01*cos(phig01+M_PI*0.5); //S-polarisation order 0,1
+	Pamp00 = amp00*sin(phig00); //P-polarisation order 0,0
+	Pamp10 = amp10*cos(phig10); //P-polarisation order 1,0
+	Pamp01 = amp01*cos(phig01); //P-polarisation order 0,1
+	Samp00 = amp00*sin(phig00 + M_PI*0.5); //S-polarisation order 0,0
+	Samp10 = amp10*cos(phig10 + M_PI*0.5); //S-polarisation order 1,0
+	Samp01 = amp01*cos(phig01 + M_PI*0.5); //S-polarisation order 0,1
 
 	if (polarization == P_POLARIZATION){
-        field[0] = (yy*Pamp10);           //Ex
-        field[1] = (Pamp00 - xx*Pamp01);  //Ey
-        field[2] = 0;                     //Ez
-        field[3] = (zz*Pamp10);           //Bx
-        field[4] = 0;                     //By
-        field[5] = (Pamp00 - xx*Pamp01);  //Bz
+		field[0] = (yy*Pamp10);           //Ex
+		field[1] = (Pamp00 - xx*Pamp01);  //Ey
+		field[2] = 0;                     //Ez
+		field[3] = (zz*Pamp10);           //Bx
+		field[4] = 0;                     //By
+		field[5] = (Pamp00 - xx*Pamp01);  //Bz
 	}
 	else if (polarization == S_POLARIZATION){
-        field[0] = (zz*Pamp10);           //Ex
-        field[1] = 0;                     //Ey
-        field[2] = (Pamp00 - xx*Pamp01);  //Ez
-        field[3] = -(yy*Samp10);           //Bx
-        field[4] = -(Pamp00 - xx*Pamp01); //By
-        field[5] = 0;                     //Bz
+		field[0] = (zz*Pamp10);           //Ex
+		field[1] = 0;                     //Ey
+		field[2] = (Pamp00 - xx*Pamp01);  //Ez
+		field[3] = -(yy*Samp10);           //Bx
+		field[4] = -(Pamp00 - xx*Pamp01); //By
+		field[5] = 0;                     //Bz
 	}
 	else if (polarization == CIRCULAR_POLARIZATION){
-        field[0] = (yy*Pamp10+zz*Samp10); //Ex
-        field[1] = (Pamp00 - xx*Pamp01) ; //Ey
-        field[2] =  (Samp00 - xx*Samp01); //Ez
-        field[3] = (zz*Pamp10-yy*Samp10); //Bx
-        field[4] = -(Samp00 - xx*Samp01); //By
-        field[5] =  (Pamp00 - xx*Pamp01); //Bz
+		field[0] = (yy*Pamp10 + zz*Samp10); //Ex
+		field[1] = (Pamp00 - xx*Pamp01); //Ey
+		field[2] = (Samp00 - xx*Samp01); //Ez
+		field[3] = (zz*Pamp10 - yy*Samp10); //Bx
+		field[4] = -(Samp00 - xx*Samp01); //By
+		field[5] = (Pamp00 - xx*Pamp01); //Bz
 	}
 
 }

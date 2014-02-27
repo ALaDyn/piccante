@@ -105,7 +105,7 @@ public:
 
 	bool areEnergyExtremesAvailable();
 
-    void printParticleNumber();
+	void printParticleNumber();
 
 
 	//PUBLIC INLINE FUNCTIONS
@@ -129,7 +129,7 @@ public:
 
 
 private:
-    long long lastParticle;
+	long long lastParticle;
 	double savedExtrema[14];
 	double savedEnergy;
 	bool energyExtremesFlag;
@@ -141,8 +141,8 @@ private:
 	void callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin);
 	void computeParticleMassChargeCoupling();
 	int getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]);
-    void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
-    void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
+	void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
+	void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
 	int npc;
 
 	void debug_warning_particle_outside_boundaries(double x, double y, double z, int nump);
