@@ -516,7 +516,9 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
 	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-	if (mygrid->myid == mygrid->master_proc){
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
@@ -543,7 +545,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 	}
 
@@ -652,9 +654,10 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
 		MPI_INFO_NULL, &thefile);
 
-	//****************FILE HEADER
-
-	if (mygrid->myid == mygrid->master_proc){
+	//+++++++++++ FILE HEADER  +++++++++++++++++++++
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
@@ -690,7 +693,7 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
 	}
 
@@ -815,9 +818,10 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
 		MPI_INFO_NULL, &thefile);
 
-	//****************FILE HEADER
-
-	if (mygrid->myid == mygrid->master_proc){
+	//+++++++++++ FILE HEADER  +++++++++++++++++++++
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
@@ -852,7 +856,7 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 		exit(33);
 	}
 
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
 	}
 
