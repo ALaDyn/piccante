@@ -132,9 +132,9 @@ void OUTPUT_MANAGER::createExtremaFiles(){
 
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
 
-    if ( !boost::filesystem::exists(_outputDir) ){
-        boost::filesystem::create_directories(_outputDir);
-    }
+//    if ( !boost::filesystem::exists(_outputDir) ){
+//        boost::filesystem::create_directories(_outputDir);
+//    }
 	outputDir = _outputDir;
 	prepareOutputMap();
 
@@ -510,13 +510,8 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	nomefile[fileName.size()] = 0;
 	sprintf(nomefile, "%s", fileName.c_str());
 
-    int openTest;
-    openTest=MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-    if(openTest=0){
-        std::cout<<"a problem occurred when trying to mpi_file_open in writeEMFieldBinary"<<std::endl;
-        std::cout<<"myrank="<<mygrid->myid<<" status="<<openTest<<std::endl;
-        exit(33);
-    }
+    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+
 	//+++++++++++ FILE HEADER  +++++++++++++++++++++
     if (mygrid->myid == mygrid->master_proc){
         MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
