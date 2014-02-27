@@ -3,7 +3,7 @@ EXE = piccante
 
 OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o 
 
-OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 
+OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
 GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
 GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
@@ -19,11 +19,11 @@ scal : COMPILER = scalasca -instrument mpixlcxx
 scal : EXE = piccante.scalasca
 scal : $(EXE)
 
-deb : OPT = -g -qfullpath -qcheck -qflttrap -qinitauto=FF -qkeepparm
+deb : OPT = -g -qfullpath -qcheck -qflttrap -qinitauto=FF -qkeepparm -DUSE_BOOST
 deb : EXE = piccante.debug
 deb : $(EXE)
 
-deb2 : OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -g -qfullpath -qcheck -qflttrap -qinitauto=FF
+deb2 : OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -g -qfullpath -qcheck -qflttrap -qinitauto=FF -DUSE_BOOST
 deb2 : EXE = piccante.debug
 deb2 : $(EXE)
 
