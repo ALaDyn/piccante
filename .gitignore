@@ -35,9 +35,8 @@
 *.config
 *.creator
 *.creator.user
-*.files
 *.includes
-
+*.files
 
 ###############################################
 # Visual Studio

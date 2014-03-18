@@ -494,14 +494,14 @@ void OUTPUT_MANAGER::writeEMFieldMap(std::ofstream &output, request req){
 }
 
 void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
-	int Ncomp = myfield->getNcomp();
+    int Ncomp = myfield->getNcomp();
 	int uniqueN[3];
 	uniqueN[0] = mygrid->uniquePoints[0];
 	uniqueN[1] = mygrid->uniquePoints[1];
 	uniqueN[2] = mygrid->uniquePoints[2];
 	MPI_Offset disp = 0;
 	int small_header = 6 * sizeof(int);
-	int big_header = 3 * sizeof(int)+3 * sizeof(int)
+    int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
 		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(char);
 
@@ -525,15 +525,15 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
 		for (int c = 0; c < Ncomp; c++){
 			integer_or_halfinteger crd = myfield->getCompCoords(c);
-			char tp[3] = { crd.x, crd.y, crd.z };
-			MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
-		}
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
-	}
-	//*********** END HEADER *****************
+            int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+            MPI_File_write(thefile, tp, 3, MPI_INT, &status);
+        }
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
+    }
+    //*********** END HEADER *****************
 
 	disp = big_header;
 
@@ -559,7 +559,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		todo[3] = mygrid->uniquePointsloc[0];
 		todo[4] = mygrid->uniquePointsloc[1];
 		todo[5] = mygrid->uniquePointsloc[2];
-		MPI_File_write(thefile, todo, 6, MPI_INT, &status);
+        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
 	}
 	//+++++++++++ Start CPU Field Values  +++++++++++++++++++++
 	{
@@ -568,7 +568,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		Nx = mygrid->uniquePointsloc[0];
 		Ny = mygrid->uniquePointsloc[1];
 		Nz = mygrid->uniquePointsloc[2];
-		int size = Ncomp*Nx*Ny*Nz;
+        int size = Ncomp*Nx*Ny*Nz;
 		todo = new float[size];
 		for (int k = 0; k < Nz; k++)
 			for (int j = 0; j < Ny; j++)

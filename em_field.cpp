@@ -1574,6 +1574,76 @@ void EM_FIELD::set_const_field_nthcomp(double value, int c)
 			}
 
 }
+void EM_FIELD::addFieldsFromFile(std::string name){
+    ifstream fileEMField (name.c_str(), std::ifstream::in);
+    int Nx_in;
+    int Nx    = mygrid->Nloc[0];
+    double *Ex, *Ey, *Ez, *Bx, *By, *Bz, *myx;
+
+    fileEMField >> Nx_in;
+
+    Ex = (double*)malloc( sizeof(double)*Nx_in);
+    Ey = (double*)malloc( sizeof(double)*Nx_in);
+    Ez = (double*)malloc( sizeof(double)*Nx_in);
+    Bx = (double*)malloc( sizeof(double)*Nx_in);
+    By = (double*)malloc( sizeof(double)*Nx_in);
+    Bz = (double*)malloc( sizeof(double)*Nx_in);
+    myx      = (double*)malloc( sizeof(double)*Nx_in   );
+
+    for(int i=0; i<Nx_in;i++){
+        fileEMField >> myx[i];
+        fileEMField >> Ex[i];
+        fileEMField >> Ey[i];
+        fileEMField >> Ez[i];
+        fileEMField >> Bx[i];
+        fileEMField >> By[i];
+        fileEMField >> Bz[i];
+    }
+
+    double xmin, xmax, dx;
+    xmin=myx[0];
+    xmax=myx[Nx_in-1];
+    dx=myx[1]-myx[0];
+
+    double xi, xh;
+    double axi, axh;
+    double wi[2], wh[2];
+    int ii, ih,iileft, iiright, ihleft, ihright;
+    for(int i=0;i<Nx;i++){
+        xi=mygrid->cir[0][i];
+        xh=mygrid->chr[0][i];
+
+        if(xi<xmin||xh<xmin){
+            printf("ERROR: xmin of input file for fields > xmin simulation");
+        }
+        if((xi-dx)>xmax||(xh-dx)>xmax){
+            printf("ERROR: xmax of input file for fields < xmax simulation");
+        }
+        ii= (int)((xi-xmin)/dx);
+        ih= (int)((xh-xmin)/dx);
+        axi=(xi-xmin)/dx-ii;
+        axh=(xh-xmin)/dx-ih;
+        wi[0]=1-axi;
+        wi[1]=axi;
+        wh[0]=1-axh;
+        wh[1]=axh;
+        iileft=(ii+Nx_in-1)%(Nx_in-1);
+        ihleft=(ih+Nx_in-1)%(Nx_in-1);
+        iiright=(ii+1)%(Nx_in-1);
+        ihright=(ih+1)%(Nx_in-1);
+
+        E0(i,0,0)+=wh[0]*Ex[ihleft] + wh[1]*Ex[ihright];
+        E1(i,0,0)+=wi[0]*Ey[ihleft] + wi[1]*Ey[ihright];
+        E2(i,0,0)+=wi[0]*Ez[ihleft] + wi[1]*Ez[ihright];
+        B0(i,0,0)+=wi[0]*Bx[ihleft] + wi[1]*Bx[ihright];
+        B1(i,0,0)+=wh[0]*By[ihleft] + wh[1]*By[ihright];
+        B2(i,0,0)+=wh[0]*Bz[ihleft] + wh[1]*Bz[ihright];
+
+
+    }
+
+
+}
 
 void EM_FIELD::move_window()
 {

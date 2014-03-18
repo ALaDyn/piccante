@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 3
+#define DIMENSIONALITY 1
 
 #include "access.h"
 #include "commons.h"
@@ -54,6 +54,7 @@ using namespace std;
 #define NPROC_ALONG_Z 1
 
 #define DIRECTORY_OUTPUT "TEST"
+#define FILE_INPUT "campi.txt"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -69,11 +70,11 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-	grid.setXrange(-1, 1);
+    grid.setXrange(-6.703383e+01, 6.703383e+01);
 	grid.setYrange(-1, 1);
 	grid.setZrange(-1, +1);
 
-	grid.setNCells(5, 100, 100);
+    grid.setNCells(800, 1, 1);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -87,7 +88,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-	grid.setSimulationTime(30.0);
+    grid.setSimulationTime(10.0);
 
 	grid.with_particles = YES;//NO;
 	grid.with_current = YES;//YES;
@@ -114,9 +115,9 @@ int main(int narg, char **args)
 	laserPulse pulse1;
 	pulse1.type = COS2_PLANE_WAVE;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
 	pulse1.polarization = P_POLARIZATION;
-	pulse1.t_FWHM = 10.0;
-	pulse1.laser_pulse_initial_position = -10.0;
-	pulse1.lambda0 = 1.0;
+    pulse1.t_FWHM = 10.0;
+    pulse1.laser_pulse_initial_position = 0.0;
+    pulse1.lambda0 = 1.0;
 	pulse1.normalized_amplitude = 8.0;
 	pulse1.waist = 3.0;
 	pulse1.focus_position = 0.0;
@@ -124,8 +125,8 @@ int main(int narg, char **args)
 	pulse1.angle = 2.0*M_PI*(-30.0 / 360.0);
 	pulse1.rotation_center_along_x = 0.0;
 
-	//myfield.addPulse(&pulse1);
-
+    //myfield.addPulse(&pulse1);
+    myfield.addFieldsFromFile(FILE_INPUT);
 	laserPulse pulse2;
 	pulse2 = pulse1;
 	pulse2.angle = 2.0*M_PI*(30.0 / 360.0);
@@ -174,8 +175,8 @@ int main(int narg, char **args)
 	electrons1.setParticlesPerCellXYZ(1, 4, 4);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
-	electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-	species.push_back(&electrons1);
+    //electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    //species.push_back(&electrons1);
 
 
 	//	SPECIE ions1(&grid);
@@ -193,8 +194,8 @@ int main(int narg, char **args)
 	electrons2.setParticlesPerCellXYZ(1, 4, 4);       //Se < 1 il nPPC viene sostituito con 1
 	electrons2.setName("ELE2");
 	electrons2.type = ELECTRON;
-	electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-	species.push_back(&electrons2);
+    //electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    //species.push_back(&electrons2);
 
 
 	//    SPECIE ions2(&grid);
@@ -210,16 +211,16 @@ int main(int narg, char **args)
 	tempDistrib distribution;
 	distribution.setMaxwell(1.0e-5);
 
-	electrons1.add_momenta(rng, 0.0, 5.0, 0.0, distribution);
+    //electrons1.add_momenta(rng, 0.0, 5.0, 0.0, distribution);
 	//    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
-	electrons2.add_momenta(rng, 0.0, -5.0, 0.0, distribution);
+    //electrons2.add_momenta(rng, 0.0, -5.0, 0.0, distribution);
 	//    ions2.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 
-
+/*
 	for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
 		(*spec_iterator)->printParticleNumber();
 	}
-
+*/
 	//    //*******************************************FINE DEFINIZIONE CAMPI***********************************************************
 
 	//*******************************************INIZIO DEFINIZIONE DIAGNOSTICHE**************************************************
@@ -228,15 +229,15 @@ int main(int narg, char **args)
 
 	manager.addEMFieldBinaryFrom(0.0, 2.0);
 
-	manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
+    //manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
 	//manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
-	manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
+    //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
 	//manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-	manager.addCurrentBinaryFrom(0.0, 5.0);
+    //manager.addCurrentBinaryFrom(0.0, 5.0);
 
-	manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 2.0);
-	manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
+    //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 2.0);
+    //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 0.0, 5.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
 
