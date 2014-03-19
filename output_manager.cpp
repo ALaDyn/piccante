@@ -665,8 +665,8 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		int tNcomp = 1;
 		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
 		integer_or_halfinteger crd = mycurrent->getDensityCoords();
-		char tp[3] = { crd.x, crd.y, crd.z };
-		MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
+        int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+        MPI_File_write(thefile, tp, 3, MPI_INT, &status);
 
 		for (int c = 0; c < 3; c++)
 			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
@@ -830,8 +830,8 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
 		for (int c = 0; c < 3; c++){
 			integer_or_halfinteger crd = mycurrent->getJCoords(c);
-			char tp[3] = { crd.x, crd.y, crd.z };
-			MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
+            int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+            MPI_File_write(thefile, tp, 3, MPI_INT, &status);
 		}
 
 

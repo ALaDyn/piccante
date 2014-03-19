@@ -702,12 +702,13 @@ void DIAG_MANAGER::callEMFieldBinary(int istep, EM_FIELD* fieldp)
 	//+++++++++++ FILE HEADER  +++++++++++++++++++++
 	if (mygrid->myid == 0){
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 		MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
 		for (int c = 0; c < Ncomp; c++){
 			integer_or_halfinteger crd = fieldp->getCompCoords(c);
 			char tp[3] = { crd.x, crd.y, crd.z };
-			MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
+    //		MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
 		}
 		for (int c = 0; c < 3; c++)
 			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);

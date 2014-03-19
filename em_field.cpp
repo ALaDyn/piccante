@@ -1613,12 +1613,6 @@ void EM_FIELD::addFieldsFromFile(std::string name){
         xi=mygrid->cir[0][i];
         xh=mygrid->chr[0][i];
 
-        if(xi<xmin||xh<xmin){
-            printf("ERROR: xmin of input file for fields > xmin simulation");
-        }
-        if((xi-dx)>xmax||(xh-dx)>xmax){
-            printf("ERROR: xmax of input file for fields < xmax simulation");
-        }
         ii= (int)((xi-xmin)/dx);
         ih= (int)((xh-xmin)/dx);
         axi=(xi-xmin)/dx-ii;
@@ -1632,16 +1626,16 @@ void EM_FIELD::addFieldsFromFile(std::string name){
         iiright=(ii+1)%(Nx_in-1);
         ihright=(ih+1)%(Nx_in-1);
 
-        E0(i,0,0)+=wh[0]*Ex[ihleft] + wh[1]*Ex[ihright];
-        E1(i,0,0)+=wi[0]*Ey[ihleft] + wi[1]*Ey[ihright];
-        E2(i,0,0)+=wi[0]*Ez[ihleft] + wi[1]*Ez[ihright];
-        B0(i,0,0)+=wi[0]*Bx[ihleft] + wi[1]*Bx[ihright];
-        B1(i,0,0)+=wh[0]*By[ihleft] + wh[1]*By[ihright];
-        B2(i,0,0)+=wh[0]*Bz[ihleft] + wh[1]*Bz[ihright];
+        E0(i,0,0)+=2*M_PI*(wh[0]*Ex[ihleft] + wh[1]*Ex[ihright]);
+        E1(i,0,0)+=2*M_PI*(wi[0]*Ey[ihleft] + wi[1]*Ey[ihright]);
+        E2(i,0,0)+=2*M_PI*(wi[0]*Ez[ihleft] + wi[1]*Ez[ihright]);
+        B0(i,0,0)+=2*M_PI*(wi[0]*Bx[ihleft] + wi[1]*Bx[ihright]);
+        B1(i,0,0)+=2*M_PI*(wh[0]*By[ihleft] + wh[1]*By[ihright]);
+        B2(i,0,0)+=2*M_PI*(wh[0]*Bz[ihleft] + wh[1]*Bz[ihright]);
 
 
     }
-
+fileEMField.close();
 
 }
 

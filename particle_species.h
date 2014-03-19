@@ -62,8 +62,9 @@ public:
 	void erase();
 	void reallocate_species();
 	SPECIE operator = (SPECIE &destro);
-	void creation();
-	void move_window();
+    void creation();
+    void creationFromFile1D(std::string name);
+    void move_window();
 	//	void output_bin(ofstream &ff);
 	void output(ofstream &ff);
 	static const int myWidth = 12;
@@ -141,9 +142,12 @@ private:
 	void callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin);
 	void computeParticleMassChargeCoupling();
 	int getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]);
-	void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
+    int getNumberOfParticlesWithinFromFile1D(double plasmarmin[3], double plasmarmax[3], std::string name);
+    void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
 	void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
-	int npc;
+    void createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
+    void createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
+    int npc;
 
 	void debug_warning_particle_outside_boundaries(double x, double y, double z, int nump);
 };
