@@ -54,7 +54,6 @@ using namespace std;
 #define NPROC_ALONG_Z 1
 
 #define DIRECTORY_OUTPUT "TEST"
-#define FILE_INPUT "campi.txt"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -70,11 +69,11 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-    grid.setXrange(-6.703383e+01, 6.703383e+01);
+    grid.setXrange(-3.530583, 3.530583);
 	grid.setYrange(-1, 1);
 	grid.setZrange(-1, +1);
 
-    grid.setNCells(800, 1, 1);
+    grid.setNCells(256, 1, 1);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -88,7 +87,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(10.0);
+    grid.setSimulationTime(50.0);
 
 	grid.with_particles = YES;//NO;
 	grid.with_current = YES;//YES;
@@ -126,7 +125,7 @@ int main(int narg, char **args)
 	pulse1.rotation_center_along_x = 0.0;
 
     //myfield.addPulse(&pulse1);
-    myfield.addFieldsFromFile(FILE_INPUT);
+    myfield.addFieldsFromFile("campi.txt");
 	laserPulse pulse2;
 	pulse2 = pulse1;
 	pulse2.angle = 2.0*M_PI*(30.0 / 360.0);
@@ -172,11 +171,12 @@ int main(int narg, char **args)
 
 	SPECIE  electrons1(&grid);
 	electrons1.plasma = plasma1;
-	electrons1.setParticlesPerCellXYZ(1, 4, 4);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
     //electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-    //species.push_back(&electrons1);
+    electrons1.creationFromFile1D("elettroni.txt");
+    species.push_back(&electrons1);
 
 
 	//	SPECIE ions1(&grid);
@@ -191,11 +191,12 @@ int main(int narg, char **args)
 
 	SPECIE  electrons2(&grid);
 	electrons2.plasma = plasma1;
-	electrons2.setParticlesPerCellXYZ(1, 4, 4);       //Se < 1 il nPPC viene sostituito con 1
-	electrons2.setName("ELE2");
-	electrons2.type = ELECTRON;
+    electrons2.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons2.setName("POS2");
+    electrons2.type = POSITRON;
+    electrons2.creationFromFile1D("positroni.txt");
     //electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-    //species.push_back(&electrons2);
+    species.push_back(&electrons2);
 
 
 	//    SPECIE ions2(&grid);
@@ -209,11 +210,11 @@ int main(int narg, char **args)
 	//    //species.push_back(&ions2);
 
 	tempDistrib distribution;
-	distribution.setMaxwell(1.0e-5);
+    distribution.setMaxwell(1.0e-2);
 
-    //electrons1.add_momenta(rng, 0.0, 5.0, 0.0, distribution);
+    electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
 	//    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
-    //electrons2.add_momenta(rng, 0.0, -5.0, 0.0, distribution);
+    electrons2.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
 	//    ions2.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 
 /*
@@ -229,15 +230,15 @@ int main(int narg, char **args)
 
 	manager.addEMFieldBinaryFrom(0.0, 2.0);
 
-    //manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
-	//manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
-    //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
-	//manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
+    manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
+    //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
+    //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-    //manager.addCurrentBinaryFrom(0.0, 5.0);
+    manager.addCurrentBinaryFrom(0.0, 2.0);
 
-    //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 2.0);
-    //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
+    manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 2.0);
+    manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 0.0, 5.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
 
@@ -248,13 +249,13 @@ int main(int narg, char **args)
 	//*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
 
 	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CICLO PRINCIPALE (NON MODIFICARE) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	if (grid.myid == grid.master_proc){
-		printf("----- START temporal cicle -----\n");
-		fflush(stdout);
-	}
 
 	int Nstep = grid.getTotalNumberOfTimesteps();
-	for (istep = 0; istep <= Nstep; istep++)
+    if (grid.myid == grid.master_proc){
+        printf("----- START temporal cicle: %i step -----\n", Nstep );
+        fflush(stdout);
+    }
+    for (istep = 0; istep <= Nstep; istep++)
 	{
 		grid.istep = istep;
 
