@@ -503,7 +503,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	int small_header = 6 * sizeof(int);
     int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(char);
+		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
@@ -641,7 +641,7 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+3 * sizeof(char);
+		+sizeof(int)+3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
@@ -806,7 +806,7 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)+
 		2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)+
-		sizeof(int)+3 * 3 * sizeof(char);
+		sizeof(int)+3 * 3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
