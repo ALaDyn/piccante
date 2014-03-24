@@ -494,16 +494,16 @@ void OUTPUT_MANAGER::writeEMFieldMap(std::ofstream &output, request req){
 }
 
 void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
-	int Ncomp = myfield->getNcomp();
+    int Ncomp = myfield->getNcomp();
 	int uniqueN[3];
 	uniqueN[0] = mygrid->uniquePoints[0];
 	uniqueN[1] = mygrid->uniquePoints[1];
 	uniqueN[2] = mygrid->uniquePoints[2];
 	MPI_Offset disp = 0;
 	int small_header = 6 * sizeof(int);
-	int big_header = 3 * sizeof(int)+3 * sizeof(int)
+    int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(char);
+		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
@@ -516,22 +516,24 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
 	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-	if (mygrid->myid == mygrid->master_proc){
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 		MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
 		for (int c = 0; c < Ncomp; c++){
 			integer_or_halfinteger crd = myfield->getCompCoords(c);
-			char tp[3] = { crd.x, crd.y, crd.z };
-			MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
-		}
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
-	}
-	//*********** END HEADER *****************
+            int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+            MPI_File_write(thefile, tp, 3, MPI_INT, &status);
+        }
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
+    }
+    //*********** END HEADER *****************
 
 	disp = big_header;
 
@@ -543,7 +545,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 	}
 
@@ -557,7 +559,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		todo[3] = mygrid->uniquePointsloc[0];
 		todo[4] = mygrid->uniquePointsloc[1];
 		todo[5] = mygrid->uniquePointsloc[2];
-		MPI_File_write(thefile, todo, 6, MPI_INT, &status);
+        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
 	}
 	//+++++++++++ Start CPU Field Values  +++++++++++++++++++++
 	{
@@ -566,7 +568,7 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 		Nx = mygrid->uniquePointsloc[0];
 		Ny = mygrid->uniquePointsloc[1];
 		Nz = mygrid->uniquePointsloc[2];
-		int size = Ncomp*Nx*Ny*Nz;
+        int size = Ncomp*Nx*Ny*Nz;
 		todo = new float[size];
 		for (int k = 0; k < Nz; k++)
 			for (int j = 0; j < Ny; j++)
@@ -639,7 +641,7 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)
 		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+3 * sizeof(char);
+		+sizeof(int)+3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
@@ -652,9 +654,10 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
 		MPI_INFO_NULL, &thefile);
 
-	//****************FILE HEADER
-
-	if (mygrid->myid == mygrid->master_proc){
+	//+++++++++++ FILE HEADER  +++++++++++++++++++++
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
@@ -662,8 +665,8 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		int tNcomp = 1;
 		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
 		integer_or_halfinteger crd = mycurrent->getDensityCoords();
-		char tp[3] = { crd.x, crd.y, crd.z };
-		MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
+        int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+        MPI_File_write(thefile, tp, 3, MPI_INT, &status);
 
 		for (int c = 0; c < 3; c++)
 			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
@@ -690,7 +693,7 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
 		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
 		exit(33);
 	}
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
 	}
 
@@ -803,7 +806,7 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	int small_header = 6 * sizeof(int);
 	int big_header = 3 * sizeof(int)+3 * sizeof(int)+
 		2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)+
-		sizeof(int)+3 * 3 * sizeof(char);
+		sizeof(int)+3 * 3 * sizeof(int);
 
 	MPI_File thefile;
 	MPI_Status status;
@@ -815,9 +818,10 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
 		MPI_INFO_NULL, &thefile);
 
-	//****************FILE HEADER
-
-	if (mygrid->myid == mygrid->master_proc){
+	//+++++++++++ FILE HEADER  +++++++++++++++++++++
+	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+	if (mygrid->myid == 0){
 		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
 		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
@@ -826,8 +830,8 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
 		for (int c = 0; c < 3; c++){
 			integer_or_halfinteger crd = mycurrent->getJCoords(c);
-			char tp[3] = { crd.x, crd.y, crd.z };
-			MPI_File_write(thefile, tp, 3, MPI_CHAR, &status);
+            int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+            MPI_File_write(thefile, tp, 3, MPI_INT, &status);
 		}
 
 
@@ -852,7 +856,7 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 		exit(33);
 	}
 
-	if (mygrid->myid != mygrid->master_proc){
+	if (mygrid->myid != 0){
 		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
 	}
 

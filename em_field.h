@@ -125,6 +125,7 @@ public:
 	void smooth_filter(int filter_points);
 
 	void addPulse(laserPulse* pulse);
+    void addFieldsFromFile(std::string name);
 
 	void move_window();
 

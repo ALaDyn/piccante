@@ -179,7 +179,191 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 			}
 	return counter;
 }
+int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double plasmarmax[], std::string name){
+
+    ifstream fileDensity (name.c_str(), std::ifstream::in);
+    int Nx_in;
+    double xmin, xmax, dx_in;
+    double temp;
+    fileDensity >> Nx_in;
+    fileDensity >> temp;
+    fileDensity >> xmin;
+    fileDensity >> xmax;
+    printf("Benvenuto! leggero' il file \"%s\"\n",name.c_str());
+    fflush(stdout);
+
+    double *density, *velocity, *x_in;
+    density  = (double*)malloc( sizeof(double)*Nx_in);
+    velocity = (double*)malloc( sizeof(double)*Nx_in);
+    x_in      = (double*)malloc( sizeof(double)*Nx_in);
+    for(int i=0; i<Nx_in;i++){
+        fileDensity >> x_in[i];
+        fileDensity >> density[i];
+        fileDensity >> velocity[i];
+    }
+    fileDensity.close();
+    xmin=x_in[0];
+    xmax=x_in[Nx_in-1];
+    dx_in=x_in[1]-x_in[0];
+
+
+    int counter = 0;
+    double xloc, yloc, zloc;
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+
+    double axh, wh[2], value;
+    int ih, ihleft, ihright;
+
+    for (int k = 0; k < Nz; k++)
+        for (int j = 0; j < Ny; j++)
+            for (int i = 0; i<Nx; i++)
+            {
+                xloc = mygrid->chrloc[0][i];
+                yloc = mygrid->chrloc[1][j];
+                zloc = mygrid->chrloc[2][k];
+                ih= (int)((xloc-xmin)/dx_in);
+                axh=(xloc-xmin)/dx_in-ih;
+                wh[0]=1-axh;
+                wh[1]=axh;
+                ihleft=(ih+Nx_in-1)%(Nx_in-1);
+                ihright=(ih+1)%(Nx_in-1);
+
+                if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+                    if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+                        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
+                            value=wh[0]*density[ihleft] + wh[1]*density[ihright];
+
+                            if (value>0)
+                                counter += npc;
+                        }
+                }
+
+    return counter;
+}
 void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+    int counter = oldNumberOfParticles;
+    double xloc, yloc, zloc;
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+    double dx = mygrid->dr[0];
+    double dy = mygrid->dr[1];
+    double dz = mygrid->dr[2];
+    double dxp = dx / npcAlong[0];
+    double dyp = dy / npcAlong[1];
+    double dzp = dz / npcAlong[2];
+    double  weight;
+
+    for (int k = 0; k < Nz; k++)
+        for (int j = 0; j < Ny; j++)
+            for (int i = 0; i<Nx; i++)
+            {
+                xloc = mygrid->chrloc[0][i];
+                yloc = mygrid->chrloc[1][j];
+                zloc = mygrid->chrloc[2][k];
+
+                if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+                    if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+                        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
+                        {
+                            if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
+                            {
+                                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
+
+                                xloc -= 0.5*dx;
+                                yloc -= 0.5*dy;
+                                zloc -= 0.5*dz;
+                                for (int ip = 0; ip < npcAlong[0]; ip++)
+                                    for (int jp = 0; jp < npcAlong[1]; jp++)
+                                        for (int kp = 0; kp < npcAlong[2]; kp++)
+                                        {
+                                            r0(counter) = xloc + dxp*(ip + 0.5);
+                                            r1(counter) = yloc + dyp*(jp + 0.5);
+                                            r2(counter) = zloc + dzp*(kp + 0.5);
+                                            u0(counter) = u1(counter) = u2(counter) = 0;
+                                            w(counter) = weight;
+                                            if (isTestSpecies)
+                                                w(counter) = (double)(counter + disp);
+                                            counter++;
+                                        }
+                            }
+                        }
+            }
+}
+
+void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+    int counter = oldNumberOfParticles;
+    double xloc, yloc, zloc;
+    double myx, myy, myz;
+    double mydx, mydy, mydz;
+    double mycsix, mycsiy, mycsiz;
+    double csilocx, csilocy, csilocz;
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+    double dx = mygrid->dr[0];
+    double dy = mygrid->dr[1];
+    double dz = mygrid->dr[2];
+    double dxp = dx / npcAlong[0];
+    double dyp = dy / npcAlong[1];
+    double dzp = dz / npcAlong[2];
+    double  weight;
+
+    for (int k = 0; k < Nz; k++){
+        zloc = mygrid->chrloc[2][k];
+        csilocz = mygrid->csiminloc[2] + dz*k;
+        for (int j = 0; j < Ny; j++){
+            yloc = mygrid->chrloc[1][j];
+            csilocy = mygrid->csiminloc[1] + dy*j;
+            for (int i = 0; i<Nx; i++){
+                xloc = mygrid->chrloc[0][i];
+                csilocx = mygrid->csiminloc[0] + dx*i;
+
+                if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0]){
+                    if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1]){
+                        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
+                        {
+                            if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
+                            {
+                                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
+                                for (int kp = 0; kp < npcAlong[2]; kp++){
+                                    mycsiz = csilocz + dzp*(kp + 0.5);
+                                    myz = mygrid->stretchGrid(mycsiz, 2);
+                                    mydz = mygrid->derivativeStretchingFunction(mycsiz, 2);
+
+                                    for (int jp = 0; jp < npcAlong[1]; jp++){
+                                        mycsiy = csilocy + dyp*(jp + 0.5);
+                                        myy = mygrid->stretchGrid(mycsiy, 1);
+                                        mydy = mygrid->derivativeStretchingFunction(mycsiy, 1);
+
+                                        for (int ip = 0; ip < npcAlong[0]; ip++){
+                                            mycsix = csilocx + dxp*(ip + 0.5);
+                                            myx = mygrid->stretchGrid(mycsix, 0);
+                                            mydx = mygrid->derivativeStretchingFunction(mycsix, 0);
+
+                                            r0(counter) = myx;
+                                            r1(counter) = myy;
+                                            r2(counter) = myz;
+                                            u0(counter) = u1(counter) = u2(counter) = 0;
+                                            w(counter) = weight*mydx*mydy*mydz;
+                                            if (isTestSpecies)
+                                                w(counter) = (double)(counter + disp);
+                                            counter++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
 	int Nx = mygrid->Nloc[0];
@@ -193,6 +377,32 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 	double dzp = dz / npcAlong[2];
 	double  weight;
 
+    ifstream fileDensity (name.c_str(), std::ifstream::in);
+    int Nx_in;
+    double xmin, xmax, dx_in;
+    double temp;
+    fileDensity >> Nx_in;
+    fileDensity >> temp;
+    fileDensity >> xmin >> xmax;
+
+    double *density, *velocity, *x_in;
+    density = (double*)malloc( sizeof(double)*Nx_in);
+    velocity = (double*)malloc( sizeof(double)*Nx_in);
+    x_in      = (double*)malloc( sizeof(double)*Nx_in);
+
+    for(int i=0; i<Nx_in;i++){
+        fileDensity >> x_in[i];
+        fileDensity >> density[i];
+        fileDensity >> velocity[i];
+    }
+
+    xmin=x_in[0];
+    xmax=x_in[Nx_in-1];
+    dx_in=x_in[1]-x_in[0];
+
+    double axh, wh[2], denValue, velValue;
+    int ih, ihleft, ihright;
+
 	for (int k = 0; k < Nz; k++)
 		for (int j = 0; j < Ny; j++)
 			for (int i = 0; i<Nx; i++)
@@ -201,18 +411,22 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 				yloc = mygrid->chrloc[1][j];
 				zloc = mygrid->chrloc[2][k];
 
+                ih= (int)((xloc-xmin)/dx_in);
+                axh=(xloc-xmin)/dx_in-ih;
+                wh[0]=1-axh;
+                wh[1]=axh;
+                ihleft=(ih+Nx_in-1)%(Nx_in-1);
+                ihright=(ih+1)%(Nx_in-1);
+
 				if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
 					if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
 						if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
-						{
-							if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
+                        {
+                            denValue=wh[0]*density[ihleft] + wh[1]*density[ihright];
+                            if (denValue>0)
 							{
-								weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
-								//if(weight<2.4)
-								//   printf("weight=%g\n",weight);
-
-								fflush(stdout);
-
+                                velValue=wh[0]*velocity[ihleft] + wh[1]*velocity[ihright];
+                                weight = denValue / npc;
 								xloc -= 0.5*dx;
 								yloc -= 0.5*dy;
 								zloc -= 0.5*dz;
@@ -223,7 +437,8 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 											r0(counter) = xloc + dxp*(ip + 0.5);
 											r1(counter) = yloc + dyp*(jp + 0.5);
 											r2(counter) = zloc + dzp*(kp + 0.5);
-											u0(counter) = u1(counter) = u2(counter) = 0;
+                                            u0(counter) = velValue/(sqrt(1-velValue*velValue));
+                                            u1(counter) = u2(counter) = 0;
 											w(counter) = weight;
 											if (isTestSpecies)
 												w(counter) = (double)(counter + disp);
@@ -232,11 +447,14 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 							}
 						}
 			}
+    free(density);
+    free(velocity);
+    free(x_in);
 }
 
-void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
 	int counter = oldNumberOfParticles;
-	double xloc, yloc, zloc;
+    double xloc, yloc, zloc;
 	double myx, myy, myz;
 	double mydx, mydy, mydz;
 	double mycsix, mycsiy, mycsiz;
@@ -249,10 +467,36 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
 	double dz = mygrid->dr[2];
 	double dxp = dx / npcAlong[0];
 	double dyp = dy / npcAlong[1];
-	double dzp = dz / npcAlong[2];
+    double dzp = dz / npcAlong[2];
 	double  weight;
 
-	for (int k = 0; k < Nz; k++){
+    ifstream fileDensity (name.c_str(), std::ifstream::in);
+    int Nx_in;
+    double xmin, xmax, dx_in;
+    double temp;
+    fileDensity >> Nx_in;
+    fileDensity >> temp;
+    fileDensity >> xmin >> xmax;
+
+    double *density, *velocity, *x_in;
+    density = (double*)malloc( sizeof(double)*Nx_in);
+    velocity = (double*)malloc( sizeof(double)*Nx_in);
+    x_in      = (double*)malloc( sizeof(double)*Nx_in);
+
+    for(int i=0; i<Nx_in;i++){
+        fileDensity >> x_in[i];
+        fileDensity >> density[i];
+        fileDensity >> velocity[i];
+    }
+
+    xmin=x_in[0];
+    xmax=x_in[Nx_in-1];
+    dx_in=x_in[1]-x_in[0];
+
+    double axh, wh[2], denValue, velValue;
+    int ih, ihleft, ihright;
+
+    for (int k = 0; k < Nz; k++){
 		zloc = mygrid->chrloc[2][k];
 		csilocz = mygrid->csiminloc[2] + dz*k;
 		for (int j = 0; j < Ny; j++){
@@ -262,13 +506,23 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
 				xloc = mygrid->chrloc[0][i];
 				csilocx = mygrid->csiminloc[0] + dx*i;
 
-				if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0]){
+                ih= (int)((xloc-xmin)/dx_in);
+                axh=(xloc-xmin)/dx_in-ih;
+                wh[0]=1-axh;
+                wh[1]=axh;
+                ihleft=(ih+Nx_in-1)%(Nx_in-1);
+                ihright=(ih+1)%(Nx_in-1);
+
+                if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0]){
 					if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1]){
 						if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
 						{
-							if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
+                            denValue=wh[0]*density[ihleft] + wh[1]*density[ihright];
+
+                            if (denValue>0)
 							{
-								weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
+                                velValue=wh[0]*velocity[ihleft] + wh[1]*velocity[ihright];
+                                weight = denValue/ npc;
 								for (int kp = 0; kp < npcAlong[2]; kp++){
 									mycsiz = csilocz + dzp*(kp + 0.5);
 									myz = mygrid->stretchGrid(mycsiz, 2);
@@ -281,13 +535,14 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
 
 										for (int ip = 0; ip < npcAlong[0]; ip++){
 											mycsix = csilocx + dxp*(ip + 0.5);
-											myx = mygrid->stretchGrid(mycsix, 0);
+                                            myx = mygrid->stretchGrid(mycsix, 0);
 											mydx = mygrid->derivativeStretchingFunction(mycsix, 0);
 
-											r0(counter) = myx;
+                                            r0(counter) = myx;
 											r1(counter) = myy;
 											r2(counter) = myz;
-											u0(counter) = u1(counter) = u2(counter) = 0;
+                                            u0(counter) = velValue/(sqrt(1-velValue*velValue));
+                                            u1(counter) = u2(counter) = 0;
 											w(counter) = weight*mydx*mydy*mydz;
 											if (isTestSpecies)
 												w(counter) = (double)(counter + disp);
@@ -302,7 +557,9 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
 			}
 		}
 	}
-
+    free(density);
+    free(velocity);
+    free(x_in);
 }
 
 void SPECIE::creation()
@@ -348,6 +605,61 @@ void SPECIE::creation()
 		SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
 
 	delete[] NpartLoc;
+
+}
+
+
+void SPECIE::creationFromFile1D(std::string name){
+    ifstream fileDensity (name.c_str(), std::ifstream::in);
+
+    if (mygrid->with_particles == NO)
+        return;
+
+    int n_points;
+    double plasmaXMin, plasmaXMax, plasmarmin[3], plasmarmax[3];
+    double temp;
+    fileDensity >> n_points;
+    fileDensity >> temp;
+    fileDensity >> plasmaXMin >> plasmaXMax;
+
+
+    fileDensity.close();
+
+    SPECIE::computeParticleMassChargeCoupling();
+    npc = 1;
+    for (int c = 0; c < 3; c++){
+        if (c < 1){
+            plasmarmin[c] = MAX(plasmaXMin, mygrid->rminloc[c]);
+            plasmarmax[c] = MIN(plasmaXMax, mygrid->rmaxloc[c]);
+            npc *= npcAlong[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
+        }
+        else{
+            plasmarmin[c] = mygrid->rminloc[c];
+            plasmarmax[c] = mygrid->rmaxloc[c];
+            npcAlong[c] = 1;
+        }
+    }
+
+    Np = SPECIE::getNumberOfParticlesWithinFromFile1D(plasmarmin, plasmarmax,name);
+    allocate_species();
+
+    int* NpartLoc = new int[mygrid->nproc];
+    NpartLoc[mygrid->myid] = Np;
+
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
+    long long disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += NpartLoc[pp];
+    for (int pp = 0; pp < mygrid->nproc; pp++)
+        lastParticle += (long long)NpartLoc[pp];
+
+
+    if (mygrid->isStretched())
+        SPECIE::createStretchedParticlesWithinFromButFromFile1D(plasmarmin, plasmarmax, 0, disp, name);
+    else
+        SPECIE::createParticlesWithinFromButFromFile1D(plasmarmin, plasmarmax, 0, disp,name);
+
+    delete[] NpartLoc;
 
 }
 //CREATE PARTICLES IN THE NEW STRIPE OF DOMAIN "grown" from the window movement
