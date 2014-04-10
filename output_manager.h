@@ -35,7 +35,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <sstream>
 #if defined(USE_BOOST)
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
 #endif
 #include "commons.h"
 #include "grid.h"
