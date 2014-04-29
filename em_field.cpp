@@ -1234,7 +1234,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 	int i, j, k;
 	int Nx, Ny, Nz;
 	double k0, rx, x, y, sigma_z, x0;
-
+    double rxEnvelope;
 	amplitude *= (2 * M_PI) / lambda0;
 	Nx = mygrid->Nloc[0];
 	Ny = mygrid->Nloc[1];
@@ -1266,20 +1266,23 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
+                    rxEnvelope = x - x0;
+                    E1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->cirloc[1][j];
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
+                    rxEnvelope = x - x0;
+                    E0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->chrloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					B2(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
+                    rxEnvelope = x - x0;
+                    B2(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
 
 
 				}
@@ -1295,20 +1298,23 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
+                    rxEnvelope = x - x0;
+                    B1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
+                    rxEnvelope = x - x0;
+                    B0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
+                    rxEnvelope = x - x0;
+                    E2(i, j, k) -= amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
 
 
 				}
@@ -1324,20 +1330,23 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mycos;
+                    rxEnvelope = x - x0;
+                    E1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->cirloc[1][j];
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx)*mysin;
+                    rxEnvelope = x - x0;
+                    E0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->chrloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					B2(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*cos(k0*rx);
+                    rxEnvelope = x - x0;
+                    B2(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
 
 
 					x = mygrid->chrloc[0][i];
@@ -1345,7 +1354,8 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					B1(i, j, k) += amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mycos;
+                    rxEnvelope = x - x0;
+                    B1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
@@ -1353,13 +1363,15 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
 
-					B0(i, j, k) += -amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx)*mysin;
+                    rxEnvelope = x - x0;
+                    B0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
-					E2(i, j, k) -= amplitude*cos2_profile(rx / sigma_z)*sin(k0*rx);
+                    rxEnvelope = x - x0;
+                    E2(i, j, k) -= amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx);
 
 
 				}
