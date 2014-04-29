@@ -200,7 +200,8 @@ private:
 	bool EBEnergyExtremesFlag;
 
 
-	static double cos2_profile(double u);
+    static double cos2_profile(double u);
+    static double cos2_plateau_profile(double rise, double plateau, double x);
 	static double cossin_profile(double u);
 
 	int pbc_compute_alloc_size();
@@ -209,22 +210,15 @@ private:
 	void pbcExchangeAlongZ(double* send_buffer, double* recv_buffer);
 	void pbc_EB();
 
-	double cos_plane_wave_angle(double x, double y, double z,
-		double t, double lambda, double fwhm,
-		double initial_position, double angle, int c);
-
-	double plane_wave_angle(double x, double y, double z,
-		double t, double lambda, double angle,
-		int c);
 
 	void gaussian_pulse(int dimensions, double xx, double yy, double zz,
 		double tt, double lambda, double fwhm,
 		double w0, double* field, pulsePolarization polarization);
 
 
-	void initialize_cos_plane_wave_angle(double lambda0, double amplitude,
+    void initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
 		double laser_pulse_initial_position,
-		double t_FWHM, double xcenter, double angle, pulsePolarization polarization);
+        double t_FWHM, double xcenter, double angle, pulsePolarization polarization, double rise_time);
 
 
 	void initialize_plane_wave_angle(double lambda0, double amplitude,

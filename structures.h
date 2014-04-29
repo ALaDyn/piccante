@@ -78,7 +78,7 @@ double left_saw_2_grating(double x, double y, double z, PLASMAparams plist, doub
 
 
 //************** LASER PULSE TYPES *******
-enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE };
+enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE};
 enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 
 class laserPulse
@@ -95,6 +95,8 @@ public:
 	bool rotation;
 	double angle;
 	double rotation_center_along_x;
+    double rise_time;
+
 
 	laserPulse();
 	~laserPulse();

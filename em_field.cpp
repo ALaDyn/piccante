@@ -1184,50 +1184,83 @@ void EM_FIELD::addPulse(laserPulse* pulse){
 	}
 	case PLANE_WAVE:{
 		if (pulse->rotation) {
-			initialize_plane_wave_angle(pulse->lambda0,
-				pulse->normalized_amplitude,
-				pulse->angle,
-				pulse->polarization);
-		}
-		else{
-			initialize_plane_wave_angle(pulse->lambda0,
-				pulse->normalized_amplitude,
-				0.0,
-				pulse->polarization);
-		}
-		break;
-	}
-	case COS2_PLANE_WAVE:
-	{
-		if (pulse->rotation) {
-			initialize_cos_plane_wave_angle(pulse->lambda0,
-				pulse->normalized_amplitude,
-				pulse->laser_pulse_initial_position,
-				pulse->t_FWHM,
-				pulse->rotation_center_along_x,
-				pulse->angle,
-				pulse->polarization);
-		}
-		else{
-			initialize_cos_plane_wave_angle(pulse->lambda0,
-				pulse->normalized_amplitude,
-				pulse->laser_pulse_initial_position,
-				pulse->t_FWHM,
-				0.0,
-				0.0,
-				pulse->polarization);
-		}
-		break;
-	}
+            initialize_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     pulse->angle,
+                     pulse->polarization);
+        }
+        else{
+            initialize_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     0.0,
+                     pulse->polarization);
+        }
+        break;
+    }
+    case COS2_PLANE_WAVE:
+    {
+        if (pulse->rotation) {
+            initialize_cos2_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     pulse->laser_pulse_initial_position,
+                     pulse->t_FWHM,
+                     pulse->rotation_center_along_x,
+                     pulse->angle,
+                     pulse->polarization,
+                     pulse->t_FWHM);
+        }
+        else{
+            initialize_cos2_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     pulse->laser_pulse_initial_position,
+                     pulse->t_FWHM,
+                     0.0,
+                     0.0,
+                     pulse->polarization,
+                     pulse->t_FWHM);
+        }
+        break;
+    }
 
-	default:{}
+    case COS2_PLATEAU_PLANE_WAVE:
+    {
+        if (pulse->rotation) {
+            initialize_cos2_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     pulse->laser_pulse_initial_position,
+                     pulse->t_FWHM,
+                     pulse->rotation_center_along_x,
+                     pulse->angle,
+                     pulse->polarization,
+                     pulse->rise_time);
+        }
+        else{
+            initialize_cos2_plane_wave_angle
+                    (pulse->lambda0,
+                     pulse->normalized_amplitude,
+                     pulse->laser_pulse_initial_position,
+                     pulse->t_FWHM,
+                     0.0,
+                     0.0,
+                     pulse->polarization,
+                     pulse->rise_time);
+        }
+        break;
+    }
+
+    default:{}
 	}
 }
 
-void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
+void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
 	double laser_pulse_initial_position,
 	double t_FWHM, double xcenter, double angle,
-	pulsePolarization polarization)
+    pulsePolarization polarization, double rise_time)
 {
 
 	//DA USARE laser_pulse_initial_position !
@@ -1267,7 +1300,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
+                    E1(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mycos;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->cirloc[1][j];
@@ -1275,14 +1308,14 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
+                    E0(i, j, k) += -amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mysin;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->chrloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    B2(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
+                    B2(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx);
 
 
 				}
@@ -1299,7 +1332,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    B1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
+                    B1(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
@@ -1307,14 +1340,14 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    B0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
+                    B0(i, j, k) += -amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E2(i, j, k) -= amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
+                    E2(i, j, k) -= amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx);
 
 
 				}
@@ -1331,7 +1364,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mycos;
+                    E1(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mycos;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->cirloc[1][j];
@@ -1339,14 +1372,14 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx)*mysin;
+                    E0(i, j, k) += -amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx)*mysin;
 
 					x = mygrid->chrloc[0][i];
 					y = mygrid->chrloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    B2(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*cos(k0*rx);
+                    B2(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*cos(k0*rx);
 
 
 					x = mygrid->chrloc[0][i];
@@ -1355,7 +1388,7 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    B1(i, j, k) += amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx)*mycos;
+                    B1(i, j, k) += amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*sin(k0*rx)*mycos;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->chrloc[1][j];
@@ -1364,14 +1397,14 @@ void EM_FIELD::initialize_cos_plane_wave_angle(double lambda0, double amplitude,
 					rx -= x0;
 
                     rxEnvelope = x - x0;
-                    B0(i, j, k) += -amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx)*mysin;
+                    B0(i, j, k) += -amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*sin(k0*rx)*mysin;
 
 					x = mygrid->cirloc[0][i];
 					y = mygrid->cirloc[1][j];
 					rx = xcenter + (x - xcenter)*mycos + y*mysin;
 					rx -= x0;
                     rxEnvelope = x - x0;
-                    E2(i, j, k) -= amplitude*cos2_profile(rxEnvelope / sigma_z)*sin(k0*rx);
+                    E2(i, j, k) -= amplitude*cos2_plateau_profile(rise_time,  t_FWHM-rise_time,rxEnvelope )*sin(k0*rx);
 
 
 				}
@@ -1870,48 +1903,24 @@ double EM_FIELD::cos2_profile(double u)
 	if (fabs(u) <= 1.0) return pow(cos(0.5*M_PI*u), 2);
 	else return 0.0;
 }
+
+double EM_FIELD::cos2_plateau_profile(double rise, double plateau, double x)
+{
+    if (fabs(x) >= rise + plateau*0.5)
+        return 0.0;
+    else if (fabs(x) >= plateau*0.5 && rise > 0)
+        return pow(cos(0.5*M_PI*(fabs(x)-plateau*0.5)/rise), 2);
+    else
+        return 1.0;
+}
+
 double EM_FIELD::cossin_profile(double u)
 {
 	if (fabs(u) <= 1.0) return cos(0.5*M_PI*u)*sin(0.5*M_PI*u);
 	else return 0.0;
 }
 
-double EM_FIELD::cos_plane_wave_angle(double x, double y, double z, double t, double lambda, double fwhm, double initial_position, double angle, int c)
-{
-	double k0, rx, sigma_z, field[6];
 
-	k0 = 2 * M_PI / lambda;
-	sigma_z = fwhm;
-
-	rx = x*cos(angle) + y*sin(angle) - t - initial_position;
-
-	field[0] = -cos2_profile(rx / sigma_z)*cos(k0*rx)*sin(angle);
-	field[1] = +cos2_profile(rx / sigma_z)*cos(k0*rx)*cos(angle);
-	field[2] = 0;   //Ez
-	field[3] = 0;   //Bx 
-	field[4] = 0;   //By 
-	field[5] = +cos2_profile(rx / sigma_z)*cos(k0*rx);
-
-	return field[c];
-}
-
-double EM_FIELD::plane_wave_angle(double x, double y, double z, double t, double lambda, double angle, int c)
-{
-	double k0, rx, field[6];
-
-	k0 = 2 * M_PI / lambda;
-
-	rx = x*cos(angle) + y*sin(angle) - t;
-
-	field[0] = -cos(k0*rx)*sin(angle);
-	field[1] = +cos(k0*rx)*cos(angle);
-	field[2] = 0;   //Ez
-	field[3] = 0;   //Bx 
-	field[4] = 0;   //By 
-	field[5] = +cos(k0*rx);
-
-	return field[c];
-}
 
 void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, double tt, double lambda, double fwhm, double w0, double* field, pulsePolarization polarization)
 {
@@ -1932,7 +1941,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 	zra = M_PI*w0*w0;   //Rayleight lenght
 	phi = k0*(tt - xx);   //k(x-ct)
 	waist = w0*sqrt(1 + (xx*xx) / (zra*zra));   //waist
-	tprofile = cos2_profile((tt - xx) / fwhm);  //long. profile
+    tprofile = cos2_profile((tt - xx) / fwhm);  //long. profile
 	rprofile = exp(-r2 / (waist*waist));      //radial profile
 	tprofile01 = cossin_profile((tt - xx) / fwhm); //long. profile order1
 	xx = xx / zra;                            //normalized x
