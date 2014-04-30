@@ -132,10 +132,20 @@ void OUTPUT_MANAGER::createExtremaFiles(){
 
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
 #if defined (USE_BOOST)
+    std::string _newoutputDir;
+    std::stringstream ss;
+    time_t timer;
+    std::time(&timer);
+    ss << _outputDir << "_" << (int)timer;
+    _newoutputDir=ss.str();
 	if (mygrid->myid == mygrid->master_proc){
 		if ( !boost::filesystem::exists(_outputDir) ){
 			boost::filesystem::create_directories(_outputDir);
 		}
+        else{
+            boost::filesystem::rename(_outputDir, _newoutputDir);
+           boost::filesystem::create_directories(_outputDir);
+        }
 	}
 #endif
 	outputDir = _outputDir;

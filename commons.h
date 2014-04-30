@@ -19,6 +19,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define __COMMONS_h__
 
 #define _USE_MATH_DEFINES
+//#define USE_BOOST
 
 #include <string>
 #if defined(_MSC_VER)
