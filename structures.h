@@ -17,7 +17,8 @@ struct PLASMAparams{
 	double rminbox[3];
 	double rmaxbox[3];
 	double ramp_length;
-	double density_coefficient;
+    double scale_length;
+    double density_coefficient;
 	double ramp_min_density;
 	void *additional_params;
 };
@@ -41,7 +42,8 @@ public:
 	PLASMA(const PLASMA& other);
 	PLASMA operator=(const PLASMA& p1);
 	void setRampLength(double rlength);
-	void setDensityCoefficient(double dcoeff);
+    void setScaleLength(double slength);
+    void setDensityCoefficient(double dcoeff);
 	void setRampMinDensity(double minden);
 	void setAdditionalParams(void* addpar);
 	void setMinBox(double xmin, double ymin, double zmin);
@@ -56,6 +58,8 @@ public:
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_soft_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 

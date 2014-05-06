@@ -20,6 +20,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _USE_MATH_DEFINES
 //#define USE_BOOST
+#define _REORDER_MPI_CART_PROCESSES 1
 
 #include <string>
 #if defined(_MSC_VER)
@@ -115,17 +116,18 @@ public:
 //*****LOGOS******
 
 const std::string common_logo =
-"         d8b                                    888                \n"
-"         Y8P                                    888                \n"
-"                                                888                \n"
-"88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.      \n"
-"888 \"88b 888 d88P\"   d88P\"        \"88b 888 \"88b 888   d8P  Y8b\n"
-"888  888 888 888     888      .d888888 888  888 888   88888888     \n"
-"888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.         \n"
-"88888P\"  888  \"Y8888P \"Y8888P \"Y888888 888  888  \"Y888 \"Y8888\n"
-"888                                                                \n"
-"888                                                                \n"
-"888                                                                \n";
+        "\n"
+        "         d8b                                    888                \n"
+        "         Y8P                                    888                \n"
+        "                                                888                \n"
+        "88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.      \n"
+        "888 \"88b 888 d88P\"   d88P\"        \"88b 888 \"88b 888   d8P  Y8b\n"
+        "888  888 888 888     888      .d888888 888  888 888   88888888     \n"
+        "888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.         \n"
+        "88888P\"  888  \"Y8888P \"Y8888P \"Y888888 888  888  \"Y888 \"Y8888\n"
+        "888                                                                \n"
+        "888                                                                \n"
+        "888                                                                \n";
 
 //**********************************
 //http://patorjk.com/software/taag

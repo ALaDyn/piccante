@@ -34,10 +34,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-#include "commons.h"
 #include "grid.h"
 #include "structures.h"
 #include "current.h"

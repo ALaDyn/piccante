@@ -309,8 +309,10 @@ void GRID::visualDiag(){
 		s_z = s_err;
 	}
 
-
-	if (myid == master_proc){
+    if (myid == master_proc){
+        GRID::printLogo();
+        GRID::printProcInformations();
+        GRID::printGridProcessorInformation();
 		printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		printf("dt=%f\n", dt);
 		printf("dx=%f\n", dr[0]);
@@ -411,26 +413,35 @@ void GRID::printLogo()
 {
 	std::cout << common_logo;
 	std::cout << common_versionLine << std::endl;
-	printf("========== %20s ==========\n", "GRID_INITIALIZATION");
-	fflush(stdout);
+    fflush(stdout);
 }
 void GRID::printProcInformations()
 {
-	printf("master_proc=%i:\n", myid);
-	printf("Nproc   =%6i :     ( %4i, %4i, %4i)\n\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
-	//	printf("single proc id and 3D coordinates:\n");
-	//	printf("%6s = (%4s,%4s,%4s)\n", "id", "idx", "idy", "idz");
+    printf("========== %19s ==========\n", "GRID_INITIALIZATION");
+    printf("master_proc=%i:\n", myid);
+    double dtotcell=uniquePoints[0]*uniquePoints[1]*uniquePoints[2];
+    printf("Ncells   =%g :     ( %5i, %5i, %5i)\n", dtotcell, uniquePoints[0], uniquePoints[1], uniquePoints[2]);
+    printf("Nprocs   =%6i :     ( %5i, %5i, %5i)\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
+    printf("Xrange = [ %6g : %6g ]\n", rmin[0], rmax[0]);
+    printf("Yrange = [ %6g : %6g ]\n", rmin[1], rmax[1]);
+    printf("Zrange = [ %6g : %6g ]\n", rmin[2], rmax[2]);
 
-	//	for (int id = 0; id < nproc; id++){
-	//		int rid[3];
-	//		MPI_Cart_coords(cart_comm, id, 3, rid);
-	//		printf("%6i = (%4i,%4i,%4i)\n", id, rid[0], rid[1], rid[2]);
-	//	}
+#ifdef _FLAG_DEBUG
+    printf("single proc id and 3D coordinates:\n");
+    printf("%6s = (%4s,%4s,%4s)\n", "id", "idx", "idy", "idz");
+
+    for (int id = 0; id < nproc; id++){
+        int rid[3];
+        MPI_Cart_coords(cart_comm, id, 3, rid);
+        printf("%6i = (%4i,%4i,%4i)\n", id, rid[0], rid[1], rid[2]);
+    }
+#endif
 }
 void GRID::checkProcNumber(){
-	if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
-	{
-		printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocy=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
+    rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
+    if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
+    {
+        printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocy=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
 		exit(18);
 	}
 	if (rnproc[0] < 1 || NGridNodes[0] < 1)
@@ -451,25 +462,27 @@ void GRID::checkProcNumber(){
 
 }
 void GRID::printGridProcessorInformation(){
-	//	printf("==========         grid         ==========\n");
-	//	printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "rmin", "rmax");
+#ifdef _FLAG_DEBUG
+        printf("==========         grid         ==========\n");
+        printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "rmin", "rmax");
 
-	//    int c = 0;
-	//	printf("X:  #proc=%i\tNx=%i\n", rnproc[c], NGridNodes[c]);
-	//	for (int pp = 0; pp < rnproc[c]; pp++)
-	//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+        int c = 0;
+        printf("X:  #proc=%i\tNx=%i\n", rnproc[c], NGridNodes[c]);
+        for (int pp = 0; pp < rnproc[c]; pp++)
+            printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
-	//	c = 1;
-	//	printf("Y:  #proc=%i\tNy=%i\n", rnproc[c], NGridNodes[c]);
-	//	for (int pp = 0; pp < rnproc[c]; pp++)
-	//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+        c = 1;
+        printf("Y:  #proc=%i\tNy=%i\n", rnproc[c], NGridNodes[c]);
+        for (int pp = 0; pp < rnproc[c]; pp++)
+            printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
-	//	c = 2;
-	//	printf("Z:  #proc=%i\tNz=%i\n", rnproc[c], NGridNodes[c]);
-	//	for (int pp = 0; pp < rnproc[c]; pp++)
-	//		printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
+        c = 2;
+        printf("Z:  #proc=%i\tNz=%i\n", rnproc[c], NGridNodes[c]);
+        for (int pp = 0; pp < rnproc[c]; pp++)
+            printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
-	printf("========== %20s ==========\n", "");
+#endif
+    printf("========== %20s ==========\n", "");
 	if (flagStretched){
 		printf("Stretched GRID!!!\n");
 		printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "Ximin", "Ximax");
@@ -658,15 +671,9 @@ void GRID::setLocalExtrems(){
 }
 void GRID::mpi_grid_initialize(int *narg, char **args)
 {
-
 	MPI_Init(narg, &args);
 	MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-
-
-	if (myid == master_proc){
-		GRID::printLogo();
-	}
 
 	GRID::checkStretchedGridInitialization();
 	if (flagStretched){
@@ -679,56 +686,29 @@ void GRID::mpi_grid_initialize(int *narg, char **args)
 
 	if (flagStretched){
 		for (int c = 0; c < accesso.dimensions; c++){
-
 			GRID::checkStretchedGridExtensionAlong(c);
 			GRID::computeAlphaStretchAlong(c);
 			GRID::computeExtremsStretchedGrid(c);
 		}
 	}
-	//    for(int c=0;c<accesso.dimensions;c++){
-	//   // std::cout<< " MMEEEERDAAAA    Nloc["<<c<<"] = " << Nloc[c]<<std::endl;
-	//}
 
-	//cyclic[0]=cyclic[1]=cyclic[2]=1;
-
-	rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
-	int reorder = 1;
-	GRID::checkProcNumber();
-	MPI_Cart_create(MPI_COMM_WORLD, 3, rnproc, cyclic, reorder, &cart_comm);
-
-
+    GRID::checkProcNumber();
+    MPI_Cart_create(MPI_COMM_WORLD, 3, rnproc, cyclic, _REORDER_MPI_CART_PROCESSES, &cart_comm);
 	MPI_Cart_coords(cart_comm, myid, 3, rmyid);
-
-
 
 	GRID::allocateRProcQuantities();
 	GRID::computeRProcNloc();
 	GRID::computeRProcNuniquePointsLoc();
-
-	//    for(int c=0;c<accesso.dimensions;c++){
-	//    //std::cout<< " ----MMEEEERDAAAA    Nloc["<<c<<"] = " << Nloc[c]<<std::endl;
-	//}
-
-
-	GRID::setIminImax();
-	if (flagStretched){
-		GRID::setRminRmaxStretched();
-	}
+    GRID::setIminImax();
+    if (flagStretched)
+        GRID::setRminRmaxStretched();
 	else
 		GRID::setRminRmax();
 
 	GRID::checkProcNumberInitialization();
-
 	GRID::setLocalExtrems();
 	GRID::computeDerivativeCorrection();
-
 	GRID::computeTotUniquePoints();
-
-	if (myid == master_proc){
-		GRID::printProcInformations();
-	}
-	if (myid == master_proc)
-		GRID::printGridProcessorInformation();
 }
 
 void GRID::finalize()

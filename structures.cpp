@@ -37,8 +37,9 @@ PLASMA::PLASMA(){
 	params.rminbox[0] = params.rminbox[1] = params.rminbox[2] = 0.0;
 	params.rmaxbox[0] = params.rmaxbox[1] = params.rmaxbox[2] = 0.0;
 	params.ramp_length = 0.0;
-	params.density_coefficient = 0.0;
-	params.ramp_min_density = 0.0;
+    params.scale_length = 1.0;
+    params.density_coefficient = 0.0;
+    params.ramp_min_density = 0.0;
 	params.additional_params = NULL;
 	density_function = NULL;
 }
@@ -46,7 +47,8 @@ PLASMA::PLASMA(){
 PLASMA::PLASMA(const PLASMA& other)
 {
 	params.ramp_length = other.params.ramp_length;
-	params.density_coefficient = other.params.density_coefficient;
+    params.scale_length = other.params.scale_length;
+    params.density_coefficient = other.params.density_coefficient;
 	params.ramp_min_density = other.params.ramp_min_density;
 	params.additional_params = other.params.additional_params;
 	density_function = other.density_function;
@@ -60,7 +62,8 @@ PLASMA::PLASMA(const PLASMA& other)
 
 PLASMA PLASMA::operator=(const PLASMA& p1){
 	params.ramp_length = p1.params.ramp_length;
-	params.density_coefficient = p1.params.density_coefficient;
+    params.scale_length = p1.params.scale_length;
+    params.density_coefficient = p1.params.density_coefficient;
 	params.ramp_min_density = p1.params.ramp_min_density;
 	params.additional_params = p1.params.additional_params;
 	density_function = p1.density_function;
@@ -75,6 +78,10 @@ PLASMA PLASMA::operator=(const PLASMA& p1){
 
 void PLASMA::setRampLength(double rlength){
 	params.ramp_length = rlength;
+}
+
+void PLASMA::setScaleLength(double slength){
+    params.scale_length = slength;
 }
 
 void PLASMA::setDensityCoefficient(double dcoeff){
@@ -147,6 +154,43 @@ double left_linear_ramp(double x, double y, double z, PLASMAparams plist, double
 		return -1;
 	}
 }
+double left_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
+    if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+        if ((x - plist.rminbox[0]) <= plist.ramp_length){
+            double xx = (x - plist.rminbox[0]-plist.ramp_length);
+            double densDiff = (plist.density_coefficient - plist.ramp_min_density);
+            double alpha = densDiff /(1-exp(-plist.ramp_length/plist.scale_length));
+            double kk = plist.density_coefficient - alpha;
+            return (alpha*exp(xx/plist.scale_length)+kk);
+        }
+        else{
+            return plist.density_coefficient;
+        }
+    }
+    else{
+        return -1;
+    }
+}
+
+double left_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
+    if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+        if ((x - plist.rminbox[0]) <= plist.ramp_length){
+            double xx = (x - plist.rminbox[0]-plist.ramp_length);
+            return (plist.density_coefficient*exp(xx/plist.scale_length));
+        }
+        else{
+            return plist.density_coefficient;
+        }
+    }
+    else{
+        return -1;
+    }
+}
+
 
 double left_soft_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
 	double lng;

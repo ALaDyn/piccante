@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 1
 
 #include "access.h"
 #include "commons.h"
@@ -50,7 +50,7 @@ using namespace std;
 #include "particle_species.h"
 #include "output_manager.h"
 
-#define NPROC_ALONG_Y 1024
+#define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
 #define DIRECTORY_OUTPUT "TEST"
@@ -69,11 +69,11 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-    grid.setXrange(-90.0, 90.0);
+    grid.setXrange(-10.0, 10.0);
     grid.setYrange(-90, 90);
 	grid.setZrange(-1, +1);
 
-    grid.setNCells(10*1024, 10*1024, 1);
+    grid.setNCells(1000, 1, 1);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -124,7 +124,7 @@ int main(int narg, char **args)
     pulse1.angle = 2.0*M_PI*(-30.0 / 360.0);
     pulse1.rotation_center_along_x = 0.0;
 
-    myfield.addPulse(&pulse1);
+    //myfield.addPulse(&pulse1);
 
     laserPulse pulse2;
     pulse2 = pulse1;
@@ -140,12 +140,13 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
 	PLASMA plasma1;
-    plasma1.density_function = left_linear_ramp;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
-    plasma1.setXRangeBox(0.0,10.0);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
+    plasma1.density_function = left_fixed_exp_ramp;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
+    plasma1.setXRangeBox(-5.0,9.0);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
     plasma1.setYRangeBox(grid.rmin[1]*0.95,grid.rmax[1]*0.95);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
 	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-    plasma1.setRampLength(0.1);                       //ramp_min_density,void *additional_params
-    plasma1.setDensityCoefficient(64.0);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
+    plasma1.setRampLength(10.0);                       //ramp_min_density,void *additional_params
+    plasma1.setScaleLength(2.0);                       //ramp_min_density,void *additional_params
+    plasma1.setDensityCoefficient(100.0);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
     plasma1.setRampMinDensity(0.0);                 //double g_phase = paramlist[2];
     double grating_peak_to_valley_depth = 0.2;
     double grating_lambda = 2.0;
@@ -171,7 +172,7 @@ int main(int narg, char **args)
 
 	SPECIE  electrons1(&grid);
 	electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(9, 9, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
 	electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
@@ -185,8 +186,8 @@ int main(int narg, char **args)
     ions1.type = ION;
     ions1.Z = 6.0;
     ions1.A = 12.0;
-    ions1.creation();
-    species.push_back(&ions1);
+    //ions1.creation();
+    //species.push_back(&ions1);
 
     //   SPECIE  electrons2(&grid);
     //electrons2.plasma = plasma1;
@@ -226,18 +227,18 @@ int main(int narg, char **args)
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-    manager.addEMFieldBinaryFrom(0.0, 5.0);
+    //manager.addEMFieldBinaryFrom(0.0, 5.0);
 
     manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
-    manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
+    //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-    manager.addCurrentBinaryFrom(0.0, 5.0);
+    //manager.addCurrentBinaryFrom(0.0, 5.0);
 
-    manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 10.0, 10.0);
+    //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 10.0, 10.0);
     //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
-    manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 10.0, 10.0);
+    //manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 10.0, 10.0);
     //manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
 
 	manager.addDiagFrom(0.0, 1.0);
