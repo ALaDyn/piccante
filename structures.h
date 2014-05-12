@@ -16,11 +16,14 @@
 struct PLASMAparams{
 	double rminbox[3];
 	double rmaxbox[3];
-	double ramp_length;
-    double scale_length;
+    double left_ramp_length;
+    double right_ramp_length;
+    double left_scale_length;
+    double right_scale_length;
     double density_coefficient;
-	double ramp_min_density;
-	void *additional_params;
+    double left_ramp_min_density;
+    double right_ramp_min_density;
+    void *additional_params;
 };
 #define NBIN_SPECTRUM 1000;
 struct SPECIEspectrum{
@@ -42,10 +45,16 @@ public:
 	PLASMA(const PLASMA& other);
 	PLASMA operator=(const PLASMA& p1);
 	void setRampLength(double rlength);
+    void setLeftRampLength(double rlength);
+    void setRightRampLength(double rlength);
     void setScaleLength(double slength);
+    void setLeftScaleLength(double slength);
+    void setRightScaleLength(double slength);
     void setDensityCoefficient(double dcoeff);
 	void setRampMinDensity(double minden);
-	void setAdditionalParams(void* addpar);
+    void setLeftRampMinDensity(double minden);
+    void setRightRampMinDensity(double minden);
+    void setAdditionalParams(void* addpar);
 	void setMinBox(double xmin, double ymin, double zmin);
 	void setMaxBox(double xmax, double ymax, double zmax);
 	void setXRangeBox(double xmin, double xmax);
@@ -58,8 +67,14 @@ public:
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double right_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_right_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double left_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double left_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_soft_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 

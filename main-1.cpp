@@ -140,14 +140,17 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
 	PLASMA plasma1;
-    plasma1.density_function = left_fixed_exp_ramp;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
+    plasma1.density_function = left_right_free_exp_ramp;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
     plasma1.setXRangeBox(-5.0,9.0);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
     plasma1.setYRangeBox(grid.rmin[1]*0.95,grid.rmax[1]*0.95);                 //PLASMAparams: rminbox[3], rmaxbox[3], ramp_length, density_coefficient,
 	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-    plasma1.setRampLength(10.0);                       //ramp_min_density,void *additional_params
-    plasma1.setScaleLength(2.0);                       //ramp_min_density,void *additional_params
-    plasma1.setDensityCoefficient(100.0);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
-    plasma1.setRampMinDensity(0.0);                 //double g_phase = paramlist[2];
+    plasma1.setLeftRampLength(5.0);                       //ramp_min_density,void *additional_params
+    plasma1.setRightRampLength(5.0);                       //ramp_min_density,void *additional_params
+    plasma1.setLeftScaleLength(2.0);                       //ramp_min_density,void *additional_params
+    plasma1.setRightScaleLength(2.0);                       //ramp_min_density,void *additional_params
+    plasma1.setDensityCoefficient(95.0);         // Per grating double g_depth = paramlist[0];double g_lambda = paramlist[1];
+    plasma1.setLeftRampMinDensity(10.0);                 //double g_phase = paramlist[2];
+    plasma1.setRightRampMinDensity(20.0);                 //double g_phase = paramlist[2];
     double grating_peak_to_valley_depth = 0.2;
     double grating_lambda = 2.0;
     double grating_phase = 0.0;
