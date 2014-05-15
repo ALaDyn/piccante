@@ -3,18 +3,22 @@ EXE = piccante
 
 OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o 
 
-OPT = -O3  
+OPT = -O3 
 
 LFLAGS = -Wall
 
-LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system
+LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system 
 
 all : $(EXE)
+
+hdf5 : OPT = -O3 -I/usr/lib/hdf5-1.8.12/hdf5/include -DUSE_HDF5
+hdf5 : LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system -lhdf5  -L/usr/lib/hdf5-1.8.12/hdf5/lib
+hdf5 : $(EXE)
 
 warn : OPT = -O3 -Wall -Winline -Wextra
 warn : $(EXE)
 
-debug : OPT = -O0 -g
+debug : OPT = -O0 -g 
 debug : $(EXE)
 
 perf : OPT = -O3 -g -pg

@@ -593,10 +593,163 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
 	//////////////////////////// END of collective binary file write
 }
 
+
+
+#if defined(USE_HDF5)
+
+void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
+    int dimensionality=mygrid->accesso.dimensions;
+    int Ncomp = myfield->getNcomp();
+
+    MPI_Info info  = MPI_INFO_NULL;
+    char nomi[6][3]={"Ex", "Ey", "Ez", "Bx", "By", "Bz"};
+    char* nomefile = new char[fileName.size() + 4];
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s.h5", fileName.c_str());
+
+    hid_t       file_id, dset_id[6];         /* file and dataset identifiers */
+    hid_t       filespace[6], memspace[6];      /* file and memory dataspace identifiers */
+    hsize_t     dimsf[3];                 /* dataset dimensions */
+    hsize_t	count[3];	          /* hyperslab selection parameters */
+    hsize_t	offset[3];
+    hid_t	plist_id;                 /* property list identifier */
+    int         i;
+    herr_t	status;
+    /*
+         * Set up file access property list with parallel I/O access
+         */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, info);
+
+    /*
+         * Create a new file collectively and release property list identifier.
+         */
+    file_id = H5Fcreate(nomefile, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+    H5Pclose(plist_id);
+    /*
+             * Create the dataspace for the dataset.
+             */
+    if(dimensionality==1){
+        dimsf[0] = mygrid->uniquePoints[0];
+    }
+    else if (dimensionality==2){
+        dimsf[0] = mygrid->uniquePoints[1];
+        dimsf[1] = mygrid->uniquePoints[0];
+    }
+    else{
+        dimsf[0] = mygrid->uniquePoints[2];
+        dimsf[1] = mygrid->uniquePoints[1];
+        dimsf[2] = mygrid->uniquePoints[0];
+
+    }
+    for(int i=0;i<6;i++)
+        filespace[i] = H5Screate_simple(dimensionality, dimsf, NULL);
+
+    /*
+         * Create the dataset with default properties and close filespace.
+         */
+    for(int i=0;i<6;i++){
+        dset_id[i] = H5Dcreate1(file_id, nomi[i], H5T_NATIVE_FLOAT, filespace[i],
+                                H5P_DEFAULT);
+        H5Sclose(filespace[i]);
+    }
+    /*
+            * Each process defines dataset in memory and writes it to the hyperslab
+            * in the file.
+            */
+    if(dimensionality==1){
+        offset[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        count[0] = mygrid->uniquePointsloc[0];
+    }
+    else if (dimensionality==2){
+        offset[1] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        offset[0] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+        count[1] = mygrid->uniquePointsloc[0];
+        count[0] = mygrid->uniquePointsloc[1];
+    }
+    else{
+        offset[2] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        offset[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+        offset[0] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
+        count[2] = mygrid->uniquePointsloc[0];
+        count[1] = mygrid->uniquePointsloc[1];
+        count[0] = mygrid->uniquePointsloc[2];
+    }
+     /*
+         * Select hyperslab in the file.
+         */
+    for(int i=0;i<6;i++){
+        memspace[i] = H5Screate_simple(dimensionality, count, NULL);
+        filespace[i] = H5Dget_space(dset_id[i]);
+        H5Sselect_hyperslab(filespace[i], H5S_SELECT_SET, offset, NULL, count, NULL);
+    }
+    //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+    {
+        float *Ex,*Ey,*Ez,*Bx,*By,*Bz;
+        int Nx, Ny, Nz;
+        Nx = mygrid->uniquePointsloc[0];
+        Ny = mygrid->uniquePointsloc[1];
+        Nz = mygrid->uniquePointsloc[2];
+        int size = Nx*Ny*Nz;
+        Ex = new float[size];
+        Ey = new float[size];
+        Ez = new float[size];
+        Bx = new float[size];
+        By = new float[size];
+        Bz = new float[size];
+        for (int k = 0; k < Nz; k++)
+            for (int j = 0; j < Ny; j++)
+                for (int i = 0; i < Nx; i++){
+                    Ex[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(0, i, j, k);
+                    Ey[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(1, i, j, k);
+                    Ez[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(2, i, j, k);
+                    Bx[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(3, i, j, k);
+                    By[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(4, i, j, k);
+                    Bz[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(5, i, j, k);
+                }
+        /*
+            * Create property list for collective dataset write.
+            */
+        plist_id = H5Pcreate(H5P_DATASET_XFER);
+        H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+
+        status = H5Dwrite(dset_id[0], H5T_NATIVE_FLOAT, memspace[0], filespace[0],
+                plist_id, Ex);
+        status = H5Dwrite(dset_id[1], H5T_NATIVE_FLOAT, memspace[1], filespace[1],
+                plist_id, Ey);
+        status = H5Dwrite(dset_id[2], H5T_NATIVE_FLOAT, memspace[2], filespace[2],
+                plist_id, Ez);
+        status = H5Dwrite(dset_id[3], H5T_NATIVE_FLOAT, memspace[3], filespace[3],
+                plist_id, Bx);
+        status = H5Dwrite(dset_id[4], H5T_NATIVE_FLOAT, memspace[4], filespace[4],
+                plist_id, By);
+        status = H5Dwrite(dset_id[5], H5T_NATIVE_FLOAT, memspace[5], filespace[5],
+                plist_id, Bz);
+
+        delete[]Ex;
+        delete[]Ey;
+        delete[]Ez;
+        delete[]Bx;
+        delete[]By;
+        delete[]Bz;
+    }
+
+    for(int i=0;i<6;i++){
+        H5Dclose(dset_id[i]);
+        H5Sclose(filespace[i]);
+        H5Sclose(memspace[i]);
+    }
+    H5Pclose(plist_id);
+    H5Fclose(file_id);
+
+    //////////////////////////// END of collective binary file write
+}
+#endif
+
 void OUTPUT_MANAGER::callEMFieldBinary(request req){
 
-	if (mygrid->myid == mygrid->master_proc){
-		std::string nameMap = composeOutputName(outputDir, "EMfield", "", req.dtime, ".map");
+    if (mygrid->myid == mygrid->master_proc){
+        std::string nameMap = composeOutputName(outputDir, "EMfield", "", req.dtime, ".map");
 		std::ofstream of1;
 		of1.open(nameMap.c_str());
 		writeEMFieldMap(of1, req);
@@ -604,8 +757,12 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 	}
 
 	std::string nameBin = composeOutputName(outputDir, "EMfield", "", req.dtime, ".bin");
+#if defined(USE_HDF5)
+    writeEMFieldBinaryHDF5(nameBin, req);
+#else
+    writeEMFieldBinary(nameBin, req);
+#endif
 
-	writeEMFieldBinary(nameBin, req);
 }
 
 void OUTPUT_MANAGER::writeSpecDensityMap(std::ofstream &output, request req){

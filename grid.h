@@ -149,10 +149,10 @@ public:
 
 	double csimin[3], csimax[3];
 	double csiminloc[3], csimaxloc[3];
+    ACCESSO accesso;
 
 private:
 	int totalNumberOfTimesteps;
-	ACCESSO accesso;
 
 	double beta_mw, t_start_moving_mw, mark_mw;
 

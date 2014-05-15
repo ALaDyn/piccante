@@ -19,7 +19,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define __COMMONS_h__
 
 #define _USE_MATH_DEFINES
-//#define USE_BOOST
+//#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
 #include <string>

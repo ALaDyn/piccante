@@ -21,6 +21,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 
+#include "stdlib.h"
 #include <mpi.h>
 #include <iomanip>
 #if defined(_MSC_VER)
@@ -37,6 +38,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
+#endif
+#if defined(USE_HDF5)
+#include <hdf5.h>
 #endif
 #include "grid.h"
 #include "structures.h"
@@ -178,7 +182,8 @@ private:
 	std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
 	void writeEMFieldMap(std::ofstream &output, request req);
 	void writeEMFieldBinary(std::string fileName, request req);
-	void callEMFieldBinary(request req);
+    void writeEMFieldBinaryHDF5(std::string fileName, request req);
+    void callEMFieldBinary(request req);
 
 
 	void writeSpecDensityMap(std::ofstream &output, request req);

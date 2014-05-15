@@ -69,11 +69,11 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-    grid.setXrange(-10.0, 10.0);
+    grid.setXrange(-20.0, 20.0);
     grid.setYrange(-90, 90);
 	grid.setZrange(-1, +1);
 
-    grid.setNCells(1000, 1, 1);
+    grid.setNCells(1000, 10, 1);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -87,7 +87,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(90.0);
+    grid.setSimulationTime(0.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -112,19 +112,19 @@ int main(int narg, char **args)
 	myfield.setAllValuesToZero();
 
 	laserPulse pulse1;
-    pulse1.type = GAUSSIAN;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
+    pulse1.type = COS2_PLANE_WAVE;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
     pulse1.polarization = P_POLARIZATION;
-    pulse1.t_FWHM = 16.0;
-    pulse1.laser_pulse_initial_position = -26.0;
+    pulse1.t_FWHM = 10.0;
+    pulse1.laser_pulse_initial_position = 0.0;
     pulse1.lambda0 = 1.0;
     pulse1.normalized_amplitude = 2.0;
     pulse1.waist = 10.0;
     pulse1.focus_position = 0.0;
-    pulse1.rotation = true;
+    pulse1.rotation = false;
     pulse1.angle = 2.0*M_PI*(-30.0 / 360.0);
     pulse1.rotation_center_along_x = 0.0;
 
-    //myfield.addPulse(&pulse1);
+    myfield.addPulse(&pulse1);
 
     laserPulse pulse2;
     pulse2 = pulse1;
@@ -178,8 +178,8 @@ int main(int narg, char **args)
     electrons1.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
-	electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-	species.push_back(&electrons1);
+    //electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    //species.push_back(&electrons1);
 
 
 	SPECIE ions1(&grid);
@@ -214,8 +214,8 @@ int main(int narg, char **args)
 	tempDistrib distribution;
     distribution.setWaterbag(1.0e-10);
 
-    electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
-    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
+    //electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
+    //ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
     //    electrons2.add_momenta(rng,0.0,-5.0,0.0,distribution);
 //    ions2.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 
@@ -230,9 +230,9 @@ int main(int narg, char **args)
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-    //manager.addEMFieldBinaryFrom(0.0, 5.0);
+    manager.addEMFieldBinaryFrom(0.0, 5.0);
 
-    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
+    //manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
