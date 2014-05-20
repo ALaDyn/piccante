@@ -146,10 +146,13 @@ public:
 	axisBoundaryConditions getYBoundaryConditions();
 	axisBoundaryConditions getZBoundaryConditions();
 	double getTotalTime();
-
+    void dump(std::ofstream &ff);
+    void reloadDump(std::ifstream &ff);
 	double csimin[3], csimax[3];
 	double csiminloc[3], csimaxloc[3];
     ACCESSO accesso;
+    std::string dumpPath;
+    std::string restartPath;
 
 private:
 	int totalNumberOfTimesteps;
@@ -171,9 +174,7 @@ private:
 	int NUniformGrid[3], NLeftStretcheGrid[3], NRightStretcheGrid[3];
 	double leftAlphaStretch[3], rightAlphaStretch[3], rminUniformGrid[3], rmaxUniformGrid[3];
 	double *rproc_csimin[3], *rproc_csimax[3]; //csiminloc for each processor, csimaxloc for each processor in the 3D integer space
-	std::string dumpPath;
-	std::string restartPath;
-	axisBoundaryConditions xBoundaryConditions, yBoundaryConditions, zBoundaryConditions;
+    axisBoundaryConditions xBoundaryConditions, yBoundaryConditions, zBoundaryConditions;
 
 	bool checkAssignBoundary(axisBoundaryConditions cond, axisBoundaryConditions* axisCond);
 

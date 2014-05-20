@@ -2003,3 +2003,11 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 
 }
 
+void EM_FIELD::dump(std::ofstream &ff){
+    ff.write((char*)val, Ntot*Ncomp*sizeof(double));
+
+}
+
+void EM_FIELD::reloadDump(std::ifstream &ff){
+    ff.read((char*)val, Ntot*Ncomp*sizeof(double));
+}

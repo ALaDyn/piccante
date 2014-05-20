@@ -1273,3 +1273,41 @@ void GRID::emergencyStop(){
 	exit(17);
 }
 
+void GRID::dump(std::ofstream &ff){
+    ff.write((char*)&istep, sizeof(int));
+    ff.write((char*)&time, sizeof(double));
+    ff.write((char*)&mark_mw, sizeof(double));
+
+
+}
+
+void GRID::reloadDump(std::ifstream &ff){
+    ff.read((char*)&istep, sizeof(int));
+    ff.read((char*)&time, sizeof(double));
+    ff.read((char*)&mark_mw, sizeof(double));
+
+    if (!withMovingWindow)
+        return;
+    rmin[0] += mark_mw;
+    rmax[0] += mark_mw;
+    rminloc[0] += mark_mw;
+    rmaxloc[0] += mark_mw;
+
+    csimax[0] += mark_mw;
+    csimin[0] += mark_mw;
+    csiminloc[0] += mark_mw;
+    csimaxloc[0] += mark_mw;
+
+    for (int pp = 0; pp < rnproc[0]; pp++){
+        rproc_rmin[0][pp] += mark_mw;
+        rproc_rmax[0][pp] += mark_mw;
+    }
+    for (int i = 0; i < NGridNodes[0]; i++){
+        cir[0][i] += mark_mw;
+        chr[0][i] += mark_mw;
+    }
+    for (int i = 0; i < Nloc[0]; i++){
+        cirloc[0][i] += mark_mw;
+        chrloc[0][i] += mark_mw;
+    }
+}

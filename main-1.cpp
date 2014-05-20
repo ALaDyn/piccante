@@ -53,6 +53,9 @@ using namespace std;
 #define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
+#define _RESTART_FROM_DUMP 2
+#define _DO_RESTART true
+
 #define DIRECTORY_OUTPUT "TEST"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
@@ -64,8 +67,7 @@ int main(int narg, char **args)
 	CURRENT current;
 	std::vector<SPECIE*> species;
 	vector<SPECIE*>::const_iterator spec_iterator;
-	int istep;
-	gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+    gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
@@ -87,7 +89,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(0.0);
+    grid.setSimulationTime(5.5);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -257,14 +259,33 @@ int main(int narg, char **args)
 	}
 
 	int Nstep = grid.getTotalNumberOfTimesteps();
-	for (istep = 0; istep <= Nstep; istep++)
+    int dumpID=0, dumpEvery=40;
+    grid.istep=0;
+    if (_DO_RESTART){
+        dumpID=_RESTART_FROM_DUMP;
+        std::ifstream dumpFile;
+        std::stringstream dumpName;
+        dumpName << DIRECTORY_OUTPUT << "/DUMP_";
+        dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
+        dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
+        dumpFile.open(dumpName.str().c_str());
+
+        grid.reloadDump(dumpFile);
+        myfield.reloadDump(dumpFile);
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+            (*spec_iterator)->reloadDump(dumpFile);
+        }
+        dumpFile.close();
+        dumpID++;
+        grid.istep++;
+    }
+    for (; grid.istep <= Nstep; grid.istep++)
 	{
-		grid.istep = istep;
 
 		grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
 
-		manager.callDiags(istep);  /// deve tornare all'inizo del ciclo
+        manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
 
 		myfield.openBoundariesE_1();
 		myfield.new_halfadvance_B();
@@ -305,6 +326,23 @@ int main(int narg, char **args)
 		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
 			(*spec_iterator)->move_window();
 		}
+
+        if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
+            std::ofstream dumpFile;
+            std::stringstream dumpName;
+            dumpName << DIRECTORY_OUTPUT << "/DUMP_";
+            dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
+            dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
+            dumpFile.open(dumpName.str().c_str());
+
+            grid.dump(dumpFile);
+            myfield.dump(dumpFile);
+            for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+                (*spec_iterator)->dump(dumpFile);
+            }
+            dumpFile.close();
+            dumpID++;
+        }
 	}
 
 	manager.close();

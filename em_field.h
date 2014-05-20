@@ -137,7 +137,8 @@ public:
 	void openBoundariesB();
 
 	bool areEnergyExtremesAvailable();
-
+    void dump(std::ofstream &ff);
+    void reloadDump(std::ifstream &ff);
 	//PUBLIC INLINE FUNCTIONS
 	inline double & E0(int i, int j, int k){
 		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
