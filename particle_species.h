@@ -27,6 +27,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 
+#define _VERY_SMALL_MOMENTUM 1.0e-5
 
 class SPECIE{
 public:
@@ -148,7 +149,7 @@ private:
     void createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
     void createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
 
-    static const double very_small_momentum = 1.0e-5;
+
     void computeLorentzMatrix(double ux, double uy, double uz, double matr[16]);
     int npc;
 

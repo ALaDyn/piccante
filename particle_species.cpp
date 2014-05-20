@@ -2267,7 +2267,7 @@ void SPECIE::computeLorentzMatrix(double ux, double uy, double uz, double *matr)
 
 void SPECIE::callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin){
 
-    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM){
 
         for (int p = 0; p < Np; p++)
         {
@@ -2304,7 +2304,7 @@ void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyi
 	double phi;
 	double cos_theta, sin_theta;
 
-    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM){
         for (int p = 0; p < Np; p++)
         {
             pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
@@ -2343,7 +2343,7 @@ void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyi
 }
 
 void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin){
-    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM){
         for (int p = 0; p < Np; p++)
         {
             u0(p) = uxin + gsl_ran_exppow(ext_rng, p0, alpha);
@@ -2381,7 +2381,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
 	double phi;
 	double cos_theta, sin_theta;
 	double theta;
-    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM){
         for (int p = 0; p < Np; p++)
         {
 
