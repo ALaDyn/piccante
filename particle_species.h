@@ -147,6 +147,9 @@ private:
 	void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
     void createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
     void createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
+
+    static const double very_small_momentum = 1.0e-5;
+    void computeLorentzMatrix(double ux, double uy, double uz, double matr[16]);
     int npc;
 
 	void debug_warning_particle_outside_boundaries(double x, double y, double z, int nump);

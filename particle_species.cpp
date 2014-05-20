@@ -2246,39 +2246,128 @@ void SPECIE::add_momenta(double uxin, double uyin, double uzin) //Aggiunge sempl
 // MAXWELL         : [Ta] Maxwell alla Macchi
 // JUTTNER         : [a] f(p) = C*exp(-a*gamma(p)) [DA RISCRIVERE]
 
+void SPECIE::computeLorentzMatrix(double ux, double uy, double uz, double *matr){
+    double gm = sqrt(1.0+ux*ux+uy*uy+uz*uz);
+    double bx = - ux/gm;
+    double by = - uy/gm;
+    double bz = - uz/gm;
+    double b = sqrt(bx*bx+by*by+bz*bz);
+
+    matr[0*4+0]=gm;     matr[0*4+1]=-gm*bx;                 matr[0*4+2]=-gm*by;                 matr[0*4+3]=-gm*bz;
+    matr[1*4+0]=-gm*bx; matr[1*4+1]=1.0+(gm-1.0)*bx*bx/b/b; matr[1*4+2]=(gm-1.0)*by*bx/b/b;     matr[1*4+3]=(gm-1.0)*bz*bx/b/b;
+    matr[2*4+0]=-gm*by; matr[2*4+1]=(gm-1.0)*bx*by/b/b;     matr[2*4+2]=1.0+(gm-1.0)*by*by/b/b; matr[2*4+3]=(gm-1.0)*bz*by/b/b;
+    matr[3*4+0]=-gm*bz; matr[3*4+1]=(gm-1.0)*bx*bz/b/b;     matr[3*4+2]=(gm-1.0)*by*bz/b/b;     matr[3*4+3]=1.0+(gm-1.0)*bz*bz/b/b;
+
+}
 
 void SPECIE::callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin){
-	for (int p = 0; p < Np; p++)
-	{
-		u0(p) += uxin + p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
-		u1(p) += uyin + p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
-		u2(p) += uzin + p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
-	}
+
+    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+
+        for (int p = 0; p < Np; p++)
+        {
+            u0(p) = uxin + p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
+            u1(p) = uyin + p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
+            u2(p) = uzin + p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
+        }
+    }
+    else{
+        double L[16];
+        computeLorentzMatrix(uxin, uyin, uzin, L);
+        double Ett, u0t, u1t, u2t;
+        for (int p = 0; p < Np; p++)
+        {
+            u0(p) = p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
+            u1(p) = p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
+            u2(p) = p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
+            Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+            u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
+            u1t = L[2*4+0]*Ett+L[2*4+1]*u0(p)+L[2*4+2]*u1(p)+L[2*4+3]*u2(p);
+            u2t = L[3*4+0]*Ett+L[3*4+1]*u0(p)+L[3*4+2]*u1(p)+L[3*4+3]*u2(p);
+
+            u0(p) = u0t;
+            u1(p) = u1t;
+            u2(p) = u2t;
+        }
+    }
+
 }
 
 void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyin, double uzin){
 	double pmod;
 	double phi;
 	double cos_theta, sin_theta;
-	for (int p = 0; p < Np; p++)
-	{
-		pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
-		phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-		cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-		sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-		u0(p) += uxin + p0*pmod*sin_theta*cos(phi);
-		u1(p) += uyin + p0*pmod*sin_theta*sin(phi);
-		u2(p) += uzin + p0*pmod*cos_theta;
-	}
+
+    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+        for (int p = 0; p < Np; p++)
+        {
+            pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
+            phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
+            cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
+            sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+            u0(p) = uxin + p0*pmod*sin_theta*cos(phi);
+            u1(p) = uyin + p0*pmod*sin_theta*sin(phi);
+            u2(p) = uzin + p0*pmod*cos_theta;
+        }
+    }
+    else{
+        double L[16];
+        computeLorentzMatrix(uxin, uyin, uzin, L);
+        double Ett, u0t, u1t, u2t;
+        for (int p = 0; p < Np; p++)
+        {
+            pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
+            phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
+            cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
+            sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+            u0(p) = uxin + p0*pmod*sin_theta*cos(phi);
+            u1(p) = uyin + p0*pmod*sin_theta*sin(phi);
+            u2(p) = uzin + p0*pmod*cos_theta;
+            Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+            u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
+            u1t = L[2*4+0]*Ett+L[2*4+1]*u0(p)+L[2*4+2]*u1(p)+L[2*4+3]*u2(p);
+            u2t = L[3*4+0]*Ett+L[3*4+1]*u0(p)+L[3*4+2]*u1(p)+L[3*4+3]*u2(p);
+
+            u0(p) = u0t;
+            u1(p) = u1t;
+            u2(p) = u2t;
+        }
+    }
 }
 
 void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin){
-	for (int p = 0; p < Np; p++)
-	{
-		u0(p) += uxin + gsl_ran_exppow(ext_rng, p0, alpha);
-		u1(p) += uyin + gsl_ran_exppow(ext_rng, p0, alpha);
-		u2(p) += uzin + gsl_ran_exppow(ext_rng, p0, alpha);
-	}
+    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+        for (int p = 0; p < Np; p++)
+        {
+            u0(p) = uxin + gsl_ran_exppow(ext_rng, p0, alpha);
+            u1(p) = uyin + gsl_ran_exppow(ext_rng, p0, alpha);
+            u2(p) = uzin + gsl_ran_exppow(ext_rng, p0, alpha);
+        }
+    }
+    else{
+        double L[16];
+        computeLorentzMatrix(uxin, uyin, uzin, L);
+        double Ett, u0t, u1t, u2t;
+        for (int p = 0; p < Np; p++)
+        {
+            u0(p) = uxin + gsl_ran_exppow(ext_rng, p0, alpha);
+            u1(p) = uyin + gsl_ran_exppow(ext_rng, p0, alpha);
+            u2(p) = uzin + gsl_ran_exppow(ext_rng, p0, alpha);
+            Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+            u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
+            u1t = L[2*4+0]*Ett+L[2*4+1]*u0(p)+L[2*4+2]*u1(p)+L[2*4+3]*u2(p);
+            u2t = L[3*4+0]*Ett+L[3*4+1]*u0(p)+L[3*4+2]*u1(p)+L[3*4+3]*u2(p);
+
+            u0(p) = u0t;
+            u1(p) = u1t;
+            u2(p) = u2t;
+        }
+
+    }
+
 }
 
 void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, double uzin){
@@ -2286,17 +2375,49 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
 	double temp;
 	double phi;
 	double cos_theta, sin_theta;
-	for (int p = 0; p < Np; p++)
-	{
-		temp = gsl_ran_exponential(ext_rng, 1.0);
-		ptot = sqrt((Ta*temp + 1)*(Ta*temp + 1) - 1 * 1);
-		phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-		cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-		sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-		u0(p) += uxin + ptot*sin_theta*cos(phi);
-		u1(p) += uyin + ptot*sin_theta*sin(phi);
-		u2(p) += uzin + ptot*cos_theta;
-	}
+	double theta;
+    if (uxin*uxin + uyin*uyin + uzin*uzin < very_small_momentum*very_small_momentum){
+        for (int p = 0; p < Np; p++)
+        {
+
+            temp = gsl_ran_exponential(ext_rng, Ta);
+            ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
+            phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
+            theta = gsl_ran_flat(ext_rng, 0.0, M_PI);
+            cos_theta = cos(theta);
+            sin_theta = sin(theta);
+            u0(p) = uxin + ptot*sin_theta*cos(phi);
+            u1(p) = uyin + ptot*sin_theta*sin(phi);
+            u2(p) = uzin + ptot*cos_theta;
+        }
+    }
+    else{
+        double L[16];
+        computeLorentzMatrix(uxin, uyin, uzin, L);
+        double Ett, u0t, u1t, u2t;
+        for (int p = 0; p < Np; p++)
+        {
+
+            temp = gsl_ran_exponential(ext_rng, Ta);
+            ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
+            phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
+            theta = gsl_ran_flat(ext_rng, 0.0, M_PI);
+            cos_theta = cos(theta);
+            sin_theta = sin(theta);
+            u0(p) = uxin + ptot*sin_theta*cos(phi);
+            u1(p) = uyin + ptot*sin_theta*sin(phi);
+            u2(p) = uzin + ptot*cos_theta;
+            Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+            u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
+            u1t = L[2*4+0]*Ett+L[2*4+1]*u0(p)+L[2*4+2]*u1(p)+L[2*4+3]*u2(p);
+            u2t = L[3*4+0]*Ett+L[3*4+1]*u0(p)+L[3*4+2]*u1(p)+L[3*4+3]*u2(p);
+
+            u0(p) = u0t;
+            u1(p) = u1t;
+            u2(p) = u2t;
+        }
+    }
 }
 
 void SPECIE::callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin){
