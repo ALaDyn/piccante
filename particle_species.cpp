@@ -716,8 +716,7 @@ void SPECIE::move_window()
 
 	SPECIE::position_parallel_pbc();
 
-	if (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))
-		return;
+
 	double plasmarmin[3], plasmarmax[3];
 
 	plasmarmin[0] = mygrid->rmaxloc[0] - mygrid->fmove_mw;
@@ -735,28 +734,34 @@ void SPECIE::move_window()
 
 	int newNumberOfParticles, oldNumberOfParticles;
 
+    if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
 
-	oldNumberOfParticles = Np;
-	newNumberOfParticles = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
-	Np += newNumberOfParticles;
-	reallocate_species();
+        oldNumberOfParticles = Np;
+        newNumberOfParticles = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
+        Np += newNumberOfParticles;
+        reallocate_species();
+    }
+    else{
+        newNumberOfParticles=0;
+    }
+    int* NpartLoc = new int[mygrid->nproc];
+    NpartLoc[mygrid->myid] = newNumberOfParticles;
 
-	int* NpartLoc = new int[mygrid->nproc];
-	NpartLoc[mygrid->myid] = newNumberOfParticles;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
+    long long disp = lastParticle;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += NpartLoc[pp];
 
-	MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-	long long disp = lastParticle;
-	for (int pp = 0; pp < mygrid->myid; pp++)
-		disp += NpartLoc[pp];
+    for (int pp = 0; pp < mygrid->nproc; pp++)
+        lastParticle += (long long)NpartLoc[pp];
+    if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
 
-	for (int pp = 0; pp < mygrid->nproc; pp++)
-		lastParticle += (long long)NpartLoc[pp];
-
-	if (mygrid->isStretched())
-		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
-	else
-		SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
-	delete[] NpartLoc;
+        if (mygrid->isStretched())
+            SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
+        else
+            SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
+    }
+    delete[] NpartLoc;
 }
 //void SPECIE::output_bin(ofstream &ff)
 //{

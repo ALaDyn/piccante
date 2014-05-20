@@ -1278,7 +1278,30 @@ void GRID::dump(std::ofstream &ff){
     ff.write((char*)&time, sizeof(double));
     ff.write((char*)&mark_mw, sizeof(double));
 
+    if (!withMovingWindow)
+        return;
+    ff.write((char*)&rmin[0], sizeof(double));
+    ff.write((char*)&rmax[0], sizeof(double));
+    ff.write((char*)&rminloc[0], sizeof(double));
+    ff.write((char*)&rmaxloc[0], sizeof(double));
 
+    ff.write((char*)&csimax[0], sizeof(double));
+    ff.write((char*)&csimin[0], sizeof(double));
+    ff.write((char*)&csiminloc[0], sizeof(double));
+    ff.write((char*)&csimaxloc[0], sizeof(double));
+
+    for (int pp = 0; pp < rnproc[0]; pp++){
+        ff.write((char*)&rproc_rmin[0][pp], sizeof(double));
+        ff.write((char*)&rproc_rmax[0][pp], sizeof(double));
+    }
+    for (int i = 0; i < NGridNodes[0]; i++){
+        ff.write((char*)&cir[0][i], sizeof(double));
+        ff.write((char*)&chr[0][i], sizeof(double));
+    }
+    for (int i = 0; i < Nloc[0]; i++){
+        ff.write((char*)&cirloc[0][i], sizeof(double));
+        ff.write((char*)&chrloc[0][i], sizeof(double));
+    }
 }
 
 void GRID::reloadDump(std::ifstream &ff){
@@ -1288,26 +1311,56 @@ void GRID::reloadDump(std::ifstream &ff){
 
     if (!withMovingWindow)
         return;
-    rmin[0] += mark_mw;
-    rmax[0] += mark_mw;
-    rminloc[0] += mark_mw;
-    rmaxloc[0] += mark_mw;
+    if(1){
+        ff.read((char*)&rmin[0], sizeof(double));
+        ff.read((char*)&rmax[0], sizeof(double));
+        ff.read((char*)&rminloc[0], sizeof(double));
+        ff.read((char*)&rmaxloc[0], sizeof(double));
 
-    csimax[0] += mark_mw;
-    csimin[0] += mark_mw;
-    csiminloc[0] += mark_mw;
-    csimaxloc[0] += mark_mw;
+        ff.read((char*)&csimax[0], sizeof(double));
+        ff.read((char*)&csimin[0], sizeof(double));
+        ff.read((char*)&csiminloc[0], sizeof(double));
+        ff.read((char*)&csimaxloc[0], sizeof(double));
 
-    for (int pp = 0; pp < rnproc[0]; pp++){
-        rproc_rmin[0][pp] += mark_mw;
-        rproc_rmax[0][pp] += mark_mw;
+        for (int pp = 0; pp < rnproc[0]; pp++){
+            ff.read((char*)&rproc_rmin[0][pp], sizeof(double));
+            ff.read((char*)&rproc_rmax[0][pp], sizeof(double));
+        }
+        for (int i = 0; i < NGridNodes[0]; i++){
+            ff.read((char*)&cir[0][i], sizeof(double));
+            ff.read((char*)&chr[0][i], sizeof(double));
+        }
+        for (int i = 0; i < Nloc[0]; i++){
+            ff.read((char*)&cirloc[0][i], sizeof(double));
+            ff.read((char*)&chrloc[0][i], sizeof(double));
+        }
     }
-    for (int i = 0; i < NGridNodes[0]; i++){
-        cir[0][i] += mark_mw;
-        chr[0][i] += mark_mw;
+    else{
+
+        rmin[0] += mark_mw;
+        rmax[0] += mark_mw;
+        rminloc[0] += mark_mw;
+        rmaxloc[0] += mark_mw;
+
+        csimax[0] += mark_mw;
+        csimin[0] += mark_mw;
+        csiminloc[0] += mark_mw;
+        csimaxloc[0] += mark_mw;
+
+        for (int pp = 0; pp < rnproc[0]; pp++){
+            rproc_rmin[0][pp] += mark_mw;
+            rproc_rmax[0][pp] += mark_mw;
+        }
+        for (int i = 0; i < NGridNodes[0]; i++){
+            cir[0][i] += mark_mw;
+            chr[0][i] += mark_mw;
+        }
+        for (int i = 0; i < Nloc[0]; i++){
+            cirloc[0][i] += mark_mw;
+            chrloc[0][i] += mark_mw;
+        }
     }
-    for (int i = 0; i < Nloc[0]; i++){
-        cirloc[0][i] += mark_mw;
-        chrloc[0][i] += mark_mw;
-    }
+}
+double GRID::getMarkMW(){
+    return mark_mw;
 }

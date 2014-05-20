@@ -150,6 +150,7 @@ public:
     void reloadDump(std::ifstream &ff);
 	double csimin[3], csimax[3];
 	double csiminloc[3], csimaxloc[3];
+    double getMarkMW();
     ACCESSO accesso;
     std::string dumpPath;
     std::string restartPath;
