@@ -2321,9 +2321,9 @@ void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyi
             phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
             cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
             sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-            u0(p) = uxin + p0*pmod*sin_theta*cos(phi);
-            u1(p) = uyin + p0*pmod*sin_theta*sin(phi);
-            u2(p) = uzin + p0*pmod*cos_theta;
+            u0(p) = p0*pmod*sin_theta*cos(phi);
+            u1(p) = p0*pmod*sin_theta*sin(phi);
+            u2(p) = p0*pmod*cos_theta;
             Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
             u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
@@ -2352,9 +2352,9 @@ void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double
         double Ett, u0t, u1t, u2t;
         for (int p = 0; p < Np; p++)
         {
-            u0(p) = uxin + gsl_ran_exppow(ext_rng, p0, alpha);
-            u1(p) = uyin + gsl_ran_exppow(ext_rng, p0, alpha);
-            u2(p) = uzin + gsl_ran_exppow(ext_rng, p0, alpha);
+            u0(p) = gsl_ran_exppow(ext_rng, p0, alpha);
+            u1(p) = gsl_ran_exppow(ext_rng, p0, alpha);
+            u2(p) = gsl_ran_exppow(ext_rng, p0, alpha);
             Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
             u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
@@ -2404,9 +2404,9 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
             theta = gsl_ran_flat(ext_rng, 0.0, M_PI);
             cos_theta = cos(theta);
             sin_theta = sin(theta);
-            u0(p) = uxin + ptot*sin_theta*cos(phi);
-            u1(p) = uyin + ptot*sin_theta*sin(phi);
-            u2(p) = uzin + ptot*cos_theta;
+            u0(p) = ptot*sin_theta*cos(phi);
+            u1(p) = ptot*sin_theta*sin(phi);
+            u2(p) = ptot*cos_theta;
             Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
             u0t = L[1*4+0]*Ett+L[1*4+1]*u0(p)+L[1*4+2]*u1(p)+L[1*4+3]*u2(p);
