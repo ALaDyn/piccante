@@ -754,7 +754,7 @@ void SPECIE::move_window()
 
     for (int pp = 0; pp < mygrid->nproc; pp++)
         lastParticle += (long long)NpartLoc[pp];
-    if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
+    if ((mygrid->rmyid[0] == (mygrid->rnproc[0] - 1))&&newNumberOfParticles>0){
 
         if (mygrid->isStretched())
             SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
