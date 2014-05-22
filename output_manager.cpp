@@ -17,6 +17,32 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output_manager.h"
 
+bool emProbe::compareProbes(emProbe *rhs){
+    return (coordinates[0]==rhs->coordinates[0]&&
+            coordinates[1]==rhs->coordinates[1]&&
+            coordinates[2]==rhs->coordinates[2]&&
+            name.c_str()==rhs->name.c_str());
+
+}
+emProbe::emProbe(){
+   coordinates[0]= coordinates[1]=coordinates[2]=0;
+   name="NONAME";
+}
+
+bool emPlane::comparePlanes(emPlane *rhs){
+    return (coordinates[0]==rhs->coordinates[0]&&
+            coordinates[1]==rhs->coordinates[1]&&
+            coordinates[2]==rhs->coordinates[2]&&
+            fixedCoordinate==rhs->fixedCoordinate&&
+            name.c_str()==rhs->name.c_str());
+
+}
+emPlane::emPlane(){
+    coordinates[0]= coordinates[1]=coordinates[2]=0;
+    name="NONAME";
+    fixedCoordinate=2;
+}
+
 bool requestCompTime(const request &first, const request &second){
 	if (first.itime != second.itime)
 		return (first.itime < second.itime);
@@ -35,6 +61,27 @@ bool requestCompUnique(const request &first, const request &second){
 		(first.target == second.target));
 }
 
+bool OUTPUT_MANAGER::isInMyDomain(double *rr){
+    if(rr[0]>= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
+        if (mygrid->accesso.dimensions<2||(rr[1]>= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
+            if (mygrid->accesso.dimensions<3||(rr[2]>= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
+ return true;
+            }
+        }
+    }
+    return false;
+}
+
+void OUTPUT_MANAGER::nearestInt(double *rr, int *ri){
+    int c;
+    for (c = 0; c < mygrid->accesso.dimensions; c++){
+        double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
+        ri[c] = (int)floor(xx + 0.5); //whole integer int
+    }
+    for (;c<3;c++){
+        ri[c]=0;
+    }
+}
 
 OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies)
 {
@@ -130,6 +177,35 @@ void OUTPUT_MANAGER::createExtremaFiles(){
 
 }
 
+void OUTPUT_MANAGER::createEMProbeFiles(){
+    int ii=0;
+    for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
+        std::stringstream ss0;
+         ss0 << outputDir << "/EMProbe_" << (*it)->name << "_" << ii << ".txt";
+        (*it)->fileName = ss0.str();
+         ii++;
+    }
+    if (checkGrid()){
+        if (mygrid->myid != mygrid->master_proc)
+            return;
+    }
+    else{
+        if (mygrid->myid != 0)
+            return;
+    }
+
+    if (checkEMField()){
+        for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
+            std::ofstream of0;
+            of0.open((*it)->fileName.c_str());
+            of0.close();
+        }
+    }
+
+
+
+}
+
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
 #if defined (USE_BOOST)
     std::string _newoutputDir;
@@ -155,7 +231,9 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir){
 		createDiagFile();
 		createExtremaFiles();
 	}
-
+    if (isThereEMProbe){
+        createEMProbeFiles();
+    }
 	amIInit = true;
 }
 
@@ -233,6 +311,28 @@ int OUTPUT_MANAGER::findSpecName(std::string name){
 	}
 	return -1;
 }
+int OUTPUT_MANAGER::returnTargetIfProbeIsInList(emProbe *newProbe){
+    int pos = 0;
+    for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
+        if ((*it)-> compareProbes(newProbe)){
+            return pos;
+        }
+        pos++;
+    }
+    return -1;
+
+}
+int OUTPUT_MANAGER::returnTargetIfPlaneIsInList(emPlane *newPlane){
+    int pos = 0;
+    for (std::vector<emPlane*>::iterator it = myEMPlanes.begin(); it != myEMPlanes.end(); it++){
+        if ((*it)-> comparePlanes(newPlane)){
+            return pos;
+        }
+        pos++;
+    }
+    return -1;
+
+}
 
 void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type, int target, double startTime, double frequency, double endTime){
 	std::list<request> tempList;
@@ -267,6 +367,84 @@ void OUTPUT_MANAGER::addEMFieldBinaryFromTo(double startTime, double frequency, 
 	if (!(checkGrid() && checkEMField()))
 		return;
 	addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0, startTime, frequency, endTime);
+}
+// EM Probe ///////////////////////////////////////
+void OUTPUT_MANAGER::addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfProbeIsInList(Probe);
+    if(target<0){
+        myEMProbes.push_back(Probe);
+        isThereEMProbe = true;
+        target=myEMProbes.size()-1;
+        std::cout<<"target=" << target << std::endl;
+    }
+        double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+        addRequestToList(requestList, OUT_EMJPROBE, target, startTime, frequency, endSimTime);
+
+    }
+
+void OUTPUT_MANAGER::addEMFieldProbeAt(emProbe* Probe, double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfProbeIsInList(Probe);
+    if(target<0){
+        myEMProbes.push_back(Probe);
+        isThereEMProbe = true;
+        target=myEMProbes.size()-1;
+
+    }
+    std::cout<<"target=" << target << std::endl;
+    addRequestToList(requestList, OUT_EMJPROBE, target, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfProbeIsInList(Probe);
+    if(target<0){
+        myEMProbes.push_back(Probe);
+        isThereEMProbe = true;
+        target=myEMProbes.size()-1;
+        std::cout<<"target=" << target << std::endl;
+    }
+    addRequestToList(requestList, OUT_EMJPROBE, target, startTime, frequency, endTime);
+}
+
+// EM Plane ////////////////////////////////////////////
+void OUTPUT_MANAGER::addEMFieldPlaneFrom(emPlane* Plane, double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfPlaneIsInList(Plane);
+    if(target<0){
+        myEMPlanes.push_back(Plane);
+        target=myEMPlanes.size();
+    }
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endSimTime);
+
+}
+
+void OUTPUT_MANAGER::addEMFieldPlaneAt(emPlane* Plane, double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfPlaneIsInList(Plane);
+    if(target<0){
+        myEMPlanes.push_back(Plane);
+        target=myEMPlanes.size();
+    }
+    addRequestToList(requestList, OUT_EMJPLANE, target, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addEMFieldPlaneFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int target=returnTargetIfPlaneIsInList(Plane);
+    if(target<0){
+        myEMPlanes.push_back(Plane);
+        target=myEMPlanes.size();
+    }
+    addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addSpecDensityBinaryFrom(std::string name, double startTime, double frequency){
@@ -418,7 +596,15 @@ void OUTPUT_MANAGER::processOutputEntry(request req){
 		callEMFieldBinary(req);
 		break;
 
-	case OUT_SPEC_DENSITY_BINARY:
+    case OUT_EMJPROBE:
+        callEMFieldProbe(req);
+        break;
+
+    case OUT_EMJPLANE:
+        callEMFieldPlane(req);
+        break;
+
+    case OUT_SPEC_DENSITY_BINARY:
 		callSpecDensityBinary(req);
 		break;
 
@@ -764,6 +950,329 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 #endif
 
 }
+void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
+    int Ncomp = myfield->getNcomp();
+    int mySliceID, sliceNProc;
+    int *totUniquePoints;
+    int shouldIWrite=false;
+    int uniqueN[3];
+    double rr[3];
+    int ri[3];
+    int fixedCoordinate=plane->fixedCoordinate;
+    rr[0]=plane->coordinates[0];
+    rr[1]=plane->coordinates[1];
+    rr[2]=plane->coordinates[2];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
+    uniqueN[fixedCoordinate]=1;
+    shouldIWrite=isInMyDomain(rr);
+    MPI_Comm sliceCommunicator;
+    int remains[3]={1,1,1};
+    remains[fixedCoordinate]=0;
+    MPI_Cart_sub(mygrid->cart_comm,remains,&sliceCommunicator);
+    MPI_Comm_rank(sliceCommunicator, &mySliceID);
+    MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Allreduce(MPI_IN_PLACE, &shouldIWrite, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+
+    totUniquePoints = new int[sliceNProc];
+    for (int rank = 0; rank < sliceNProc; rank++){
+        int rid[2];
+        MPI_Cart_coords(sliceCommunicator, rank, 2, rid);
+        if(fixedCoordinate==0){
+            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[1][rid[0]];
+            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[2][rid[1]];
+        }
+        else if(fixedCoordinate==1){
+            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[0][rid[0]];
+            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[2][rid[1]];
+        }
+        else if(fixedCoordinate==2){
+            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[0][rid[0]];
+            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[1][rid[1]];
+        }
+    }
+
+    MPI_Offset disp = 0;
+    int small_header = 6 * sizeof(int);
+    int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
+            +2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
+            +sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
+
+    MPI_File thefile;
+    MPI_Status status;
+
+    char* nomefile = new char[fileName.size() + 1];
+
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
+
+    if(shouldIWrite){
+        MPI_File_open(sliceCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+
+            nearestInt(rr, ri);
+        //+++++++++++ FILE HEADER  +++++++++++++++++++++
+        if (mySliceID == 0){
+            MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+            MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+            MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
+            MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
+            for (int c = 0; c < Ncomp; c++){
+                integer_or_halfinteger crd = myfield->getCompCoords(c);
+                int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
+                MPI_File_write(thefile, tp, 3, MPI_INT, &status);
+            }
+            if(fixedCoordinate==0){
+                MPI_File_write(thefile, mygrid->cirloc[ri[0]], 1, MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cir[1], uniqueN[1], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cir[2], uniqueN[2], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chrloc[ri[0]], 1, MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[1], uniqueN[1], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[2], uniqueN[2], MPI_DOUBLE, &status);
+            }
+            else if(fixedCoordinate==1){
+                MPI_File_write(thefile, mygrid->cir[0], uniqueN[0], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cirloc[ri[1]], 1, MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cir[2], uniqueN[2], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[0], uniqueN[0], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chrloc[ri[1]], 1, MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[2], uniqueN[2], MPI_DOUBLE, &status);
+            }
+            else if(fixedCoordinate==2){
+                MPI_File_write(thefile, mygrid->cir[0], uniqueN[0], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cir[1], uniqueN[1], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->cirloc[ri[2]], 1, MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[0], uniqueN[0], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chr[1], uniqueN[1], MPI_DOUBLE, &status);
+                MPI_File_write(thefile, mygrid->chrloc[ri[2]], 1, MPI_DOUBLE, &status);
+            }
+
+        }
+        //*********** END HEADER *****************
+
+        disp = big_header;
+
+        for (int rank = 0; rank < sliceNProc; rank++)
+            disp += small_header + totUniquePoints[rank] * sizeof(float)*Ncomp;
+        if (disp < 0)
+        {
+            std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+            std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+            exit(33);
+        }
+        if (mySliceID != 0){
+            MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        }
+
+
+        //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
+        {
+            int itodo[6];
+            itodo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+            itodo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+            itodo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
+            itodo[3] = mygrid->uniquePointsloc[0];
+            itodo[4] = mygrid->uniquePointsloc[1];
+            itodo[5] = mygrid->uniquePointsloc[2];
+            itodo[fixedCoordinate] = 0;
+            itodo[fixedCoordinate+3] = 1;
+            MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+        }
+        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+        {
+            float *todo;
+            int NN[3], Nx, Ny, Nz;
+            NN[0] = mygrid->uniquePointsloc[0];
+            NN[1] = mygrid->uniquePointsloc[1];
+            NN[2] = mygrid->uniquePointsloc[2];
+            NN[fixedCoordinate] = 1;
+            Nx=NN[0];
+            Ny=NN[1];
+            Nz=NN[2];
+            int size = Ncomp*NN[0]*NN[1]*NN[2];
+            todo = new float[size];
+            if(fixedCoordinate==0){
+                int i=ri[0];
+                for (int k = 0; k < Nz; k++)
+                    for (int j = 0; j < Ny; j++)
+                        for (int c = 0; c < Ncomp; c++)
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+
+            }
+            if(fixedCoordinate==1){
+                int j=ri[1];
+                for (int k = 0; k < Nz; k++)
+                    for (int i = 0; i < Nx; i++)
+                        for (int c = 0; c < Ncomp; c++)
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+            }
+            if(fixedCoordinate==2){
+                int k=ri[2];
+                for (int j = 0; j < Ny; j++)
+                    for (int i = 0; i < Nx; i++)
+                        for (int c = 0; c < Ncomp; c++)
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+            }
+            MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+            delete[]todo;
+        }
+
+        MPI_File_close(&thefile);
+    }
+    MPI_Comm_free( &sliceCommunicator );
+    //////////////////////////// END of collective binary file write
+}
+
+
+void OUTPUT_MANAGER::callEMFieldPlane(request req){
+
+    std::string nameBin = composeOutputName(outputDir, "EMfield", myEMPlanes[req.target]->name, req.dtime, ".bin");
+    writeEMFieldPlane(nameBin, myEMPlanes[req.target]);
+
+}
+void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
+    int hii[3], wii[3];
+    double hiw[3][3], wiw[3][3];
+    double rr, rh, rr2, rh2;
+    int i1, j1, k1, i2, j2, k2;
+    double dvol;
+
+    for (int c = 0; c < 3; c++){
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+    }
+    for (int c = 0; c < mygrid->accesso.dimensions; c++)
+    {
+        rr = mygrid->dri[c] * (pos[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+    }
+    E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+    switch (mygrid->accesso.dimensions)
+    {
+    case 3:
+        for (int k = 0; k < 3; k++)
+        {
+            k1 = k + wii[2] - 1;
+            k2 = k + hii[2] - 1;
+            for (int j = 0; j < 3; j++)
+            {
+                j1 = j + wii[1] - 1;
+                j2 = j + hii[1] - 1;
+                for (int i = 0; i < 3; i++)
+                {
+                    i1 = i + wii[0] - 1;
+                    i2 = i + hii[0] - 1;
+                    dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                        E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+                    dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                        E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+                    dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                        E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                    dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                        B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+                    dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                        B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+                    dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                        B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+                }
+            }
+        }
+        break;
+
+    case 2:
+        k1 = k2 = 0;
+        for (int j = 0; j < 3; j++)
+        {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (int i = 0; i < 3; i++)
+            {
+                i1 = i + wii[0] - 1;
+                i2 = i + hii[0] - 1;
+                dvol = hiw[0][i] * wiw[1][j],
+                    E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+                dvol = wiw[0][i] * hiw[1][j],
+                    E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+                dvol = wiw[0][i] * wiw[1][j],
+                    E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                dvol = wiw[0][i] * hiw[1][j],
+                    B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+                dvol = hiw[0][i] * wiw[1][j],
+                    B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+                dvol = hiw[0][i] * hiw[1][j],
+                    B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+            }
+        }
+        break;
+
+    case 1:
+        k1 = k2 = j1 = j2 = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
+            dvol = hiw[0][i],
+                E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i],
+                E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i],
+                E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+
+            dvol = wiw[0][i],
+                B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i],
+                B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i],
+                B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+        }
+        break;
+    }
+
+}
+
+void OUTPUT_MANAGER::callEMFieldProbe(request req){
+
+    double rr[3], EE[3], BB[3];
+    rr[0]=myEMProbes[req.target]->coordinates[0];
+    rr[1]=myEMProbes[req.target]->coordinates[1];
+    rr[2]=myEMProbes[req.target]->coordinates[2];
+
+    if(rr[0]>= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
+        if (mygrid->accesso.dimensions<2||(rr[1]>= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
+            if (mygrid->accesso.dimensions<3||(rr[2]>= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
+                interpEB(rr,EE,BB);
+                std::ofstream of0;
+                of0.open(myEMProbes[req.target]->fileName.c_str(), std::ios::app);
+                of0 << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << req.dtime;
+                of0 << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
+                of0 << " " << setw(diagWidth) << BB[0] << " " << setw(diagWidth) << BB[1] << " " << setw(diagWidth) << BB[2];
+                of0 << "\n";
+                of0.close();
+            }
+        }
+    }
+
+
+
+}
+
 
 void OUTPUT_MANAGER::writeSpecDensityMap(std::ofstream &output, request req){
 	int uniqueN[3];

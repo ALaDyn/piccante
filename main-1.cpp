@@ -54,7 +54,7 @@ using namespace std;
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
-#define _DO_RESTART true
+#define _DO_RESTART false
 #define DO_DUMP true
 #define TIME_BTW_DUMP 50
 
@@ -118,9 +118,9 @@ int main(int narg, char **args)
 
 	laserPulse pulse1;
     pulse1.type = GAUSSIAN;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
-    pulse1.polarization = S_POLARIZATION;
-    pulse1.t_FWHM = 5.0;
-    pulse1.laser_pulse_initial_position = 0.0;
+    pulse1.polarization = P_POLARIZATION;
+    pulse1.t_FWHM = 10.0;
+    pulse1.laser_pulse_initial_position = -10.1;
     pulse1.lambda0 = 1.0;
     pulse1.normalized_amplitude = 3.0;
     pulse1.waist = 8.0;
@@ -178,7 +178,7 @@ int main(int narg, char **args)
 
 	SPECIE ions1(&grid);
 	ions1.plasma = plasma1;
-    ions1.setParticlesPerCellXYZ(7, 7, 1);
+    ions1.setParticlesPerCellXYZ(4, 4, 1);
 	ions1.setName("ION1");
     ions1.type = ION;
     ions1.Z = 6.0;
@@ -225,6 +225,21 @@ int main(int narg, char **args)
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
     manager.addEMFieldBinaryFrom(0.0, 5.0);
+    emProbe *probe1=new emProbe;
+    probe1->coordinates[0]=30;
+    probe1->coordinates[1]=0;
+    probe1->coordinates[2]=0;
+    probe1->name="CICCIO";
+
+    emPlane *plane1= new emPlane;
+    plane1->coordinates[0]=0;
+    plane1->coordinates[1]=0;
+    plane1->coordinates[2]=0;
+    plane1->fixedCoordinate=2;
+    plane1->name="CICCIO";
+
+    manager.addEMFieldProbeFrom(probe1,0.0,0.1);
+    //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
     manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
@@ -274,21 +289,11 @@ int main(int narg, char **args)
         dumpID++;
         grid.istep++;
     }
-     std::ofstream moveFile;
-    if (grid.myid == grid.master_proc){
-        std::stringstream dumpName;
-        dumpName << DIRECTORY_DUMP << "/MOVE.txt";
-        moveFile.open(dumpName.str().c_str());
 
-    }
-
-
+    std::cout<<probe1->fileName<<std::endl;
     for (; grid.istep <= Nstep; grid.istep++)
 	{
-        if (grid.myid == grid.master_proc){
 
-            moveFile << grid.time << "\t" << std::setprecision(15) << grid.getMarkMW() << std::setprecision(15)  << std::endl;
-        }
 		grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
 
@@ -351,9 +356,6 @@ int main(int narg, char **args)
             }
         }
 	}
-    if (grid.myid == grid.master_proc){
-        moveFile.close();
-    }
 
 	manager.close();
 	MPI_Finalize();

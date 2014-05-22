@@ -61,8 +61,9 @@ enum diagType{
 	OUT_SPEC_PHASE_SPACE_BINARY,
 	OUT_DIAG,
 	OUT_CURRENT_BINARY,
-	OUT_EMJPROBE, //NON ESISTE ANCORA !
-	OUT_SPEC_DENSITY_BINARY
+    OUT_EMJPROBE,
+    OUT_EMJPLANE, //NON ESISTE ANCORA !
+    OUT_SPEC_DENSITY_BINARY
 };
 
 
@@ -73,7 +74,21 @@ struct request{
 	int target;
 };
 
+struct emProbe{
+    double coordinates[3];
+    std::string name;
+    std::string fileName;
+    bool compareProbes(emProbe* rhs);
+    emProbe();
+};
 
+struct emPlane{
+    double coordinates[3];
+    int fixedCoordinate; // 0, 1, 2
+    std::string name;
+    bool comparePlanes(emPlane* rhs);
+    emPlane();
+};
 
 bool requestCompTime(const request &first, const request &second);
 bool requestCompUnique(const request &first, const request &second);
@@ -92,7 +107,15 @@ public:
 	void addEMFieldBinaryAt(double atTime);
 	void addEMFieldBinaryFromTo(double startTime, double frequency, double endTime);
 
-	void addSpecDensityBinaryFrom(std::string name, double startTime, double frequency);
+    void addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
+    void addEMFieldProbeAt(emProbe* Probe, double atTime);
+    void addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime);
+
+    void addEMFieldPlaneFrom(emPlane* Plane,double startTime, double frequency);
+    void addEMFieldPlaneAt(emPlane* Plane,double atTime);
+    void addEMFieldPlaneFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+
+    void addSpecDensityBinaryFrom(std::string name, double startTime, double frequency);
 	void addSpecDensityBinaryAt(std::string name, double atTime);
 	void addSpecDensityBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
 
@@ -138,6 +161,8 @@ private:
 	EM_FIELD* myfield;
 	CURRENT* mycurrent;
 	std::vector<SPECIE*> myspecies;
+    std::vector<emProbe*> myEMProbes;
+    std::vector<emPlane*> myEMPlanes;
 
 	bool isThereGrid;
 	bool isThereCurrent;
@@ -148,15 +173,18 @@ private:
 	bool amIInit;
 
 	bool isThereDiag;
+    bool isThereEMProbe;
 
 	bool checkGrid();
 	bool checkEMField();
 	bool checkCurrent();
 	bool checkSpecies();
-
-	int findSpecName(std::string name);
-
-	std::string diagFileName;
+    bool isInMyDomain(double *rr);
+    void nearestInt(double *rr, int *ri);
+    int findSpecName(std::string name);
+    int returnTargetIfProbeIsInList(emProbe *newProbe);
+    int returnTargetIfPlaneIsInList(emPlane *newPlane);
+    std::string diagFileName;
 	std::string extremaFieldFileName;
 	std::vector<std::string> extremaSpecFileNames;
 
@@ -176,6 +204,7 @@ private:
 
 	void createDiagFile();
 	void createExtremaFiles();
+    void createEMProbeFiles();
 
 	void processOutputEntry(request req);
 
@@ -185,8 +214,11 @@ private:
     void writeEMFieldBinaryHDF5(std::string fileName, request req);
     void callEMFieldBinary(request req);
 
+    void callEMFieldProbe(request req);
+    void writeEMFieldPlane(std::string fileName, emPlane *plane);
+    void callEMFieldPlane(request req);
 
-	void writeSpecDensityMap(std::ofstream &output, request req);
+    void writeSpecDensityMap(std::ofstream &output, request req);
 	void writeSpecDensityBinary(std::string fileName, request req);
 	void callSpecDensityBinary(request req);
 
@@ -199,7 +231,7 @@ private:
 
 
 	void callDiag(request req);
-
+    void interpEB(double pos[3], double E[3], double B[3]);
 };
 
 #endif // DIAG_MANAGER_PLUS_H

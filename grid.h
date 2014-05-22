@@ -77,7 +77,7 @@ public:
 	int imove_mw;
 	double fmove_mw;
 	MPI_Comm cart_comm;
-	int  myid, rnproc[3], nproc;   //INPUT myid (COMM_WORLD), domain decomposition in the three dimensions, total number of porcessor
+    int  myid, rnproc[3], nproc;   //INPUT myid (COMM_WORLD), domain decomposition in the three dimensions, total number of porcessor
 	int  rmyid[3], master_proc;  // INPUT my 3D int coordinate, master process
 
 	double ref_den;   // reference density
