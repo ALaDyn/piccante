@@ -231,7 +231,7 @@ int main(int narg, char **args)
 
     emPlane *plane1= new emPlane;
     plane1->setPointCoordinate(0,0,0);
-    plane1->setFreeDimensions(0,0,0);
+    plane1->setFreeDimensions(0 ,0,0);
     plane1->setName("CICCIO");
 
     manager.addEMFieldProbeFrom(probe1,0.0,0.1);
