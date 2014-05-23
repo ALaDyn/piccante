@@ -92,7 +92,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(100.0);
+    grid.setSimulationTime(5.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -226,20 +226,16 @@ int main(int narg, char **args)
 
     manager.addEMFieldBinaryFrom(0.0, 5.0);
     emProbe *probe1=new emProbe;
-    probe1->coordinates[0]=30;
-    probe1->coordinates[1]=0;
-    probe1->coordinates[2]=0;
-    probe1->name="CICCIO";
+    probe1->setPointCoordinate(30,0,0);
+    probe1->setName("CICCIO");
 
     emPlane *plane1= new emPlane;
-    plane1->coordinates[0]=0;
-    plane1->coordinates[1]=0;
-    plane1->coordinates[2]=0;
-    plane1->fixedCoordinate=2;
-    plane1->name="CICCIO";
+    plane1->setPointCoordinate(0,0,0);
+    plane1->setFreeDimensions(0,0,0);
+    plane1->setName("CICCIO");
 
     manager.addEMFieldProbeFrom(probe1,0.0,0.1);
-    //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
+    manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
     manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
