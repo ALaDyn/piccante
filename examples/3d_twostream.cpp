@@ -80,32 +80,7 @@ int main(int narg, char **args)
     grid.initRNG(rng,RANDOM_NUMBER_GENERATOR_SEED);
 
     grid.visualDiag();
-    if(grid.myid==grid.master_proc){
-      std::ofstream of1;
-        of1.open("merda_dx.txt");
-        for(int i=0; i<grid.Nloc[0]; i++){
-            of1<<i<<"\t"<<grid.dr[0]/grid.iStretchingDerivativeCorrection[0][i]<<"\n";
-        }
-        of1.close();
 
-        of1.open("merda_dy.txt");
-        for(int i=0; i<grid.Nloc[1]; i++){
-            of1<<i<<"\t"<<grid.dr[1]/grid.iStretchingDerivativeCorrection[1][i]<<"\n";
-        }
-        of1.close();
-
-        of1.open("merda_x.txt");
-        for(int i=0; i<grid.NGridNodes[0]; i++){
-            of1<<i<<"\t"<<grid.cir[0][i]<<"\n";
-        }
-        of1.close();
-
-        of1.open("merda_y.txt");
-        for(int i=0; i<grid.NGridNodes[1]; i++){
-            of1<<i<<"\t"<<grid.cir[1][i]<<"\n";
-        }
-        of1.close();
-    }
     //********************************************FINE DEFINIZIONE GRIGLIA********************************************************
 
     //*******************************************INIZIO DEFINIZIONE CAMPI*********************************************************

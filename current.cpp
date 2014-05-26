@@ -60,7 +60,7 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
 		memset((void*)val, 0, Ntot*Ncomp*sizeof(double));
 	else
 	{
-		printf("ERROR: erase_field\n");
+        printf("ERROR: current.setAllValuesToZero impossible");
 		exit(17);
 	}
 }

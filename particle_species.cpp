@@ -59,7 +59,7 @@ void SPECIE::erase()
 
 	if (!allocated){
 		printf("ERROR: species not allocated!!!\n");
-		exit(17);
+        exit(11);
 	}
 	//memset((void*)val, 0, (Np*Ncomp)*sizeof(double));
 	for (int c = 0; c < Ncomp; c++){
@@ -74,7 +74,7 @@ void SPECIE::reallocate_species()
 	if (!allocated)
 	{
 		printf("\nERROR: species not allocated\n\n");
-		exit(17);
+        exit(11);
 	}
 
 	//val = (double *)realloc((void*)val, Np*Ncomp*sizeof(double));
@@ -86,7 +86,7 @@ void SPECIE::reallocate_species()
 
 SPECIE SPECIE::operator = (SPECIE &destro)
 {
-	if (!destro.allocated){ printf("---ERROR---\noperation not permitted\nSPECIE=SPECIE\nnot allocated\n"); exit(17); }
+    if (!destro.allocated){ printf("---ERROR---\noperation not permitted\nSPECIE=SPECIE\nnot allocated\n"); exit(11); }
 
 	Np = destro.Np;
 	Ncomp = destro.Ncomp;
@@ -145,7 +145,7 @@ void SPECIE::computeParticleMassChargeCoupling(){
 		if (Z == 0 || A == 0)
 		{
 			printf("ERROR: Ion charge or mass NOT defined!\n");
-			exit(0);
+            exit(11);
 		}
 		else{
 			coupling = Z / (1.8362e3*A);
