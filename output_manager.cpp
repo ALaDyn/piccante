@@ -17,6 +17,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output_manager.h"
 
+emProbe::emProbe(){
+   coordinates[0]= coordinates[1]=coordinates[2]=0;
+   name="NONAME";
+}
 bool emProbe::compareProbes(emProbe *rhs){
     return (coordinates[0]==rhs->coordinates[0]&&
             coordinates[1]==rhs->coordinates[1]&&
@@ -24,23 +28,43 @@ bool emProbe::compareProbes(emProbe *rhs){
             name.c_str()==rhs->name.c_str());
 
 }
-emProbe::emProbe(){
-   coordinates[0]= coordinates[1]=coordinates[2]=0;
-   name="NONAME";
+void emProbe::setPointCoordinate(double X, double Y, double Z){
+    coordinates[0]=X;
+    coordinates[1]=Y;
+    coordinates[2]=Z;
+}
+void emProbe::setName(string iname){
+    name = iname;
 }
 
+
+emPlane::emPlane(){
+    coordinates[0]= coordinates[1]=coordinates[2]=0;
+    name="NONAME";
+    remainingCoord[0]=remainingCoord[1]=1;
+    remainingCoord[2]=0;
+}
 bool emPlane::comparePlanes(emPlane *rhs){
     return (coordinates[0]==rhs->coordinates[0]&&
             coordinates[1]==rhs->coordinates[1]&&
             coordinates[2]==rhs->coordinates[2]&&
-            fixedCoordinate==rhs->fixedCoordinate&&
+            remainingCoord[0]==rhs->remainingCoord[0]&&
+            remainingCoord[1]==rhs->remainingCoord[1]&&
+            remainingCoord[2]==rhs->remainingCoord[2]&&
             name.c_str()==rhs->name.c_str());
-
 }
-emPlane::emPlane(){
-    coordinates[0]= coordinates[1]=coordinates[2]=0;
-    name="NONAME";
-    fixedCoordinate=2;
+void emPlane::setFreeDimensions(bool flagX, bool flagY, bool flagZ){
+    remainingCoord[0]=flagX;
+    remainingCoord[1]=flagY;
+    remainingCoord[2]=flagZ;
+}
+void emPlane::setPointCoordinate(double X, double Y, double Z){
+    coordinates[0]=X;
+    coordinates[1]=Y;
+    coordinates[2]=Z;
+}
+void emPlane::setName(string iname){
+    name = iname;
 }
 
 bool requestCompTime(const request &first, const request &second){
@@ -72,14 +96,31 @@ bool OUTPUT_MANAGER::isInMyDomain(double *rr){
     return false;
 }
 
-void OUTPUT_MANAGER::nearestInt(double *rr, int *ri){
+void OUTPUT_MANAGER::nearestInt(double *rr, int *ri, int *globalri){
     int c;
-    for (c = 0; c < mygrid->accesso.dimensions; c++){
-        double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
-        ri[c] = (int)floor(xx + 0.5); //whole integer int
+    if(mygrid->isStretched()){
+        for (c = 0; c < mygrid->accesso.dimensions; c++){
+            double mycsi = mygrid->unStretchGrid(rr[c], c);
+            double xx = mygrid->dri[c] * (mycsi - mygrid->csiminloc[c]);
+            ri[c] = (int)floor(xx + 0.5); //whole integer int
+            mycsi = mygrid->unStretchGrid(rr[c], c);
+            xx = mygrid->dri[c] * (mycsi - mygrid->csimin[c]);
+            globalri[c] = (int)floor(xx + 0.5);
+        }
+        for (;c<3;c++){
+            ri[c]=globalri[c] = 0;
+        }
     }
-    for (;c<3;c++){
-        ri[c]=0;
+    else{
+        for (c = 0; c < mygrid->accesso.dimensions; c++){
+            double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
+            ri[c] = (int)floor(xx + 0.5); //whole integer int
+            xx = mygrid->dri[c] * (rr[c] - mygrid->rmin[c]);
+            globalri[c] = (int)floor(xx + 0.5);
+        }
+        for (;c<3;c++){
+            ri[c]=globalri[c] = 0;
+        }
     }
 }
 
@@ -418,7 +459,7 @@ void OUTPUT_MANAGER::addEMFieldPlaneFrom(emPlane* Plane, double startTime, doubl
     int target=returnTargetIfPlaneIsInList(Plane);
     if(target<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size();
+        target=myEMPlanes.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
     addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endSimTime);
@@ -431,7 +472,7 @@ void OUTPUT_MANAGER::addEMFieldPlaneAt(emPlane* Plane, double atTime){
     int target=returnTargetIfPlaneIsInList(Plane);
     if(target<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size();
+        target=myEMPlanes.size()-1;
     }
     addRequestToList(requestList, OUT_EMJPLANE, target, atTime, 1.0, atTime);
 }
@@ -442,7 +483,7 @@ void OUTPUT_MANAGER::addEMFieldPlaneFromTo(emPlane* Plane, double startTime, dou
     int target=returnTargetIfPlaneIsInList(Plane);
     if(target<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size();
+        target=myEMPlanes.size()-1;
     }
     addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endTime);
 }
@@ -952,44 +993,47 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 }
 void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
     int Ncomp = myfield->getNcomp();
-    int mySliceID, sliceNProc;
     int *totUniquePoints;
     int shouldIWrite=false;
-    int uniqueN[3];
-    double rr[3];
+    int uniqueN[3], slice_rNproc[3];
+    double rr[3]={plane->coordinates[0],plane->coordinates[1],plane->coordinates[2]};
     int ri[3];
-    int fixedCoordinate=plane->fixedCoordinate;
-    rr[0]=plane->coordinates[0];
-    rr[1]=plane->coordinates[1];
-    rr[2]=plane->coordinates[2];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
-    uniqueN[fixedCoordinate]=1;
+    int remains[3]={plane->remainingCoord[0],plane->remainingCoord[1],plane->remainingCoord[2]};
+
+    for(int c=0;c<3;c++){
+        if(remains[c]){
+            uniqueN[c] = mygrid->uniquePoints[c];
+            slice_rNproc[c]=mygrid->rnproc[c];
+        }
+        else{
+            uniqueN[c] = 1;
+            slice_rNproc[c] = 1;
+        }
+    }
+
     shouldIWrite=isInMyDomain(rr);
+
     MPI_Comm sliceCommunicator;
-    int remains[3]={1,1,1};
-    remains[fixedCoordinate]=0;
+    int mySliceID, sliceNProc;
+
+    int dimension;
     MPI_Cart_sub(mygrid->cart_comm,remains,&sliceCommunicator);
     MPI_Comm_rank(sliceCommunicator, &mySliceID);
     MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Cartdim_get(sliceCommunicator,&dimension);
+    printf("dimension=%i \n", dimension);
     MPI_Allreduce(MPI_IN_PLACE, &shouldIWrite, 1, MPI_INT, MPI_LOR, sliceCommunicator);
 
     totUniquePoints = new int[sliceNProc];
     for (int rank = 0; rank < sliceNProc; rank++){
-        int rid[2];
-        MPI_Cart_coords(sliceCommunicator, rank, 2, rid);
-        if(fixedCoordinate==0){
-            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[1][rid[0]];
-            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[2][rid[1]];
-        }
-        else if(fixedCoordinate==1){
-            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[0][rid[0]];
-            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[2][rid[1]];
-        }
-        else if(fixedCoordinate==2){
-            totUniquePoints[rank] = mygrid->rproc_NuniquePointsloc[0][rid[0]];
-            totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[1][rid[1]];
+        int rid[3],idbookmark=0;
+        MPI_Cart_coords(sliceCommunicator, rank, dimension, rid);
+        totUniquePoints[rank] = 1;
+        for(int c=0;c<3;c++){
+            if(remains[c]){
+                totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[c][rid[idbookmark]];
+                idbookmark++;
+            }
         }
     }
 
@@ -1009,53 +1053,39 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
 
     if(shouldIWrite){
         MPI_File_open(sliceCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-
-            nearestInt(rr, ri);
+        int globalri[3];
+        nearestInt(rr, ri, globalri);
         //+++++++++++ FILE HEADER  +++++++++++++++++++++
         if (mySliceID == 0){
             MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
             MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-            MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
+            MPI_File_write(thefile, slice_rNproc, 3, MPI_INT, &status);
             MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
             for (int c = 0; c < Ncomp; c++){
                 integer_or_halfinteger crd = myfield->getCompCoords(c);
                 int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
                 MPI_File_write(thefile, tp, 3, MPI_INT, &status);
             }
-            if(fixedCoordinate==0){
-                MPI_File_write(thefile, mygrid->cirloc[ri[0]], 1, MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cir[1], uniqueN[1], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cir[2], uniqueN[2], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chrloc[ri[0]], 1, MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[1], uniqueN[1], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[2], uniqueN[2], MPI_DOUBLE, &status);
+            for(int c=0;c<3;c++){
+                if(remains[c])
+                    MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
+                else
+                    MPI_File_write(thefile, &mygrid->cir[c][globalri[c]], 1, MPI_DOUBLE, &status);
             }
-            else if(fixedCoordinate==1){
-                MPI_File_write(thefile, mygrid->cir[0], uniqueN[0], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cirloc[ri[1]], 1, MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cir[2], uniqueN[2], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[0], uniqueN[0], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chrloc[ri[1]], 1, MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[2], uniqueN[2], MPI_DOUBLE, &status);
-            }
-            else if(fixedCoordinate==2){
-                MPI_File_write(thefile, mygrid->cir[0], uniqueN[0], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cir[1], uniqueN[1], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->cirloc[ri[2]], 1, MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[0], uniqueN[0], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chr[1], uniqueN[1], MPI_DOUBLE, &status);
-                MPI_File_write(thefile, mygrid->chrloc[ri[2]], 1, MPI_DOUBLE, &status);
+            for(int c=0;c<3;c++){
+                if(remains[c])
+                    MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
+                else
+                    MPI_File_write(thefile, &mygrid->chr[c][globalri[c]], 1, MPI_DOUBLE, &status);
             }
 
         }
         //*********** END HEADER *****************
 
         disp = big_header;
-
-        for (int rank = 0; rank < sliceNProc; rank++)
+        for (int rank = 0; rank < mySliceID; rank++)
             disp += small_header + totUniquePoints[rank] * sizeof(float)*Ncomp;
-        if (disp < 0)
-        {
+        if (disp < 0){
             std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
             std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
             exit(33);
@@ -1064,69 +1094,64 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
             MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
         }
 
-
         //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
         {
             int itodo[6];
-            itodo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-            itodo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-            itodo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-            itodo[3] = mygrid->uniquePointsloc[0];
-            itodo[4] = mygrid->uniquePointsloc[1];
-            itodo[5] = mygrid->uniquePointsloc[2];
-            itodo[fixedCoordinate] = 0;
-            itodo[fixedCoordinate+3] = 1;
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                   itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
+                   itodo[c+3] = mygrid->uniquePointsloc[c];
+                }
+                else{
+                    itodo[c] = 0;
+                    itodo[c+3] = 1;
+                }
+            }
             MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
         }
         //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
             float *todo;
-            int NN[3], Nx, Ny, Nz;
-            NN[0] = mygrid->uniquePointsloc[0];
-            NN[1] = mygrid->uniquePointsloc[1];
-            NN[2] = mygrid->uniquePointsloc[2];
-            NN[fixedCoordinate] = 1;
+            int NN[3], Nx, Ny, Nz, origin[3];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    NN[c] = mygrid->uniquePointsloc[c];
+                    origin[c]=0;
+                }
+                else{
+                    NN[c]=1;
+                    origin[c]=ri[c];
+                }
+            }
             Nx=NN[0];
             Ny=NN[1];
             Nz=NN[2];
             int size = Ncomp*NN[0]*NN[1]*NN[2];
             todo = new float[size];
-            if(fixedCoordinate==0){
-                int i=ri[0];
-                for (int k = 0; k < Nz; k++)
-                    for (int j = 0; j < Ny; j++)
+            int ii,jj,kk;
+            for (int k = 0; k < Nz; k++){
+                kk=k+origin[2];
+                for (int j = 0; j < Ny; j++){
+                    jj=j+origin[1];
+                    for (int i = 0; i < Nx; i++){
+                        ii=i+origin[0];
                         for (int c = 0; c < Ncomp; c++)
-                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
-
-            }
-            if(fixedCoordinate==1){
-                int j=ri[1];
-                for (int k = 0; k < Nz; k++)
-                    for (int i = 0; i < Nx; i++)
-                        for (int c = 0; c < Ncomp; c++)
-                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
-            }
-            if(fixedCoordinate==2){
-                int k=ri[2];
-                for (int j = 0; j < Ny; j++)
-                    for (int i = 0; i < Nx; i++)
-                        for (int c = 0; c < Ncomp; c++)
-                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, ii, jj, kk);
+                    }
+                }
             }
             MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
             delete[]todo;
         }
-
         MPI_File_close(&thefile);
     }
     MPI_Comm_free( &sliceCommunicator );
-    //////////////////////////// END of collective binary file write
 }
 
 
 void OUTPUT_MANAGER::callEMFieldPlane(request req){
 
-    std::string nameBin = composeOutputName(outputDir, "EMfield", myEMPlanes[req.target]->name, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "EMPLANE", myEMPlanes[req.target]->name, req.dtime, ".bin");
     writeEMFieldPlane(nameBin, myEMPlanes[req.target]);
 
 }
@@ -1136,30 +1161,55 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
     double rr, rh, rr2, rh2;
     int i1, j1, k1, i2, j2, k2;
     double dvol;
+    double mycsi[3];
 
     for (int c = 0; c < 3; c++){
         hiw[c][1] = wiw[c][1] = 1;
         hii[c] = wii[c] = 0;
     }
-    for (int c = 0; c < mygrid->accesso.dimensions; c++)
-    {
-        rr = mygrid->dri[c] * (pos[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+    if(mygrid->isStretched()){
+        for (int c = 0; c < mygrid->accesso.dimensions; c++){
+            mycsi[c] = mygrid->unStretchGrid(pos[c], c);
+            rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+            rh = rr - 0.5;
+            wii[c] = (int)floor(rr + 0.5); //whole integer int
+            hii[c] = (int)floor(rr);     //half integer int
+            rr -= wii[c];
+            rh -= hii[c];
+            rr2 = rr*rr;
+            rh2 = rh*rh;
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+            wiw[c][1] = 0.75 - rr2;
+            wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+            wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+            hiw[c][1] = 0.75 - rh2;
+            hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+            hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
     }
+    else{
+        for (int c = 0; c < mygrid->accesso.dimensions; c++){
+            rr = mygrid->dri[c] * (pos[c] - mygrid->rminloc[c]);
+            rh = rr - 0.5;
+            wii[c] = (int)floor(rr + 0.5); //whole integer int
+            hii[c] = (int)floor(rr);     //half integer int
+            rr -= wii[c];
+            rh -= hii[c];
+            rr2 = rr*rr;
+            rh2 = rh*rh;
+
+            wiw[c][1] = 0.75 - rr2;
+            wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+            wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+            hiw[c][1] = 0.75 - rh2;
+            hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+            hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+    }
+
     E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
     switch (mygrid->accesso.dimensions)

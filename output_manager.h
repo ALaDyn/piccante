@@ -78,16 +78,21 @@ struct emProbe{
     double coordinates[3];
     std::string name;
     std::string fileName;
-    bool compareProbes(emProbe* rhs);
     emProbe();
+    bool compareProbes(emProbe* rhs);
+    void setPointCoordinate(double X, double Y, double Z);
+    void setName(std::string iname);
 };
 
 struct emPlane{
     double coordinates[3];
-    int fixedCoordinate; // 0, 1, 2
+    bool remainingCoord[3];
     std::string name;
-    bool comparePlanes(emPlane* rhs);
     emPlane();
+    bool comparePlanes(emPlane* rhs);
+    void setFreeDimensions(bool flagX, bool flagY, bool flagZ);
+    void setPointCoordinate(double X, double Y, double Z);
+    void setName(std::string iname);
 };
 
 bool requestCompTime(const request &first, const request &second);
@@ -180,7 +185,7 @@ private:
 	bool checkCurrent();
 	bool checkSpecies();
     bool isInMyDomain(double *rr);
-    void nearestInt(double *rr, int *ri);
+    void nearestInt(double *rr, int *ri, int *globalri);
     int findSpecName(std::string name);
     int returnTargetIfProbeIsInList(emProbe *newProbe);
     int returnTargetIfPlaneIsInList(emPlane *newPlane);

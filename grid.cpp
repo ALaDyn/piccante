@@ -823,7 +823,7 @@ void GRID::setXandNxLeftStretchedGrid(double min, int N){
 	rminUniformGrid[0] = min;
 	if ((N >= NGridNodes[0]) || (N < 0)) {
 		printf("ERROR NxLeftStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NLeftStretcheGrid[0] = N;
 }
@@ -835,7 +835,7 @@ void GRID::setYandNyLeftStretchedGrid(double min, int N){
 	rminUniformGrid[1] = min;
 	if ((N >= NGridNodes[1]) || (N < 0)) {
 		printf("ERROR NyLeftStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NLeftStretcheGrid[1] = N;
 }
@@ -847,7 +847,7 @@ void GRID::setZandNzLeftStretchedGrid(double min, int N){
 	rminUniformGrid[2] = min;
 	if ((N >= NGridNodes[2]) || (N < 0)) {
 		printf("ERROR NzLeftStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NLeftStretcheGrid[2] = N;
 }
@@ -859,7 +859,7 @@ void GRID::setXandNxRightStretchedGrid(double max, int N){
 	rmaxUniformGrid[0] = max;
 	if ((N >= NGridNodes[0]) || (N < 0)) {
 		printf("ERROR NxRightStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NRightStretcheGrid[0] = N;
 }
@@ -871,7 +871,7 @@ void GRID::setYandNyRightStretchedGrid(double max, int N){
 	rmaxUniformGrid[1] = max;
 	if ((N >= NGridNodes[1]) || (N < 0)) {
 		printf("ERROR NyRightStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NRightStretcheGrid[1] = N;
 }
@@ -883,7 +883,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N){
 	rmaxUniformGrid[2] = max;
 	if ((N >= NGridNodes[2]) || (N < 0)) {
 		printf("ERROR NzRightStretcheGrid cannot be set to %i \n", N);
-		exit(0);
+        exit(19);
 	}
 	NRightStretcheGrid[2] = N;
 }
