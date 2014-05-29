@@ -92,7 +92,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(5.0);
+    grid.setSimulationTime(50.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -123,7 +123,7 @@ int main(int narg, char **args)
     pulse1.laser_pulse_initial_position = -10.1;
     pulse1.lambda0 = 1.0;
     pulse1.normalized_amplitude = 3.0;
-    pulse1.waist = 8.0;
+    pulse1.waist = 4.0;
     pulse1.focus_position = 0.0;
     pulse1.rotation = false;
     pulse1.angle = 2.0*M_PI*(-30.0 / 360.0);
@@ -226,18 +226,25 @@ int main(int narg, char **args)
 
     emProbe *probe1=new emProbe;
     probe1->setPointCoordinate(30,0,0);
-    probe1->setName("CICCIO");
+    probe1->setName("A");
 
-    emPlane *plane1= new emPlane;
+    outDomain *plane1= new outDomain;
     plane1->setPointCoordinate(0,0,0);
     plane1->setFreeDimensions(1 ,0,0);
-    plane1->setName("CICCIO");
+    plane1->setName(B);
+
+    outDomain *plane2= new outDomain;
+    plane2->setPointCoordinate(0,0,0);
+    plane2->setFreeDimensions(1 ,0,0);
+    plane2->setName("C");
 
     manager.addEFieldFrom(plane1, 0.0, 5.0);
+    manager.addEFieldFrom(plane2, 0.0, 2.0);
     //manager.addEMFieldProbeFrom(probe1,0.0,0.1);
     //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
-    //manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
+    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
+    manager.addSpecDensityBinaryFrom(plane1,electrons1.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
@@ -285,8 +292,6 @@ int main(int narg, char **args)
         dumpID++;
         grid.istep++;
     }
-
-    std::cout<<probe1->fileName<<std::endl;
     for (; grid.istep <= Nstep; grid.istep++)
 	{
 

@@ -48,13 +48,13 @@ void emProbe::setName(string iname){
 }
 
 
-emPlane::emPlane(){
+outDomain::outDomain(){
     coordinates[0]= coordinates[1]=coordinates[2]=0;
     name="";
     remainingCoord[0]=remainingCoord[1]=1;
     remainingCoord[2]=1;
 }
-bool emPlane::comparePlanes(emPlane *rhs){
+bool outDomain::compareDomains(outDomain *rhs){
     return (coordinates[0]==rhs->coordinates[0]&&
             coordinates[1]==rhs->coordinates[1]&&
             coordinates[2]==rhs->coordinates[2]&&
@@ -63,17 +63,17 @@ bool emPlane::comparePlanes(emPlane *rhs){
             remainingCoord[2]==rhs->remainingCoord[2]&&
             name.c_str()==rhs->name.c_str());
 }
-void emPlane::setFreeDimensions(bool flagX, bool flagY, bool flagZ){
+void outDomain::setFreeDimensions(bool flagX, bool flagY, bool flagZ){
     remainingCoord[0]=flagX;
     remainingCoord[1]=flagY;
     remainingCoord[2]=flagZ;
 }
-void emPlane::setPointCoordinate(double X, double Y, double Z){
+void outDomain::setPointCoordinate(double X, double Y, double Z){
     coordinates[0]=X;
     coordinates[1]=Y;
     coordinates[2]=Z;
 }
-void emPlane::setName(string iname){
+void outDomain::setName(string iname){
     name = iname;
 }
 
@@ -154,6 +154,10 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
     amIInit = false;
 
     isThereDiag = false;
+
+    outDomain *plane1= new outDomain;
+    myDomains.push_back(plane1);
+
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
@@ -288,8 +292,7 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir){
     if (isThereEMProbe){
         createEMProbeFiles();
     }
-    emPlane *plane1= new emPlane;
-    myEMPlanes.push_back(plane1);
+
     amIInit = true;
 }
 
@@ -378,10 +381,10 @@ int OUTPUT_MANAGER::returnDomainIfProbeIsInList(emProbe *newProbe){
     return -1;
 
 }
-int OUTPUT_MANAGER::returnDomainIfPlaneIsInList(emPlane *newPlane){
+int OUTPUT_MANAGER::returnDomainIfPlaneIsInList(outDomain *newPlane){
     int pos = 0;
-    for (std::vector<emPlane*>::iterator it = myEMPlanes.begin(); it != myEMPlanes.end(); it++){
-        if ((*it)-> comparePlanes(newPlane)){
+    for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); it++){
+        if ((*it)-> compareDomains(newPlane)){
             return pos;
         }
         pos++;
@@ -463,74 +466,74 @@ void OUTPUT_MANAGER::addBFieldFromTo(double startTime, double frequency, double 
     addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endTime);
 }
 // SELECTION
-void OUTPUT_MANAGER::addEFieldFrom(emPlane* Plane, double startTime, double frequency){
+void OUTPUT_MANAGER::addEFieldFrom(outDomain* _domain, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int plane=returnDomainIfPlaneIsInList(Plane);
-    if(plane<0){
-        myEMPlanes.push_back(Plane);
-        plane=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_E_FIELD,  0, plane, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addEFieldAt(emPlane* Plane, double atTime){
+void OUTPUT_MANAGER::addEFieldAt(outDomain* _domain, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_E_FIELD,  0, domain, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addEFieldFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addEFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_E_FIELD,  0,domain, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, startTime, frequency, endTime);
 }
 
-void OUTPUT_MANAGER::addBFieldFrom(emPlane* Plane, double startTime, double frequency){
+void OUTPUT_MANAGER::addBFieldFrom(outDomain* _domain, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_B_FIELD,  0,domain, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addBFieldAt(emPlane* Plane, double atTime){
+void OUTPUT_MANAGER::addBFieldAt(outDomain* _domain, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_B_FIELD,  0,domain, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addBFieldFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addBFieldFromTo(outDomain* Plane, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_B_FIELD,  0,domain, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, startTime, frequency, endTime);
 }
 
 
@@ -552,62 +555,28 @@ void OUTPUT_MANAGER::addEMFieldProbeFrom(emProbe* Probe, double startTime, doubl
 void OUTPUT_MANAGER::addEMFieldProbeAt(emProbe* Probe, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfProbeIsInList(Probe);
-    if(domain<0){
+    int domainID=returnDomainIfProbeIsInList(Probe);
+    if(domainID<0){
         myEMProbes.push_back(Probe);
         isThereEMProbe = true;
-        domain=myEMProbes.size()-1;
+        domainID=myEMProbes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPROBE,  0,domain, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_EMJPROBE,  0,domainID, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domain=returnDomainIfProbeIsInList(Probe);
-    if(domain<0){
+    int domainID=returnDomainIfProbeIsInList(Probe);
+    if(domainID<0){
         myEMProbes.push_back(Probe);
         isThereEMProbe = true;
-        domain=myEMProbes.size()-1;
+        domainID=myEMProbes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPROBE,  0, domain, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_EMJPROBE,  0, domainID, startTime, frequency, endTime);
 }
 
-// EM Plane ////////////////////////////////////////////
-void OUTPUT_MANAGER::addEMFieldPlaneFrom(emPlane* Plane, double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
-    }
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, startTime, frequency, endSimTime);
 
-}
-
-void OUTPUT_MANAGER::addEMFieldPlaneAt(emPlane* Plane, double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
-    }
-    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, atTime, 1.0, atTime);
-}
-
-void OUTPUT_MANAGER::addEMFieldPlaneFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domain=returnDomainIfPlaneIsInList(Plane);
-    if(domain<0){
-        myEMPlanes.push_back(Plane);
-        domain=myEMPlanes.size()-1;
-    }
-    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, startTime, frequency, endTime);
-}
 
 void OUTPUT_MANAGER::addSpecDensityBinaryFrom(std::string name, double startTime, double frequency){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
@@ -636,6 +605,50 @@ void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(std::string name, double startTi
     if (specNum < 0)
         return;
     addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addSpecDensityBinaryFrom(outDomain* Plane, std::string name, double startTime, double frequency){
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, startTime, frequency, endSimTime);
+
+}
+
+void OUTPUT_MANAGER::addSpecDensityBinaryAt(outDomain* Plane, std::string name, double atTime){
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(outDomain* Plane, std::string name, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addCurrentBinaryFrom(double startTime, double frequency){
@@ -1118,15 +1131,15 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 #endif
 
 }
-void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane, bool EorB){
+void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, request req, bool EorB){
     int Ncomp = 3;//myfield->getNcomp();
     int offset = EorB*3;
     int *totUniquePoints;
     int shouldIWrite=false;
     int uniqueN[3], slice_rNproc[3];
-    double rr[3]={plane->coordinates[0],plane->coordinates[1],plane->coordinates[2]};
+    double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
     int ri[3];
-    int remains[3]={plane->remainingCoord[0],plane->remainingCoord[1],plane->remainingCoord[2]};
+    int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
 
     for(int c=0;c<3;c++){
         if(remains[c]){
@@ -1149,7 +1162,6 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane, boo
     MPI_Comm_rank(sliceCommunicator, &mySliceID);
     MPI_Comm_size(sliceCommunicator, &sliceNProc);
     MPI_Cartdim_get(sliceCommunicator,&dimension);
-    printf("dimension=%i \n", dimension);
     MPI_Allreduce(MPI_IN_PLACE, &shouldIWrite, 1, MPI_INT, MPI_LOR, sliceCommunicator);
 
     totUniquePoints = new int[sliceNProc];
@@ -1285,18 +1297,18 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane, boo
 void OUTPUT_MANAGER::callEMFieldPlane(request req){
 
     if(req.type==OUT_E_FIELD){
-        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
-        writeEMFieldPlane(nameBin, myEMPlanes[req.domain],0);
+        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBin, req,0);
     }
     else if(req.type==OUT_B_FIELD){
-        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
-        writeEMFieldPlane(nameBin, myEMPlanes[req.domain],1);
+        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBin, req,1);
     }
     else if(req.type==OUT_EMJPLANE){
-        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
-        writeEMFieldPlane(nameBinE, myEMPlanes[req.domain],0);
-        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
-        writeEMFieldPlane(nameBinB, myEMPlanes[req.domain],1);
+        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBinE, req,0);
+        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBinB, req,1);
     }
 }
 
@@ -1611,6 +1623,168 @@ void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
     MPI_File_close(&thefile);
     delete[] nomefile;
 
+
+}
+void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){//outDomain *plane, bool EorB){
+    int Ncomp = 1;//myfield->getNcomp();
+    int *totUniquePoints;
+    int shouldIWrite=false;
+    int uniqueN[3], slice_rNproc[3];
+    double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
+    int ri[3];
+    int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
+
+    for(int c=0;c<3;c++){
+        if(remains[c]){
+            uniqueN[c] = mygrid->uniquePoints[c];
+            slice_rNproc[c]=mygrid->rnproc[c];
+        }
+        else{
+            uniqueN[c] = 1;
+            slice_rNproc[c] = 1;
+        }
+    }
+
+    shouldIWrite=isInMyDomain(rr);
+
+    MPI_Comm sliceCommunicator;
+    int mySliceID, sliceNProc;
+
+    int dimension;
+    MPI_Cart_sub(mygrid->cart_comm,remains,&sliceCommunicator);
+    MPI_Comm_rank(sliceCommunicator, &mySliceID);
+    MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Cartdim_get(sliceCommunicator,&dimension);
+    MPI_Allreduce(MPI_IN_PLACE, &shouldIWrite, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+
+    totUniquePoints = new int[sliceNProc];
+    for (int rank = 0; rank < sliceNProc; rank++){
+        int rid[3],idbookmark=0;
+        MPI_Cart_coords(sliceCommunicator, rank, dimension, rid);
+        totUniquePoints[rank] = 1;
+        for(int c=0;c<3;c++){
+            if(remains[c]){
+                totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[c][rid[idbookmark]];
+                idbookmark++;
+            }
+        }
+    }
+
+    MPI_Offset disp = 0;
+    int small_header = 6 * sizeof(int);
+    int big_header = (1+3+3+1)*sizeof(int)
+            +(uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+
+    MPI_File thefile;
+    MPI_Status status;
+
+    char* nomefile = new char[fileName.size() + 1];
+
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
+
+    if(shouldIWrite){
+        MPI_File_open(sliceCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+        int globalri[3];
+        nearestInt(rr, ri, globalri);
+        //+++++++++++ FILE HEADER  +++++++++++++++++++++
+        if (mySliceID == 0){
+            MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+            int itodo[8];
+            itodo[0]=is_big_endian();
+            itodo[1]=uniqueN[0];
+            itodo[2]=uniqueN[1];
+            itodo[3]=uniqueN[2];
+            itodo[4]=slice_rNproc[0];
+            itodo[5]=slice_rNproc[1];
+            itodo[6]=slice_rNproc[2];
+            itodo[7]=Ncomp;
+            MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+
+            float *fcir[3];
+            for(int c=0;c<3;c++){
+                fcir[c]=new float[uniqueN[c]];
+                for(int m=0; m<uniqueN[c]; m++){
+                    fcir[c][m] = (float)mygrid->cir[c][m];
+                }
+            }
+            for(int c=0;c<3;c++){
+                if(remains[c])
+                    MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+                else
+                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+            }
+            for(int c=0;c<3;c++){
+                delete[] fcir[c];
+            }
+
+        }
+        //*********** END HEADER *****************
+
+        disp = big_header;
+        for (int rank = 0; rank < mySliceID; rank++)
+            disp += small_header + totUniquePoints[rank] * sizeof(float)*Ncomp;
+        if (disp < 0){
+            std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+            std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+            exit(33);
+        }
+        if (mySliceID != 0){
+            MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        }
+
+        //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
+        {
+            int itodo[6];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
+                    itodo[c+3] = mygrid->uniquePointsloc[c];
+                }
+                else{
+                    itodo[c] = 0;
+                    itodo[c+3] = 1;
+                }
+            }
+            MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+        }
+        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+        {
+            float *todo;
+            int NN[3], Nx, Ny, Nz, origin[3];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    NN[c] = mygrid->uniquePointsloc[c];
+                    origin[c]=0;
+                }
+                else{
+                    NN[c]=1;
+                    origin[c]=ri[c];
+                }
+            }
+            Nx=NN[0];
+            Ny=NN[1];
+            Nz=NN[2];
+            int size = Ncomp*NN[0]*NN[1]*NN[2];
+            todo = new float[size];
+            int ii,jj,kk;
+            for (int k = 0; k < Nz; k++){
+                kk=k+origin[2];
+                for (int j = 0; j < Ny; j++){
+                    jj=j+origin[1];
+                    for (int i = 0; i < Nx; i++){
+                        ii=i+origin[0];
+                        for (int c = 0; c < Ncomp; c++)
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  mycurrent->density(i, j, k);
+                    }
+                }
+            }
+            MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+            delete[]todo;
+        }
+        MPI_File_close(&thefile);
+    }
+    MPI_Comm_free( &sliceCommunicator );
 }
 
 void OUTPUT_MANAGER::callSpecDensityBinary(request req){
@@ -1618,19 +1792,19 @@ void OUTPUT_MANAGER::callSpecDensityBinary(request req){
     myspecies[req.target]->density_deposition_standard(mycurrent);
     mycurrent->pbc();
 
-    std::string name = myspecies[req.target]->name;
+    std::string name = myspecies[req.target]->name + "_" + myDomains[req.domain]->name;
 
-    if (mygrid->myid == mygrid->master_proc){
-        std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
-        std::ofstream of1;
-        of1.open(nameMap.c_str());
-        writeSpecDensityMap(of1, req);
-        of1.close();
-    }
+//    if (mygrid->myid == mygrid->master_proc){
+//        std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
+//        std::ofstream of1;
+//        of1.open(nameMap.c_str());
+//        writeSpecDensityMap(of1, req);
+//        of1.close();
+//    }
 
     std::string nameBin = composeOutputName(outputDir, "DENS", name, req.dtime, ".bin");
 
-    writeSpecDensityBinary(nameBin, req);
+    writeSpecDensityNew(nameBin, req);
 
 }
 
@@ -1787,7 +1961,7 @@ void  OUTPUT_MANAGER::callCurrentBinary(request req){
         writeCurrentMap(of1, req);
         of1.close();
     }
-    std::string nameBin = composeOutputName(outputDir, "J", "", req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "J", "", req.dtime, ".bin")+ "_" + myDomains[req.domain]->name;
 
     writeCurrentBinary(nameBin, req);
 
