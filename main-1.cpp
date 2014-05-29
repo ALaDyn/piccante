@@ -224,20 +224,20 @@ int main(int narg, char **args)
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-    manager.addEMFieldBinaryFrom(0.0, 5.0);
     emProbe *probe1=new emProbe;
     probe1->setPointCoordinate(30,0,0);
     probe1->setName("CICCIO");
 
     emPlane *plane1= new emPlane;
     plane1->setPointCoordinate(0,0,0);
-    plane1->setFreeDimensions(0 ,0,0);
+    plane1->setFreeDimensions(1 ,0,0);
     plane1->setName("CICCIO");
 
-    manager.addEMFieldProbeFrom(probe1,0.0,0.1);
-    manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
+    manager.addEFieldFrom(plane1, 0.0, 5.0);
+    //manager.addEMFieldProbeFrom(probe1,0.0,0.1);
+    //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
-    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
+    //manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);

@@ -86,12 +86,12 @@ struct emProbe{
     void setName(std::string iname);
 };
 
-struct emPlane{
+struct outDomain{
     double coordinates[3];
     bool remainingCoord[3];
     std::string name;
-    emPlane();
-    bool comparePlanes(emPlane* rhs);
+    outDomain();
+    bool comparePlanes(outDomain* rhs);
     void setFreeDimensions(bool flagX, bool flagY, bool flagZ);
     void setPointCoordinate(double X, double Y, double Z);
     void setName(std::string iname);
@@ -122,21 +122,21 @@ public:
     void addBFieldAt(double atTime);
     void addBFieldFromTo(double startTime, double frequency, double endTime);
 
-    void addEFieldFrom(emPlane* Plane,double startTime, double frequency);
-    void addEFieldAt(emPlane* Plane,double atTime);
-    void addEFieldFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+    void addEFieldFrom(outDomain* Plane,double startTime, double frequency);
+    void addEFieldAt(outDomain* Plane,double atTime);
+    void addEFieldFromTo(outDomain* Plane,double startTime, double frequency, double endTime);
 
-    void addBFieldFrom(emPlane* Plane,double startTime, double frequency);
-    void addBFieldAt(emPlane* Plane,double atTime);
-    void addBFieldFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+    void addBFieldFrom(outDomain* Plane,double startTime, double frequency);
+    void addBFieldAt(outDomain* Plane,double atTime);
+    void addBFieldFromTo(outDomain* Plane,double startTime, double frequency, double endTime);
 
     void addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
     void addEMFieldProbeAt(emProbe* Probe, double atTime);
     void addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime);
 
-    void addEMFieldPlaneFrom(emPlane* Plane,double startTime, double frequency);
-    void addEMFieldPlaneAt(emPlane* Plane,double atTime);
-    void addEMFieldPlaneFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+    void addEMFieldPlaneFrom(outDomain* Plane,double startTime, double frequency);
+    void addEMFieldPlaneAt(outDomain* Plane,double atTime);
+    void addEMFieldPlaneFromTo(outDomain* Plane,double startTime, double frequency, double endTime);
 
     void addSpecDensityBinaryFrom(std::string name, double startTime, double frequency);
 	void addSpecDensityBinaryAt(std::string name, double atTime);
@@ -166,7 +166,7 @@ private:
 	CURRENT* mycurrent;
 	std::vector<SPECIE*> myspecies;
     std::vector<emProbe*> myEMProbes;
-    std::vector<emPlane*> myEMPlanes;
+    std::vector<outDomain*> myEMPlanes;
 
 	bool isThereGrid;
 	bool isThereCurrent;
@@ -187,7 +187,7 @@ private:
     void nearestInt(double *rr, int *ri, int *globalri);
     int findSpecName(std::string name);
     int returnDomainIfProbeIsInList(emProbe *newProbe);
-    int returnDomainIfPlaneIsInList(emPlane *newPlane);
+    int returnDomainIfPlaneIsInList(outDomain *newPlane);
     std::string diagFileName;
 	std::string extremaFieldFileName;
 	std::vector<std::string> extremaSpecFileNames;
@@ -220,7 +220,7 @@ private:
     void callEMFieldBinary(request req);
 
     void callEMFieldProbe(request req);
-    void writeEMFieldPlane(std::string fileName, emPlane *plane, bool EorB);
+    void writeEMFieldPlane(std::string fileName, outDomain *plane, bool EorB);
     void callEMFieldPlane(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);

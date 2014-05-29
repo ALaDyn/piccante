@@ -50,7 +50,7 @@ void emProbe::setName(string iname){
 
 emPlane::emPlane(){
     coordinates[0]= coordinates[1]=coordinates[2]=0;
-    name="ALL";
+    name="";
     remainingCoord[0]=remainingCoord[1]=1;
     remainingCoord[2]=1;
 }
