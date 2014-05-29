@@ -17,9 +17,19 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output_manager.h"
 
+int is_big_endian()
+{
+    union {
+        uint32_t i;
+        char c[4];
+    } bint = { 0x01020304 };
+
+    return bint.c[0] == 1;
+}
+
 emProbe::emProbe(){
-   coordinates[0]= coordinates[1]=coordinates[2]=0;
-   name="NONAME";
+    coordinates[0]= coordinates[1]=coordinates[2]=0;
+    name="NONAME";
 }
 bool emProbe::compareProbes(emProbe *rhs){
     return (coordinates[0]==rhs->coordinates[0]&&
@@ -40,9 +50,9 @@ void emProbe::setName(string iname){
 
 emPlane::emPlane(){
     coordinates[0]= coordinates[1]=coordinates[2]=0;
-    name="NONAME";
+    name="ALL";
     remainingCoord[0]=remainingCoord[1]=1;
-    remainingCoord[2]=0;
+    remainingCoord[2]=1;
 }
 bool emPlane::comparePlanes(emPlane *rhs){
     return (coordinates[0]==rhs->coordinates[0]&&
@@ -68,28 +78,31 @@ void emPlane::setName(string iname){
 }
 
 bool requestCompTime(const request &first, const request &second){
-	if (first.itime != second.itime)
-		return (first.itime < second.itime);
-	else if (first.type != second.type)
-		return (first.type < second.type);
-	else if (first.target != second.target)
-		return (first.target < second.target);
-	else
-		return false;
+    if (first.itime != second.itime)
+        return (first.itime < second.itime);
+    else if (first.type != second.type)
+        return (first.type < second.type);
+    else if (first.target != second.target)
+        return (first.target < second.target);
+    else if (first.domain != second.domain)
+        return (first.domain < second.domain);
+    else
+        return false;
 
 }
 
 bool requestCompUnique(const request &first, const request &second){
-	return ((first.itime == second.itime) &&
-		(first.type == second.type) &&
-		(first.target == second.target));
+    return ((first.itime == second.itime) &&
+            (first.type == second.type) &&
+            (first.target == second.target) &&
+            (first.domain == second.domain));
 }
 
 bool OUTPUT_MANAGER::isInMyDomain(double *rr){
     if(rr[0]>= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
         if (mygrid->accesso.dimensions<2||(rr[1]>= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
             if (mygrid->accesso.dimensions<3||(rr[2]>= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
- return true;
+                return true;
             }
         }
     }
@@ -126,21 +139,21 @@ void OUTPUT_MANAGER::nearestInt(double *rr, int *ri, int *globalri){
 
 OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies)
 {
-	mygrid = _mygrid;
-	isThereGrid = (mygrid != NULL) ? true : false;
+    mygrid = _mygrid;
+    isThereGrid = (mygrid != NULL) ? true : false;
 
-	myfield = _myfield;
-	isThereField = (myfield != NULL) ? true : false;
+    myfield = _myfield;
+    isThereField = (myfield != NULL) ? true : false;
 
-	mycurrent = _mycurrent;
-	isThereCurrent = (mycurrent != NULL) ? true : false;
+    mycurrent = _mycurrent;
+    isThereCurrent = (mycurrent != NULL) ? true : false;
 
-	myspecies = _myspecies;
-	isThereSpecList = (myspecies.size() > 0) ? true : false;
+    myspecies = _myspecies;
+    isThereSpecList = (myspecies.size() > 0) ? true : false;
 
-	amIInit = false;
+    amIInit = false;
 
-	isThereDiag = false;
+    isThereDiag = false;
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
@@ -148,73 +161,73 @@ OUTPUT_MANAGER::~OUTPUT_MANAGER(){
 }
 
 void OUTPUT_MANAGER::createDiagFile(){
-	if (checkGrid()){
-		if (mygrid->myid != mygrid->master_proc)
-			return;
-	}
-	else{
-		if (mygrid->myid != 0)
-			return;
-	}
+    if (checkGrid()){
+        if (mygrid->myid != mygrid->master_proc)
+            return;
+    }
+    else{
+        if (mygrid->myid != 0)
+            return;
+    }
 
-	std::stringstream ss;
-	ss << outputDir << "/diag.dat";
+    std::stringstream ss;
+    ss << outputDir << "/diag.dat";
 
-	diagFileName = ss.str();
+    diagFileName = ss.str();
 
-	std::ofstream of1;
+    std::ofstream of1;
 
-	of1.open(diagFileName.c_str(), std::ofstream::out | std::ofstream::trunc);
+    of1.open(diagFileName.c_str(), std::ofstream::out | std::ofstream::trunc);
 
-	of1 << " " << setw(diagNarrowWidth) << "#istep" << " " << setw(diagWidth) << "time";
-	of1 << " " << setw(diagWidth) << "Etot";
-	of1 << " " << setw(diagWidth) << "Ex2" << " " << setw(diagWidth) << "Ey2" << " " << setw(diagWidth) << "Ez2";
-	of1 << " " << setw(diagWidth) << "Bx2" << " " << setw(diagWidth) << "By2" << " " << setw(diagWidth) << "Bz2";
+    of1 << " " << setw(diagNarrowWidth) << "#istep" << " " << setw(diagWidth) << "time";
+    of1 << " " << setw(diagWidth) << "Etot";
+    of1 << " " << setw(diagWidth) << "Ex2" << " " << setw(diagWidth) << "Ey2" << " " << setw(diagWidth) << "Ez2";
+    of1 << " " << setw(diagWidth) << "Bx2" << " " << setw(diagWidth) << "By2" << " " << setw(diagWidth) << "Bz2";
 
-	std::vector<SPECIE*>::const_iterator spec_iterator;
+    std::vector<SPECIE*>::const_iterator spec_iterator;
 
-	for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
-		of1 << " " << setw(diagWidth) << (*spec_iterator)->name;
-	}
+    for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
+        of1 << " " << setw(diagWidth) << (*spec_iterator)->name;
+    }
 
-	of1 << std::endl;
+    of1 << std::endl;
 
-	of1.close();
+    of1.close();
 }
 
 void OUTPUT_MANAGER::createExtremaFiles(){
 
-	if (checkGrid()){
-		if (mygrid->myid != mygrid->master_proc)
-			return;
-	}
-	else{
-		if (mygrid->myid != 0)
-			return;
-	}
+    if (checkGrid()){
+        if (mygrid->myid != mygrid->master_proc)
+            return;
+    }
+    else{
+        if (mygrid->myid != 0)
+            return;
+    }
 
-	if (checkEMField()){
-		std::stringstream ss0;
-		ss0 << outputDir << "/EXTREMES_EMfield.dat";
-		extremaFieldFileName = ss0.str();
+    if (checkEMField()){
+        std::stringstream ss0;
+        ss0 << outputDir << "/EXTREMES_EMfield.dat";
+        extremaFieldFileName = ss0.str();
 
-		std::ofstream of0;
-		of0.open(extremaFieldFileName.c_str());
-		myfield->init_output_extrems(of0);
-		of0.close();
-	}
+        std::ofstream of0;
+        of0.open(extremaFieldFileName.c_str());
+        myfield->init_output_extrems(of0);
+        of0.close();
+    }
 
-	if (checkSpecies()){
-		for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++){
-			std::stringstream ss1;
-			ss1 << outputDir << "/EXTREMES_" << (*it)->name << ".dat";
-			extremaSpecFileNames.push_back(ss1.str());
-			std::ofstream of1;
-			of1.open(ss1.str().c_str());
-			(*it)->init_output_extrems(of1);
-			of1.close();
-		}
-	}
+    if (checkSpecies()){
+        for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++){
+            std::stringstream ss1;
+            ss1 << outputDir << "/EXTREMES_" << (*it)->name << ".dat";
+            extremaSpecFileNames.push_back(ss1.str());
+            std::ofstream of1;
+            of1.open(ss1.str().c_str());
+            (*it)->init_output_extrems(of1);
+            of1.close();
+        }
+    }
 
 }
 
@@ -222,9 +235,9 @@ void OUTPUT_MANAGER::createEMProbeFiles(){
     int ii=0;
     for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
         std::stringstream ss0;
-         ss0 << outputDir << "/EMProbe_" << (*it)->name << "_" << ii << ".txt";
+        ss0 << outputDir << "/EMProbe_" << (*it)->name << "_" << ii << ".txt";
         (*it)->fileName = ss0.str();
-         ii++;
+        ii++;
     }
     if (checkGrid()){
         if (mygrid->myid != mygrid->master_proc)
@@ -255,27 +268,29 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir){
     std::time(&timer);
     ss << _outputDir << "_" << (int)timer;
     _newoutputDir=ss.str();
-	if (mygrid->myid == mygrid->master_proc){
-		if ( !boost::filesystem::exists(_outputDir) ){
-			boost::filesystem::create_directories(_outputDir);
-		}
+    if (mygrid->myid == mygrid->master_proc){
+        if ( !boost::filesystem::exists(_outputDir) ){
+            boost::filesystem::create_directories(_outputDir);
+        }
         else{
             boost::filesystem::rename(_outputDir, _newoutputDir);
-           boost::filesystem::create_directories(_outputDir);
+            boost::filesystem::create_directories(_outputDir);
         }
-	}
+    }
 #endif
-	outputDir = _outputDir;
-	prepareOutputMap();
+    outputDir = _outputDir;
+    prepareOutputMap();
 
-	if (isThereDiag){
-		createDiagFile();
-		createExtremaFiles();
-	}
+    if (isThereDiag){
+        createDiagFile();
+        createExtremaFiles();
+    }
     if (isThereEMProbe){
         createEMProbeFiles();
     }
-	amIInit = true;
+    emPlane *plane1= new emPlane;
+    myEMPlanes.push_back(plane1);
+    amIInit = true;
 }
 
 void OUTPUT_MANAGER::close(){
@@ -283,76 +298,76 @@ void OUTPUT_MANAGER::close(){
 }
 
 bool OUTPUT_MANAGER::checkGrid(){
-	if (!isThereGrid){
-		int myid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-		if (myid == 0){
-			std::cout << "WARNING! No valid GRID pointer provided. Output request will be ignored." << std::endl;
-		}
+    if (!isThereGrid){
+        int myid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+        if (myid == 0){
+            std::cout << "WARNING! No valid GRID pointer provided. Output request will be ignored." << std::endl;
+        }
 
-	}
-	return isThereGrid;
+    }
+    return isThereGrid;
 }
 
 bool OUTPUT_MANAGER::checkEMField(){
-	if (!isThereField){
-		int myid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-		if (myid == 0){
-			std::cout << "WARNING! No valid FIELD pointer provided. Output request will be ignored." << std::endl;
-		}
-	}
-	return isThereField;
+    if (!isThereField){
+        int myid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+        if (myid == 0){
+            std::cout << "WARNING! No valid FIELD pointer provided. Output request will be ignored." << std::endl;
+        }
+    }
+    return isThereField;
 }
 
 bool OUTPUT_MANAGER::checkCurrent(){
-	if (!isThereCurrent){
-		int myid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-		if (myid == 0){
-			std::cout << "WARNING! No valid CURRENT pointer provided. Output request will be ignored." << std::endl;
-		}
-	}
-	return isThereCurrent;
+    if (!isThereCurrent){
+        int myid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+        if (myid == 0){
+            std::cout << "WARNING! No valid CURRENT pointer provided. Output request will be ignored." << std::endl;
+        }
+    }
+    return isThereCurrent;
 }
 
 bool OUTPUT_MANAGER::checkSpecies(){
-	if (!isThereSpecList){
-		int myid;
-		MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-		if (myid == 0){
-			std::cout << "WARNING! Empty SPECIES list provided. Output request will be ignored." << std::endl;
-		}
-	}
-	return isThereSpecList;
+    if (!isThereSpecList){
+        int myid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+        if (myid == 0){
+            std::cout << "WARNING! Empty SPECIES list provided. Output request will be ignored." << std::endl;
+        }
+    }
+    return isThereSpecList;
 }
 
 int OUTPUT_MANAGER::getIntTime(double dtime){
-	if (dtime == 0.0)
-		return 0;
+    if (dtime == 0.0)
+        return 0;
 
-	int Nsteps = mygrid->getTotalNumberOfTimesteps();
-	int step = (int)floor(dtime / mygrid->dt + 0.5);
+    int Nsteps = mygrid->getTotalNumberOfTimesteps();
+    int step = (int)floor(dtime / mygrid->dt + 0.5);
 
-	return (step <= Nsteps) ? (step) : (-1);
+    return (step <= Nsteps) ? (step) : (-1);
 }
 
 int OUTPUT_MANAGER::findSpecName(std::string name){
-	int pos = 0;
-	for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++){
-		if ((*it)->getName() == name){
-			return pos;
-		}
-		pos++;
-	}
-	int myid;
-	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-	if (myid == 0){
-		std::cout << "WARNING! Species" << name << " not in species list !" << std::endl;
-	}
-	return -1;
+    int pos = 0;
+    for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++){
+        if ((*it)->getName() == name){
+            return pos;
+        }
+        pos++;
+    }
+    int myid;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    if (myid == 0){
+        std::cout << "WARNING! Species" << name << " not in species list !" << std::endl;
+    }
+    return -1;
 }
-int OUTPUT_MANAGER::returnTargetIfProbeIsInList(emProbe *newProbe){
+int OUTPUT_MANAGER::returnDomainIfProbeIsInList(emProbe *newProbe){
     int pos = 0;
     for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
         if ((*it)-> compareProbes(newProbe)){
@@ -363,7 +378,7 @@ int OUTPUT_MANAGER::returnTargetIfProbeIsInList(emProbe *newProbe){
     return -1;
 
 }
-int OUTPUT_MANAGER::returnTargetIfPlaneIsInList(emPlane *newPlane){
+int OUTPUT_MANAGER::returnDomainIfPlaneIsInList(emPlane *newPlane){
     int pos = 0;
     for (std::vector<emPlane*>::iterator it = myEMPlanes.begin(); it != myEMPlanes.end(); it++){
         if ((*it)-> comparePlanes(newPlane)){
@@ -375,267 +390,373 @@ int OUTPUT_MANAGER::returnTargetIfPlaneIsInList(emPlane *newPlane){
 
 }
 
-void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type, int target, double startTime, double frequency, double endTime){
-	std::list<request> tempList;
+void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type, int target, int domain, double startTime, double frequency, double endTime){
+    std::list<request> tempList;
 
-	for (double ttime = startTime; ttime <= endTime; ttime += frequency){
-		request req;
-		req.dtime = ttime;
-		req.itime = getIntTime(ttime);
-		req.type = type;
-		req.target = target;
-		tempList.push_back(req);
-	}
-	tempList.sort(requestCompTime);
-	reqList.merge(tempList, requestCompTime);
+    for (double ttime = startTime; ttime <= endTime; ttime += frequency){
+        request req;
+        req.dtime = ttime;
+        req.itime = getIntTime(ttime);
+        req.type = type;
+        req.target = target;
+        req.domain = domain;
+        tempList.push_back(req);
+    }
+    tempList.sort(requestCompTime);
+    reqList.merge(tempList, requestCompTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldBinaryFrom(double startTime, double frequency){
-	if (!(checkGrid() && checkEMField()))
-		return;
-	double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-	addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0, startTime, frequency, endSimTime);
-
+    if (!(checkGrid() && checkEMField()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, startTime, frequency, endSimTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldBinaryAt(double atTime){
-	if (!(checkGrid() && checkEMField()))
-		return;
-	addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0, atTime, 1.0, atTime);
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldBinaryFromTo(double startTime, double frequency, double endTime){
-	if (!(checkGrid() && checkEMField()))
-		return;
-	addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0, startTime, frequency, endTime);
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, startTime, frequency, endTime);
 }
+//NEW OUTPUT
+void OUTPUT_MANAGER::addEFieldFrom(double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endSimTime);
+}
+
+void OUTPUT_MANAGER::addEFieldAt(double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addEFieldFromTo(double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addBFieldFrom(double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endSimTime);
+}
+
+void OUTPUT_MANAGER::addBFieldAt(double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addBFieldFromTo(double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endTime);
+}
+// SELECTION
+void OUTPUT_MANAGER::addEFieldFrom(emPlane* Plane, double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int plane=returnDomainIfPlaneIsInList(Plane);
+    if(plane<0){
+        myEMPlanes.push_back(Plane);
+        plane=myEMPlanes.size()-1;
+    }
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_E_FIELD,  0, plane, startTime, frequency, endSimTime);
+
+}
+
+void OUTPUT_MANAGER::addEFieldAt(emPlane* Plane, double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
+        myEMPlanes.push_back(Plane);
+        domain=myEMPlanes.size()-1;
+    }
+    addRequestToList(requestList, OUT_E_FIELD,  0, domain, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addEFieldFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
+        myEMPlanes.push_back(Plane);
+        domain=myEMPlanes.size()-1;
+    }
+    addRequestToList(requestList, OUT_E_FIELD,  0,domain, startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addBFieldFrom(emPlane* Plane, double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
+        myEMPlanes.push_back(Plane);
+        domain=myEMPlanes.size()-1;
+    }
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_B_FIELD,  0,domain, startTime, frequency, endSimTime);
+
+}
+
+void OUTPUT_MANAGER::addBFieldAt(emPlane* Plane, double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
+        myEMPlanes.push_back(Plane);
+        domain=myEMPlanes.size()-1;
+    }
+    addRequestToList(requestList, OUT_B_FIELD,  0,domain, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addBFieldFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
+        myEMPlanes.push_back(Plane);
+        domain=myEMPlanes.size()-1;
+    }
+    addRequestToList(requestList, OUT_B_FIELD,  0,domain, startTime, frequency, endTime);
+}
+
+
 // EM Probe ///////////////////////////////////////
 void OUTPUT_MANAGER::addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfProbeIsInList(Probe);
-    if(target<0){
+    int domain=returnDomainIfProbeIsInList(Probe);
+    if(domain<0){
         myEMProbes.push_back(Probe);
         isThereEMProbe = true;
-        target=myEMProbes.size()-1;
-        std::cout<<"target=" << target << std::endl;
+        domain=myEMProbes.size()-1;
     }
-        double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-        addRequestToList(requestList, OUT_EMJPROBE, target, startTime, frequency, endSimTime);
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_EMJPROBE,  0,domain, startTime, frequency, endSimTime);
 
-    }
+}
 
 void OUTPUT_MANAGER::addEMFieldProbeAt(emProbe* Probe, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfProbeIsInList(Probe);
-    if(target<0){
+    int domain=returnDomainIfProbeIsInList(Probe);
+    if(domain<0){
         myEMProbes.push_back(Probe);
         isThereEMProbe = true;
-        target=myEMProbes.size()-1;
-
+        domain=myEMProbes.size()-1;
     }
-    std::cout<<"target=" << target << std::endl;
-    addRequestToList(requestList, OUT_EMJPROBE, target, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_EMJPROBE,  0,domain, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfProbeIsInList(Probe);
-    if(target<0){
+    int domain=returnDomainIfProbeIsInList(Probe);
+    if(domain<0){
         myEMProbes.push_back(Probe);
         isThereEMProbe = true;
-        target=myEMProbes.size()-1;
-        std::cout<<"target=" << target << std::endl;
+        domain=myEMProbes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPROBE, target, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_EMJPROBE,  0, domain, startTime, frequency, endTime);
 }
 
 // EM Plane ////////////////////////////////////////////
 void OUTPUT_MANAGER::addEMFieldPlaneFrom(emPlane* Plane, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfPlaneIsInList(Plane);
-    if(target<0){
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size()-1;
+        domain=myEMPlanes.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, startTime, frequency, endSimTime);
 
 }
 
 void OUTPUT_MANAGER::addEMFieldPlaneAt(emPlane* Plane, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfPlaneIsInList(Plane);
-    if(target<0){
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size()-1;
+        domain=myEMPlanes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPLANE, target, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addEMFieldPlaneFromTo(emPlane* Plane, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int target=returnTargetIfPlaneIsInList(Plane);
-    if(target<0){
+    int domain=returnDomainIfPlaneIsInList(Plane);
+    if(domain<0){
         myEMPlanes.push_back(Plane);
-        target=myEMPlanes.size()-1;
+        domain=myEMPlanes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPLANE, target, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_EMJPLANE,  0,domain, startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addSpecDensityBinaryFrom(std::string name, double startTime, double frequency){
-	if (!(checkGrid() && checkSpecies() && checkCurrent()))
-		return;
-	double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum, startTime, frequency, endSimTime);
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,startTime, frequency, endSimTime);
 
 }
 
 void OUTPUT_MANAGER::addSpecDensityBinaryAt(std::string name, double atTime){
-	if (!(checkGrid() && checkSpecies() && checkCurrent()))
-		return;
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum, atTime, 1.0, atTime);
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
-	if (!(checkGrid() && checkSpecies() && checkCurrent()))
-		return;
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum, startTime, frequency, endTime);
+    if (!(checkGrid() && checkSpecies() && checkCurrent()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addCurrentBinaryFrom(double startTime, double frequency){
-	if (!(checkGrid() && checkCurrent()))
-		return;
-	double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-	addRequestToList(requestList, OUT_CURRENT_BINARY, 0, startTime, frequency, endSimTime);
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,startTime, frequency, endSimTime);
 
 }
 
 void OUTPUT_MANAGER::addCurrentBinaryAt(double atTime){
-	if (!(checkGrid() && checkCurrent()))
-		return;
-	addRequestToList(requestList, OUT_CURRENT_BINARY, 0, atTime, 1.0, atTime);
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addCurrentBinaryFromTo(double startTime, double frequency, double endTime){
-	if (!(checkGrid() && checkCurrent()))
-		return;
-	addRequestToList(requestList, OUT_CURRENT_BINARY, 0, startTime, frequency, endTime);
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency){
-	if (!(checkGrid() && checkSpecies()))
-		return;
-	double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum, startTime, frequency, endSimTime);
+    if (!(checkGrid() && checkSpecies()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,startTime, frequency, endSimTime);
 
 }
 
 void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryAt(std::string name, double atTime){
-	if (!(checkGrid() && checkSpecies()))
-		return;
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum, atTime, 1.0, atTime);
+    if (!(checkGrid() && checkSpecies()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
-	if (!(checkGrid() && checkSpecies()))
-		return;
-	int specNum = findSpecName(name);
-	if (specNum < 0)
-		return;
-	addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum, startTime, frequency, endTime);
+    if (!(checkGrid() && checkSpecies()))
+        return;
+    int specNum = findSpecName(name);
+    if (specNum < 0)
+        return;
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
-	if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
-		return;
-	double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-	addRequestToList(requestList, OUT_DIAG, 0, startTime, frequency, endSimTime);
-	isThereDiag = true;
+    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_DIAG, 0, 0, startTime, frequency, endSimTime);
+    isThereDiag = true;
 }
 
 void OUTPUT_MANAGER::addDiagAt(double atTime){
-	if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
-		return;
-	addRequestToList(requestList, OUT_DIAG, 0, atTime, 1.0, atTime);
-	isThereDiag = true;
+    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_DIAG, 0,  0,atTime, 1.0, atTime);
+    isThereDiag = true;
 }
 
 void OUTPUT_MANAGER::addDiagFromTo(double startTime, double frequency, double endTime){
-	if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
-		return;
-	addRequestToList(requestList, OUT_DIAG, 0, startTime, frequency, endTime);
-	isThereDiag = true;
+    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
+        return;
+    addRequestToList(requestList, OUT_DIAG, 0,  0,startTime, frequency, endTime);
+    isThereDiag = true;
 }
 
 void OUTPUT_MANAGER::prepareOutputMap(){
 
-	requestList.sort(requestCompTime);
-	requestList.unique(requestCompUnique);
+    requestList.sort(requestCompTime);
+    requestList.unique(requestCompUnique);
 
-	std::map< int, std::vector<request> >::iterator itMap;
+    std::map< int, std::vector<request> >::iterator itMap;
 
-	for (std::list<request>::iterator itList = requestList.begin(); itList != requestList.end(); itList++){
-		itMap = allOutputs.find(itList->itime);
-		if (itMap != allOutputs.end()){
-			itMap->second.push_back(*itList);
-		}
-		else{
-			std::vector<request> newTimeVec;
-			newTimeVec.push_back(*itList);
-			allOutputs.insert(std::pair<int, std::vector<request> >(itList->itime, newTimeVec));
-			timeList.push_back(itList->itime);
-		}
-	}
+    for (std::list<request>::iterator itList = requestList.begin(); itList != requestList.end(); itList++){
+        itMap = allOutputs.find(itList->itime);
+        if (itMap != allOutputs.end()){
+            itMap->second.push_back(*itList);
+        }
+        else{
+            std::vector<request> newTimeVec;
+            newTimeVec.push_back(*itList);
+            allOutputs.insert(std::pair<int, std::vector<request> >(itList->itime, newTimeVec));
+            timeList.push_back(itList->itime);
+        }
+    }
 
 }
 
 void OUTPUT_MANAGER::autoVisualDiag(){
-	int myid;
-	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-	if (myid == 0){
-		std::cout << "*******OUTPUT MANAGER DEBUG***********" << std::endl;
-		std::map< int, std::vector<request> >::iterator itMap;
-		for (std::vector<int>::iterator itD = timeList.begin(); itD != timeList.end(); itD++) {
-			std::map< int, std::vector<request> >::iterator itMapD;
-			itMapD = allOutputs.find(*itD);
-			if (itMapD != allOutputs.end()){
-				std::cout << *itD << " ";
-				for (std::vector<request>::iterator itR = itMapD->second.begin(); itR != itMapD->second.end(); itR++)
-					std::cout << "(" << itR->type << "," << itR->target << ")";
-				std::cout << std::endl;
-			}
+    int myid;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    if (myid == 0){
+        std::cout << "*******OUTPUT MANAGER DEBUG***********" << std::endl;
+        std::map< int, std::vector<request> >::iterator itMap;
+        for (std::vector<int>::iterator itD = timeList.begin(); itD != timeList.end(); itD++) {
+            std::map< int, std::vector<request> >::iterator itMapD;
+            itMapD = allOutputs.find(*itD);
+            if (itMapD != allOutputs.end()){
+                std::cout << *itD << " ";
+                for (std::vector<request>::iterator itR = itMapD->second.begin(); itR != itMapD->second.end(); itR++)
+                    std::cout << "(" << itR->type << "," << itR->target << ")";
+                std::cout << std::endl;
+            }
 
-		}
-		std::cout << "**************************************" << std::endl;
-	}
+        }
+        std::cout << "**************************************" << std::endl;
+    }
 }
 
 void OUTPUT_MANAGER::processOutputEntry(request req){
-	switch (req.type){
-	case OUT_EM_FIELD_BINARY:
-		callEMFieldBinary(req);
-		break;
+    switch (req.type){
+    case OUT_EM_FIELD_BINARY:
+        callEMFieldBinary(req);
+        break;
 
     case OUT_EMJPROBE:
         callEMFieldProbe(req);
@@ -646,122 +767,128 @@ void OUTPUT_MANAGER::processOutputEntry(request req){
         break;
 
     case OUT_SPEC_DENSITY_BINARY:
-		callSpecDensityBinary(req);
-		break;
+        callSpecDensityBinary(req);
+        break;
 
-	case OUT_CURRENT_BINARY:
-		callCurrentBinary(req);
-		break;
+    case OUT_CURRENT_BINARY:
+        callCurrentBinary(req);
+        break;
 
-	case OUT_SPEC_PHASE_SPACE_BINARY:
-		callSpecPhaseSpaceBinary(req);
-		break;
+    case OUT_SPEC_PHASE_SPACE_BINARY:
+        callSpecPhaseSpaceBinary(req);
+        break;
 
-	case OUT_DIAG:
-		callDiag(req);
-		break;
+    case OUT_DIAG:
+        callDiag(req);
+        break;
+    case OUT_E_FIELD:
+        callEMFieldPlane(req);
+        break;
+    case OUT_B_FIELD:
+        callEMFieldPlane(req);
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 void OUTPUT_MANAGER::callDiags(int istep){
-	std::map< int, std::vector<request> >::iterator itMap;
-	itMap = allOutputs.find(istep);
+    std::map< int, std::vector<request> >::iterator itMap;
+    itMap = allOutputs.find(istep);
 
-	if (itMap == allOutputs.end())
-		return;
+    if (itMap == allOutputs.end())
+        return;
 
-	std::vector<request> diagList = itMap->second;
+    std::vector<request> diagList = itMap->second;
 
-	for (std::vector<request>::iterator it = diagList.begin(); it != diagList.end(); it++){
-		processOutputEntry(*it);
-	}
+    for (std::vector<request>::iterator it = diagList.begin(); it != diagList.end(); it++){
+        processOutputEntry(*it);
+    }
 }
 
 std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext){
-	std::stringstream ss;
-	ss << dir << "/"
-		<< out << "_";
-	if (opt != "")
-		ss << opt << "_";
-	ss << std::setw(OUTPUT_SIZE_TIME_DIAG) << std::setfill('0') << std::fixed << std::setprecision(3) << time;
-	ss << ext;
-	return ss.str();
+    std::stringstream ss;
+    ss << dir << "/"
+       << out << "_";
+    if (opt != "")
+        ss << opt << "_";
+    ss << std::setw(OUTPUT_SIZE_TIME_DIAG) << std::setfill('0') << std::fixed << std::setprecision(3) << time;
+    ss << ext;
+    return ss.str();
 }
 
 void OUTPUT_MANAGER::writeEMFieldMap(std::ofstream &output, request req){
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
 
-	int Ncomp = myfield->getNcomp();
+    int Ncomp = myfield->getNcomp();
 
-	for (int c = 0; c < 3; c++)
-		output << uniqueN[c] << "\t";
+    for (int c = 0; c < 3; c++)
+        output << uniqueN[c] << "\t";
 
-	output << std::endl;
+    output << std::endl;
 
-	for (int c = 0; c < 3; c++)
-		output << mygrid->rnproc[c] << "\t";
+    for (int c = 0; c < 3; c++)
+        output << mygrid->rnproc[c] << "\t";
 
-	output << std::endl;
+    output << std::endl;
 
-	output << "Ncomp: " << Ncomp << std::endl;
+    output << "Ncomp: " << Ncomp << std::endl;
 
-	for (int c = 0; c < Ncomp; c++){
-		integer_or_halfinteger crd = myfield->getCompCoords(c);
-		output << c << ":\t" << (int)crd.x << "\t"
-			<< (int)crd.y << "\t"
-			<< (int)crd.z << std::endl;
-	}
+    for (int c = 0; c < Ncomp; c++){
+        integer_or_halfinteger crd = myfield->getCompCoords(c);
+        output << c << ":\t" << (int)crd.x << "\t"
+               << (int)crd.y << "\t"
+               << (int)crd.z << std::endl;
+    }
 
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->cir[c][i] << "  ";
-		output << std::endl;
-	}
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->chr[c][i] << "  ";
-		output << std::endl;
-	}
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->cir[c][i] << "  ";
+        output << std::endl;
+    }
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->chr[c][i] << "  ";
+        output << std::endl;
+    }
 }
 
 void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
     int Ncomp = myfield->getNcomp();
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
-	MPI_Offset disp = 0;
-	int small_header = 6 * sizeof(int);
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
+    MPI_Offset disp = 0;
+    int small_header = 6 * sizeof(int);
     int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
-		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
+            +2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
+            +sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
 
-	MPI_File thefile;
-	MPI_Status status;
+    MPI_File thefile;
+    MPI_Status status;
 
-	char* nomefile = new char[fileName.size() + 1];
+    char* nomefile = new char[fileName.size() + 1];
 
-	nomefile[fileName.size()] = 0;
-	sprintf(nomefile, "%s", fileName.c_str());
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
 
-	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
-	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
-	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
-	if (mygrid->myid == 0){
-		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
-		MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
-		for (int c = 0; c < Ncomp; c++){
-			integer_or_halfinteger crd = myfield->getCompCoords(c);
+    //+++++++++++ FILE HEADER  +++++++++++++++++++++
+    // We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+    // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+    if (mygrid->myid == 0){
+        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+        MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
+        MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
+        for (int c = 0; c < Ncomp; c++){
+            integer_or_halfinteger crd = myfield->getCompCoords(c);
             int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
             MPI_File_write(thefile, tp, 3, MPI_INT, &status);
         }
@@ -772,52 +899,52 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
     }
     //*********** END HEADER *****************
 
-	disp = big_header;
+    disp = big_header;
 
-	for (int rank = 0; rank < mygrid->myid; rank++)
-		disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
-	if (disp < 0)
-	{
-		std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
-		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
-		exit(33);
-	}
-	if (mygrid->myid != 0){
-		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-	}
+    for (int rank = 0; rank < mygrid->myid; rank++)
+        disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
+    if (disp < 0)
+    {
+        std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+        std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+        exit(33);
+    }
+    if (mygrid->myid != 0){
+        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    }
 
 
-	//+++++++++++ Start CPU HEADER  +++++++++++++++++++++
-	{
-		int todo[6];
-		todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-		todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-		todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-		todo[3] = mygrid->uniquePointsloc[0];
-		todo[4] = mygrid->uniquePointsloc[1];
-		todo[5] = mygrid->uniquePointsloc[2];
+    //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
+    {
+        int todo[6];
+        todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+        todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
+        todo[3] = mygrid->uniquePointsloc[0];
+        todo[4] = mygrid->uniquePointsloc[1];
+        todo[5] = mygrid->uniquePointsloc[2];
         MPI_File_write(thefile, todo, 6, MPI_INT, &status);
-	}
-	//+++++++++++ Start CPU Field Values  +++++++++++++++++++++
-	{
-		float *todo;
-		int Nx, Ny, Nz;
-		Nx = mygrid->uniquePointsloc[0];
-		Ny = mygrid->uniquePointsloc[1];
-		Nz = mygrid->uniquePointsloc[2];
+    }
+    //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+    {
+        float *todo;
+        int Nx, Ny, Nz;
+        Nx = mygrid->uniquePointsloc[0];
+        Ny = mygrid->uniquePointsloc[1];
+        Nz = mygrid->uniquePointsloc[2];
         int size = Ncomp*Nx*Ny*Nz;
-		todo = new float[size];
-		for (int k = 0; k < Nz; k++)
-			for (int j = 0; j < Ny; j++)
-				for (int i = 0; i < Nx; i++)
-					for (int c = 0; c < Ncomp; c++)
-						todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
-		MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
-		delete[]todo;
-	}
+        todo = new float[size];
+        for (int k = 0; k < Nz; k++)
+            for (int j = 0; j < Ny; j++)
+                for (int i = 0; i < Nx; i++)
+                    for (int c = 0; c < Ncomp; c++)
+                        todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+        MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+        delete[]todo;
+    }
 
-	MPI_File_close(&thefile);
-	//////////////////////////// END of collective binary file write
+    MPI_File_close(&thefile);
+    //////////////////////////// END of collective binary file write
 }
 
 
@@ -902,7 +1029,7 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
         count[1] = mygrid->uniquePointsloc[1];
         count[0] = mygrid->uniquePointsloc[2];
     }
-     /*
+    /*
          * Select hyperslab in the file.
          */
     for(int i=0;i<6;i++){
@@ -977,13 +1104,13 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 
     if (mygrid->myid == mygrid->master_proc){
         std::string nameMap = composeOutputName(outputDir, "EMfield", "", req.dtime, ".map");
-		std::ofstream of1;
-		of1.open(nameMap.c_str());
-		writeEMFieldMap(of1, req);
-		of1.close();
-	}
+        std::ofstream of1;
+        of1.open(nameMap.c_str());
+        writeEMFieldMap(of1, req);
+        of1.close();
+    }
 
-	std::string nameBin = composeOutputName(outputDir, "EMfield", "", req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "EMfield", "", req.dtime, ".bin");
 #if defined(USE_HDF5)
     writeEMFieldBinaryHDF5(nameBin, req);
 #else
@@ -991,8 +1118,9 @@ void OUTPUT_MANAGER::callEMFieldBinary(request req){
 #endif
 
 }
-void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
-    int Ncomp = myfield->getNcomp();
+void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane, bool EorB){
+    int Ncomp = 3;//myfield->getNcomp();
+    int offset = EorB*3;
     int *totUniquePoints;
     int shouldIWrite=false;
     int uniqueN[3], slice_rNproc[3];
@@ -1039,9 +1167,8 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
 
     MPI_Offset disp = 0;
     int small_header = 6 * sizeof(int);
-    int big_header = 3 * sizeof(int)+ 3 * sizeof(int)
-            +2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-            +sizeof(int)+myfield->getNcomp() * 3 * sizeof(int);
+    int big_header = (1+3+3+1)*sizeof(int)
+            +(uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
 
     MPI_File thefile;
     MPI_Status status;
@@ -1058,25 +1185,32 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
         //+++++++++++ FILE HEADER  +++++++++++++++++++++
         if (mySliceID == 0){
             MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-            MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-            MPI_File_write(thefile, slice_rNproc, 3, MPI_INT, &status);
-            MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
-            for (int c = 0; c < Ncomp; c++){
-                integer_or_halfinteger crd = myfield->getCompCoords(c);
-                int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
-                MPI_File_write(thefile, tp, 3, MPI_INT, &status);
+            int itodo[8];
+            itodo[0]=is_big_endian();
+            itodo[1]=uniqueN[0];
+            itodo[2]=uniqueN[1];
+            itodo[3]=uniqueN[2];
+            itodo[4]=slice_rNproc[0];
+            itodo[5]=slice_rNproc[1];
+            itodo[6]=slice_rNproc[2];
+            itodo[7]=Ncomp;
+            MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+
+            float *fcir[3];
+            for(int c=0;c<3;c++){
+                fcir[c]=new float[uniqueN[c]];
+                for(int m=0; m<uniqueN[c]; m++){
+                    fcir[c][m] = (float)mygrid->cir[c][m];
+                }
             }
             for(int c=0;c<3;c++){
                 if(remains[c])
-                    MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
+                    MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
                 else
-                    MPI_File_write(thefile, &mygrid->cir[c][globalri[c]], 1, MPI_DOUBLE, &status);
+                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
             }
             for(int c=0;c<3;c++){
-                if(remains[c])
-                    MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
-                else
-                    MPI_File_write(thefile, &mygrid->chr[c][globalri[c]], 1, MPI_DOUBLE, &status);
+                delete[] fcir[c];
             }
 
         }
@@ -1099,8 +1233,8 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
             int itodo[6];
             for(int c=0;c<3;c++){
                 if(remains[c]){
-                   itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
-                   itodo[c+3] = mygrid->uniquePointsloc[c];
+                    itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
+                    itodo[c+3] = mygrid->uniquePointsloc[c];
                 }
                 else{
                     itodo[c] = 0;
@@ -1136,7 +1270,7 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
                     for (int i = 0; i < Nx; i++){
                         ii=i+origin[0];
                         for (int c = 0; c < Ncomp; c++)
-                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, ii, jj, kk);
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  (float)myfield->VEB(c+offset, ii, jj, kk);
                     }
                 }
             }
@@ -1148,13 +1282,24 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, emPlane *plane){
     MPI_Comm_free( &sliceCommunicator );
 }
 
-
 void OUTPUT_MANAGER::callEMFieldPlane(request req){
 
-    std::string nameBin = composeOutputName(outputDir, "EMPLANE", myEMPlanes[req.target]->name, req.dtime, ".bin");
-    writeEMFieldPlane(nameBin, myEMPlanes[req.target]);
-
+    if(req.type==OUT_E_FIELD){
+        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBin, myEMPlanes[req.domain],0);
+    }
+    else if(req.type==OUT_B_FIELD){
+        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBin, myEMPlanes[req.domain],1);
+    }
+    else if(req.type==OUT_EMJPLANE){
+        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBinE, myEMPlanes[req.domain],0);
+        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myEMPlanes[req.domain]->name, req.dtime, ".bin");
+        writeEMFieldPlane(nameBinB, myEMPlanes[req.domain],1);
+    }
 }
+
 void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
     int hii[3], wii[3];
     double hiw[3][3], wiw[3][3];
@@ -1228,18 +1373,18 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
                     i1 = i + wii[0] - 1;
                     i2 = i + hii[0] - 1;
                     dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                        E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+                            E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
                     dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                        E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+                            E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
                     dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                        E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+                            E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
 
                     dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-                        B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+                            B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
                     dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-                        B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+                            B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
                     dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-                        B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+                            B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
                 }
             }
         }
@@ -1256,18 +1401,18 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
                 i1 = i + wii[0] - 1;
                 i2 = i + hii[0] - 1;
                 dvol = hiw[0][i] * wiw[1][j],
-                    E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+                        E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
                 dvol = wiw[0][i] * hiw[1][j],
-                    E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+                        E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
                 dvol = wiw[0][i] * wiw[1][j],
-                    E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+                        E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
 
                 dvol = wiw[0][i] * hiw[1][j],
-                    B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+                        B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
                 dvol = hiw[0][i] * wiw[1][j],
-                    B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+                        B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
                 dvol = hiw[0][i] * hiw[1][j],
-                    B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+                        B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
             }
         }
         break;
@@ -1279,18 +1424,18 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
             dvol = hiw[0][i],
-                E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+                    E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
             dvol = wiw[0][i],
-                E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+                    E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
             dvol = wiw[0][i],
-                E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+                    E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
 
             dvol = wiw[0][i],
-                B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+                    B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
             dvol = hiw[0][i],
-                B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+                    B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
             dvol = hiw[0][i],
-                B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+                    B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
         }
         break;
     }
@@ -1300,16 +1445,16 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
 void OUTPUT_MANAGER::callEMFieldProbe(request req){
 
     double rr[3], EE[3], BB[3];
-    rr[0]=myEMProbes[req.target]->coordinates[0];
-    rr[1]=myEMProbes[req.target]->coordinates[1];
-    rr[2]=myEMProbes[req.target]->coordinates[2];
+    rr[0]=myEMProbes[req.domain]->coordinates[0];
+    rr[1]=myEMProbes[req.domain]->coordinates[1];
+    rr[2]=myEMProbes[req.domain]->coordinates[2];
 
     if(rr[0]>= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
         if (mygrid->accesso.dimensions<2||(rr[1]>= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
             if (mygrid->accesso.dimensions<3||(rr[2]>= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
                 interpEB(rr,EE,BB);
                 std::ofstream of0;
-                of0.open(myEMProbes[req.target]->fileName.c_str(), std::ios::app);
+                of0.open(myEMProbes[req.domain]->fileName.c_str(), std::ios::app);
                 of0 << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << req.dtime;
                 of0 << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
                 of0 << " " << setw(diagWidth) << BB[0] << " " << setw(diagWidth) << BB[1] << " " << setw(diagWidth) << BB[2];
@@ -1325,465 +1470,465 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req){
 
 
 void OUTPUT_MANAGER::writeSpecDensityMap(std::ofstream &output, request req){
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
 
-	for (int c = 0; c < 3; c++)
-		output << uniqueN[c] << "\t";
-	output << std::endl;
-	for (int c = 0; c < 3; c++)
-		output << mygrid->rnproc[c] << "\t";
-	output << std::endl;
+    for (int c = 0; c < 3; c++)
+        output << uniqueN[c] << "\t";
+    output << std::endl;
+    for (int c = 0; c < 3; c++)
+        output << mygrid->rnproc[c] << "\t";
+    output << std::endl;
 
-	output << "Ncomp: " << 1 << std::endl;
-	integer_or_halfinteger crd = mycurrent->getDensityCoords();
-	output << 0 << ":\t" << (int)crd.x << "\t"
-		<< (int)crd.y << "\t"
-		<< (int)crd.z << std::endl;
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->cir[c][i] << "  ";
-		output << std::endl;
-	}
+    output << "Ncomp: " << 1 << std::endl;
+    integer_or_halfinteger crd = mycurrent->getDensityCoords();
+    output << 0 << ":\t" << (int)crd.x << "\t"
+           << (int)crd.y << "\t"
+           << (int)crd.z << std::endl;
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->cir[c][i] << "  ";
+        output << std::endl;
+    }
 
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->chr[c][i] << "  ";
-		output << std::endl;
-	}
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->chr[c][i] << "  ";
+        output << std::endl;
+    }
 
 }
 
 void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
 
-	MPI_Offset disp = 0;
+    MPI_Offset disp = 0;
 
-	int small_header = 6 * sizeof(int);
-	int big_header = 3 * sizeof(int)+3 * sizeof(int)
-		+2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-		+sizeof(int)+3 * sizeof(int);
+    int small_header = 6 * sizeof(int);
+    int big_header = 3 * sizeof(int)+3 * sizeof(int)
+            +2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
+            +sizeof(int)+3 * sizeof(int);
 
-	MPI_File thefile;
-	MPI_Status status;
+    MPI_File thefile;
+    MPI_Status status;
 
-	char* nomefile = new char[fileName.size() + 1];
+    char* nomefile = new char[fileName.size() + 1];
 
-	nomefile[fileName.size()] = 0;
-	sprintf(nomefile, "%s", fileName.c_str());
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
 
-	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
-		MPI_INFO_NULL, &thefile);
+    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
+                  MPI_INFO_NULL, &thefile);
 
-	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
-	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
-	if (mygrid->myid == 0){
-		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
+    //+++++++++++ FILE HEADER  +++++++++++++++++++++
+    // We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+    // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+    if (mygrid->myid == 0){
+        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+        MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 
-		int tNcomp = 1;
-		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
-		integer_or_halfinteger crd = mycurrent->getDensityCoords();
+        int tNcomp = 1;
+        MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
+        integer_or_halfinteger crd = mycurrent->getDensityCoords();
         int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
         MPI_File_write(thefile, tp, 3, MPI_INT, &status);
 
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
-			MPI_DOUBLE, &status);
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
+                           MPI_DOUBLE, &status);
 
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
-			MPI_DOUBLE, &status);
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
+                           MPI_DOUBLE, &status);
 
-	}
+    }
 
-	//****************END OF FILE HEADER
-
-
-	disp = big_header;
-
-	for (int rank = 0; rank < mygrid->myid; rank++)
-		disp += small_header +
-		mygrid->proc_totUniquePoints[rank] * sizeof(float);
-
-	if (disp < 0)
-	{
-		std::cout << "a problem occurred when trying to mpi_file_set_view in writeSpecDensityBinary" << std::endl;
-		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
-		exit(33);
-	}
-	if (mygrid->myid != 0){
-		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
-	}
-
-	//****************CPU HEADER
-	{
-		int todo[6];
-		todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-		todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-		todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-		todo[3] = mygrid->uniquePointsloc[0];
-		todo[4] = mygrid->uniquePointsloc[1];
-		todo[5] = mygrid->uniquePointsloc[2];
-
-		MPI_File_write(thefile, todo, 6, MPI_INT, &status);
-	}
-	//****************END OF CPU HEADER
+    //****************END OF FILE HEADER
 
 
-	//****************CPU DENSITY VALUES
-	{
-		float *todo;
-		int Nx, Ny, Nz;
+    disp = big_header;
 
-		Nx = mygrid->uniquePointsloc[0];
-		Ny = mygrid->uniquePointsloc[1];
-		Nz = mygrid->uniquePointsloc[2];
+    for (int rank = 0; rank < mygrid->myid; rank++)
+        disp += small_header +
+                mygrid->proc_totUniquePoints[rank] * sizeof(float);
 
-		int size = Nx*Ny*Nz;
+    if (disp < 0)
+    {
+        std::cout << "a problem occurred when trying to mpi_file_set_view in writeSpecDensityBinary" << std::endl;
+        std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+        exit(33);
+    }
+    if (mygrid->myid != 0){
+        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
+    }
 
-		todo = new float[size];
+    //****************CPU HEADER
+    {
+        int todo[6];
+        todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+        todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
+        todo[3] = mygrid->uniquePointsloc[0];
+        todo[4] = mygrid->uniquePointsloc[1];
+        todo[5] = mygrid->uniquePointsloc[2];
 
-		for (int k = 0; k < Nz; k++)
-			for (int j = 0; j < Ny; j++)
-				for (int i = 0; i < Nx; i++)
-					todo[i + j*Nx + k*Nx*Ny] =
-					(float)mycurrent->density(i, j, k);
+        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
+    }
+    //****************END OF CPU HEADER
 
-		MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
 
-		delete[]todo;
-	}
-	//****************END OF CPU DENSITY VALUES
+    //****************CPU DENSITY VALUES
+    {
+        float *todo;
+        int Nx, Ny, Nz;
 
-	MPI_File_close(&thefile);
-	delete[] nomefile;
+        Nx = mygrid->uniquePointsloc[0];
+        Ny = mygrid->uniquePointsloc[1];
+        Nz = mygrid->uniquePointsloc[2];
+
+        int size = Nx*Ny*Nz;
+
+        todo = new float[size];
+
+        for (int k = 0; k < Nz; k++)
+            for (int j = 0; j < Ny; j++)
+                for (int i = 0; i < Nx; i++)
+                    todo[i + j*Nx + k*Nx*Ny] =
+                            (float)mycurrent->density(i, j, k);
+
+        MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+
+        delete[]todo;
+    }
+    //****************END OF CPU DENSITY VALUES
+
+    MPI_File_close(&thefile);
+    delete[] nomefile;
 
 }
 
 void OUTPUT_MANAGER::callSpecDensityBinary(request req){
-	mycurrent->eraseDensity();
-	myspecies[req.target]->density_deposition_standard(mycurrent);
-	mycurrent->pbc();
+    mycurrent->eraseDensity();
+    myspecies[req.target]->density_deposition_standard(mycurrent);
+    mycurrent->pbc();
 
-	std::string name = myspecies[req.target]->name;
+    std::string name = myspecies[req.target]->name;
 
-	if (mygrid->myid == mygrid->master_proc){
-		std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
-		std::ofstream of1;
-		of1.open(nameMap.c_str());
-		writeSpecDensityMap(of1, req);
-		of1.close();
-	}
+    if (mygrid->myid == mygrid->master_proc){
+        std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
+        std::ofstream of1;
+        of1.open(nameMap.c_str());
+        writeSpecDensityMap(of1, req);
+        of1.close();
+    }
 
-	std::string nameBin = composeOutputName(outputDir, "DENS", name, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "DENS", name, req.dtime, ".bin");
 
-	writeSpecDensityBinary(nameBin, req);
+    writeSpecDensityBinary(nameBin, req);
 
 }
 
 void  OUTPUT_MANAGER::writeCurrentMap(std::ofstream &output, request req){
-	int Ncomp = mycurrent->Ncomp;
+    int Ncomp = mycurrent->Ncomp;
 
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
 
-	for (int c = 0; c < 3; c++)
-		output << uniqueN[c] << "\t";
-	output << std::endl;
-	for (int c = 0; c < 3; c++)
-		output << mygrid->rnproc[c] << "\t";
-	output << std::endl;
+    for (int c = 0; c < 3; c++)
+        output << uniqueN[c] << "\t";
+    output << std::endl;
+    for (int c = 0; c < 3; c++)
+        output << mygrid->rnproc[c] << "\t";
+    output << std::endl;
 
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->cir[c][i] << "  ";
-		output << std::endl;
-	}
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->cir[c][i] << "  ";
+        output << std::endl;
+    }
 
-	for (int c = 0; c < 3; c++){
-		for (int i = 0; i < uniqueN[c]; i++)
-			output << mygrid->chr[c][i] << "  ";
-		output << std::endl;
-	}
+    for (int c = 0; c < 3; c++){
+        for (int i = 0; i < uniqueN[c]; i++)
+            output << mygrid->chr[c][i] << "  ";
+        output << std::endl;
+    }
 }
 
 void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
 
-	int Ncomp = 3;
+    int Ncomp = 3;
 
-	int uniqueN[3];
-	uniqueN[0] = mygrid->uniquePoints[0];
-	uniqueN[1] = mygrid->uniquePoints[1];
-	uniqueN[2] = mygrid->uniquePoints[2];
+    int uniqueN[3];
+    uniqueN[0] = mygrid->uniquePoints[0];
+    uniqueN[1] = mygrid->uniquePoints[1];
+    uniqueN[2] = mygrid->uniquePoints[2];
 
 
-	MPI_Offset disp = 0;
+    MPI_Offset disp = 0;
 
-	int small_header = 6 * sizeof(int);
-	int big_header = 3 * sizeof(int)+3 * sizeof(int)+
-		2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)+
-		sizeof(int)+3 * 3 * sizeof(int);
+    int small_header = 6 * sizeof(int);
+    int big_header = 3 * sizeof(int)+3 * sizeof(int)+
+            2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)+
+            sizeof(int)+3 * 3 * sizeof(int);
 
-	MPI_File thefile;
-	MPI_Status status;
+    MPI_File thefile;
+    MPI_Status status;
 
-	char *nomefile = new char[fileName.size() + 1];
-	nomefile[fileName.size()] = 0;
-	sprintf(nomefile, "%s", fileName.c_str());
+    char *nomefile = new char[fileName.size() + 1];
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
 
-	MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
-		MPI_INFO_NULL, &thefile);
+    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
+                  MPI_INFO_NULL, &thefile);
 
-	//+++++++++++ FILE HEADER  +++++++++++++++++++++
-	// We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
-	// in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
-	if (mygrid->myid == 0){
-		MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-		MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-		MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
+    //+++++++++++ FILE HEADER  +++++++++++++++++++++
+    // We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
+    // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
+    if (mygrid->myid == 0){
+        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
+        MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
 
-		int tNcomp = 3;
-		MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
-		for (int c = 0; c < 3; c++){
-			integer_or_halfinteger crd = mycurrent->getJCoords(c);
+        int tNcomp = 3;
+        MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
+        for (int c = 0; c < 3; c++){
+            integer_or_halfinteger crd = mycurrent->getJCoords(c);
             int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
             MPI_File_write(thefile, tp, 3, MPI_INT, &status);
-		}
+        }
 
 
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
-			MPI_DOUBLE, &status);
-		for (int c = 0; c < 3; c++)
-			MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
-			MPI_DOUBLE, &status);
-	}
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
+                           MPI_DOUBLE, &status);
+        for (int c = 0; c < 3; c++)
+            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
+                           MPI_DOUBLE, &status);
+    }
 
-	//****************END OF FILE HEADER
+    //****************END OF FILE HEADER
 
-	disp = big_header;
+    disp = big_header;
 
-	for (int rank = 0; rank < mygrid->myid; rank++)
-		disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
-	if (disp < 0)
-	{
-		std::cout << "a problem occurred when trying to mpi_file_set_view in writeCurrentBinary" << std::endl;
-		std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
-		exit(33);
-	}
+    for (int rank = 0; rank < mygrid->myid; rank++)
+        disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
+    if (disp < 0)
+    {
+        std::cout << "a problem occurred when trying to mpi_file_set_view in writeCurrentBinary" << std::endl;
+        std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+        exit(33);
+    }
 
-	if (mygrid->myid != 0){
-		MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
-	}
+    if (mygrid->myid != 0){
+        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
+    }
 
-	//****************CPU HEADER
-	{
-		int todo[6];
-		todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-		todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-		todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-		todo[3] = mygrid->uniquePointsloc[0];
-		todo[4] = mygrid->uniquePointsloc[1];
-		todo[5] = mygrid->uniquePointsloc[2];
+    //****************CPU HEADER
+    {
+        int todo[6];
+        todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
+        todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
+        todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
+        todo[3] = mygrid->uniquePointsloc[0];
+        todo[4] = mygrid->uniquePointsloc[1];
+        todo[5] = mygrid->uniquePointsloc[2];
 
-		MPI_File_write(thefile, todo, 6, MPI_INT, &status);
-	}
-	//****************END OF CPU HEADER
+        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
+    }
+    //****************END OF CPU HEADER
 
 
-	//****************CPU CURRENT VALUES
-	{
-		float *todo;
-		int Nx, Ny, Nz;
+    //****************CPU CURRENT VALUES
+    {
+        float *todo;
+        int Nx, Ny, Nz;
 
-		int Nc = Ncomp;
+        int Nc = Ncomp;
 
-		Nx = mygrid->uniquePointsloc[0];
-		Ny = mygrid->uniquePointsloc[1];
-		Nz = mygrid->uniquePointsloc[2];
+        Nx = mygrid->uniquePointsloc[0];
+        Ny = mygrid->uniquePointsloc[1];
+        Nz = mygrid->uniquePointsloc[2];
 
-		int size = Nx*Ny*Nz*Nc;
+        int size = Nx*Ny*Nz*Nc;
 
-		todo = new float[size];
+        todo = new float[size];
 
-		for (int k = 0; k < Nz; k++)
-			for (int j = 0; j < Ny; j++)
-				for (int i = 0; i < Nx; i++)
-					for (int c = 0; c < Nc; c++)
-						todo[c + i*Nc + j*Nx*Nc + k*Nx*Ny*Nc] =
-						(float)mycurrent->JJ(c, i, j, k);
+        for (int k = 0; k < Nz; k++)
+            for (int j = 0; j < Ny; j++)
+                for (int i = 0; i < Nx; i++)
+                    for (int c = 0; c < Nc; c++)
+                        todo[c + i*Nc + j*Nx*Nc + k*Nx*Ny*Nc] =
+                                (float)mycurrent->JJ(c, i, j, k);
 
-		MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+        MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
 
-		delete[]todo;
-	}
-	//****************END OF CPU CURRENT VALUES
+        delete[]todo;
+    }
+    //****************END OF CPU CURRENT VALUES
 
-	MPI_File_close(&thefile);
+    MPI_File_close(&thefile);
 
-	delete[] nomefile;
+    delete[] nomefile;
 }
 
 void  OUTPUT_MANAGER::callCurrentBinary(request req){
-	if (mygrid->myid == mygrid->master_proc){
-		std::string nameMap = composeOutputName(outputDir, "J", "", req.dtime, ".map");
-		std::ofstream of1;
-		of1.open(nameMap.c_str());
-		writeCurrentMap(of1, req);
-		of1.close();
-	}
-	std::string nameBin = composeOutputName(outputDir, "J", "", req.dtime, ".bin");
+    if (mygrid->myid == mygrid->master_proc){
+        std::string nameMap = composeOutputName(outputDir, "J", "", req.dtime, ".map");
+        std::ofstream of1;
+        of1.open(nameMap.c_str());
+        writeCurrentMap(of1, req);
+        of1.close();
+    }
+    std::string nameBin = composeOutputName(outputDir, "J", "", req.dtime, ".bin");
 
-	writeCurrentBinary(nameBin, req);
+    writeCurrentBinary(nameBin, req);
 
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpaceBinary(std::string fileName, request req){
 
-	SPECIE* spec = myspecies[req.target];
+    SPECIE* spec = myspecies[req.target];
 
-	int* NfloatLoc = new int[mygrid->nproc];
-	NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
+    int* NfloatLoc = new int[mygrid->nproc];
+    NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
 
-	MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
 
-	MPI_Offset disp = 0;
-	for (int pp = 0; pp < mygrid->myid; pp++)
-		disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
-	MPI_File thefile;
+    MPI_Offset disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+    MPI_File thefile;
 
-	char *nomefile = new char[fileName.size() + 1];
-	nomefile[fileName.size()] = 0;
-	sprintf(nomefile, "%s", fileName.c_str());
+    char *nomefile = new char[fileName.size() + 1];
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
 
-	MPI_File_open(MPI_COMM_WORLD, nomefile,
-		MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_open(MPI_COMM_WORLD, nomefile,
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
-	MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-	float *buf;
-	MPI_Status status;
-	int dimensione, passaggi, resto;
+    float *buf;
+    MPI_Status status;
+    int dimensione, passaggi, resto;
 
-	dimensione = 100000;
-	buf = new float[dimensione*spec->Ncomp];
-	passaggi = spec->Np / dimensione;
-	resto = spec->Np % dimensione;
-	for (int i = 0; i < passaggi; i++){
-		for (int p = 0; p < dimensione; p++){
-			for (int c = 0; c < spec->Ncomp; c++){
-				buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*i);
-			}
-		}
-		MPI_File_write(thefile, buf, dimensione*spec->Ncomp, MPI_FLOAT, &status);
-	}
-	for (int p = 0; p < resto; p++){
-		for (int c = 0; c < spec->Ncomp; c++){
-			buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
-		}
-	}
-	MPI_File_write(thefile, buf, resto*spec->Ncomp, MPI_FLOAT, &status);
-	MPI_File_close(&thefile);
-	delete[]buf;
-	delete[] NfloatLoc;
+    dimensione = 100000;
+    buf = new float[dimensione*spec->Ncomp];
+    passaggi = spec->Np / dimensione;
+    resto = spec->Np % dimensione;
+    for (int i = 0; i < passaggi; i++){
+        for (int p = 0; p < dimensione; p++){
+            for (int c = 0; c < spec->Ncomp; c++){
+                buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*i);
+            }
+        }
+        MPI_File_write(thefile, buf, dimensione*spec->Ncomp, MPI_FLOAT, &status);
+    }
+    for (int p = 0; p < resto; p++){
+        for (int c = 0; c < spec->Ncomp; c++){
+            buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
+        }
+    }
+    MPI_File_write(thefile, buf, resto*spec->Ncomp, MPI_FLOAT, &status);
+    MPI_File_close(&thefile);
+    delete[]buf;
+    delete[] NfloatLoc;
 
 }
 void OUTPUT_MANAGER::callSpecPhaseSpaceBinary(request req){
-	std::string name = myspecies[req.target]->name;
+    std::string name = myspecies[req.target]->name;
 
-	std::string nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
 
-	writeSpecPhaseSpaceBinary(nameBin, req);
+    writeSpecPhaseSpaceBinary(nameBin, req);
 }
 
 
 void OUTPUT_MANAGER::callDiag(request req){
-	std::vector<SPECIE*>::const_iterator spec_iterator;
-	double * ekinSpecies;
-	size_t specie = 0;
+    std::vector<SPECIE*>::const_iterator spec_iterator;
+    double * ekinSpecies;
+    size_t specie = 0;
 
-	double tw = req.dtime;
+    double tw = req.dtime;
 
-	ekinSpecies = new double[myspecies.size()];
+    ekinSpecies = new double[myspecies.size()];
 
-	//double t_spec_extrema[SPEC_DIAG_COMP];
-	// double field_extrema[FIELD_DIAG_COMP];
+    //double t_spec_extrema[SPEC_DIAG_COMP];
+    // double field_extrema[FIELD_DIAG_COMP];
 
-	double EE[3], BE[3];
+    double EE[3], BE[3];
 
-	myfield->computeEnergyAndExtremes();
-	double etotFields = myfield->total_energy[6];
+    myfield->computeEnergyAndExtremes();
+    double etotFields = myfield->total_energy[6];
 
-	EE[0] = myfield->total_energy[0];
-	EE[1] = myfield->total_energy[1];
-	EE[2] = myfield->total_energy[2];
-	BE[0] = myfield->total_energy[3];
-	BE[1] = myfield->total_energy[4];
-	BE[2] = myfield->total_energy[5];
+    EE[0] = myfield->total_energy[0];
+    EE[1] = myfield->total_energy[1];
+    EE[2] = myfield->total_energy[2];
+    BE[0] = myfield->total_energy[3];
+    BE[1] = myfield->total_energy[4];
+    BE[2] = myfield->total_energy[5];
 
-	specie = 0;
-	double etotKin = 0.0;
-	for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
-		(*spec_iterator)->computeKineticEnergyWExtrems();
-		ekinSpecies[specie++] = (*spec_iterator)->total_energy;
-		etotKin += (*spec_iterator)->total_energy;
-	}
-	double etot = etotKin + etotFields;
+    specie = 0;
+    double etotKin = 0.0;
+    for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
+        (*spec_iterator)->computeKineticEnergyWExtrems();
+        ekinSpecies[specie++] = (*spec_iterator)->total_energy;
+        etotKin += (*spec_iterator)->total_energy;
+    }
+    double etot = etotKin + etotFields;
 
-	if (mygrid->myid == mygrid->master_proc){
-		std::ofstream outStat;
-		outStat.open(diagFileName.c_str(), std::ios::app);
+    if (mygrid->myid == mygrid->master_proc){
+        std::ofstream outStat;
+        outStat.open(diagFileName.c_str(), std::ios::app);
 
-		outStat << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << tw;
-		outStat << " " << setw(diagWidth) << etot;
-		outStat << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
-		outStat << " " << setw(diagWidth) << BE[0] << " " << setw(diagWidth) << BE[1] << " " << setw(diagWidth) << BE[2];
+        outStat << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << tw;
+        outStat << " " << setw(diagWidth) << etot;
+        outStat << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
+        outStat << " " << setw(diagWidth) << BE[0] << " " << setw(diagWidth) << BE[1] << " " << setw(diagWidth) << BE[2];
 
-		for (specie = 0; specie < myspecies.size(); specie++){
-			outStat << " " << setw(diagWidth) << ekinSpecies[specie];
-		}
-		outStat << std::endl;
+        for (specie = 0; specie < myspecies.size(); specie++){
+            outStat << " " << setw(diagWidth) << ekinSpecies[specie];
+        }
+        outStat << std::endl;
 
-		outStat.close();
+        outStat.close();
 
-		std::ofstream ofField;
-		ofField.open(extremaFieldFileName.c_str(), std::ios_base::app);
-		myfield->output_extrems(req.itime, ofField);
-		ofField.close();
+        std::ofstream ofField;
+        ofField.open(extremaFieldFileName.c_str(), std::ios_base::app);
+        myfield->output_extrems(req.itime, ofField);
+        ofField.close();
 
-	}
+    }
 
-	for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
-		std::stringstream ss1;
-		ss1 << outputDir << "/EXTREMES_" << (*spec_iterator)->name << ".dat";
-		std::ofstream ofSpec;
-		if (mygrid->myid == mygrid->master_proc)
-			ofSpec.open(ss1.str().c_str(), std::ios_base::app);
-		(*spec_iterator)->output_extrems(req.itime, ofSpec);
-		ofSpec.close();
-	}
+    for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
+        std::stringstream ss1;
+        ss1 << outputDir << "/EXTREMES_" << (*spec_iterator)->name << ".dat";
+        std::ofstream ofSpec;
+        if (mygrid->myid == mygrid->master_proc)
+            ofSpec.open(ss1.str().c_str(), std::ios_base::app);
+        (*spec_iterator)->output_extrems(req.itime, ofSpec);
+        ofSpec.close();
+    }
 
-	for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
-		std::string outNameSpec = composeOutputName(outputDir, "SPECTRUM", (*spec_iterator)->name, req.dtime, ".dat");
-		std::ofstream ofSpec;
-		if (mygrid->myid == mygrid->master_proc)
-			ofSpec.open(outNameSpec.c_str());
-		(*spec_iterator)->outputSpectrum(ofSpec);
-		ofSpec.close();
-	}
+    for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
+        std::string outNameSpec = composeOutputName(outputDir, "SPECTRUM", (*spec_iterator)->name, req.dtime, ".dat");
+        std::ofstream ofSpec;
+        if (mygrid->myid == mygrid->master_proc)
+            ofSpec.open(outNameSpec.c_str());
+        (*spec_iterator)->outputSpectrum(ofSpec);
+        ofSpec.close();
+    }
 
 
-	delete[] ekinSpecies;
+    delete[] ekinSpecies;
 
 
 

@@ -57,14 +57,15 @@ using namespace std;
 
 enum diagType{
 	OUT_EM_FIELD_BINARY,
-
 	OUT_SPEC_PHASE_SPACE_BINARY,
 	OUT_DIAG,
 	OUT_CURRENT_BINARY,
     OUT_EMJPROBE,
-    OUT_EMJPLANE, //NON ESISTE ANCORA !
-    OUT_SPEC_DENSITY_BINARY
-};
+    OUT_EMJPLANE,
+    OUT_SPEC_DENSITY_BINARY,
+    OUT_E_FIELD,
+    OUT_B_FIELD
+    };
 
 
 struct request{
@@ -72,6 +73,7 @@ struct request{
 	int itime;
 	diagType type;
 	int target;
+    int domain;
 };
 
 struct emProbe{
@@ -112,6 +114,22 @@ public:
 	void addEMFieldBinaryAt(double atTime);
 	void addEMFieldBinaryFromTo(double startTime, double frequency, double endTime);
 
+    void addEFieldFrom(double startTime, double frequency);
+    void addEFieldAt(double atTime);
+    void addEFieldFromTo(double startTime, double frequency, double endTime);
+
+    void addBFieldFrom(double startTime, double frequency);
+    void addBFieldAt(double atTime);
+    void addBFieldFromTo(double startTime, double frequency, double endTime);
+
+    void addEFieldFrom(emPlane* Plane,double startTime, double frequency);
+    void addEFieldAt(emPlane* Plane,double atTime);
+    void addEFieldFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+
+    void addBFieldFrom(emPlane* Plane,double startTime, double frequency);
+    void addBFieldAt(emPlane* Plane,double atTime);
+    void addBFieldFromTo(emPlane* Plane,double startTime, double frequency, double endTime);
+
     void addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
     void addEMFieldProbeAt(emProbe* Probe, double atTime);
     void addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime);
@@ -142,25 +160,6 @@ public:
 	void callDiags(int istep);
 
 
-
-	//    void addEMFieldStat(int start, int frequency, EM_FIELD* field_pointer);
-	//    void addEMFieldStatAtTime(int tstepout, EM_FIELD* field_pointer);
-
-
-
-
-
-	//    void addSpecStat(int start, int frequency, SPECIE* spec );
-	//    void addSpecStatAtTime(int tstepout, SPECIE* spec);
-
-	//    void addStat(int start, int frequency, EM_FIELD* aux, std::vector<SPECIE*>* spec_vec, bool simple);
-	//    void addStatAtTime(int tstepout, EM_FIELD* aux, std::vector<SPECIE*>* spec_vec, bool simple);
-
-
-
-	//    void addEMJProbe(int start, int frequency, double x, double y, double z, EM_FIELD* field_pointer, CURRENT* current_pointer);
-	//    void addEMJProbeAtTime(int tstepout, double x, double y, double z, EM_FIELD* field_pointer, CURRENT* current_pointer);
-
 private:
 	GRID* mygrid;
 	EM_FIELD* myfield;
@@ -187,8 +186,8 @@ private:
     bool isInMyDomain(double *rr);
     void nearestInt(double *rr, int *ri, int *globalri);
     int findSpecName(std::string name);
-    int returnTargetIfProbeIsInList(emProbe *newProbe);
-    int returnTargetIfPlaneIsInList(emPlane *newPlane);
+    int returnDomainIfProbeIsInList(emProbe *newProbe);
+    int returnDomainIfPlaneIsInList(emPlane *newPlane);
     std::string diagFileName;
 	std::string extremaFieldFileName;
 	std::vector<std::string> extremaSpecFileNames;
@@ -203,7 +202,7 @@ private:
 
 	int getIntTime(double dtime);
 
-	void addRequestToList(std::list<request>& timeList, diagType type, int target, double startTime, double frequency, double endTime);
+    void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
 
 	void prepareOutputMap();
 
@@ -216,11 +215,12 @@ private:
 	std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
 	void writeEMFieldMap(std::ofstream &output, request req);
 	void writeEMFieldBinary(std::string fileName, request req);
+    void writeNewEMFieldBinary(std::string fileName, request req, int comp);
     void writeEMFieldBinaryHDF5(std::string fileName, request req);
     void callEMFieldBinary(request req);
 
     void callEMFieldProbe(request req);
-    void writeEMFieldPlane(std::string fileName, emPlane *plane);
+    void writeEMFieldPlane(std::string fileName, emPlane *plane, bool EorB);
     void callEMFieldPlane(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);
