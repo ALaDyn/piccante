@@ -978,6 +978,26 @@ gnuplot gnuplot.scr
 \end{verbatim}
 For the visualization of 3D data it is strongly suggested to use \emph{paraview}.
 
+\subsection{binary output formats}
+After some analysis it has been decided that netCDF and HDF5 is indeed the path you want to follow for structured - well organized - multiformats output.
+However using libraries, at the very beginning, might appear cumbersome; so while the library output is on its (fast) way, we have also developed an owner format.
+
+The binary format has the following structure:
+% \begin{lstlisting}[backgroundcolor=\color{blue}]
+% \end{lstlisting}	
+\begin{verbatim}
+1-line : 1 x INTeger : Endianess : 0-little endian; 1-big endian
+2-line : 3 x INTeger : Nx Ny Nz : total number of cells for the whole simulation
+3-line : 3 x INTeger : Npx Npy Npz : number of processors for each direction (i, j, k)
+4-line : 1 x INTeger : Nc : number of components
+5-line : -float-           : X,Y,Z : mesh point for X (fast variable), Y and Z
+#--- processor output
+6-line : 6 x INTeger : i0,j0,k0, len_i, len_j, len_k : zero coordinate for the processor - and its extension in the 3 directions
+7-line : -float-          : field in (i,j,k)
+\end{verbatim}
+
+
+
 \subsection{Density files}
 Most of what has been said for \emph{EMfield} files is valid for \emph{Density} files. Their name structure is \verb+DENS_SPECNAME_TIME.bin+ and, once converted with \emph{reader}, they are 4 columns files ($x$, $y$, $z$, $\rho$). The charge density is always positive.\\
 Suppose that you want the \emph{total charge density} in a simulation where you have one electron species ``ELE1'' and one ion specie ``ION1''. With \emph{gnuplot} you can accomplish this as follows:
