@@ -701,7 +701,7 @@ void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFromTo(std::string name, double star
 }
 
 void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
-    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
+    if (!(checkGrid() && checkEMField()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
     addRequestToList(requestList, OUT_DIAG, 0, 0, startTime, frequency, endSimTime);
@@ -826,6 +826,21 @@ std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, 
        << out << "_";
     if (opt != "")
         ss << opt << "_";
+    ss << std::setw(OUTPUT_SIZE_TIME_DIAG) << std::setfill('0') << std::fixed << std::setprecision(3) << time;
+    ss << ext;
+    return ss.str();
+}
+
+std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext){
+    std::stringstream ss;
+    ss << dir << "/"
+       << out << "_";
+    if (opt1 != "")
+        ss << opt1 << "_";
+    if (opt2 != "")
+        ss << opt2 << "_";
+    if(domain!=0)
+        ss << domain << "_";
     ss << std::setw(OUTPUT_SIZE_TIME_DIAG) << std::setfill('0') << std::fixed << std::setprecision(3) << time;
     ss << ext;
     return ss.str();
@@ -1297,17 +1312,17 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, request req, bool E
 void OUTPUT_MANAGER::callEMFieldPlane(request req){
 
     if(req.type==OUT_E_FIELD){
-        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
         writeEMFieldPlane(nameBin, req,0);
     }
     else if(req.type==OUT_B_FIELD){
-        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
         writeEMFieldPlane(nameBin, req,1);
     }
     else if(req.type==OUT_EMJPLANE){
-        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
         writeEMFieldPlane(nameBinE, req,0);
-        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, req.dtime, ".bin");
+        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
         writeEMFieldPlane(nameBinB, req,1);
     }
 }
@@ -1792,8 +1807,6 @@ void OUTPUT_MANAGER::callSpecDensityBinary(request req){
     myspecies[req.target]->density_deposition_standard(mycurrent);
     mycurrent->pbc();
 
-    std::string name = myspecies[req.target]->name + "_" + myDomains[req.domain]->name;
-
 //    if (mygrid->myid == mygrid->master_proc){
 //        std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
 //        std::ofstream of1;
@@ -1802,7 +1815,7 @@ void OUTPUT_MANAGER::callSpecDensityBinary(request req){
 //        of1.close();
 //    }
 
-    std::string nameBin = composeOutputName(outputDir, "DENS", name, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "DENS", myspecies[req.target]->name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
     writeSpecDensityNew(nameBin, req);
 

@@ -212,8 +212,9 @@ private:
 
 	void processOutputEntry(request req);
 
-	std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
-	void writeEMFieldMap(std::ofstream &output, request req);
+    std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
+    std::string composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext);
+    void writeEMFieldMap(std::ofstream &output, request req);
 	void writeEMFieldBinary(std::string fileName, request req);
     void writeNewEMFieldBinary(std::string fileName, request req, int comp);
     void writeEMFieldBinaryHDF5(std::string fileName, request req);

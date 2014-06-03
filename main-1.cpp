@@ -231,7 +231,7 @@ int main(int narg, char **args)
     outDomain *plane1= new outDomain;
     plane1->setPointCoordinate(0,0,0);
     plane1->setFreeDimensions(1 ,0,0);
-    plane1->setName(B);
+    plane1->setName("B");
 
     outDomain *plane2= new outDomain;
     plane2->setPointCoordinate(0,0,0);
