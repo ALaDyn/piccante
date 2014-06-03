@@ -675,8 +675,8 @@ The following lines set up the diagnostics of the simulation.
 \end{lstlisting}
 An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the simulation. If some of the arguments are not valid, the output manager may not function properly.
 \begin{lstlisting}
-	manager.addEFieldBinaryFrom(0.0, 2.0);
-	manager.addBFieldBinaryFrom(0.0, 2.0);
+	manager.addEFieldFrom(0.0, 2.0);
+	manager.addBFieldFrom(0.0, 2.0);
 
 	manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
 	manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
@@ -689,14 +689,14 @@ An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the 
 \end{lstlisting}
 These lines of code can be modified by the user according to its needs: they define exactly which diagnostics will be saved on disk and how frequently this will be done.
 \begin{lstlisting}
-	manager.addEFieldBinaryFrom(0.0, 2.0);
-	manager.addBFieldBinaryFrom(0.0, 2.0);
+	manager.addEFieldFrom(0.0, 2.0);
+	manager.addBFieldFrom(0.0, 2.0);
 \end{lstlisting}
 For example, the first two lines asks for the binary output of EM field every 2 $\tau_p$, starting from time 0.0 . \\
 It is also possible to ask for the output between two times with a given frequency or at a precise time. In these cases, the calls are as follows:
 \begin{lstlisting}
-	manager.addEFieldBinaryFromTo(START, FREQUENCY, END);
-	manager.addEFieldBinaryAt(TIME);
+	manager.addEFieldFromTo(START, FREQUENCY, END);
+	manager.addEFieldAt(TIME);
 \end{lstlisting}
 For the density output and the phase space output, it is necessary to specify also the name of the target species, as defined in section \ref{section_species}. Make sure that the name is written correctly, or the requested output will be ignored (a warning message is displayed in this case).\\
 If two output requests overlap, this is automatically detected by the output manager and no duplicated output is saved on disk. \\
@@ -704,8 +704,8 @@ A quick reference of the available diagnostics is given in the following table.
 A more detailed discussion about how to handle the output files can be found in chapter \ref{chapter_howtoanalyse}
 \begin{center}
     \begin{tabular}{ l | l }
-    	\textbf{EFieldBinary} & binary output of the E field\\
-    	\textbf{BFieldBinary} & binary output of the B field\\
+    	\textbf{EField} & binary output of the E field\\
+    	\textbf{BField} & binary output of the B field\\
     	\textbf{SpecDensityBinary} & binary output of the charge density of a given species \\
     	\textbf{SpecPhaseSpaceBinary} & binary output of the phase space of a given species\\
     	\textbf{CurrentBinary} & binary output of the total current density\\

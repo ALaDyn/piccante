@@ -229,7 +229,8 @@ int main(int narg, char **args)
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-    manager.addEMFieldBinaryFrom(0.0, 2.0);
+    manager.addEFieldFrom(0.0, 2.0);
+		manager.addBFieldFrom(0.0, 2.0);
 
     manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
     manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
