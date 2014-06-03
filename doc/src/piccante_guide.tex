@@ -42,7 +42,7 @@ texpreamble("\def\V#1{\bm{#1}}");
 \begin{document}
 \chapter{Introduction}
 \emph{piccante}, the code described in this document, is a massively parallel fully-relativistic 3D particle-in-cell code. The user is able to define an arbitrary number of particle species with arbitrary density functions and an arbitrary number of Gaussian laser pulses.\\
-The code is proved to run on up to 2048 MPI processes.\\
+The code is proved to run on up to 16384 MPI processes. Some preliminary scaling tests verified a very good scalability on up to 4096 MPI tasks.\\
 In its present state, the code could be considered in ``beta testing''.\\
 This document should provide all the information needed to compile the code, run simulations and analyse the results.
 \begin{figure}[h!]
@@ -84,7 +84,7 @@ If you need further information, ask one of the contributors:
 \end{center}
 
 \section{Dependencies}
-This code depends on \emph{GNU Scientific Library} and \emph{Message Passing Interface}. You need these libraries to compile and run the code on your system.
+This code depends on \emph{GNU Scientific Library} and \emph{Message Passing Interface}. You need these libraries to compile and run the code on your system. It is possible to enable some functions depending on \emph{Boost} library, which is thus an optional dependence.
 \subsection{GNU Scientific Library}
 In Debian-based Linux distributions, it should be possible to install the GNU Scientific Library typing:
 \begin{verbatim}
@@ -99,6 +99,15 @@ To install \emph{MPI} on a Debian-based Linux distribution, just type:
 $ sudo apt-get install openmpi-bin libopenmpi-dev
 \end{verbatim}
 Plese refere to \url{http://www.open-mpi.org/} for further information.
+
+\subsection{Boost library}
+To install \emph{Boost} on a Debian-based Linux distribution, just type: 
+\begin{verbatim}
+$ sudo apt-get install libboost-all-dev
+\end{verbatim}
+Plese refere to \url{http://www.boost.org/} for further information.
+
+
 \section{Compilation of the code}
 The code is provided with a Makefile, so, in order to compile it, just type:
 \begin{verbatim}
@@ -171,6 +180,17 @@ The first parameter which the user needs to modify is the dimensionality of the 
 Here, the header files of the code are included. These lines should not be modified by the user.\\
 %\tikz \fill [green,overlay] (-0.5,-2.0) rectangle (-0.3,-1.0);
 
+\subsection*{Restart}
+\begin{lstlisting}
+#define _RESTART_FROM_DUMP 1
+#define _DO_RESTART false
+#define DO_DUMP true
+#define TIME_BTW_DUMP 50
+\end{lstlisting}
+These lines control the behaviour of the restart function.
+This simulation is not a restart (so \verb+_DO_RESTART+ is \verb+false+ and \verb+_RESTART_FROM_DUMP+ is
+ignored). However, since \verb+DO_DUMP+ is \verb+true+, files for a simulation restart are dumped every 50 time units (as set by \verb+TIME_BTW_DUMP+).
+
 \subsection*{Parallelization: set the number of MPI task}
 \begin{lstlisting}
 #define NPROC_ALONG_Y 1
@@ -180,10 +200,11 @@ Here, the header files of the code are included. These lines should not be modif
 The total number of MPI processes when the application is launched (see chapter \ref{chapter_run}) should be a multiple of \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+. The number of processes along x is \emph{automatically} selected so that [number of processes along x] $\times$ \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+ is equal to the total number of MPI processes.
 \begin{lstlisting}
 #define DIRECTORY_OUTPUT "TEST"
+#define DIRECTORY_DUMP "TEST"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 \end{lstlisting}
-These lines set, respectively, the output directory (\emph{which should be created manually by the user}), the seed of the random number generator (more on that later) and the frequency of the visual status report when the code is in execution.
+These lines set, respectively, the output directory (\emph{which should be created manually by the user if Boost is not used}), the dump files directory, the seed of the random number generator (more on that later) and the frequency of the visual status report when the code is in execution.
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 int main(int narg, char **args)
 {
@@ -227,7 +248,7 @@ The stretched grid is commented out in this example (so in this example the simu
 \end{lstlisting}
 \verb+grid.setBoundaries(...)+ sets the boundary conditions of the simulation.\\ The available options at the moment are: \verb+xOpen xPBC yOpen yPBC zPBC+ 
 (so, open boundary conditions are not yet implemented along z).\\
-Boundary conditions may not be compatible with other simulation parameters. For instance, \verb+xPBC+ is incompatible with the moving window. Moreover, while open boundaries are fine for EM fields, if a particle suddenly disappear from the simulation, disruptive numerical instabilities may occur (in this case, using the stretched grid feature is suggested). Of course particles can disappear safely from the left x boundary if there's a moving window with $\beta = 1.0$. 
+Boundary conditions may not be compatible with other simulation parameters. For instance, \verb+xPBC+ is incompatible with the moving window. Moreover, while open boundaries are fine for EM fields, if a particle suddenly disappear from the simulation, disruptive numerical instabilities may occur (in this case, using the stretched grid feature is suggested). Of course particles can disappear safely from the left x boundary if there's a moving window with $\beta = 1.0$. \\
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	grid.mpi_grid_initialize(&narg, args);
 \end{lstlisting}
@@ -235,7 +256,7 @@ This line initialises the grid (the user should not modify it).
 \begin{lstlisting}
 	grid.setCourantFactor(0.98);
 \end{lstlisting}
-The Courant Factor should be always less than $1.0$ to insure numerical stability of the algorithm. The user is advised not to modify the default value of 0.98 without good reason.
+The Courant Factor should be always less than $1.0$ to insure numerical stability of the algorithm. $0.98$ is a good value if periodic boundary conditions are exploited. Instead, it may be necessary to reduce the Courant Factor to achieve numerical stability when open boundaries are used ($0.8$ may be a safer value in these cases).
 \begin{lstlisting}
 	grid.setSimulationTime(60.0);
 \end{lstlisting}
@@ -471,7 +492,6 @@ These lines need to be called after pulse generation. They apply boundary condit
 	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 
 	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
 	plasma1.setDensityCoefficient(0.01);
-
 	plasma1.setRampLength(20.0);
 	plasma1.setRampMinDensity(0.0);             
 \end{lstlisting}
@@ -630,7 +650,7 @@ Here, carbon ions are created, with the same plasma profile of \verb+electrons1+
 	ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
 \end{lstlisting}
 These lines apply a Maxwell distribution to the species, with a temperature of $10^{-5}$ in code units (see appendixes).\\
-It is also possible to add a momentum to each particle (after the application of the temperature distributions). For example, if a drift motion along z is required:
+It is also possible to add a momentum to each particle. In this case, momenta extracted from the temperature distribution are assigned in the reference frame co-moving with the plasma and then a Lorentz transformation is performed.   For example, if a drift motion along z is required:
 \begin{lstlisting}
 	electrons1.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
 \end{lstlisting}
@@ -644,6 +664,7 @@ The available distribution functions are listed hereunder:
     	\verb+setMaxwell(temp)+ & Maxwell distribution \\
     \end{tabular}
 \end{center}
+\textbf{WARNING: } multiple assignments of a temperature distribution to a species will result in the last assignment overwriting the previous ones.
 \textbf{WARNING: } at the moment, if the moving window is activated, new particles entering in the simulation area are cold and with no drift. This will be fixed in future releases of the code.
 
 
@@ -654,7 +675,8 @@ The following lines set up the diagnostics of the simulation.
 \end{lstlisting}
 An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the simulation. If some of the arguments are not valid, the output manager may not function properly.
 \begin{lstlisting}
-	manager.addEMFieldBinaryFrom(0.0, 2.0);
+	manager.addEFieldBinaryFrom(0.0, 2.0);
+	manager.addBFieldBinaryFrom(0.0, 2.0);
 
 	manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
 	manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
@@ -667,13 +689,14 @@ An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the 
 \end{lstlisting}
 These lines of code can be modified by the user according to its needs: they define exactly which diagnostics will be saved on disk and how frequently this will be done.
 \begin{lstlisting}
-	manager.addEMFieldBinaryFrom(0.0, 2.0);
+	manager.addEFieldBinaryFrom(0.0, 2.0);
+	manager.addBFieldBinaryFrom(0.0, 2.0);
 \end{lstlisting}
-For example, the first line asks for the binary output of EM field every 2 $\tau_p$, starting from time 0.0 . \\
+For example, the first two lines asks for the binary output of EM field every 2 $\tau_p$, starting from time 0.0 . \\
 It is also possible to ask for the output between two times with a given frequency or at a precise time. In these cases, the calls are as follows:
 \begin{lstlisting}
-	manager.addEMFieldBinaryFromTo(START, FREQUENCY, END);
-	manager.addEMFieldBinaryAt(TIME);
+	manager.addEFieldBinaryFromTo(START, FREQUENCY, END);
+	manager.addEFieldBinaryAt(TIME);
 \end{lstlisting}
 For the density output and the phase space output, it is necessary to specify also the name of the target species, as defined in section \ref{section_species}. Make sure that the name is written correctly, or the requested output will be ignored (a warning message is displayed in this case).\\
 If two output requests overlap, this is automatically detected by the output manager and no duplicated output is saved on disk. \\
@@ -681,7 +704,8 @@ A quick reference of the available diagnostics is given in the following table.
 A more detailed discussion about how to handle the output files can be found in chapter \ref{chapter_howtoanalyse}
 \begin{center}
     \begin{tabular}{ l | l }
-    	\textbf{EMFieldBinary} & binary output of the EM field\\
+    	\textbf{EFieldBinary} & binary output of the E field\\
+    	\textbf{BFieldBinary} & binary output of the B field\\
     	\textbf{SpecDensityBinary} & binary output of the charge density of a given species \\
     	\textbf{SpecPhaseSpaceBinary} & binary output of the phase space of a given species\\
     	\textbf{CurrentBinary} & binary output of the total current density\\
@@ -699,71 +723,115 @@ as an argument.
 The user should not modify the temporal cycle without a good reason. Anyway, the code is described here for reference purposes.
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	if (grid.myid == grid.master_proc){
-		printf("----- START temporal cicle -----\n");
-		fflush(stdout);
-	}
+printf("----- START temporal cicle -----\n");
+fflush(stdout);
+}
 
-	int Nstep = grid.getTotalNumberOfTimesteps();
-	for (istep = 0; istep <= Nstep; istep++)
-	{
-		grid.istep = istep;
+int Nstep = grid.getTotalNumberOfTimesteps();
+    int dumpID=1, dumpEvery=40;
+    grid.istep=0;
+    if(DO_DUMP){
+        dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
+    }
+    if (_DO_RESTART){
+        dumpID=_RESTART_FROM_DUMP;
+        std::ifstream dumpFile;
+        std::stringstream dumpName;
+        dumpName << DIRECTORY_DUMP << "/DUMP_";
+        dumpName<< std::setw(2)<< std::setfill('0') << 
+        		std::fixed << dumpID << "_";
+        dumpName<< std::setw(5)<< std::setfill('0') << 
+        		std::fixed << grid.myid << ".bin";
+        dumpFile.open(dumpName.str().c_str());
 
-		grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+        grid.reloadDump(dumpFile);
+        myfield.reloadDump(dumpFile);
+        for (spec_iterator = species.begin(); 
+        		spec_iterator != species.end(); 
+        		spec_iterator++){
+            (*spec_iterator)->reloadDump(dumpFile);
+        }
+        dumpFile.close();
+        dumpID++;
+        grid.istep++;
+    }
+    for (; grid.istep <= Nstep; grid.istep++)
+{
 
-
-		manager.callDiags(istep); 
-
-		myfield.openBoundariesE_1();
-		myfield.new_halfadvance_B();
-		myfield.boundary_conditions();
-
-		current.setAllValuesToZero();
-
-		for (spec_iterator = species.begin(); 
-			 spec_iterator != species.end(); 
-			 spec_iterator++)
-		{
-	(*spec_iterator)->current_deposition_standard(&current);
-		}
-
-		current.pbc();
-
-		for (spec_iterator = species.begin(); 
-			 spec_iterator != species.end(); 
-			 spec_iterator++)
-		{
-			(*spec_iterator)->position_parallel_pbc();
-		}
-
-		myfield.openBoundariesB();
-		myfield.new_advance_E(&current);
-
-		myfield.boundary_conditions();
-
-		myfield.openBoundariesE_2();
-		myfield.new_halfadvance_B();
-
-		myfield.boundary_conditions();
-
-		for (spec_iterator = species.begin(); 
-			 spec_iterator != species.end(); 
-			 spec_iterator++)
-		{
-			(*spec_iterator)->momenta_advance(&myfield);
-		}
-
-		grid.time += grid.dt;
+grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
 
-		grid.move_window();
+        manager.callDiags(grid.istep); 
 
-		myfield.move_window();
-		for (spec_iterator = species.begin(); 
-			 spec_iterator != species.end(); 
-			 spec_iterator++){
-			(*spec_iterator)->move_window();
-		}
-	}
+myfield.openBoundariesE_1();
+myfield.new_halfadvance_B();
+myfield.boundary_conditions();
+
+current.setAllValuesToZero();
+
+for (spec_iterator = species.begin(); 
+	spec_iterator != species.end(); 
+	spec_iterator++){
+(*spec_iterator)->current_deposition_standard(&current);
+}
+
+current.pbc();
+
+for (spec_iterator = species.begin(); 
+	spec_iterator != species.end(); 
+	spec_iterator++){
+(*spec_iterator)->position_parallel_pbc();
+}	
+
+myfield.openBoundariesB();
+myfield.new_advance_E(&current);
+
+myfield.boundary_conditions();
+
+myfield.openBoundariesE_2();
+myfield.new_halfadvance_B();
+
+myfield.boundary_conditions();
+
+for (spec_iterator = species.begin(); 
+	spec_iterator != species.end(); 
+	spec_iterator++){
+(*spec_iterator)->momenta_advance(&myfield);
+}
+
+grid.time += grid.dt;
+
+
+grid.move_window();
+         myfield.move_window();
+        for (spec_iterator = species.begin(); 
+        spec_iterator != species.end(); 
+        spec_iterator++){
+(*spec_iterator)->move_window();
+        }
+         if(DO_DUMP){
+            if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
+                std::ofstream dumpFile;
+                std::stringstream dumpName;
+                dumpName << DIRECTORY_OUTPUT << "/DUMP_";
+                dumpName<< std::setw(2)<< std::setfill('0') 
+               		 << std::fixed << dumpID << "_";
+                dumpName<< std::setw(5)<< std::setfill('0') 
+                		<< std::fixed << grid.myid << ".bin";
+                dumpFile.open(dumpName.str().c_str());
+
+                grid.dump(dumpFile);
+                myfield.dump(dumpFile);
+                for (spec_iterator = species.begin(); 
+                spec_iterator != species.end(); 
+                spec_iterator++){
+                    (*spec_iterator)->dump(dumpFile);
+                }
+                dumpFile.close();
+                dumpID++;
+            }
+        }
+}
 \end{lstlisting}
 
 \section{Finalization}
@@ -804,38 +872,30 @@ You should get something like:
 88888P"  888  "Y8888P "Y8888P "Y888888 888  888  "Y888 "Y8888
 888                                                                
 888                                                                
-888             
-================   version 1.0.0.0  ================
-==========  GRID_INITIALIZATION ==========
+888                                                                
+================   version 1.2.0  ================
+========== GRID_INITIALIZATION ==========
 master_proc=0:
-Nproc   =     1 :     (    1,    1,    1)
-
-single proc id and 3D coordinates:
-    id = ( idx, idy, idz)
-     0 = (   0,   0,   0)
-==========         grid         ==========
-	  id:  Nloc = [   rmin :   rmax ]
-X:  #proc=1	Nx=2501
-               0:  2501 = [    -50 :      0 ]
-Y:  #proc=1	Ny=1
-               0:     1 = [     -1 :      1 ]
-Z:  #proc=1	Nz=1
-               0:     1 = [     -1 :      1 ]
+Ncells   =2500 :     (  2500,     1,     1)
+Nprocs   =     8 :     (     8,     1,     1)
+Xrange = [    -50 :      0 ]
+Yrange = [     -1 :      1 ]
+Zrange = [     -1 :      1 ]
 ==========                      ==========
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 dt=0.019600
 dx=0.020000
 dy=2.000000
 dz=2.000000
-Nstep=3061
+Nstep=3063
 Boundaries (X,Y,Z) : OPEN , PBC , PBC 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ----- START temporal cicle -----
-     0/3061  0.000000   18:38:11  (29/01/2014)          0 sec.
-     5/3061  0.098000   18:38:11  (29/01/2014)          0 sec.
-    10/3061  0.196000   18:38:11  (29/01/2014)          0 sec.
-    15/3061  0.294000   18:38:11  (29/01/2014)          0 sec.
-    20/3061  0.392000   18:38:11  (29/01/2014)          0 sec.
+     0/3063  0.000000   12:04:39  (03/06/2014)          1 sec.
+     5/3063  0.098000   12:04:39  (03/06/2014)          1 sec.
+    10/3063  0.196000   12:04:39  (03/06/2014)          1 sec.
+    15/3063  0.294000   12:04:39  (03/06/2014)          1 sec.
+    20/3063  0.392000   12:04:39  (03/06/2014)          1 sec.
 \end{verbatim}
 These lines contains some information about the simulation. As far as the simulation time is of concern, please consider that the load balancing can vary during the simulation and thus the simulation speed may increase or decrease. It is worth to remember that writing output files on disk may be very time-consuming for large files.\\
 You may want to redirect the standard output to a text file. If this is the case, launch the simulation as follows:
