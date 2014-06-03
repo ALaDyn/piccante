@@ -89,7 +89,7 @@ int main(int narg, char **args)
 	//grid.setXandNxRightStretchedGrid(15.0,1000);
 	//grid.setYandNyRightStretchedGrid(5.0, 70);
 	
-	grid.setBoundaries(xOpen | yOpen | zPBC); //LUNGO Z c'è solo PBC al momento !
+	grid.setBoundaries(xOpen | yOpen | zPBC); 
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 	
@@ -300,4 +300,5 @@ int main(int narg, char **args)
 	exit(1);
 	
 }
+
 

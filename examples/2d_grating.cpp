@@ -28,18 +28,18 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstring>
 #include <ctime>       /* time */
 #if defined(_MSC_VER)
-#include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
+#include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
 #else
-#include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
+#include <gsl/gsl_rng.h> 
 #include <gsl/gsl_randist.h>
 #endif
-#include <cstdarg> //Per chiamare funzioni con numero variabile di argomenti
+#include <cstdarg>
 #include <vector>
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 1
 
 #include "access.h"
 #include "commons.h"
@@ -53,7 +53,13 @@ using namespace std;
 #define NPROC_ALONG_Y 512
 #define NPROC_ALONG_Z 1
 
+#define _RESTART_FROM_DUMP 1
+#define _DO_RESTART false
+#define DO_DUMP true
+#define TIME_BTW_DUMP 50
+
 #define DIRECTORY_OUTPUT "TEST"
+#define DIRECTORY_DUMP "TEST"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -67,7 +73,7 @@ int main(int narg, char **args)
 	int istep;
 	gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
-	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
+	//*******************************************BEGIN GRID DEFINITION*******************************************************
 
     grid.setXrange(-40.0, 40.0);
     grid.setYrange(-40.0, 40.0);
@@ -83,14 +89,14 @@ int main(int narg, char **args)
     grid.setXandNxRightStretchedGrid(20.0,1000);
     grid.setYandNyRightStretchedGrid(15.0,1000);
 
-    grid.setBoundaries(xOpen | yOpen | zPBC); //LUNGO Z c'è solo PBC al momento !
+    grid.setBoundaries(xOpen | yOpen | zPBC); 
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
     grid.setSimulationTime(50.0);
 
-    grid.with_particles = YES;//NO;
-    grid.with_current = YES;//YES;
+    grid.with_particles = YES;
+    grid.with_current = YES;
 
     //grid.setStartMovingWindow(0);
     grid.setBetaMovingWindow(1.0);
@@ -104,11 +110,11 @@ int main(int narg, char **args)
     grid.finalize();
 
 	grid.visualDiag();
+		//********************************************END GRID DEFINITION********************************************************
 
-	//********************************************FINE DEFINIZIONE GRIGLIA********************************************************
+	//*******************************************BEGIN FIELD DEFINITION*********************************************************	
 
-	//*******************************************INIZIO DEFINIZIONE CAMPI*********************************************************
-	myfield.allocate(&grid);
+		myfield.allocate(&grid);
 	myfield.setAllValuesToZero();
 
 	laserPulse pulse1;
@@ -136,9 +142,11 @@ int main(int narg, char **args)
 
 	current.allocate(&grid);
 	current.setAllValuesToZero();
-	//*******************************************FINE DEFINIZIONE CAMPI***********************************************************
+	
+	//*******************************************END FIELD DEFINITION***********************************************************
 
-	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
+	//*******************************************BEGIN SPECIES DEFINITION*********************************************************
+
 	PLASMA plasma1;
     plasma1.density_function = left_grating;      //Opzioni: box, left_linear_ramp, left_soft_ramp, left_grating
     plasma1.setXRangeBox(0.0,0.8);                  //double (* distrib_function)(double x, double y, double z, PLASMAparams plist, int Z, int A)
@@ -238,68 +246,110 @@ int main(int narg, char **args)
 	manager.addDiagFrom(0.0, 1.0);
 
 	manager.initialize(DIRECTORY_OUTPUT);
+	
+	//*******************************************END DIAG DEFINITION**************************************************
 
-	//*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CICLO PRINCIPALE (NON MODIFICARE) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	if (grid.myid == grid.master_proc){
 		printf("----- START temporal cicle -----\n");
 		fflush(stdout);
 	}
-
+	
 	int Nstep = grid.getTotalNumberOfTimesteps();
-	for (istep = 0; istep <= Nstep; istep++)
-	{
-		grid.istep = istep;
-
-		grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-
-		manager.callDiags(istep);  /// deve tornare all'inizo del ciclo
-
-		myfield.openBoundariesE_1();
-		myfield.new_halfadvance_B();
-		myfield.boundary_conditions();
-
-		current.setAllValuesToZero();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->current_deposition_standard(&current);
-		}
-
-		current.pbc();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->position_parallel_pbc();
-		}		
-
-		myfield.openBoundariesB();
-		myfield.new_advance_E(&current);
-
-		myfield.boundary_conditions();
-
-		myfield.openBoundariesE_2();
-		myfield.new_halfadvance_B();
-
-		myfield.boundary_conditions();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->momenta_advance(&myfield);
-		}
-
-		grid.time += grid.dt;
-
-
-		grid.move_window();
-
-		myfield.move_window();
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->move_window();
-		}
+	int dumpID=1, dumpEvery=40;
+	grid.istep=0;
+	if(DO_DUMP){
+		dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
 	}
-
+	if (_DO_RESTART){
+		dumpID=_RESTART_FROM_DUMP;
+		std::ifstream dumpFile;
+		std::stringstream dumpName;
+		dumpName << DIRECTORY_DUMP << "/DUMP_";
+		dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
+		dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
+		dumpFile.open(dumpName.str().c_str());
+		
+		grid.reloadDump(dumpFile);
+		myfield.reloadDump(dumpFile);
+		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+			(*spec_iterator)->reloadDump(dumpFile);
+		}
+		dumpFile.close();
+		dumpID++;
+		grid.istep++;
+	}
+	for (; grid.istep <= Nstep; grid.istep++)
+		{
+			
+			grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+			
+			
+			manager.callDiags(grid.istep); 
+			
+			myfield.openBoundariesE_1();
+			myfield.new_halfadvance_B();
+			myfield.boundary_conditions();
+			
+			current.setAllValuesToZero();
+			
+			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+				(*spec_iterator)->current_deposition_standard(&current);
+			}
+			
+			current.pbc();
+			
+			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+				(*spec_iterator)->position_parallel_pbc();
+			}	
+			
+			myfield.openBoundariesB();
+			myfield.new_advance_E(&current);
+			
+			myfield.boundary_conditions();
+			
+			myfield.openBoundariesE_2();
+			myfield.new_halfadvance_B();
+			
+			myfield.boundary_conditions();
+			
+			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+				(*spec_iterator)->momenta_advance(&myfield);
+			}
+			
+			grid.time += grid.dt;
+			
+			
+			grid.move_window();
+			myfield.move_window();
+			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+				(*spec_iterator)->move_window();
+			}
+			if(DO_DUMP){
+				if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
+					std::ofstream dumpFile;
+					std::stringstream dumpName;
+					dumpName << DIRECTORY_OUTPUT << "/DUMP_";
+					dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
+					dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
+					dumpFile.open(dumpName.str().c_str());
+					
+					grid.dump(dumpFile);
+					myfield.dump(dumpFile);
+					for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+						(*spec_iterator)->dump(dumpFile);
+					}
+					dumpFile.close();
+					dumpID++;
+				}
+			}
+		}
+	
 	manager.close();
 	MPI_Finalize();
 	exit(1);
-
+	
 }
+
+

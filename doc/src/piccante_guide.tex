@@ -1005,31 +1005,31 @@ These files are basically for debug purpose only. They always come in pair with 
 \section{Binary outputs}
 Among the binary (\verb+*.bin+) output files, all but the phase space files require \emph{reader} to be analysed. 
 \subsection{EM field files}
-These files (\verb+EMfield_TIME.bin+) contains the EM field of the simulation at a given time-step.\\
+These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) contains the EM field of the simulation at a given time-step.\\
 First, launch \emph{reader} passing the file name as an argument (this is usually extremely fast for 1D simulation, while it can take several minutes for 2D or 3D simulations):
 \begin{verbatim}
-$reader EMfield_050.000.bin
+$reader Efield_050.000.bin
 \end{verbatim}
 If you haven't or you couldn't copy \emph{reader} in \verb+\usr\bin+, copy the executable in the output folder and launch it as:
 \begin{verbatim}
-$./reader EMfield_050.000.bin
+$./reader Efield_050.000.bin
 \end{verbatim}
-This command produces a file with a \verb+.txt+ extension (\verb+EMfield_050.000.bin.txt+) in this case. The columns of this file are, respectively: $x$, $y$, $z$, $E_x$, $E_y$, $E_z$, $B_x$, $B_y$, $B_z$. So, if you want to plot the $B_x$ field component of a 2D simulation with \emph{gnuplot}, launch the application and type:
+This command produces a file with a \verb+.txt+ extension (\verb+Efield_050.000.bin.txt+) in this case. The columns of this file are, respectively: $x$, $y$, $z$, $E_x$, $E_y$, $E_z$. So, if you want to plot the $E_x$ field component of a 2D simulation with \emph{gnuplot}, launch the application and type:
 \begin{verbatim}
-$plot "EMfield_050.000.bin.txt" u 1:2:7 w image
+$plot "Efield_050.000.bin.txt" u 1:2:4 w image
 \end{verbatim}
 If you have used the stretched grid feature, plotting with image won't work correctly. In this case you have to type:
 \begin{verbatim}
 $set pm3d map
-$splot "EMfield_050.000.bin.txt" u 1:2:7 w pm3d
+$splot "Efield_050.000.bin.txt" u 1:2:4 w pm3d
 \end{verbatim}
 You can avoid launching the reader for every single file implementing some simple \emph{bash} scripts. The following script, for example, plots the 
-$E_x$ field component and saves it as a \verb+.png+ file for each \emph{EMfield} file in the \verb+TEST+ directory:
+$E_x$ field component and saves it as a \verb+.png+ file for each \emph{Efield} file in the \verb+TEST+ directory:
 \begin{verbatim}
 #!/bin/bash
 echo "set term pngcairo size 1000,1000">gnuplot.scr
 echo "set size ratio -1">>gnuplot.scr
-for f in TEST/EMfield_*.bin
+for f in TEST/Efield_*.bin
         do ./reader $f
         echo "set output '${f}_Ex.png'">>gnuplot.scr
         echo "plot '${f}.txt' u 1:2:4 w image">>gnuplot.scr 
