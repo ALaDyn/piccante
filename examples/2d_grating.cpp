@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 1
+#define DIMENSIONALITY 2
 
 #include "access.h"
 #include "commons.h"
