@@ -260,7 +260,7 @@ The Courant Factor should be always less than $1.0$ to insure numerical stabilit
 \begin{lstlisting}
 	grid.setSimulationTime(60.0);
 \end{lstlisting}
-Here the total simulation time in units of $\tau_p$ is set.
+Here the total simulation time in units of $\tau_L$ ($\tau_L=\ell_0$) is set.
 \begin{lstlisting}
 	grid.with_particles = YES;
 	grid.with_current = YES;
@@ -678,21 +678,22 @@ An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the 
 	manager.addEFieldFrom(0.0, 2.0);
 	manager.addBFieldFrom(0.0, 2.0);
 
-	manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
-	manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
-
-	manager.addCurrentBinaryFrom(0.0, 5.0);
-
-	manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 5.0);
-
+	manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
+	manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
+	
+	manager.addCurrentFrom(0.0, 5.0);
+	
+	manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
+	
 	manager.addDiagFrom(0.0, 1.0);
+	
 \end{lstlisting}
 These lines of code can be modified by the user according to its needs: they define exactly which diagnostics will be saved on disk and how frequently this will be done.
 \begin{lstlisting}
 	manager.addEFieldFrom(0.0, 2.0);
 	manager.addBFieldFrom(0.0, 2.0);
 \end{lstlisting}
-For example, the first two lines asks for the binary output of EM field every 2 $\tau_p$, starting from time 0.0 . \\
+For example, the first two lines ask for the binary output of EM field every 2 $\tau_L$, starting from time 0.0 . \\
 It is also possible to ask for the output between two times with a given frequency or at a precise time. In these cases, the calls are as follows:
 \begin{lstlisting}
 	manager.addEFieldFromTo(START, FREQUENCY, END);
@@ -706,12 +707,37 @@ A more detailed discussion about how to handle the output files can be found in 
     \begin{tabular}{ l | l }
     	\textbf{EField} & binary output of the E field\\
     	\textbf{BField} & binary output of the B field\\
-    	\textbf{SpecDensityBinary} & binary output of the charge density of a given species \\
-    	\textbf{SpecPhaseSpaceBinary} & binary output of the phase space of a given species\\
-    	\textbf{CurrentBinary} & binary output of the total current density\\
-    	\textbf{Diag} & lightweight text output (total energy, maximum momentum \ldots) \\
+    	\textbf{EBField} & binary output of the E and B fields (separate files)\\
+    	\textbf{EBFieldProbe} & text output: EB fields time evolution on a given point (one file) see \ref{em_probe}\\
+    	\textbf{SpeciesDensity} & binary output of the charge density of a given species \\
+    	\textbf{SpeciesPhaseSpace} & binary output of the phase space of a given species\\
+    	\textbf{Current} & binary output of the total current density\\
+    	\textbf{Diag} & lightweight text output (total energy, maximum momentum \ldots)
     \end{tabular}
 \end{center}
+
+\subsubsection{Output domains}
+For grid based output (fields current and densities) it is possible to select an output subdomain (i.e. a plane or a lineout). This is accomplished by ``freezing'' one or more dimensions (i.e. in a 3D simulation the $x,y$ plane is selected by freezing the "$z$ dimension).
+The prototype call for the $\mathbf{E}$ on a  $x,y$ plane passing through the point $(1,2,3)$ is as follows.
+
+\begin{lstlisting}
+	outDomain *plane1= new outDomain;
+	plane1->setPointCoordinate(1.0, 2.0, 3.0);
+	plane1->setFreeDimensions(1 ,1, 0);
+	plane1->setName("a_nice_domainname");
+	manager.addEFieldFrom(plane1, 0.0, 5.0);
+\end{lstlisting}
+
+\subsubsection{Output EB field probe}\label{em_probe}
+For EM fields is possible to create one or more files (text outputs) with the interpolated values of the 6 components on point chosen by the user. Multiple probe can be created and one separate file for each of them will be created.
+The prototype call for a probe on the point $(1,2,3)$is as follows which will output the EM fields values every $0.1\tau_L$
+
+\begin{lstlisting}
+	emProbe *probe1=new emProbe;
+	probe1->setPointCoordinate(1.0, 2.0, 3.0);
+	probe1->setName("a_nice_probename");
+	manager.addEBFieldProbeFrom(probe1,0.0,0.1);
+\end{lstlisting}
 
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	manager.initialize(DIRECTORY_OUTPUT);
@@ -722,116 +748,75 @@ as an argument.
 \section{Temporal cycle}
 The user should not modify the temporal cycle without a good reason. Anyway, the code is described here for reference purposes.
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
-	if (grid.myid == grid.master_proc){
-printf("----- START temporal cicle -----\n");
-fflush(stdout);
-}
+if (grid.myid == grid.master_proc){
+  printf("----- START temporal cicle -----\n");
+  fflush(stdout);
+ }
 
 int Nstep = grid.getTotalNumberOfTimesteps();
-    int dumpID=1, dumpEvery=40;
-    grid.istep=0;
+int dumpID=1, dumpEvery;
+if(DO_DUMP){
+  dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
+ }
+grid.istep=0;
+if (_DO_RESTART){
+  dumpID=_RESTART_FROM_DUMP;
+  restartFromDump(&dumpID, &grid, &myfield, species);
+ }
+while(grid.istep <= Nstep)
+  {
+			
+    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+			
+			
+    manager.callDiags(grid.istep); 
+			
+    myfield.openBoundariesE_1();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
+			
+    current.setAllValuesToZero();
+			
+    for (spec_iterator = species.begin();
+    spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->current_deposition_standard(&current);
+    }
+			
+    current.pbc();
+			
+    for (spec_iterator = species.begin();
+    spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->position_parallel_pbc();
+    }	
+			
+    myfield.openBoundariesB();
+    myfield.new_advance_E(&current);
+			
+    myfield.boundary_conditions();
+			
+    myfield.openBoundariesE_2();
+    myfield.new_halfadvance_B();
+			
+    myfield.boundary_conditions();
+			
+    for (spec_iterator = species.begin();
+    spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->momenta_advance(&myfield);
+    }
+			
+    grid.time += grid.dt;
+			
+			
+    moveWindow(&grid, &myfield, species);
+
+    grid.istep++;
     if(DO_DUMP){
-        dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
+      if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
+	dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+      }
     }
-    if (_DO_RESTART){
-        dumpID=_RESTART_FROM_DUMP;
-        std::ifstream dumpFile;
-        std::stringstream dumpName;
-        dumpName << DIRECTORY_DUMP << "/DUMP_";
-        dumpName<< std::setw(2)<< std::setfill('0') << 
-        		std::fixed << dumpID << "_";
-        dumpName<< std::setw(5)<< std::setfill('0') << 
-        		std::fixed << grid.myid << ".bin";
-        dumpFile.open(dumpName.str().c_str());
+  }
 
-        grid.reloadDump(dumpFile);
-        myfield.reloadDump(dumpFile);
-        for (spec_iterator = species.begin(); 
-        		spec_iterator != species.end(); 
-        		spec_iterator++){
-            (*spec_iterator)->reloadDump(dumpFile);
-        }
-        dumpFile.close();
-        dumpID++;
-        grid.istep++;
-    }
-    for (; grid.istep <= Nstep; grid.istep++)
-{
-
-grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-
-        manager.callDiags(grid.istep); 
-
-myfield.openBoundariesE_1();
-myfield.new_halfadvance_B();
-myfield.boundary_conditions();
-
-current.setAllValuesToZero();
-
-for (spec_iterator = species.begin(); 
-	spec_iterator != species.end(); 
-	spec_iterator++){
-(*spec_iterator)->current_deposition_standard(&current);
-}
-
-current.pbc();
-
-for (spec_iterator = species.begin(); 
-	spec_iterator != species.end(); 
-	spec_iterator++){
-(*spec_iterator)->position_parallel_pbc();
-}	
-
-myfield.openBoundariesB();
-myfield.new_advance_E(&current);
-
-myfield.boundary_conditions();
-
-myfield.openBoundariesE_2();
-myfield.new_halfadvance_B();
-
-myfield.boundary_conditions();
-
-for (spec_iterator = species.begin(); 
-	spec_iterator != species.end(); 
-	spec_iterator++){
-(*spec_iterator)->momenta_advance(&myfield);
-}
-
-grid.time += grid.dt;
-
-
-grid.move_window();
-         myfield.move_window();
-        for (spec_iterator = species.begin(); 
-        spec_iterator != species.end(); 
-        spec_iterator++){
-(*spec_iterator)->move_window();
-        }
-         if(DO_DUMP){
-            if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-                std::ofstream dumpFile;
-                std::stringstream dumpName;
-                dumpName << DIRECTORY_OUTPUT << "/DUMP_";
-                dumpName<< std::setw(2)<< std::setfill('0') 
-               		 << std::fixed << dumpID << "_";
-                dumpName<< std::setw(5)<< std::setfill('0') 
-                		<< std::fixed << grid.myid << ".bin";
-                dumpFile.open(dumpName.str().c_str());
-
-                grid.dump(dumpFile);
-                myfield.dump(dumpFile);
-                for (spec_iterator = species.begin(); 
-                spec_iterator != species.end(); 
-                spec_iterator++){
-                    (*spec_iterator)->dump(dumpFile);
-                }
-                dumpFile.close();
-                dumpID++;
-            }
-        }
-}
 \end{lstlisting}
 
 \section{Finalization}
@@ -937,7 +922,7 @@ git clone https://github.com/ALaDyn/tools-pic.git
 \section{Compile the reader}
 To compile \emph{reader}, it is sufficient to type:
 \begin{verbatim}
-$g++ field_reader.cpp -O3 -o reader
+$g++ newfield_reader.cpp -O3 -o reader
 \end{verbatim}
 Then, you may want to launch \emph{reader} from any location on your system. To make it possible, copy the executable in the \verb+\usr\bin+ folder.
 \begin{verbatim}
@@ -998,6 +983,18 @@ Each file contains an energy spectrum of a given species at a given time. You ca
 \begin{verbatim}
 $plot "SPECTRUM_ELE1_020.000.dat" u ($1+$2):3 w l
 \end{verbatim}
+\subsection{EMProbe* files}
+\verb+EMProbe_PROBENAME_PROBEID.txt+ contains the interpolated values of the electromagnetic fields at the position given via the \verb+emProbe+ object during the call. \verb+PROBENAME+ is chosen by the user by setting it via the \verb+emProbe+ object. \verb+PROBEID+ is a progressive number to avoid overwriting a probe which may incidentally have the same name.
+\begin{itemize}
+\item simulation step
+\item simulation time
+\item value of $E_x$
+\item value of $E_y$
+\item value of $E_z$
+\item value of $B_x$
+\item value of $B_y$
+\item value of $B_z$
+\end{itemize}
 
 \subsection{*.map files}
 These files are basically for debug purpose only. They always come in pair with a binary file and they contain some of the information included in the binary header in a human readable format.
@@ -1005,7 +1002,7 @@ These files are basically for debug purpose only. They always come in pair with 
 \section{Binary outputs}
 Among the binary (\verb+*.bin+) output files, all but the phase space files require \emph{reader} to be analysed. 
 \subsection{EM field files}
-These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) contains the EM field of the simulation at a given time-step.\\
+These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) and their subdomains' equivalent (\verb+E_FIELD_DOMAINNAME_DOMAINID_TIME.bin+) contains the EM field of the simulation at a given time-step.\\
 First, launch \emph{reader} passing the file name as an argument (this is usually extremely fast for 1D simulation, while it can take several minutes for 2D or 3D simulations):
 \begin{verbatim}
 $reader Efield_050.000.bin
@@ -1059,7 +1056,7 @@ The binary format has the following structure:
 
 
 \subsection{Density files}
-Most of what has been said for \emph{EMfield} files is valid for \emph{Density} files. Their name structure is \verb+DENS_SPECNAME_TIME.bin+ and, once converted with \emph{reader}, they are 4 columns files ($x$, $y$, $z$, $\rho$). The charge density is always positive.\\
+Most of what has been said for \emph{EMfield} files is valid for \emph{Density} files. They have their subdomain version too \verb+DENS_SPECNAME_DOMAINNAME_DOMAINID_TIME.bin+ Their name structure is \verb+DENS_SPECNAME_TIME.bin+ and, once converted with \emph{reader}, they are 4 columns files ($x$, $y$, $z$, $\rho$). The charge density is always positive.\\
 Suppose that you want the \emph{total charge density} in a simulation where you have one electron species ``ELE1'' and one ion specie ``ION1''. With \emph{gnuplot} you can accomplish this as follows:
 \begin{verbatim}
 plot "< paste DENS_ION1_024.000.bin.txt DENS_ELE1_024.000.bin.txt" u 1:($4-$8) w l

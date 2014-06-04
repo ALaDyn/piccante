@@ -206,30 +206,16 @@ int main(int narg, char **args)
 	}
 	
 	int Nstep = grid.getTotalNumberOfTimesteps();
-	int dumpID=1, dumpEvery=40;
-	grid.istep=0;
-	if(DO_DUMP){
+    int dumpID=1, dumpEvery;
+    if(DO_DUMP){
 		dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
 	}
-	if (_DO_RESTART){
-		dumpID=_RESTART_FROM_DUMP;
-		std::ifstream dumpFile;
-		std::stringstream dumpName;
-		dumpName << DIRECTORY_DUMP << "/DUMP_";
-		dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
-		dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
-		dumpFile.open(dumpName.str().c_str());
-		
-		grid.reloadDump(dumpFile);
-		myfield.reloadDump(dumpFile);
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->reloadDump(dumpFile);
-		}
-		dumpFile.close();
-		dumpID++;
-		grid.istep++;
-	}
-	for (; grid.istep <= Nstep; grid.istep++)
+    grid.istep=0;
+    if (_DO_RESTART){
+        dumpID=_RESTART_FROM_DUMP;
+        restartFromDump(&dumpID, &grid, &myfield, species);
+    }
+    while(grid.istep <= Nstep)
 		{
 			
 			grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
@@ -270,29 +256,14 @@ int main(int narg, char **args)
 			grid.time += grid.dt;
 			
 			
-			grid.move_window();
-			myfield.move_window();
-			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-				(*spec_iterator)->move_window();
-			}
-			if(DO_DUMP){
-				if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-					std::ofstream dumpFile;
-					std::stringstream dumpName;
-					dumpName << DIRECTORY_OUTPUT << "/DUMP_";
-					dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
-					dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
-					dumpFile.open(dumpName.str().c_str());
-					
-					grid.dump(dumpFile);
-					myfield.dump(dumpFile);
-					for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-						(*spec_iterator)->dump(dumpFile);
-					}
-					dumpFile.close();
-					dumpID++;
-				}
-			}
+            moveWindow(&grid, &myfield, species);
+
+            grid.istep++;
+            if(DO_DUMP){
+                if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
+                    dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+                }
+            }
 		}
 	
 	manager.close();
