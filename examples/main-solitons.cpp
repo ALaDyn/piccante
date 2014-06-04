@@ -228,17 +228,17 @@ int main(int narg, char **args)
 
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-	manager.addEMFieldBinaryFrom(0.0, 2.0);
+	manager.addEBFieldFrom(0.0, 2.0);
 
-    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
-    manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
+    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
+    manager.addSpeciesDensityFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-    manager.addCurrentBinaryFrom(0.0, 2.0);
+    manager.addCurrentFrom(0.0, 2.0);
 
-    manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 2.0);
-    manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
+    manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 2.0);
+    manager.addSpeciesPhaseSpaceFrom(electrons2.name, 0.0, 2.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 0.0, 5.0);
 	//manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
 

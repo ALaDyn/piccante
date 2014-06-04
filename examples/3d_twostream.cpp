@@ -187,14 +187,14 @@ int main(int narg, char **args)
     manager.addEFieldFrom(5.0,5.0);
 		manager.addBFieldFrom(5.0,5.0);
 
-    manager.addSpecDensityBinaryFrom("ELE1", 5.0,5.0);
-    manager.addSpecDensityBinaryFrom("ELE2", 5.0,5.0);
+    manager.addSpeciesDensityFrom("ELE1", 5.0,5.0);
+    manager.addSpeciesDensityFrom("ELE2", 5.0,5.0);
    
-    manager.addCurrentBinaryFrom(5.0,5.0);
+    manager.addCurrentFrom(5.0,5.0);
 
 
-    manager.addSpecPhaseSpaceBinaryFrom("ELE1", 5.0,5.0);
-    manager.addSpecPhaseSpaceBinaryFrom("ELE2", 5.0,5.0);
+    manager.addSpeciesPhaseSpaceFrom("ELE1", 5.0,5.0);
+    manager.addSpeciesPhaseSpaceFrom("ELE2", 5.0,5.0);
    
 
     manager.addDiagFrom(0.0,2.0);

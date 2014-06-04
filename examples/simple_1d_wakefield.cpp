@@ -185,12 +185,12 @@ int main(int narg, char **args)
 	manager.addEFieldFrom(0.0, 2.0);
 	manager.addBFieldFrom(0.0, 2.0);
 	
-	manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 2.0);
-	manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 2.0);
+	manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
+	manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
 	
-	manager.addCurrentBinaryFrom(0.0, 5.0);
+	manager.addCurrentFrom(0.0, 5.0);
 	
-	manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 0.0, 5.0);
+	manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
 	
 	manager.addDiagFrom(0.0, 1.0);
 	

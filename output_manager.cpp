@@ -155,8 +155,8 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
 
     isThereDiag = false;
 
-    outDomain *plane1= new outDomain;
-    myDomains.push_back(plane1);
+    outDomain *domain1= new outDomain;
+    myDomains.push_back(domain1);
 
 }
 
@@ -386,10 +386,10 @@ int OUTPUT_MANAGER::returnDomainIfProbeIsInList(emProbe *newProbe){
     return -1;
 
 }
-int OUTPUT_MANAGER::returnDomainIfPlaneIsInList(outDomain *newPlane){
+int OUTPUT_MANAGER::returnDomainIDIfDomainIsInList(outDomain *newDomain){
     int pos = 0;
     for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); it++){
-        if ((*it)-> compareDomains(newPlane)){
+        if ((*it)-> compareDomains(newDomain)){
             return pos;
         }
         pos++;
@@ -414,23 +414,56 @@ void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type
     reqList.merge(tempList, requestCompTime);
 }
 
-void OUTPUT_MANAGER::addEMFieldBinaryFrom(double startTime, double frequency){
+void OUTPUT_MANAGER::addEBFieldFrom(double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, startTime, frequency, endSimTime);
 }
 
-void OUTPUT_MANAGER::addEMFieldBinaryAt(double atTime){
+void OUTPUT_MANAGER::addEBFieldAt(double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addEMFieldBinaryFromTo(double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addEBFieldFromTo(double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    addRequestToList(requestList, OUT_EM_FIELD_BINARY, 0,  0, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, startTime, frequency, endTime);
+}
+void OUTPUT_MANAGER::addEBFieldFrom(outDomain* _domain, double startTime, double frequency){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
+    }
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, startTime, frequency, endSimTime);
+}
+
+void OUTPUT_MANAGER::addEBFieldAt(outDomain* _domain, double atTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addEBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkEMField()))
+        return;
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
+    if(domainID<0){
+        myDomains.push_back(_domain);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, startTime, frequency, endTime);
 }
 //NEW OUTPUT
 void OUTPUT_MANAGER::addEFieldFrom(double startTime, double frequency){
@@ -474,7 +507,7 @@ void OUTPUT_MANAGER::addBFieldFromTo(double startTime, double frequency, double 
 void OUTPUT_MANAGER::addEFieldFrom(outDomain* _domain, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(_domain);
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
     if(domainID<0){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
@@ -487,7 +520,7 @@ void OUTPUT_MANAGER::addEFieldFrom(outDomain* _domain, double startTime, double 
 void OUTPUT_MANAGER::addEFieldAt(outDomain* _domain, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(_domain);
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
     if(domainID<0){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
@@ -498,7 +531,7 @@ void OUTPUT_MANAGER::addEFieldAt(outDomain* _domain, double atTime){
 void OUTPUT_MANAGER::addEFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(_domain);
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
     if(domainID<0){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
@@ -509,7 +542,7 @@ void OUTPUT_MANAGER::addEFieldFromTo(outDomain* _domain, double startTime, doubl
 void OUTPUT_MANAGER::addBFieldFrom(outDomain* _domain, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(_domain);
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
     if(domainID<0){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
@@ -522,7 +555,7 @@ void OUTPUT_MANAGER::addBFieldFrom(outDomain* _domain, double startTime, double 
 void OUTPUT_MANAGER::addBFieldAt(outDomain* _domain, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(_domain);
+    int domainID=returnDomainIDIfDomainIsInList(_domain);
     if(domainID<0){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
@@ -530,12 +563,12 @@ void OUTPUT_MANAGER::addBFieldAt(outDomain* _domain, double atTime){
     addRequestToList(requestList, OUT_B_FIELD,  0,domainID, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addBFieldFromTo(outDomain* Plane, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addBFieldFromTo(outDomain* domain_in, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
     addRequestToList(requestList, OUT_B_FIELD,  0,domainID, startTime, frequency, endTime);
@@ -543,7 +576,7 @@ void OUTPUT_MANAGER::addBFieldFromTo(outDomain* Plane, double startTime, double 
 
 
 // EM Probe ///////////////////////////////////////
-void OUTPUT_MANAGER::addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
+void OUTPUT_MANAGER::addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
     int domain=returnDomainIfProbeIsInList(Probe);
@@ -553,11 +586,11 @@ void OUTPUT_MANAGER::addEMFieldProbeFrom(emProbe* Probe, double startTime, doubl
         domain=myEMProbes.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EMJPROBE,  0,domain, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_EB_PROBE,  0,domain, startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addEMFieldProbeAt(emProbe* Probe, double atTime){
+void OUTPUT_MANAGER::addEBFieldProbeAt(emProbe* Probe, double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
     int domainID=returnDomainIfProbeIsInList(Probe);
@@ -566,10 +599,10 @@ void OUTPUT_MANAGER::addEMFieldProbeAt(emProbe* Probe, double atTime){
         isThereEMProbe = true;
         domainID=myEMProbes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPROBE,  0,domainID, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_EB_PROBE,  0,domainID, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
     int domainID=returnDomainIfProbeIsInList(Probe);
@@ -578,168 +611,168 @@ void OUTPUT_MANAGER::addEMFieldProbeFromTo(emProbe* Probe, double startTime, dou
         isThereEMProbe = true;
         domainID=myEMProbes.size()-1;
     }
-    addRequestToList(requestList, OUT_EMJPROBE,  0, domainID, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_EB_PROBE,  0, domainID, startTime, frequency, endTime);
 }
 
 
 
-void OUTPUT_MANAGER::addSpecDensityBinaryFrom(std::string name, double startTime, double frequency){
+void OUTPUT_MANAGER::addSpeciesDensityFrom(std::string name, double startTime, double frequency){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addSpecDensityBinaryAt(std::string name, double atTime){
+void OUTPUT_MANAGER::addSpeciesDensityAt(std::string name, double atTime){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesDensityFromTo(std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  0,startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,startTime, frequency, endTime);
 }
 
-void OUTPUT_MANAGER::addSpecDensityBinaryFrom(outDomain* Plane, std::string name, double startTime, double frequency){
+void OUTPUT_MANAGER::addSpeciesDensityFrom(outDomain* domain_in, std::string name, double startTime, double frequency){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addSpecDensityBinaryAt(outDomain* Plane, std::string name, double atTime){
+void OUTPUT_MANAGER::addSpeciesDensityAt(outDomain* domain_in, std::string name, double atTime){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(outDomain* Plane, std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesDensityFromTo(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, startTime, frequency, endTime);
 }
 
 // ++++++++++++++++++++++++++++     current
-void OUTPUT_MANAGER::addCurrentBinaryFrom(double startTime, double frequency){
+void OUTPUT_MANAGER::addCurrentFrom(double startTime, double frequency){
     if (!(checkGrid() && checkCurrent()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  0,startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addCurrentBinaryAt(double atTime){
+void OUTPUT_MANAGER::addCurrentAt(double atTime){
     if (!(checkGrid() && checkCurrent()))
         return;
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  0,atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addCurrentBinaryFromTo(double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addCurrentFromTo(double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkCurrent()))
         return;
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  0,startTime, frequency, endTime);
 }
 
-void OUTPUT_MANAGER::addCurrentBinaryFrom(outDomain* Plane, double startTime, double frequency){
+void OUTPUT_MANAGER::addCurrentFrom(outDomain* domain_in, double startTime, double frequency){
     if (!(checkGrid() && checkCurrent()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,startTime, frequency, endSimTime);
 
 }
-void OUTPUT_MANAGER::addCurrentBinaryAt(outDomain* Plane, double atTime){
+void OUTPUT_MANAGER::addCurrentAt(outDomain* domain_in, double atTime){
     if (!(checkGrid() && checkCurrent()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addCurrentBinaryFromTo(outDomain* Plane, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addCurrentFromTo(outDomain* domain_in, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkCurrent()))
         return;
-    int domainID=returnDomainIfPlaneIsInList(Plane);
+    int domainID=returnDomainIDIfDomainIsInList(domain_in);
     if(domainID<0){
-        myDomains.push_back(Plane);
+        myDomains.push_back(domain_in);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,startTime, frequency, endTime);
 }
 
 
 
-void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency){
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency){
     if (!(checkGrid() && checkSpecies()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,startTime, frequency, endSimTime);
 
 }
 
-void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryAt(std::string name, double atTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceBinaryAt(std::string name, double atTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE_BINARY, specNum,  0,startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
@@ -809,38 +842,34 @@ void OUTPUT_MANAGER::autoVisualDiag(){
 
 void OUTPUT_MANAGER::processOutputEntry(request req){
     switch (req.type){
-    case OUT_EM_FIELD_BINARY:
-        callEMFieldOld(req);
+    case OUT_EB_FIELD:
+        callEMFieldDomain(req);
+        break;
+    case OUT_E_FIELD:
+        callEMFieldDomain(req);
+        break;
+    case OUT_B_FIELD:
+        callEMFieldDomain(req);
         break;
 
-    case OUT_EMJPROBE:
+    case OUT_EB_PROBE:
         callEMFieldProbe(req);
         break;
 
-    case OUT_EMJPLANE:
-        callEMFieldPlane(req);
-        break;
-
-    case OUT_SPEC_DENSITY_BINARY:
+    case OUT_SPEC_DENSITY:
         callSpecDensity(req);
         break;
 
-    case OUT_CURRENT_BINARY:
+    case OUT_CURRENT:
         callCurrent(req);
         break;
 
-    case OUT_SPEC_PHASE_SPACE_BINARY:
+    case OUT_SPEC_PHASE_SPACE:
         callSpecPhaseSpace(req);
         break;
 
     case OUT_DIAG:
         callDiag(req);
-        break;
-    case OUT_E_FIELD:
-        callEMFieldPlane(req);
-        break;
-    case OUT_B_FIELD:
-        callEMFieldPlane(req);
         break;
 
     default:
@@ -1188,7 +1217,7 @@ void OUTPUT_MANAGER::callEMFieldOld(request req){
 #endif
 
 }
-void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, request req, bool EorB){
+void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req, bool EorB){
     int Ncomp = 3;//myfield->getNcomp();
     int offset = EorB*3;
     int *totUniquePoints;
@@ -1351,21 +1380,21 @@ void OUTPUT_MANAGER::writeEMFieldPlane(std::string fileName, request req, bool E
     MPI_Comm_free( &sliceCommunicator );
 }
 
-void OUTPUT_MANAGER::callEMFieldPlane(request req){
+void OUTPUT_MANAGER::callEMFieldDomain(request req){
 
     if(req.type==OUT_E_FIELD){
         std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEMFieldPlane(nameBin, req,0);
+        writeEBFieldDomain(nameBin, req,0);
     }
     else if(req.type==OUT_B_FIELD){
         std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEMFieldPlane(nameBin, req,1);
+        writeEBFieldDomain(nameBin, req,1);
     }
-    else if(req.type==OUT_EMJPLANE){
+    else if(req.type==OUT_EB_FIELD){
         std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEMFieldPlane(nameBinE, req,0);
+        writeEBFieldDomain(nameBinE, req,0);
         std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEMFieldPlane(nameBinB, req,1);
+        writeEBFieldDomain(nameBinB, req,1);
     }
 }
 
@@ -1682,7 +1711,7 @@ void OUTPUT_MANAGER::writeSpecDensityOld(std::string fileName, request req){
 
 
 }
-void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){//outDomain *plane, bool EorB){
+void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){
     int Ncomp = 1;//myfield->getNcomp();
     int *totUniquePoints;
     int shouldIWrite=false;
@@ -2008,7 +2037,7 @@ void  OUTPUT_MANAGER::writeCurrentOld(std::string fileName, request req){
     delete[] nomefile;
 }
 
-void OUTPUT_MANAGER::writeCurrentNew(std::string fileName, request req){//outDomain *plane, bool EorB){
+void OUTPUT_MANAGER::writeCurrentNew(std::string fileName, request req){
     int Ncomp = 3;//myfield->getNcomp();
     int *totUniquePoints;
     int shouldIWrite=false;

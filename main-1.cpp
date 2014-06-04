@@ -239,17 +239,17 @@ int main(int narg, char **args)
 
     manager.addEFieldFrom(plane1, 0.0, 5.0);
     manager.addEFieldFrom(plane2, 0.0, 2.0);
-    manager.addEMFieldProbeFrom(probe1,0.0,0.1);
+    manager.addEBFieldProbeFrom(probe1,0.0,0.1);
     //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
-    manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
-    manager.addSpecDensityBinaryFrom(plane1,electrons1.name, 0.0, 2.0);
+    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 5.0);
+    manager.addSpeciesDensityFrom(plane1,electrons1.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-    manager.addCurrentBinaryFrom(0.0, 5.0);
-    manager.addCurrentBinaryFrom(plane1, 0.0, 5.0);
+    manager.addCurrentFrom(0.0, 5.0);
+    manager.addCurrentFrom(plane1, 0.0, 5.0);
 
     //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 10.0, 10.0);
     //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);

@@ -56,15 +56,14 @@ using namespace std;
 #define FIELD_DIAG_COMP 14
 
 enum diagType{
-	OUT_EM_FIELD_BINARY,
-	OUT_SPEC_PHASE_SPACE_BINARY,
-	OUT_DIAG,
-	OUT_CURRENT_BINARY,
-    OUT_EMJPROBE,
-    OUT_EMJPLANE,
-    OUT_SPEC_DENSITY_BINARY,
+    OUT_EB_FIELD,
     OUT_E_FIELD,
-    OUT_B_FIELD
+    OUT_B_FIELD,
+    OUT_SPEC_PHASE_SPACE,
+	OUT_DIAG,
+    OUT_CURRENT,
+    OUT_EB_PROBE,
+    OUT_SPEC_DENSITY
     };
 
 
@@ -110,9 +109,13 @@ public:
 	void initialize(std::string _outputDir);
 	void close();
 
-	void addEMFieldBinaryFrom(double startTime, double frequency);
-	void addEMFieldBinaryAt(double atTime);
-	void addEMFieldBinaryFromTo(double startTime, double frequency, double endTime);
+    void addEBFieldFrom(double startTime, double frequency);
+    void addEBFieldAt(double atTime);
+    void addEBFieldFromTo(double startTime, double frequency, double endTime);
+
+    void addEBFieldFrom(outDomain* _domain,double startTime, double frequency);
+    void addEBFieldAt(outDomain* _domain,double atTime);
+    void addEBFieldFromTo(outDomain* _domain,double startTime, double frequency, double endTime);
 
     void addEFieldFrom(double startTime, double frequency);
     void addEFieldAt(double atTime);
@@ -130,29 +133,29 @@ public:
     void addBFieldAt(outDomain* _domain,double atTime);
     void addBFieldFromTo(outDomain* Plane,double startTime, double frequency, double endTime);
 
-    void addEMFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
-    void addEMFieldProbeAt(emProbe* Probe, double atTime);
-    void addEMFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime);
+    void addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
+    void addEBFieldProbeAt(emProbe* Probe, double atTime);
+    void addEBFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime);
 
-    void addSpecDensityBinaryFrom(std::string name, double startTime, double frequency);
-	void addSpecDensityBinaryAt(std::string name, double atTime);
-	void addSpecDensityBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
+    void addSpeciesDensityFrom(std::string name, double startTime, double frequency);
+    void addSpeciesDensityAt(std::string name, double atTime);
+    void addSpeciesDensityFromTo(std::string name, double startTime, double frequency, double endTime);
 
-    void addSpecDensityBinaryFrom(outDomain* Plane, std::string name, double startTime, double frequency);
-    void addSpecDensityBinaryAt(outDomain* Plane, std::string name, double atTime);
-    void addSpecDensityBinaryFromTo(outDomain* Plane, std::string name, double startTime, double frequency, double endTime);
+    void addSpeciesDensityFrom(outDomain* Plane, std::string name, double startTime, double frequency);
+    void addSpeciesDensityAt(outDomain* Plane, std::string name, double atTime);
+    void addSpeciesDensityFromTo(outDomain* Plane, std::string name, double startTime, double frequency, double endTime);
 
-    void addCurrentBinaryFrom(double startTime, double frequency);
-	void addCurrentBinaryAt(double atTime);
-	void addCurrentBinaryFromTo(double startTime, double frequency, double endTime);
+    void addCurrentFrom(double startTime, double frequency);
+    void addCurrentAt(double atTime);
+    void addCurrentFromTo(double startTime, double frequency, double endTime);
 
-    void addCurrentBinaryFrom(outDomain* Plane, double startTime, double frequency);
-    void addCurrentBinaryAt(outDomain* Plane, double atTime);
-    void addCurrentBinaryFromTo(outDomain* Plane, double startTime, double frequency, double endTime);
+    void addCurrentFrom(outDomain* Plane, double startTime, double frequency);
+    void addCurrentAt(outDomain* Plane, double atTime);
+    void addCurrentFromTo(outDomain* Plane, double startTime, double frequency, double endTime);
 
-    void addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency);
-	void addSpecPhaseSpaceBinaryAt(std::string name, double atTime);
-	void addSpecPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
+    void addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency);
+    void addSpeciesPhaseSpaceBinaryAt(std::string name, double atTime);
+    void addSpeciesPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
 
 	void addDiagFrom(double startTime, double frequency);
 	void addDiagAt(double atTime);
@@ -191,7 +194,7 @@ private:
     void nearestInt(double *rr, int *ri, int *globalri);
     int findSpecName(std::string name);
     int returnDomainIfProbeIsInList(emProbe *newProbe);
-    int returnDomainIfPlaneIsInList(outDomain *newPlane);
+    int returnDomainIDIfDomainIsInList(outDomain *newDomain);
     std::string diagFileName;
 	std::string extremaFieldFileName;
 	std::vector<std::string> extremaSpecFileNames;
@@ -225,8 +228,8 @@ private:
     void callEMFieldOld(request req);
 
     void callEMFieldProbe(request req);
-    void writeEMFieldPlane(std::string fileName,  request req, bool EorB);
-    void callEMFieldPlane(request req);
+    void writeEBFieldDomain(std::string fileName,  request req, bool EorB);
+    void callEMFieldDomain(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);
     void writeSpecDensityOld(std::string fileName, request req);
