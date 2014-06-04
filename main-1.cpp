@@ -49,7 +49,7 @@ using namespace std;
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
-
+#include "utilities.h"
 #define NPROC_ALONG_Y 2
 #define NPROC_ALONG_Z 1
 
@@ -186,24 +186,6 @@ int main(int narg, char **args)
     //ions1.creation();
     //species.push_back(&ions1);
 
-    //   SPECIE  electrons2(&grid);
-    //electrons2.plasma = plasma1;
-    //electrons2.setParticlesPerCellXYZ(1, 4, 4);       //Se < 1 il nPPC viene sostituito con 1
-    //electrons2.setName("ELE2");
-    //electrons2.type = ELECTRON;
-    //electrons2.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-    //species.push_back(&electrons2);
-
-
-//    SPECIE ions2(&grid);
-//    ions2.plasma = plasma2;
-//    ions2.setParticlesPerCellXYZ(10, 10, 1);
-//    ions2.setName("ION2");
-//    ions2.type = ION;
-//    ions2.Z = 1.0;
-//    ions2.A = 1.0;
-//    //ions2.creation();
-//    //species.push_back(&ions2);
 
 	tempDistrib distribution;
     distribution.setWaterbag(1.0e-10);
@@ -237,24 +219,19 @@ int main(int narg, char **args)
     plane2->setFreeDimensions(1 ,0,0);
     plane2->setName("C");
 
-    manager.addEFieldFrom(plane1, 0.0, 5.0);
-    manager.addEFieldFrom(plane2, 0.0, 2.0);
+    manager.addEBFieldFrom(plane1, 0.0, 5.0);
+    manager.addEBFieldFrom(plane2, 0.0, 2.0);
     manager.addEBFieldProbeFrom(probe1,0.0,0.1);
-    //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
     manager.addSpeciesDensityFrom(electrons1.name, 0.0, 5.0);
     manager.addSpeciesDensityFrom(plane1,electrons1.name, 0.0, 2.0);
-    //manager.addSpecDensityBinaryFrom(ions1.name, 0.0, 5.0);
-    //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
-    //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
+    //manager.addSpeciesDensityFrom(ions1.name, 0.0, 5.0);
 
     manager.addCurrentFrom(0.0, 5.0);
     manager.addCurrentFrom(plane1, 0.0, 5.0);
 
-    //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 10.0, 10.0);
-    //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
-    //manager.addSpecPhaseSpaceBinaryFrom(ions1.name, 10.0, 10.0);
-    //manager.addSpecPhaseSpaceBinaryFrom(ions2.name, 0.0, 5.0);
+    manager.addSpeciesPhaseSpaceFrom(electrons1.name, 10.0, 10.0);
+    //manager.addSpeciesPhaseSpaceFrom(ions1.name, 10.0, 10.0);
 
 	manager.addDiagFrom(0.0, 1.0);
 
@@ -268,24 +245,15 @@ int main(int narg, char **args)
 	}
 
 	int Nstep = grid.getTotalNumberOfTimesteps();
-    int dumpID=1, dumpEvery=40;
-    grid.istep=0;
+    int dumpID=1, dumpEvery;
     if(DO_DUMP){
         dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
     }
+
+    grid.istep=0;
     if (_DO_RESTART){
         dumpID=_RESTART_FROM_DUMP;
-        std::ifstream dumpFile;
-        dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
-        if( dumpFile.good()){
-            grid.reloadDump(dumpFile);
-            myfield.reloadDump(dumpFile);
-            for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-                (*spec_iterator)->reloadDump(dumpFile);
-            }
-            dumpFile.close();
-            dumpID++;
-        }
+        restartFromDump(&dumpID, &grid, &myfield, species);
     }
     while(grid.istep <= Nstep)
     {
@@ -322,24 +290,12 @@ int main(int narg, char **args)
 
         grid.time += grid.dt;
 
-        grid.move_window();
-        myfield.move_window();
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-            (*spec_iterator)->move_window();
-        }
+        moveWindow(&grid, &myfield, species);
+
         grid.istep++;
         if(DO_DUMP){
             if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-                std::ofstream dumpFile;
-                dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
-
-                grid.dump(dumpFile);
-                myfield.dump(dumpFile);
-                for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-                    (*spec_iterator)->dump(dumpFile);
-                }
-                dumpFile.close();
-                dumpID++;
+                dumpFilesForRestart(&dumpID, &grid, &myfield, species);
             }
         }
     }

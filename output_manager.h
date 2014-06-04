@@ -56,7 +56,6 @@ using namespace std;
 #define FIELD_DIAG_COMP 14
 
 enum diagType{
-    OUT_EB_FIELD,
     OUT_E_FIELD,
     OUT_B_FIELD,
     OUT_SPEC_PHASE_SPACE,
@@ -154,8 +153,8 @@ public:
     void addCurrentFromTo(outDomain* Plane, double startTime, double frequency, double endTime);
 
     void addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency);
-    void addSpeciesPhaseSpaceBinaryAt(std::string name, double atTime);
-    void addSpeciesPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
+    void addSpeciesPhaseSpaceAt(std::string name, double atTime);
+    void addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime);
 
 	void addDiagFrom(double startTime, double frequency);
 	void addDiagAt(double atTime);
@@ -228,7 +227,7 @@ private:
     void callEMFieldOld(request req);
 
     void callEMFieldProbe(request req);
-    void writeEBFieldDomain(std::string fileName,  request req, bool EorB);
+    void writeEBFieldDomain(std::string fileName,  request req);
     void callEMFieldDomain(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);

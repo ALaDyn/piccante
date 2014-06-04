@@ -1,7 +1,7 @@
 COMPILER = mpic++
 EXE = piccante
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o 
+OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o
 
 OPT = -O3 
 
@@ -55,6 +55,8 @@ particle_species.o: particle_species.cpp
 output_manager.o:  output_manager.cpp 
 						$(COMPILER) $(OPT) -c output_manager.cpp
 
+utilities.o: utilities.cpp 
+	$(COMPILER) $(OPT) -c utilities.cpp
 clean :
 				rm $(OBJ)
 

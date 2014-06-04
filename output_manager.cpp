@@ -418,19 +418,24 @@ void OUTPUT_MANAGER::addEBFieldFrom(double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
         return;
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endSimTime);
+
 }
 
 void OUTPUT_MANAGER::addEBFieldAt(double atTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, atTime, 1.0, atTime);
+
 }
 
 void OUTPUT_MANAGER::addEBFieldFromTo(double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  0, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endTime);
 }
 void OUTPUT_MANAGER::addEBFieldFrom(outDomain* _domain, double startTime, double frequency){
     if (!(checkGrid() && checkEMField()))
@@ -441,7 +446,8 @@ void OUTPUT_MANAGER::addEBFieldFrom(outDomain* _domain, double startTime, double
         domainID=myDomains.size()-1;
     }
     double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endSimTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endSimTime);
 }
 
 void OUTPUT_MANAGER::addEBFieldAt(outDomain* _domain, double atTime){
@@ -452,7 +458,8 @@ void OUTPUT_MANAGER::addEBFieldAt(outDomain* _domain, double atTime){
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, atTime, 1.0, atTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addEBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
@@ -463,7 +470,8 @@ void OUTPUT_MANAGER::addEBFieldFromTo(outDomain* _domain, double startTime, doub
         myDomains.push_back(_domain);
         domainID=myDomains.size()-1;
     }
-    addRequestToList(requestList, OUT_EB_FIELD, 0,  domainID, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endTime);
 }
 //NEW OUTPUT
 void OUTPUT_MANAGER::addEFieldFrom(double startTime, double frequency){
@@ -757,7 +765,7 @@ void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime
 
 }
 
-void OUTPUT_MANAGER::addSpeciesPhaseSpaceBinaryAt(std::string name, double atTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceAt(std::string name, double atTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
@@ -766,7 +774,7 @@ void OUTPUT_MANAGER::addSpeciesPhaseSpaceBinaryAt(std::string name, double atTim
     addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addSpeciesPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
@@ -842,9 +850,7 @@ void OUTPUT_MANAGER::autoVisualDiag(){
 
 void OUTPUT_MANAGER::processOutputEntry(request req){
     switch (req.type){
-    case OUT_EB_FIELD:
-        callEMFieldDomain(req);
-        break;
+
     case OUT_E_FIELD:
         callEMFieldDomain(req);
         break;
@@ -1217,9 +1223,13 @@ void OUTPUT_MANAGER::callEMFieldOld(request req){
 #endif
 
 }
-void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req, bool EorB){
+void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
     int Ncomp = 3;//myfield->getNcomp();
-    int offset = EorB*3;
+    int offset=0;
+    if(req.type==OUT_E_FIELD)
+        offset = 0;
+    if(req.type==OUT_B_FIELD)
+        offset = 3;
     int *totUniquePoints;
     int shouldIWrite=false;
     int uniqueN[3], slice_rNproc[3];
@@ -1384,18 +1394,13 @@ void OUTPUT_MANAGER::callEMFieldDomain(request req){
 
     if(req.type==OUT_E_FIELD){
         std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEBFieldDomain(nameBin, req,0);
+        writeEBFieldDomain(nameBin, req);
     }
     else if(req.type==OUT_B_FIELD){
         std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEBFieldDomain(nameBin, req,1);
+        writeEBFieldDomain(nameBin, req);
     }
-    else if(req.type==OUT_EB_FIELD){
-        std::string nameBinE = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEBFieldDomain(nameBinE, req,0);
-        std::string nameBinB = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-        writeEBFieldDomain(nameBinB, req,1);
-    }
+
 }
 
 void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
