@@ -33,7 +33,7 @@ GRID::GRID()
 	lambda0 = 1.0;   //set lenght of the normalization
 	ref_den = 1.0; //= critical density
 	den_factor = (2 * M_PI)*(2 * M_PI);
-
+    dumpPath = "./";
 	GRID::initializeStretchParameters();
 
 }
@@ -1363,4 +1363,22 @@ void GRID::reloadDump(std::ifstream &ff){
 }
 double GRID::getMarkMW(){
     return mark_mw;
+}
+
+void GRID::setDumpPath(std::string _dumpDir){
+#if defined (USE_BOOST)
+    if (myid == master_proc){
+        if ( !boost::filesystem::exists(_dumpDir) ){
+            boost::filesystem::create_directories(_dumpDir);
+        }
+    }
+#endif
+    dumpPath=_dumpDir;
+}
+std::string GRID::composeDumpFileName(int dumpID){
+    std::stringstream dumpName;
+    dumpName << dumpPath << "/DUMP_";
+    dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
+    dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << myid << ".bin";
+    return dumpName.str();
 }

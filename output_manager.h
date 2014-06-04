@@ -146,7 +146,11 @@ public:
 	void addCurrentBinaryAt(double atTime);
 	void addCurrentBinaryFromTo(double startTime, double frequency, double endTime);
 
-	void addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency);
+    void addCurrentBinaryFrom(outDomain* Plane, double startTime, double frequency);
+    void addCurrentBinaryAt(outDomain* Plane, double atTime);
+    void addCurrentBinaryFromTo(outDomain* Plane, double startTime, double frequency, double endTime);
+
+    void addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency);
 	void addSpecPhaseSpaceBinaryAt(std::string name, double atTime);
 	void addSpecPhaseSpaceBinaryFromTo(std::string name, double startTime, double frequency, double endTime);
 
@@ -218,23 +222,24 @@ private:
 	void writeEMFieldBinary(std::string fileName, request req);
     void writeNewEMFieldBinary(std::string fileName, request req, int comp);
     void writeEMFieldBinaryHDF5(std::string fileName, request req);
-    void callEMFieldBinary(request req);
+    void callEMFieldOld(request req);
 
     void callEMFieldProbe(request req);
     void writeEMFieldPlane(std::string fileName,  request req, bool EorB);
     void callEMFieldPlane(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);
-	void writeSpecDensityBinary(std::string fileName, request req);
+    void writeSpecDensityOld(std::string fileName, request req);
     void writeSpecDensityNew(std::string fileName, request req);
-    void callSpecDensityBinary(request req);
+    void callSpecDensity(request req);
 
 	void writeCurrentMap(std::ofstream &output, request req);
-	void writeCurrentBinary(std::string fileName, request req);
-	void callCurrentBinary(request req);
+    void writeCurrentOld(std::string fileName, request req);
+    void writeCurrentNew(std::string fileName, request req);
+    void callCurrent(request req);
 
-	void writeSpecPhaseSpaceBinary(std::string fileName, request req);
-	void callSpecPhaseSpaceBinary(request req);
+    void writeSpecPhaseSpace(std::string fileName, request req);
+    void callSpecPhaseSpace(request req);
 
 
 	void callDiag(request req);

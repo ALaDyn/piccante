@@ -41,6 +41,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include"commons.h"
+#if defined(USE_BOOST)
+#include <boost/filesystem.hpp>
+#endif
 
 enum axisBoundaryConditions{
 	_notAssigned,
@@ -152,10 +155,9 @@ public:
 	double csiminloc[3], csimaxloc[3];
     double getMarkMW();
     ACCESSO accesso;
-    std::string dumpPath;
-    std::string restartPath;
-
-private:
+    void setDumpPath(std::string _dumpDir);
+    std::string composeDumpFileName(int dumpID);
+    private:
 	int totalNumberOfTimesteps;
 
 	double beta_mw, t_start_moving_mw, mark_mw;
@@ -180,6 +182,7 @@ private:
 	bool checkAssignBoundary(axisBoundaryConditions cond, axisBoundaryConditions* axisCond);
 
 	time_t unix_time_start;
+    std::string dumpPath;
 
 	void setGridDeltar();
 	void setGridDeltarNormal();

@@ -56,10 +56,10 @@ using namespace std;
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
 #define DO_DUMP true
-#define TIME_BTW_DUMP 50
+#define TIME_BTW_DUMP 10
 
 #define DIRECTORY_OUTPUT "TEST"
-#define DIRECTORY_DUMP "TEST"
+#define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -221,11 +221,10 @@ int main(int narg, char **args)
 	//    //*******************************************FINE DEFINIZIONE CAMPI***********************************************************
 
 	//*******************************************INIZIO DEFINIZIONE DIAGNOSTICHE**************************************************
-
 	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
     emProbe *probe1=new emProbe;
-    probe1->setPointCoordinate(30,0,0);
+    probe1->setPointCoordinate(0,0,0);
     probe1->setName("A");
 
     outDomain *plane1= new outDomain;
@@ -240,7 +239,7 @@ int main(int narg, char **args)
 
     manager.addEFieldFrom(plane1, 0.0, 5.0);
     manager.addEFieldFrom(plane2, 0.0, 2.0);
-    //manager.addEMFieldProbeFrom(probe1,0.0,0.1);
+    manager.addEMFieldProbeFrom(probe1,0.0,0.1);
     //manager.addEMFieldPlaneFrom(plane1,0.0,1.0);
 
     manager.addSpecDensityBinaryFrom(electrons1.name, 0.0, 5.0);
@@ -249,7 +248,8 @@ int main(int narg, char **args)
     //manager.addSpecDensityBinaryFrom(electrons2.name, 0.0, 2.0);
     //manager.addSpecDensityBinaryFrom(ions2.name, 0.0, 2.0);
 
-    //manager.addCurrentBinaryFrom(0.0, 5.0);
+    manager.addCurrentBinaryFrom(0.0, 5.0);
+    manager.addCurrentBinaryFrom(plane1, 0.0, 5.0);
 
     //manager.addSpecPhaseSpaceBinaryFrom(electrons1.name, 10.0, 10.0);
     //manager.addSpecPhaseSpaceBinaryFrom(electrons2.name, 0.0, 2.0);
@@ -259,9 +259,8 @@ int main(int narg, char **args)
 	manager.addDiagFrom(0.0, 1.0);
 
 	manager.initialize(DIRECTORY_OUTPUT);
-
 	//*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
-
+    grid.setDumpPath(DIRECTORY_DUMP);
 	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CICLO PRINCIPALE (NON MODIFICARE) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	if (grid.myid == grid.master_proc){
 		printf("----- START temporal cicle -----\n");
@@ -277,75 +276,62 @@ int main(int narg, char **args)
     if (_DO_RESTART){
         dumpID=_RESTART_FROM_DUMP;
         std::ifstream dumpFile;
-        std::stringstream dumpName;
-        dumpName << DIRECTORY_DUMP << "/DUMP_";
-        dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
-        dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
-        dumpFile.open(dumpName.str().c_str());
-
-        grid.reloadDump(dumpFile);
-        myfield.reloadDump(dumpFile);
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-            (*spec_iterator)->reloadDump(dumpFile);
+        dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
+        if( dumpFile.good()){
+            grid.reloadDump(dumpFile);
+            myfield.reloadDump(dumpFile);
+            for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+                (*spec_iterator)->reloadDump(dumpFile);
+            }
+            dumpFile.close();
+            dumpID++;
         }
-        dumpFile.close();
-        dumpID++;
-        grid.istep++;
     }
-    for (; grid.istep <= Nstep; grid.istep++)
-	{
+    while(grid.istep <= Nstep)
+    {
 
-		grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
+        grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
         manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
 
-		myfield.openBoundariesE_1();
-		myfield.new_halfadvance_B();
-		myfield.boundary_conditions();
+        myfield.openBoundariesE_1();
+        myfield.new_halfadvance_B();
+        myfield.boundary_conditions();
 
-		current.setAllValuesToZero();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->current_deposition_standard(&current);
-		}
-
-		current.pbc();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->position_parallel_pbc();
-		}		
-
-		myfield.openBoundariesB();
-		myfield.new_advance_E(&current);
-
-		myfield.boundary_conditions();
-
-		myfield.openBoundariesE_2();
-		myfield.new_halfadvance_B();
-
-		myfield.boundary_conditions();
-
-		for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->momenta_advance(&myfield);
-		}
-
-		grid.time += grid.dt;
-
-
-		grid.move_window();
-         myfield.move_window();
+        current.setAllValuesToZero();
         for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-			(*spec_iterator)->move_window();
+            (*spec_iterator)->current_deposition_standard(&current);
         }
-         if(DO_DUMP){
+        current.pbc();
+
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+            (*spec_iterator)->position_parallel_pbc();
+        }
+
+        myfield.openBoundariesB();
+        myfield.new_advance_E(&current);
+
+        myfield.boundary_conditions();
+        myfield.openBoundariesE_2();
+        myfield.new_halfadvance_B();
+        myfield.boundary_conditions();
+
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+            (*spec_iterator)->momenta_advance(&myfield);
+        }
+
+        grid.time += grid.dt;
+
+        grid.move_window();
+        myfield.move_window();
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+            (*spec_iterator)->move_window();
+        }
+        grid.istep++;
+        if(DO_DUMP){
             if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
                 std::ofstream dumpFile;
-                std::stringstream dumpName;
-                dumpName << DIRECTORY_OUTPUT << "/DUMP_";
-                dumpName<< std::setw(2)<< std::setfill('0') << std::fixed << dumpID << "_";
-                dumpName<< std::setw(5)<< std::setfill('0') << std::fixed << grid.myid << ".bin";
-                dumpFile.open(dumpName.str().c_str());
+                dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
 
                 grid.dump(dumpFile);
                 myfield.dump(dumpFile);
@@ -356,10 +342,10 @@ int main(int narg, char **args)
                 dumpID++;
             }
         }
-	}
+    }
 
-	manager.close();
-	MPI_Finalize();
-	exit(1);
+    manager.close();
+    MPI_Finalize();
+    exit(1);
 
 }

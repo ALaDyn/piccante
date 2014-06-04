@@ -256,6 +256,11 @@ void OUTPUT_MANAGER::createEMProbeFiles(){
         for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
             std::ofstream of0;
             of0.open((*it)->fileName.c_str());
+            of0 << "# EM field probe at coordinates  ";
+            of0 <<  (*it)->coordinates[0] << "  ";
+            of0 <<  (*it)->coordinates[1] << "  ";
+            of0 <<  (*it)->coordinates[2] << "  ";
+            of0 << std::endl;
             of0.close();
         }
     }
@@ -651,6 +656,7 @@ void OUTPUT_MANAGER::addSpecDensityBinaryFromTo(outDomain* Plane, std::string na
     addRequestToList(requestList, OUT_SPEC_DENSITY_BINARY, specNum,  domainID, startTime, frequency, endTime);
 }
 
+// ++++++++++++++++++++++++++++     current
 void OUTPUT_MANAGER::addCurrentBinaryFrom(double startTime, double frequency){
     if (!(checkGrid() && checkCurrent()))
         return;
@@ -670,6 +676,42 @@ void OUTPUT_MANAGER::addCurrentBinaryFromTo(double startTime, double frequency, 
         return;
     addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  0,startTime, frequency, endTime);
 }
+
+void OUTPUT_MANAGER::addCurrentBinaryFrom(outDomain* Plane, double startTime, double frequency){
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,startTime, frequency, endSimTime);
+
+}
+void OUTPUT_MANAGER::addCurrentBinaryAt(outDomain* Plane, double atTime){
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addCurrentBinaryFromTo(outDomain* Plane, double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkCurrent()))
+        return;
+    int domainID=returnDomainIfPlaneIsInList(Plane);
+    if(domainID<0){
+        myDomains.push_back(Plane);
+        domainID=myDomains.size()-1;
+    }
+    addRequestToList(requestList, OUT_CURRENT_BINARY, 0,  domainID,startTime, frequency, endTime);
+}
+
+
 
 void OUTPUT_MANAGER::addSpecPhaseSpaceBinaryFrom(std::string name, double startTime, double frequency){
     if (!(checkGrid() && checkSpecies()))
@@ -768,7 +810,7 @@ void OUTPUT_MANAGER::autoVisualDiag(){
 void OUTPUT_MANAGER::processOutputEntry(request req){
     switch (req.type){
     case OUT_EM_FIELD_BINARY:
-        callEMFieldBinary(req);
+        callEMFieldOld(req);
         break;
 
     case OUT_EMJPROBE:
@@ -780,15 +822,15 @@ void OUTPUT_MANAGER::processOutputEntry(request req){
         break;
 
     case OUT_SPEC_DENSITY_BINARY:
-        callSpecDensityBinary(req);
+        callSpecDensity(req);
         break;
 
     case OUT_CURRENT_BINARY:
-        callCurrentBinary(req);
+        callCurrent(req);
         break;
 
     case OUT_SPEC_PHASE_SPACE_BINARY:
-        callSpecPhaseSpaceBinary(req);
+        callSpecPhaseSpace(req);
         break;
 
     case OUT_DIAG:
@@ -1128,7 +1170,7 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
 }
 #endif
 
-void OUTPUT_MANAGER::callEMFieldBinary(request req){
+void OUTPUT_MANAGER::callEMFieldOld(request req){
 
     if (mygrid->myid == mygrid->master_proc){
         std::string nameMap = composeOutputName(outputDir, "EMfield", "", req.dtime, ".map");
@@ -1528,7 +1570,7 @@ void OUTPUT_MANAGER::writeSpecDensityMap(std::ofstream &output, request req){
 
 }
 
-void OUTPUT_MANAGER::writeSpecDensityBinary(std::string fileName, request req){
+void OUTPUT_MANAGER::writeSpecDensityOld(std::string fileName, request req){
     int uniqueN[3];
     uniqueN[0] = mygrid->uniquePoints[0];
     uniqueN[1] = mygrid->uniquePoints[1];
@@ -1802,7 +1844,7 @@ void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){//ou
     MPI_Comm_free( &sliceCommunicator );
 }
 
-void OUTPUT_MANAGER::callSpecDensityBinary(request req){
+void OUTPUT_MANAGER::callSpecDensity(request req){
     mycurrent->eraseDensity();
     myspecies[req.target]->density_deposition_standard(mycurrent);
     mycurrent->pbc();
@@ -1849,7 +1891,7 @@ void  OUTPUT_MANAGER::writeCurrentMap(std::ofstream &output, request req){
     }
 }
 
-void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
+void  OUTPUT_MANAGER::writeCurrentOld(std::string fileName, request req){
 
     int Ncomp = 3;
 
@@ -1966,7 +2008,169 @@ void  OUTPUT_MANAGER::writeCurrentBinary(std::string fileName, request req){
     delete[] nomefile;
 }
 
-void  OUTPUT_MANAGER::callCurrentBinary(request req){
+void OUTPUT_MANAGER::writeCurrentNew(std::string fileName, request req){//outDomain *plane, bool EorB){
+    int Ncomp = 3;//myfield->getNcomp();
+    int *totUniquePoints;
+    int shouldIWrite=false;
+    int uniqueN[3], slice_rNproc[3];
+    double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
+    int ri[3];
+    int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
+
+    for(int c=0;c<3;c++){
+        if(remains[c]){
+            uniqueN[c] = mygrid->uniquePoints[c];
+            slice_rNproc[c]=mygrid->rnproc[c];
+        }
+        else{
+            uniqueN[c] = 1;
+            slice_rNproc[c] = 1;
+        }
+    }
+
+    shouldIWrite=isInMyDomain(rr);
+
+    MPI_Comm sliceCommunicator;
+    int mySliceID, sliceNProc;
+
+    int dimension;
+    MPI_Cart_sub(mygrid->cart_comm,remains,&sliceCommunicator);
+    MPI_Comm_rank(sliceCommunicator, &mySliceID);
+    MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Cartdim_get(sliceCommunicator,&dimension);
+    MPI_Allreduce(MPI_IN_PLACE, &shouldIWrite, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+
+    totUniquePoints = new int[sliceNProc];
+    for (int rank = 0; rank < sliceNProc; rank++){
+        int rid[3],idbookmark=0;
+        MPI_Cart_coords(sliceCommunicator, rank, dimension, rid);
+        totUniquePoints[rank] = 1;
+        for(int c=0;c<3;c++){
+            if(remains[c]){
+                totUniquePoints[rank] *= mygrid->rproc_NuniquePointsloc[c][rid[idbookmark]];
+                idbookmark++;
+            }
+        }
+    }
+
+    MPI_Offset disp = 0;
+    int small_header = 6 * sizeof(int);
+    int big_header = (1+3+3+1)*sizeof(int)
+            +(uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+
+    MPI_File thefile;
+    MPI_Status status;
+
+    char* nomefile = new char[fileName.size() + 1];
+
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
+
+    if(shouldIWrite){
+        MPI_File_open(sliceCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+        int globalri[3];
+        nearestInt(rr, ri, globalri);
+        //+++++++++++ FILE HEADER  +++++++++++++++++++++
+        if (mySliceID == 0){
+            MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+            int itodo[8];
+            itodo[0]=is_big_endian();
+            itodo[1]=uniqueN[0];
+            itodo[2]=uniqueN[1];
+            itodo[3]=uniqueN[2];
+            itodo[4]=slice_rNproc[0];
+            itodo[5]=slice_rNproc[1];
+            itodo[6]=slice_rNproc[2];
+            itodo[7]=Ncomp;
+            MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+
+            float *fcir[3];
+            for(int c=0;c<3;c++){
+                fcir[c]=new float[uniqueN[c]];
+                for(int m=0; m<uniqueN[c]; m++){
+                    fcir[c][m] = (float)mygrid->cir[c][m];
+                }
+            }
+            for(int c=0;c<3;c++){
+                if(remains[c])
+                    MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+                else
+                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+            }
+            for(int c=0;c<3;c++){
+                delete[] fcir[c];
+            }
+
+        }
+        //*********** END HEADER *****************
+
+        disp = big_header;
+        for (int rank = 0; rank < mySliceID; rank++)
+            disp += small_header + totUniquePoints[rank] * sizeof(float)*Ncomp;
+        if (disp < 0){
+            std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+            std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+            exit(33);
+        }
+        if (mySliceID != 0){
+            MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        }
+
+        //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
+        {
+            int itodo[6];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
+                    itodo[c+3] = mygrid->uniquePointsloc[c];
+                }
+                else{
+                    itodo[c] = 0;
+                    itodo[c+3] = 1;
+                }
+            }
+            MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+        }
+        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+        {
+            float *todo;
+            int NN[3], Nx, Ny, Nz, origin[3];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    NN[c] = mygrid->uniquePointsloc[c];
+                    origin[c]=0;
+                }
+                else{
+                    NN[c]=1;
+                    origin[c]=ri[c];
+                }
+            }
+            Nx=NN[0];
+            Ny=NN[1];
+            Nz=NN[2];
+            int size = Ncomp*NN[0]*NN[1]*NN[2];
+            todo = new float[size];
+            int ii,jj,kk;
+            for (int k = 0; k < Nz; k++){
+                kk=k+origin[2];
+                for (int j = 0; j < Ny; j++){
+                    jj=j+origin[1];
+                    for (int i = 0; i < Nx; i++){
+                        ii=i+origin[0];
+                        for (int c = 0; c < Ncomp; c++)
+                            todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  (float)mycurrent->JJ(c, i, j, k);
+                    }
+                }
+            }
+            MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+            delete[]todo;
+        }
+        MPI_File_close(&thefile);
+    }
+    MPI_Comm_free( &sliceCommunicator );
+}
+
+void  OUTPUT_MANAGER::callCurrent(request req){
     if (mygrid->myid == mygrid->master_proc){
         std::string nameMap = composeOutputName(outputDir, "J", "", req.dtime, ".map");
         std::ofstream of1;
@@ -1974,13 +2178,13 @@ void  OUTPUT_MANAGER::callCurrentBinary(request req){
         writeCurrentMap(of1, req);
         of1.close();
     }
-    std::string nameBin = composeOutputName(outputDir, "J", "", req.dtime, ".bin")+ "_" + myDomains[req.domain]->name;
+    std::string nameBin = composeOutputName(outputDir, "J", "", myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
-    writeCurrentBinary(nameBin, req);
+    writeCurrentNew(nameBin, req);
 
 }
 
-void OUTPUT_MANAGER::writeSpecPhaseSpaceBinary(std::string fileName, request req){
+void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
     SPECIE* spec = myspecies[req.target];
 
@@ -2030,12 +2234,12 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceBinary(std::string fileName, request req
     delete[] NfloatLoc;
 
 }
-void OUTPUT_MANAGER::callSpecPhaseSpaceBinary(request req){
+void OUTPUT_MANAGER::callSpecPhaseSpace(request req){
     std::string name = myspecies[req.target]->name;
 
     std::string nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
 
-    writeSpecPhaseSpaceBinary(nameBin, req);
+    writeSpecPhaseSpace(nameBin, req);
 }
 
 
