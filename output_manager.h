@@ -86,13 +86,19 @@ struct emProbe{
 
 struct outDomain{
     double coordinates[3];
-    bool remainingCoord[3];
+    bool remainingCoord[3], subselection;
+    double rmin[3], rmax[3];
     std::string name;
     outDomain();
     bool compareDomains(outDomain* rhs);
     void setFreeDimensions(bool flagX, bool flagY, bool flagZ);
     void setPointCoordinate(double X, double Y, double Z);
     void setName(std::string iname);
+    void setXRange(double min, double max);
+    void setYRange(double min, double max);
+    void setZRange(double min, double max);
+
+
 };
 
 bool requestCompTime(const request &first, const request &second);
@@ -190,7 +196,11 @@ private:
 	bool checkCurrent();
 	bool checkSpecies();
     bool isInMyDomain(double *rr);
+    bool amIInTheSubDomain(request req);
     void nearestInt(double *rr, int *ri, int *globalri);
+    void findIntLocalBoundaries(double *rmin, double *rmax, int *imin, int *imax);
+    void findIntGlobalBoundaries(double *rmin, double *rmax, int *imin, int *imax);
+    void findNumberOfProc(int *Nproc, int *imin, int *imax);
     int findSpecName(std::string name);
     int returnDomainIfProbeIsInList(emProbe *newProbe);
     int returnDomainIDIfDomainIsInList(outDomain *newDomain);
@@ -228,6 +238,7 @@ private:
 
     void callEMFieldProbe(request req);
     void writeEBFieldDomain(std::string fileName,  request req);
+    void writeEBFieldSubDomain(std::string fileName,  request req);
     void callEMFieldDomain(request req);
 
     void writeSpecDensityMap(std::ofstream &output, request req);

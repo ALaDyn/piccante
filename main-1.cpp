@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 3
 
 #include "access.h"
 #include "commons.h"
@@ -76,13 +76,13 @@ int main(int narg, char **args)
 
     grid.setXrange(-29.0, 1.0);
     grid.setYrange(-16, 16);
-	grid.setZrange(-1, +1);
+    grid.setZrange(-16, +16);
 
-    grid.setNCells(30*24, 80+48, 1);
+    grid.setNCells(30*24, 80+48, 80+48);
 	grid.setNProcsAlongY(NPROC_ALONG_Y);
 	grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
-    grid.enableStretchedGrid();
+    //grid.enableStretchedGrid();
     //grid.setXandNxLeftStretchedGrid(-20.0,1000);
     grid.setYandNyLeftStretchedGrid(-8.0,21);
     //grid.setXandNxRightStretchedGrid(20.0,1000);
@@ -172,8 +172,8 @@ int main(int narg, char **args)
     electrons1.setParticlesPerCellXYZ(4, 4, 1);       //Se < 1 il nPPC viene sostituito con 1
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
-    electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
-    species.push_back(&electrons1);
+    //electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    //species.push_back(&electrons1);
 
 
 	SPECIE ions1(&grid);
@@ -216,10 +216,13 @@ int main(int narg, char **args)
 
     outDomain *plane2= new outDomain;
     plane2->setPointCoordinate(0,0,0);
-    plane2->setFreeDimensions(1 ,0,0);
+    plane2->setFreeDimensions(1 ,1,1);
     plane2->setName("C");
+    plane2->setXRange(-28,0);
+    plane2->setYRange(0,10);
+    plane2->setYRange(0,10);
 
-    manager.addEBFieldFrom(plane1, 0.0, 5.0);
+    manager.addEBFieldFrom(0.0, 5.0);
     manager.addEBFieldFrom(plane2, 0.0, 2.0);
     manager.addEBFieldProbeFrom(probe1,0.0,0.1);
 
