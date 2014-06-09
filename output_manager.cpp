@@ -1512,16 +1512,16 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
     findNumberOfProc(NProcSubdomain, imin, imax);
 
-    if(mygrid->myid==0&&1){
+//    if(mygrid->myid==0&&1){
 
-        std::cout << mygrid->myid <<"  nproc subdomain: "<< NProcSubdomain[0] <<"  "<< NProcSubdomain[1] <<"  "<< NProcSubdomain[2] <<"\n";
-        std::cout << mygrid->myid <<"  imin   "<< imin[0] <<"  "<< imin[1] <<"  "<< imin[2] <<"\n";
-        std::cout << mygrid->myid <<"  imax   "<< imax[0] <<"  "<< imax[1] <<"  "<< imax[2] <<"\n";
-        std::cout << mygrid->myid <<"  locimin   "<< locimin[0] <<"  "<< locimin[1] <<"  "<< locimin[2] <<"\n";
-        std::cout << mygrid->myid <<"  locimax   "<< locimax[0] <<"  "<< locimax[1] <<"  "<< locimax[2] <<"\n";
-        std::cout << mygrid->myid <<"  rmin   "<< myDomains[req.domain]->rmin[0] <<"  "<< myDomains[req.domain]->rmin[1] <<"  "<< myDomains[req.domain]->rmin[2] <<"\n";
-        std::cout << mygrid->myid <<"  rmax   "<< myDomains[req.domain]->rmax[0] <<"  "<< myDomains[req.domain]->rmax[1] <<"  "<< myDomains[req.domain]->rmax[2] <<"\n";
-    }
+//        std::cout << mygrid->myid <<"  nproc subdomain: "<< NProcSubdomain[0] <<"  "<< NProcSubdomain[1] <<"  "<< NProcSubdomain[2] <<"\n";
+//        std::cout << mygrid->myid <<"  imin   "<< imin[0] <<"  "<< imin[1] <<"  "<< imin[2] <<"\n";
+//        std::cout << mygrid->myid <<"  imax   "<< imax[0] <<"  "<< imax[1] <<"  "<< imax[2] <<"\n";
+//        std::cout << mygrid->myid <<"  locimin   "<< locimin[0] <<"  "<< locimin[1] <<"  "<< locimin[2] <<"\n";
+//        std::cout << mygrid->myid <<"  locimax   "<< locimax[0] <<"  "<< locimax[1] <<"  "<< locimax[2] <<"\n";
+//        std::cout << mygrid->myid <<"  rmin   "<< myDomains[req.domain]->rmin[0] <<"  "<< myDomains[req.domain]->rmin[1] <<"  "<< myDomains[req.domain]->rmin[2] <<"\n";
+//        std::cout << mygrid->myid <<"  rmax   "<< myDomains[req.domain]->rmax[0] <<"  "<< myDomains[req.domain]->rmax[1] <<"  "<< myDomains[req.domain]->rmax[2] <<"\n";
+//    }
 
     for(int c=0;c<3;c++){
         if(remains[c]){
@@ -1547,11 +1547,11 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             uniqueLocN[c] = 1;
         }
     }
-    if(mygrid->myid==0&&1){
+//    if(mygrid->myid==0&&1){
 
-        std::cout << mygrid->myid <<"  uniqueN: "<< uniqueN[0] <<"  "<< uniqueN[1] <<"  "<< uniqueN[2] <<"\n";
-        std::cout << mygrid->myid <<"  uniqueLocN   "<< uniqueLocN[0] <<"  "<< uniqueLocN[1] <<"  "<< uniqueLocN[2] <<"\n";
-    }
+//        std::cout << mygrid->myid <<"  uniqueN: "<< uniqueN[0] <<"  "<< uniqueN[1] <<"  "<< uniqueN[2] <<"\n";
+//        std::cout << mygrid->myid <<"  uniqueLocN   "<< uniqueLocN[0] <<"  "<< uniqueLocN[1] <<"  "<< uniqueLocN[2] <<"\n";
+//    }
 
     isInMyHyperplane=isInMyDomain(rr);
 
@@ -1567,7 +1567,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     if(isInMyHyperplane)
         shouldIWrite=amIInTheSubDomain(req);
 
-    std::cout << mygrid->myid <<"  isInMyHyperplane: "<< isInMyHyperplane <<"  shouldIWrite: "<< shouldIWrite<<"\n";
+    //std::cout << mygrid->myid <<"  isInMyHyperplane: "<< isInMyHyperplane <<"  shouldIWrite: "<< shouldIWrite<<"\n";
 
     MPI_Comm outputCommunicator;
     MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
@@ -1578,8 +1578,8 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     totUniquePoints = new int[outputNProc];
     totUniquePoints[myOutputID]=uniqueLocN[0]*uniqueLocN[1]*uniqueLocN[2];
 
-    printf("myid=%i myOutputID=%i   totUniquePoints=%i \n", mygrid->myid , myOutputID, totUniquePoints[myOutputID]);
-            MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
+    //printf("myid=%i myOutputID=%i   totUniquePoints=%i \n", mygrid->myid , myOutputID, totUniquePoints[myOutputID]);
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
 
     MPI_Offset disp = 0;
