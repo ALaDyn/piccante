@@ -1511,14 +1511,18 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     findIntGlobalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
     findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
     findNumberOfProc(NProcSubdomain, imin, imax);
-    if(mygrid->myid==0&&0){
 
-        std::cout << mygrid->myid <<"  "<< NProcSubdomain[0] <<"  "<< NProcSubdomain[1] <<"  "<< NProcSubdomain[2] <<"\n";
-        std::cout << mygrid->myid <<"  "<< imin[0] <<"  "<< imin[1] <<"  "<< imin[2] <<"\n";
-        std::cout << mygrid->myid <<"  "<< imax[0] <<"  "<< imax[1] <<"  "<< imax[2] <<"\n";
-        std::cout << mygrid->myid <<"  "<< myDomains[req.domain]->rmin[0] <<"  "<< myDomains[req.domain]->rmin[1] <<"  "<< myDomains[req.domain]->rmin[2] <<"\n";
-        std::cout << mygrid->myid <<"  "<< myDomains[req.domain]->rmax[0] <<"  "<< myDomains[req.domain]->rmax[1] <<"  "<< myDomains[req.domain]->rmax[2] <<"\n";
+    if(mygrid->myid==0&&1){
+
+        std::cout << mygrid->myid <<"  nproc subdomain: "<< NProcSubdomain[0] <<"  "<< NProcSubdomain[1] <<"  "<< NProcSubdomain[2] <<"\n";
+        std::cout << mygrid->myid <<"  imin   "<< imin[0] <<"  "<< imin[1] <<"  "<< imin[2] <<"\n";
+        std::cout << mygrid->myid <<"  imax   "<< imax[0] <<"  "<< imax[1] <<"  "<< imax[2] <<"\n";
+        std::cout << mygrid->myid <<"  locimin   "<< locimin[0] <<"  "<< locimin[1] <<"  "<< locimin[2] <<"\n";
+        std::cout << mygrid->myid <<"  locimax   "<< locimax[0] <<"  "<< locimax[1] <<"  "<< locimax[2] <<"\n";
+        std::cout << mygrid->myid <<"  rmin   "<< myDomains[req.domain]->rmin[0] <<"  "<< myDomains[req.domain]->rmin[1] <<"  "<< myDomains[req.domain]->rmin[2] <<"\n";
+        std::cout << mygrid->myid <<"  rmax   "<< myDomains[req.domain]->rmax[0] <<"  "<< myDomains[req.domain]->rmax[1] <<"  "<< myDomains[req.domain]->rmax[2] <<"\n";
     }
+
     for(int c=0;c<3;c++){
         if(remains[c]){
             if(imax[c]<(mygrid->NGridNodes[c]-1))
@@ -1543,6 +1547,11 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             uniqueLocN[c] = 1;
         }
     }
+    if(mygrid->myid==0&&1){
+
+        std::cout << mygrid->myid <<"  uniqueN: "<< uniqueN[0] <<"  "<< uniqueN[1] <<"  "<< uniqueN[2] <<"\n";
+        std::cout << mygrid->myid <<"  uniqueLocN   "<< uniqueLocN[0] <<"  "<< uniqueLocN[1] <<"  "<< uniqueLocN[2] <<"\n";
+    }
 
     isInMyHyperplane=isInMyDomain(rr);
 
@@ -1558,6 +1567,8 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     if(isInMyHyperplane)
         shouldIWrite=amIInTheSubDomain(req);
 
+    std::cout << mygrid->myid <<"  isInMyHyperplane: "<< isInMyHyperplane <<"  shouldIWrite: "<< shouldIWrite<<"\n";
+
     MPI_Comm outputCommunicator;
     MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
     int myOutputID, outputNProc;
@@ -1565,8 +1576,10 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     MPI_Comm_size(outputCommunicator, &outputNProc);
 
     totUniquePoints = new int[outputNProc];
-    totUniquePoints[myOutputID]=uniqueN[0]*uniqueN[1]*uniqueN[2];
-    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
+    totUniquePoints[myOutputID]=uniqueLocN[0]*uniqueLocN[1]*uniqueLocN[2];
+
+    printf("myid=%i myOutputID=%i   totUniquePoints=%i \n", mygrid->myid , myOutputID, totUniquePoints[myOutputID]);
+            MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
 
     MPI_Offset disp = 0;
@@ -1583,12 +1596,13 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     sprintf(nomefile, "%s", fileName.c_str());
 
     if(shouldIWrite){
-        printf("myid=%i, myOutputID=%i\n", mygrid->myid, myOutputID);
+//        printf("myid=%i, myOutputID=%i\n", mygrid->myid, myOutputID);
         MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
         int globalri[3];
         nearestInt(rr, ri, globalri);
         //+++++++++++ FILE HEADER  +++++++++++++++++++++
         if (myOutputID == 0){
+//            printf("I DO!    myid=%i, myOutputID=%i\n", mygrid->myid, myOutputID);
             MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
             int itodo[8];
             itodo[0]=is_big_endian();
@@ -1600,7 +1614,12 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             itodo[6]=slice_rNproc[2];
             itodo[7]=Ncomp;
             MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
-
+//            std::cout << "***********" << myOutputID << "\n";
+//            std::cout << " is_big_endian "<< itodo[0] << "\n";
+//            std::cout << " uniqueN "<< itodo[1] << "  " << "  "<< itodo[2] << "  "<< "  "<< itodo[3] << "\n";
+//            std::cout << " slice_rNproc "<< itodo[4] << "  " << itodo[5] << "  " << "  "<< itodo[6] << "\n";
+//            std::cout << " Ncomp "<< itodo[7] << "\n";
+//            std::cout << "***********" << myOutputID << "\n";
             float *fcir[3];
             for(int c=0;c<3;c++){
                 fcir[c]=new float[uniqueN[c]];
@@ -1630,6 +1649,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             exit(33);
         }
         if (myOutputID != 0){
+//            std::cout << "myOutputID != 0\n";
             MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
         }
 
@@ -1650,14 +1670,14 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
                     itodo[c+3] = 1;
                 }
             }
-            std::cout << "***********" << myOutputID << "\n";
-            std::cout << itodo[0] << "  ";
-            std::cout << itodo[1] << "  ";
-            std::cout << itodo[2] << "\n";
-            std::cout << itodo[3] << "  ";
-            std::cout << itodo[4] << "  ";
-            std::cout << itodo[5] << "\n";
-            std::cout << "***********" << myOutputID << "\n";
+//            std::cout << "***********" << myOutputID << "\n";
+//            std::cout << itodo[0] << "  ";
+//            std::cout << itodo[1] << "  ";
+//            std::cout << itodo[2] << "\n";
+//            std::cout << itodo[3] << "  ";
+//            std::cout << itodo[4] << "  ";
+//            std::cout << itodo[5] << "\n";
+//            std::cout << "***********" << myOutputID << "\n";
 
             MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
         }
@@ -1668,7 +1688,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             for(int c=0;c<3;c++){
                 if(remains[c]){
                     NN[c] = uniqueLocN[c];
-                    origin[c]=locimin[0];
+                    origin[c]=locimin[c];
                 }
                 else{
                     NN[c]=1;
@@ -1678,6 +1698,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             Nx=NN[0];
             Ny=NN[1];
             Nz=NN[2];
+           // std::cout << " uniqueN "<< NN[0] << "  " << "  "<< NN[1] << "  "<< "  "<< NN[2] << "\n";
             int size = Ncomp*NN[0]*NN[1]*NN[2];
             todo = new float[size];
             int ii,jj,kk;
