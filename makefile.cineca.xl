@@ -53,7 +53,7 @@ output_manager.o:  output_manager.cpp
 						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c output_manager.cpp
 
 utilities.o: utilities.cpp 
-	$(COMPILER) $(OPT) -c utilities.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c utilities.cpp
 clean :
 				rm $(OBJ) *~
 
