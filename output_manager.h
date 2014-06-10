@@ -243,7 +243,8 @@ private:
 
     void writeSpecDensityMap(std::ofstream &output, request req);
     void writeSpecDensityOld(std::string fileName, request req);
-    void writeSpecDensityNew(std::string fileName, request req);
+    void writeSpecDensity(std::string fileName, request req);
+    void writeSpecDensitySubDomain(std::string fileName,  request req);
     void callSpecDensity(request req);
 
 	void writeCurrentMap(std::ofstream &output, request req);

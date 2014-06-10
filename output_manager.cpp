@@ -1502,7 +1502,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     if(req.type==OUT_B_FIELD)
         offset = 3;
     int *totUniquePoints;
-    int isInMyHyperplane= false, shouldIWrite=false;
+    bool isInMyHyperplane= false, shouldIWrite=false;
     int uniqueN[3], uniqueLocN[3], slice_rNproc[3];
     double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
     int ri[3];
@@ -1512,16 +1512,6 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
     findNumberOfProc(NProcSubdomain, imin, imax);
 
-//    if(mygrid->myid==0&&1){
-
-//        std::cout << mygrid->myid <<"  nproc subdomain: "<< NProcSubdomain[0] <<"  "<< NProcSubdomain[1] <<"  "<< NProcSubdomain[2] <<"\n";
-//        std::cout << mygrid->myid <<"  imin   "<< imin[0] <<"  "<< imin[1] <<"  "<< imin[2] <<"\n";
-//        std::cout << mygrid->myid <<"  imax   "<< imax[0] <<"  "<< imax[1] <<"  "<< imax[2] <<"\n";
-//        std::cout << mygrid->myid <<"  locimin   "<< locimin[0] <<"  "<< locimin[1] <<"  "<< locimin[2] <<"\n";
-//        std::cout << mygrid->myid <<"  locimax   "<< locimax[0] <<"  "<< locimax[1] <<"  "<< locimax[2] <<"\n";
-//        std::cout << mygrid->myid <<"  rmin   "<< myDomains[req.domain]->rmin[0] <<"  "<< myDomains[req.domain]->rmin[1] <<"  "<< myDomains[req.domain]->rmin[2] <<"\n";
-//        std::cout << mygrid->myid <<"  rmax   "<< myDomains[req.domain]->rmax[0] <<"  "<< myDomains[req.domain]->rmax[1] <<"  "<< myDomains[req.domain]->rmax[2] <<"\n";
-//    }
 
     for(int c=0;c<3;c++){
         if(remains[c]){
@@ -1547,11 +1537,6 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             uniqueLocN[c] = 1;
         }
     }
-//    if(mygrid->myid==0&&1){
-
-//        std::cout << mygrid->myid <<"  uniqueN: "<< uniqueN[0] <<"  "<< uniqueN[1] <<"  "<< uniqueN[2] <<"\n";
-//        std::cout << mygrid->myid <<"  uniqueLocN   "<< uniqueLocN[0] <<"  "<< uniqueLocN[1] <<"  "<< uniqueLocN[2] <<"\n";
-//    }
 
     isInMyHyperplane=isInMyDomain(rr);
 
@@ -1567,7 +1552,6 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     if(isInMyHyperplane)
         shouldIWrite=amIInTheSubDomain(req);
 
-    //std::cout << mygrid->myid <<"  isInMyHyperplane: "<< isInMyHyperplane <<"  shouldIWrite: "<< shouldIWrite<<"\n";
 
     MPI_Comm outputCommunicator;
     MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
@@ -1578,7 +1562,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     totUniquePoints = new int[outputNProc];
     totUniquePoints[myOutputID]=uniqueLocN[0]*uniqueLocN[1]*uniqueLocN[2];
 
-    //printf("myid=%i myOutputID=%i   totUniquePoints=%i \n", mygrid->myid , myOutputID, totUniquePoints[myOutputID]);
+
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
 
@@ -1595,14 +1579,12 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     nomefile[fileName.size()] = 0;
     sprintf(nomefile, "%s", fileName.c_str());
 
-    if(shouldIWrite){
-//        printf("myid=%i, myOutputID=%i\n", mygrid->myid, myOutputID);
+    if(shouldIWrite){    
         MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
         int globalri[3];
         nearestInt(rr, ri, globalri);
         //+++++++++++ FILE HEADER  +++++++++++++++++++++
-        if (myOutputID == 0){
-//            printf("I DO!    myid=%i, myOutputID=%i\n", mygrid->myid, myOutputID);
+        if (myOutputID == 0){           
             MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
             int itodo[8];
             itodo[0]=is_big_endian();
@@ -1614,12 +1596,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             itodo[6]=slice_rNproc[2];
             itodo[7]=Ncomp;
             MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
-//            std::cout << "***********" << myOutputID << "\n";
-//            std::cout << " is_big_endian "<< itodo[0] << "\n";
-//            std::cout << " uniqueN "<< itodo[1] << "  " << "  "<< itodo[2] << "  "<< "  "<< itodo[3] << "\n";
-//            std::cout << " slice_rNproc "<< itodo[4] << "  " << itodo[5] << "  " << "  "<< itodo[6] << "\n";
-//            std::cout << " Ncomp "<< itodo[7] << "\n";
-//            std::cout << "***********" << myOutputID << "\n";
+
             float *fcir[3];
             for(int c=0;c<3;c++){
                 fcir[c]=new float[uniqueN[c]];
@@ -1698,7 +1675,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             Nx=NN[0];
             Ny=NN[1];
             Nz=NN[2];
-           // std::cout << " uniqueN "<< NN[0] << "  " << "  "<< NN[1] << "  "<< "  "<< NN[2] << "\n";
+
             int size = Ncomp*NN[0]*NN[1]*NN[2];
             todo = new float[size];
             int ii,jj,kk;
@@ -2055,7 +2032,7 @@ void OUTPUT_MANAGER::writeSpecDensityOld(std::string fileName, request req){
 
 
 }
-void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){
+void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
     int Ncomp = 1;//myfield->getNcomp();
     int *totUniquePoints;
     int shouldIWrite=false;
@@ -2217,6 +2194,196 @@ void OUTPUT_MANAGER::writeSpecDensityNew(std::string fileName, request req){
     MPI_Comm_free( &sliceCommunicator );
 }
 
+void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req){
+    int Ncomp = 1;//myfield->getNcomp();
+    int *totUniquePoints;
+    bool shouldIWrite=false;
+    bool isInMyHyperplane= false;
+    int uniqueN[3], uniqueLocN[3], slice_rNproc[3];
+    double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
+    int ri[3];
+    int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
+    int imin[3], imax[3],locimin[3], locimax[3], NProcSubdomain[3];
+
+    findIntGlobalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
+    findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
+    findNumberOfProc(NProcSubdomain, imin, imax);
+
+    for(int c=0;c<3;c++){
+        if(remains[c]){
+            if(imax[c]<(mygrid->NGridNodes[c]-1))
+                uniqueN[c] = imax[c]-imin[c]+1;
+            else
+                uniqueN[c] = mygrid->NGridNodes[c]-imin[c]-1;
+            slice_rNproc[c]=NProcSubdomain[c];
+        }
+        else{
+            uniqueN[c] = 1;
+            slice_rNproc[c] = 1;
+        }
+    }
+
+    for(int c=0;c<3;c++){
+        if(remains[c]){
+            if(locimax[c]<(mygrid->Nloc[c]-1))
+                uniqueLocN[c] = locimax[c]-locimin[c]+1;
+            else
+                uniqueLocN[c] = mygrid->Nloc[c]-locimin[c]-1;
+        }
+        else{
+            uniqueLocN[c] = 1;
+        }
+    }
+
+    isInMyHyperplane=isInMyDomain(rr);
+
+    MPI_Comm sliceCommunicator;
+    int mySliceID, sliceNProc;
+
+    int dimension;
+    MPI_Cart_sub(mygrid->cart_comm,remains,&sliceCommunicator);
+    MPI_Comm_rank(sliceCommunicator, &mySliceID);
+    MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Cartdim_get(sliceCommunicator,&dimension);
+    MPI_Allreduce(MPI_IN_PLACE, &isInMyHyperplane, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+    if(isInMyHyperplane)
+        shouldIWrite=amIInTheSubDomain(req);
+
+    MPI_Comm outputCommunicator;
+    MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
+    int myOutputID, outputNProc;
+    MPI_Comm_rank(outputCommunicator,&myOutputID);
+    MPI_Comm_size(outputCommunicator, &outputNProc);
+
+    totUniquePoints = new int[outputNProc];
+    totUniquePoints[myOutputID]=uniqueLocN[0]*uniqueLocN[1]*uniqueLocN[2];
+
+
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
+
+
+    MPI_Offset disp = 0;
+    int small_header = 6 * sizeof(int);
+    int big_header = (1+3+3+1)*sizeof(int)
+            +(uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+
+    MPI_File thefile;
+    MPI_Status status;
+
+    char* nomefile = new char[fileName.size() + 1];
+
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
+
+    if(shouldIWrite){
+        MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+        int globalri[3];
+        nearestInt(rr, ri, globalri);
+        //+++++++++++ FILE HEADER  +++++++++++++++++++++
+        if (mySliceID == 0){
+            MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+            int itodo[8];
+            itodo[0]=is_big_endian();
+            itodo[1]=uniqueN[0];
+            itodo[2]=uniqueN[1];
+            itodo[3]=uniqueN[2];
+            itodo[4]=slice_rNproc[0];
+            itodo[5]=slice_rNproc[1];
+            itodo[6]=slice_rNproc[2];
+            itodo[7]=Ncomp;
+            MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+
+            float *fcir[3];
+            for(int c=0;c<3;c++){
+                fcir[c]=new float[uniqueN[c]];
+                for(int m=0; m<uniqueN[c]; m++){
+                    fcir[c][m] = (float)mygrid->cir[c][m];
+                }
+            }
+            for(int c=0;c<3;c++){
+                if(remains[c])
+                    MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+                else
+                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+            }
+            for(int c=0;c<3;c++){
+                delete[] fcir[c];
+            }
+
+        }
+        //*********** END HEADER *****************
+
+        disp = big_header;
+        for (int rank = 0; rank < myOutputID; rank++)
+            disp += small_header + totUniquePoints[rank] * sizeof(float)*Ncomp;
+        if (disp < 0){
+            std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
+            std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
+            exit(33);
+        }
+        if (myOutputID != 0){
+            MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        }
+
+        //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
+        {
+            int itodo[6];
+            for(int c=0;c<3;c++){
+                if(remains[c]){
+                    if(mygrid->rproc_imin[c][mygrid->rmyid[c]]>imin[c])
+                        itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]]-imin[c];
+                    else
+                        itodo[c] = 0;
+
+                    itodo[c+3] = uniqueLocN[c];
+                }
+                else{
+                    itodo[c] = 0;
+                    itodo[c+3] = 1;
+                }
+            }
+            MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+        }
+            //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+            {
+                float *todo;
+                int NN[3], Nx, Ny, Nz, origin[3];
+                for(int c=0;c<3;c++){
+                    if(remains[c]){
+                        NN[c] = uniqueLocN[c];
+                        origin[c]=locimin[c];
+                    }
+                    else{
+                        NN[c]=1;
+                        origin[c]=ri[c];
+                    }
+                }
+                Nx=NN[0];
+                Ny=NN[1];
+                Nz=NN[2];
+                int size = Ncomp*NN[0]*NN[1]*NN[2];
+                todo = new float[size];
+                int ii,jj,kk;
+                for (int k = 0; k < Nz; k++){
+                    kk=k+origin[2];
+                    for (int j = 0; j < Ny; j++){
+                        jj=j+origin[1];
+                        for (int i = 0; i < Nx; i++){
+                            ii=i+origin[0];
+                            for (int c = 0; c < Ncomp; c++)
+                                todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  mycurrent->density(i, j, k);
+                        }
+                    }
+                }
+                MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+                delete[]todo;
+            }
+            MPI_File_close(&thefile);
+        }
+        MPI_Comm_free( &sliceCommunicator );
+        MPI_Comm_free( &outputCommunicator );
+    }
+
 void OUTPUT_MANAGER::callSpecDensity(request req){
     mycurrent->eraseDensity();
     myspecies[req.target]->density_deposition_standard(mycurrent);
@@ -2232,7 +2399,12 @@ void OUTPUT_MANAGER::callSpecDensity(request req){
 
     std::string nameBin = composeOutputName(outputDir, "DENS", myspecies[req.target]->name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
-    writeSpecDensityNew(nameBin, req);
+    if(!myDomains[req.domain]->subselection)
+        writeSpecDensity(nameBin, req);
+    else
+        writeSpecDensitySubDomain(nameBin, req);
+
+
 
 }
 
