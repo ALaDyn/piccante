@@ -1515,10 +1515,10 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
 
     for(int c=0;c<3;c++){
         if(remains[c]){
-            if(imax[c]<(mygrid->NGridNodes[c]-1))
+            if(imax[c]<(mygrid->uniquePoints[c]))
                 uniqueN[c] = imax[c]-imin[c]+1;
             else
-                uniqueN[c] = mygrid->NGridNodes[c]-imin[c]-1;
+                uniqueN[c] = mygrid->uniquePoints[c]-imin[c];
             slice_rNproc[c]=NProcSubdomain[c];
         }
         else{
@@ -1528,10 +1528,10 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     }
     for(int c=0;c<3;c++){
         if(remains[c]){
-            if(locimax[c]<(mygrid->Nloc[c]-1))
+            if(locimax[c]<(mygrid->uniquePointsloc[c]))
                 uniqueLocN[c] = locimax[c]-locimin[c]+1;
             else
-                uniqueLocN[c] = mygrid->Nloc[c]-locimin[c]-1;
+                uniqueLocN[c] = mygrid->uniquePointsloc[c]-locimin[c];
         }
         else{
             uniqueLocN[c] = 1;
@@ -1605,10 +1605,9 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
                 }
             }
             for(int c=0;c<3;c++){
-                if(remains[c])
+
                     MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-                else
-                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+
             }
             for(int c=0;c<3;c++){
                 delete[] fcir[c];
@@ -2116,10 +2115,10 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
                 }
             }
             for(int c=0;c<3;c++){
-                if(remains[c])
+                //if(remains[c])
                     MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-                else
-                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+                //else
+                  //  MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
             }
             for(int c=0;c<3;c++){
                 delete[] fcir[c];
@@ -2211,10 +2210,10 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
 
     for(int c=0;c<3;c++){
         if(remains[c]){
-            if(imax[c]<(mygrid->NGridNodes[c]-1))
+            if(imax[c]<(mygrid->uniquePoints[c]))
                 uniqueN[c] = imax[c]-imin[c]+1;
             else
-                uniqueN[c] = mygrid->NGridNodes[c]-imin[c]-1;
+                uniqueN[c] = mygrid->uniquePoints[c]-imin[c];
             slice_rNproc[c]=NProcSubdomain[c];
         }
         else{
@@ -2222,13 +2221,12 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
             slice_rNproc[c] = 1;
         }
     }
-
     for(int c=0;c<3;c++){
         if(remains[c]){
-            if(locimax[c]<(mygrid->Nloc[c]-1))
+            if(locimax[c]<(mygrid->uniquePointsloc[c]))
                 uniqueLocN[c] = locimax[c]-locimin[c]+1;
             else
-                uniqueLocN[c] = mygrid->Nloc[c]-locimin[c]-1;
+                uniqueLocN[c] = mygrid->uniquePointsloc[c]-locimin[c];
         }
         else{
             uniqueLocN[c] = 1;
@@ -2301,10 +2299,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                 }
             }
             for(int c=0;c<3;c++){
-                if(remains[c])
+
                     MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-                else
-                    MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+
             }
             for(int c=0;c<3;c++){
                 delete[] fcir[c];

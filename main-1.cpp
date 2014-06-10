@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 3
+#define DIMENSIONALITY 2
 
 #include "access.h"
 #include "commons.h"
@@ -156,8 +156,8 @@ int main(int narg, char **args)
     electrons1.setParticlesPerCellXYZ(4, 4, 1);
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
-    //electrons1.creation();
-    //species.push_back(&electrons1);
+    electrons1.creation();
+    species.push_back(&electrons1);
 
 
 	SPECIE ions1(&grid);
@@ -167,8 +167,8 @@ int main(int narg, char **args)
     ions1.type = ION;
     ions1.Z = 6.0;
     ions1.A = 12.0;
-    //ions1.creation();
-    //species.push_back(&ions1);
+    ions1.creation();
+    species.push_back(&ions1);
 
 
 	tempDistrib distribution;
@@ -198,7 +198,7 @@ int main(int narg, char **args)
 
     outDomain *plane2= new outDomain;
     plane2->setPointCoordinate(0,0,0);
-    plane2->setFreeDimensions(1 ,1,1);
+    plane2->setFreeDimensions(1 ,0,1);
     plane2->setName("D");
     plane2->setXRange(-20,10);
     plane2->setYRange(-5,10);
@@ -208,7 +208,7 @@ int main(int narg, char **args)
     //manager.addEBFieldProbeFrom(probe1,0.0,0.1);
 
     //manager.addSpeciesDensityFrom(electrons1.name, 0.0, 5.0);
-    //manager.addSpeciesDensityFrom(plane1,electrons1.name, 0.0, 2.0);
+    manager.addSpeciesDensityFrom(plane2,electrons1.name, 0.0, 2.0);
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 5.0);
 
     //manager.addCurrentFrom(0.0, 5.0);
