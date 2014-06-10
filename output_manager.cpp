@@ -2358,6 +2358,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                 Nx=NN[0];
                 Ny=NN[1];
                 Nz=NN[2];
+
                 int size = Ncomp*NN[0]*NN[1]*NN[2];
                 todo = new float[size];
                 int ii,jj,kk;
@@ -2368,7 +2369,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                         for (int i = 0; i < Nx; i++){
                             ii=i+origin[0];
                             for (int c = 0; c < Ncomp; c++)
-                                todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  mycurrent->density(i, j, k);
+                                todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] =  (float)mycurrent->density(ii, jj, kk);
                         }
                     }
                 }
