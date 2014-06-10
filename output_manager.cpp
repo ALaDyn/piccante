@@ -1502,7 +1502,7 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
     if(req.type==OUT_B_FIELD)
         offset = 3;
     int *totUniquePoints;
-    bool isInMyHyperplane= false, shouldIWrite=false;
+    int isInMyHyperplane= false, shouldIWrite=false;
     int uniqueN[3], uniqueLocN[3], slice_rNproc[3];
     double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
     int ri[3];
@@ -2197,8 +2197,8 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
 void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req){
     int Ncomp = 1;//myfield->getNcomp();
     int *totUniquePoints;
-    bool shouldIWrite=false;
-    bool isInMyHyperplane= false;
+    int shouldIWrite=false;
+    int isInMyHyperplane= false;
     int uniqueN[3], uniqueLocN[3], slice_rNproc[3];
     double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
     int ri[3];
@@ -2280,7 +2280,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
         int globalri[3];
         nearestInt(rr, ri, globalri);
         //+++++++++++ FILE HEADER  +++++++++++++++++++++
-        if (mySliceID == 0){
+        if (myOutputID == 0){
             MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
             int itodo[8];
             itodo[0]=is_big_endian();
@@ -2297,7 +2297,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
             for(int c=0;c<3;c++){
                 fcir[c]=new float[uniqueN[c]];
                 for(int m=0; m<uniqueN[c]; m++){
-                    fcir[c][m] = (float)mygrid->cir[c][m];
+                    fcir[c][m] = (float)mygrid->cir[c][m+imin[c]];
                 }
             }
             for(int c=0;c<3;c++){
