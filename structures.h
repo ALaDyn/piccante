@@ -136,7 +136,7 @@ struct integer_or_halfinteger{
 };
 
 //************** PARTICLES DISTRIBUTION FUNCTION *******
-enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER };
+enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER , SPECIAL};
 
 class tempDistrib{
 public:
@@ -151,6 +151,7 @@ public:
 	void setSupergaussian(double _p0, double _alpha);
 	void setMaxwell(double _temp);
 	void setJuttner(double _a);
+    void setSpecial(double _a);
 
 	bool isInit();
 

@@ -1655,8 +1655,8 @@ void EM_FIELD::addFieldsFromFile(std::string name){
     double wi[2], wh[2];
     int ii, ih,iileft, iiright, ihleft, ihright;
     for(int i=0;i<Nx;i++){
-        xi=mygrid->cir[0][i];
-        xh=mygrid->chr[0][i];
+        xi=mygrid->cirloc[0][i];
+        xh=mygrid->chrloc[0][i];
 
         ii= (int)((xi-xmin)/dx);
         ih= (int)((xh-xmin)/dx);

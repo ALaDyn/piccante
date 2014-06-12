@@ -663,5 +663,11 @@ void tempDistrib::setJuttner(double _a){
 	init = true;
 }
 
+void tempDistrib::setSpecial(double _a){
+    type = SPECIAL;
+    a = _a;
+    init = true;
+}
+
 //************** END DISTRIBUTION_FUNCTION ******
 

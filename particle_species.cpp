@@ -192,14 +192,19 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
     printf("Benvenuto! leggero' il file \"%s\"\n",name.c_str());
     fflush(stdout);
 
-    double *density, *velocity, *x_in;
+    double *density, *velocity, *x_in, *uy, *uz;
     density  = (double*)malloc( sizeof(double)*Nx_in);
     velocity = (double*)malloc( sizeof(double)*Nx_in);
-    x_in      = (double*)malloc( sizeof(double)*Nx_in);
+    x_in     = (double*)malloc( sizeof(double)*Nx_in);
+    uy       = (double*)malloc( sizeof(double)*Nx_in);
+    uz       = (double*)malloc( sizeof(double)*Nx_in);
     for(int i=0; i<Nx_in;i++){
         fileDensity >> x_in[i];
         fileDensity >> density[i];
         fileDensity >> velocity[i];
+        fileDensity >> uy[i];
+        fileDensity >> uz[i];
+
     }
     fileDensity.close();
     xmin=x_in[0];
@@ -376,6 +381,7 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
 	double dyp = dy / npcAlong[1];
 	double dzp = dz / npcAlong[2];
 	double  weight;
+    double myuy, myuz;
 
     ifstream fileDensity (name.c_str(), std::ifstream::in);
     int Nx_in;
@@ -385,15 +391,18 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
     fileDensity >> temp;
     fileDensity >> xmin >> xmax;
 
-    double *density, *velocity, *x_in;
+    double *density, *velocity, *x_in, *uy, *uz;
     density = (double*)malloc( sizeof(double)*Nx_in);
     velocity = (double*)malloc( sizeof(double)*Nx_in);
     x_in      = (double*)malloc( sizeof(double)*Nx_in);
-
+    uy       = (double*)malloc( sizeof(double)*Nx_in);
+    uz       = (double*)malloc( sizeof(double)*Nx_in);
     for(int i=0; i<Nx_in;i++){
         fileDensity >> x_in[i];
         fileDensity >> density[i];
         fileDensity >> velocity[i];
+        fileDensity >> uy[i];
+        fileDensity >> uz[i];
     }
 
     xmin=x_in[0];
@@ -430,15 +439,18 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
 								xloc -= 0.5*dx;
 								yloc -= 0.5*dy;
 								zloc -= 0.5*dz;
-								for (int ip = 0; ip < npcAlong[0]; ip++)
+                                myuy  = wh[0]*uy[ihleft] + wh[1]*uy[ihright];
+                                myuz  = wh[0]*uz[ihleft] + wh[1]*uz[ihright];
+                                for (int ip = 0; ip < npcAlong[0]; ip++)
 									for (int jp = 0; jp < npcAlong[1]; jp++)
 										for (int kp = 0; kp < npcAlong[2]; kp++)
 										{
 											r0(counter) = xloc + dxp*(ip + 0.5);
 											r1(counter) = yloc + dyp*(jp + 0.5);
 											r2(counter) = zloc + dzp*(kp + 0.5);
-                                            u0(counter) = velValue/(sqrt(1-velValue*velValue));
-                                            u1(counter) = u2(counter) = 0;
+											u0(counter) = 0;//velValue/(sqrt(1-velValue*velValue));
+                                            u1(counter) = myuy;
+                                            u2(counter) = myuz;
 											w(counter) = weight;
 											if (isTestSpecies)
 												w(counter) = (double)(counter + disp);
@@ -469,6 +481,7 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 	double dyp = dy / npcAlong[1];
     double dzp = dz / npcAlong[2];
 	double  weight;
+    double myuy, myuz;
 
     ifstream fileDensity (name.c_str(), std::ifstream::in);
     int Nx_in;
@@ -478,15 +491,18 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
     fileDensity >> temp;
     fileDensity >> xmin >> xmax;
 
-    double *density, *velocity, *x_in;
+    double *density, *velocity, *x_in, *uy, *uz;
     density = (double*)malloc( sizeof(double)*Nx_in);
     velocity = (double*)malloc( sizeof(double)*Nx_in);
     x_in      = (double*)malloc( sizeof(double)*Nx_in);
-
+    uy       = (double*)malloc( sizeof(double)*Nx_in);
+    uz       = (double*)malloc( sizeof(double)*Nx_in);
     for(int i=0; i<Nx_in;i++){
         fileDensity >> x_in[i];
         fileDensity >> density[i];
         fileDensity >> velocity[i];
+        fileDensity >> uy[i];
+        fileDensity >> uz[i];
     }
 
     xmin=x_in[0];
@@ -523,7 +539,9 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 							{
                                 velValue=wh[0]*velocity[ihleft] + wh[1]*velocity[ihright];
                                 weight = denValue/ npc;
-								for (int kp = 0; kp < npcAlong[2]; kp++){
+                                myuy  = wh[0]*uy[ihleft] + wh[1]*uy[ihright];
+                                myuz  = wh[0]*uz[ihleft] + wh[1]*uz[ihright];
+                                for (int kp = 0; kp < npcAlong[2]; kp++){
 									mycsiz = csilocz + dzp*(kp + 0.5);
 									myz = mygrid->stretchGrid(mycsiz, 2);
 									mydz = mygrid->derivativeStretchingFunction(mycsiz, 2);
@@ -541,8 +559,9 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
                                             r0(counter) = myx;
 											r1(counter) = myy;
 											r2(counter) = myz;
-                                            u0(counter) = velValue/(sqrt(1-velValue*velValue));
-                                            u1(counter) = u2(counter) = 0;
+											u0(counter) = 0;//velValue/(sqrt(1-velValue*velValue));
+                                            u1(counter) = myuy;
+                                            u2(counter) = myuz;
 											w(counter) = weight*mydx*mydy*mydz;
 											if (isTestSpecies)
 												w(counter) = (double)(counter + disp);
@@ -2424,9 +2443,32 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
         }
     }
 }
-
-void SPECIE::callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin){
-	//DA PENSARE!!
+void SPECIE::callJuttner(gsl_rng* ext_rng, double Ta, double uxin, double uyin, double uzin){
+    //DA DEFINIRE
+}
+double densityFunctionMaxwell(double px, double alpha, double temp){
+    return exp( -( sqrt(alpha*alpha+px*px)-alpha)/temp) ;
+}
+void SPECIE::callSpecial(gsl_rng* ext_rng, double Ta){
+    double ptot;
+        double temp;
+        double phi;
+        double segno;
+        double alpha;
+        double cos_theta, sin_theta;
+        double auxPX, auxDF;
+        for (int p = 0; p < Np; p++)
+            {
+                double uperp2=u1(p)*u1(p)-u2(p)*u2(p);
+                alpha=sqrt(1+uperp2);
+                while(1){
+                    auxDF=gsl_ran_flat(ext_rng, 0.0, 1.0);
+                    auxPX=gsl_ran_flat(ext_rng, -50*sqrt(Ta),50*sqrt(Ta));
+                    if(densityFunctionMaxwell(auxPX, alpha, Ta)>auxDF)
+                        break;
+                }
+                u0(p) = auxPX;
+            }
 }
 
 void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
@@ -2489,7 +2531,12 @@ void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin
 			uxin, uyin, uzin);
 		break;
 
-	default:
+    case SPECIAL:
+        callSpecial(ext_rng,
+            distribution.a);
+        break;
+
+    default:
 		break;
 
 

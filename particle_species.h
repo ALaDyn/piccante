@@ -141,7 +141,8 @@ private:
 	void callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin);
 	void callMaxwell(gsl_rng* ext_rng, double temp, double uxin, double uyin, double uzin);
 	void callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin);
-	void computeParticleMassChargeCoupling();
+    void callSpecial(gsl_rng* ext_rng, double Ta);
+    void computeParticleMassChargeCoupling();
 	int getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]);
     int getNumberOfParticlesWithinFromFile1D(double plasmarmin[3], double plasmarmax[3], std::string name);
     void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
