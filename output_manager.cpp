@@ -2299,9 +2299,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                 }
             }
             for(int c=0;c<3;c++){
-
                     MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-
             }
             for(int c=0;c<3;c++){
                 delete[] fcir[c];

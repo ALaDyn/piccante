@@ -121,6 +121,27 @@ public:
 	~laserPulse();
 	laserPulse(const laserPulse& other);
 	laserPulse operator=(const laserPulse& p1);
+    void setFocusPosition(double _focus_position);
+    void setPulseInitialPosition(double _laser_pulse_initial_position);
+    void setLambda(double _lambda0);
+    void setWaist(double _waist);
+    void setDurationFWHM(double _t_FWHM);
+    void setNormalizedAmplitude(double _normalized_amplitude);
+    void setRiseTime(double _rise_time);
+    void setRotationAngleAndCenter(double _angle, double _rotation_center_along_x);
+    void setGaussianPulse(double _waist, double _t_FWHM, double _normalized_amplitude);
+    void setPlaneWave(double _normalized_amplitude);
+    void setCos2PlaneWave(double _t_FWHM, double _normalized_amplitude);
+    void setCos2PlateauPlaneWave(double _t_FWHM, double _rise_time, double _normalized_amplitude);
+    void setGaussianPulse();
+    void setPlaneWave();
+    void setCos2PlaneWave();
+    void setCos2PlateauPlaneWave();
+
+    void setPPol();
+    void setSPol();
+    void setCPol();
+
 };
 
 //************** FIELD COORDINATES *******

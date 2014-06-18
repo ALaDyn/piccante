@@ -579,40 +579,127 @@ laserPulse::laserPulse(){
 	polarization = P_POLARIZATION;
 	t_FWHM = 0.0;
 	waist = 0.0;
-	focus_position = 0.0;
-	laser_pulse_initial_position = 0.0;
-	normalized_amplitude = 0.0;
-	lambda0 = 0.0;
-	rotation = false;
-	angle = 0.0;
-	rotation_center_along_x = 0.0;
+    focus_position = 0.0;
+    laser_pulse_initial_position = 0.0;
+    normalized_amplitude = 0.0;
+    lambda0 = 1.0;
+    rotation = false;
+    angle = 0.0;
+    rotation_center_along_x = 0.0;
     rise_time = 0.0;
 }
 
 laserPulse::~laserPulse(){}
 
 laserPulse::laserPulse(const laserPulse& other)
-:type(other.type), t_FWHM(other.t_FWHM), waist(other.waist), focus_position(other.focus_position),
-laser_pulse_initial_position(other.laser_pulse_initial_position), normalized_amplitude(other.normalized_amplitude),
-lambda0(other.lambda0), rotation(other.rotation), angle(other.angle),
-  rotation_center_along_x(other.rotation_center_along_x),rise_time(other.rise_time){}
+    :type(other.type), t_FWHM(other.t_FWHM), waist(other.waist), focus_position(other.focus_position),
+      laser_pulse_initial_position(other.laser_pulse_initial_position), normalized_amplitude(other.normalized_amplitude),
+      lambda0(other.lambda0), rotation(other.rotation), angle(other.angle),
+      rotation_center_along_x(other.rotation_center_along_x),rise_time(other.rise_time){}
 
 
 laserPulse laserPulse::operator=(const laserPulse& p1){
-	type = p1.type;
-	polarization = p1.polarization;
-	t_FWHM = p1.t_FWHM;
-	waist = p1.waist;
-	focus_position = p1.focus_position;
-	laser_pulse_initial_position = p1.laser_pulse_initial_position;
-	normalized_amplitude = p1.normalized_amplitude;
-	lambda0 = p1.lambda0;
-	rotation = p1.rotation;
-	angle = p1.angle;
-	rotation_center_along_x = p1.rotation_center_along_x;
+    type = p1.type;
+    polarization = p1.polarization;
+    t_FWHM = p1.t_FWHM;
+    waist = p1.waist;
+    focus_position = p1.focus_position;
+    laser_pulse_initial_position = p1.laser_pulse_initial_position;
+    normalized_amplitude = p1.normalized_amplitude;
+    lambda0 = p1.lambda0;
+    rotation = p1.rotation;
+    angle = p1.angle;
+    rotation_center_along_x = p1.rotation_center_along_x;
     rise_time = p1.rise_time;
-	return *this;
+    return *this;
 }
+
+void laserPulse::setFocusPosition(double _focus_position){
+    focus_position=_focus_position;
+}
+
+void laserPulse::setPulseInitialPosition(double _laser_pulse_initial_position){
+    laser_pulse_initial_position=_laser_pulse_initial_position;
+}
+
+void laserPulse::setLambda(double _lambda0){
+    lambda0=_lambda0;
+}
+void laserPulse::setWaist(double _waist){
+    waist=_waist;
+}
+
+void laserPulse::setDurationFWHM(double _t_FWHM){
+    t_FWHM=_t_FWHM;
+}
+
+void laserPulse::setNormalizedAmplitude(double _normalized_amplitude){
+    normalized_amplitude=_normalized_amplitude;
+}
+
+void laserPulse::setRiseTime(double _rise_time){
+    rise_time=_rise_time;
+}
+
+void laserPulse::setRotationAngleAndCenter(double _angle, double _rotation_center_along_x){
+    angle=_angle;
+    rotation_center_along_x=_rotation_center_along_x;
+    rotation=true;
+}
+
+void laserPulse::setGaussianPulse(double _waist, double _t_FWHM, double _normalized_amplitude){
+    type=GAUSSIAN;
+    waist=_waist;
+    t_FWHM=_t_FWHM;
+    normalized_amplitude=_normalized_amplitude;
+}
+
+void laserPulse::setPlaneWave(double _normalized_amplitude){
+    type=PLANE_WAVE;
+    normalized_amplitude=_normalized_amplitude;
+}
+
+void laserPulse::setCos2PlaneWave(double _t_FWHM, double _normalized_amplitude){
+    type=COS2_PLANE_WAVE;
+    t_FWHM=_t_FWHM;
+    normalized_amplitude=_normalized_amplitude;
+}
+
+void laserPulse::setCos2PlateauPlaneWave(double _t_FWHM, double _rise_time, double _normalized_amplitude){
+    type=COS2_PLATEAU_PLANE_WAVE;
+    t_FWHM=_t_FWHM;
+    normalized_amplitude=_normalized_amplitude;
+    rise_time=_rise_time;
+}
+
+void laserPulse::setGaussianPulse(){
+    type=GAUSSIAN;
+}
+
+void laserPulse::setPlaneWave(){
+    type=PLANE_WAVE;
+}
+
+void laserPulse::setCos2PlaneWave(){
+    type=COS2_PLANE_WAVE;
+}
+
+void laserPulse::setCos2PlateauPlaneWave(){
+    type=COS2_PLATEAU_PLANE_WAVE;
+}
+
+void laserPulse::setPPol(){
+    polarization=P_POLARIZATION;
+}
+
+void laserPulse::setSPol(){
+    polarization=S_POLARIZATION;
+}
+
+void laserPulse::setCPol(){
+    polarization=CIRCULAR_POLARIZATION;
+}
+
 
 //************** DISTRIBUTION_FUNCTION **********
 
