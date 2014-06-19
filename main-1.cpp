@@ -49,193 +49,163 @@ using namespace std;
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
-#include "utilities.h"
-#define NPROC_ALONG_Y 2
+
+#define NPROC_ALONG_Y 512
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
-#define DO_DUMP true
+#define DO_DUMP false
 #define TIME_BTW_DUMP 10
 
-#define DIRECTORY_OUTPUT "TEST"
+#define DIRECTORY_OUTPUT "OUTPUT"
 #define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
+#define _FACT 0.333333
+
 int main(int narg, char **args)
 {
-	GRID grid;
-	EM_FIELD myfield;
-	CURRENT current;
-	std::vector<SPECIE*> species;
-	vector<SPECIE*>::const_iterator spec_iterator;
+    GRID grid;
+    EM_FIELD myfield;
+    CURRENT current;
+    std::vector<SPECIE*> species;
+    vector<SPECIE*>::const_iterator spec_iterator;
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
     //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-    grid.setXrange(-29.0, 1.0);
-    grid.setYrange(-16, 16);
-    grid.setZrange(-16, +16);
+    grid.setXrange(-25.0, 20.0);
+    grid.setYrange(-7.5, 7.5);
+    grid.setZrange(-1, +1);
 
-    grid.setNCells(30*24, 80+48, 80+48);
-	grid.setNProcsAlongY(NPROC_ALONG_Y);
-	grid.setNProcsAlongZ(NPROC_ALONG_Z);
+    grid.setNCells(9180, 3072, 1);
+    grid.setNProcsAlongY(NPROC_ALONG_Y);
+    grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
-    //grid.enableStretchedGrid();
-    //grid.setXandNxLeftStretchedGrid(-20.0,1000);
-    grid.setYandNyLeftStretchedGrid(-8.0,21);
-    //grid.setXandNxRightStretchedGrid(20.0,1000);
-    grid.setYandNyRightStretchedGrid(8.0,21);
+    grid.setBoundaries(xPBC | yPBC | zPBC);
+    grid.mpi_grid_initialize(&narg, args);
+    grid.setCourantFactor(0.98);
 
-    grid.setBoundaries(xOpen | yOpen | zPBC);
-	grid.mpi_grid_initialize(&narg, args);
-	grid.setCourantFactor(0.98);
-
-    grid.setSimulationTime(50.0);
+    grid.setSimulationTime(30.0);
 
     grid.with_particles = YES;
     grid.with_current = YES;
 
-    grid.setStartMovingWindow(0);
-    grid.setBetaMovingWindow(1.0);
-    grid.setFrequencyMovingWindow(20);
-
-	grid.setMasterProc(0);	
-
-	srand(time(NULL));
-	grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
-
+    grid.setMasterProc(0);
+    
+    srand(time(NULL));
+    grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+    
     grid.finalize();
-
-	grid.visualDiag();
+    
+    grid.visualDiag();
 
     //********************************************END GRID DEFINITION********************************************************
 
     //*******************************************BEGIN FIELD DEFINITION*********************************************************
-	myfield.allocate(&grid);
-	myfield.setAllValuesToZero();
-
-	laserPulse pulse1;
-    pulse1.setGaussianPulse(3.0, 10.0, 3.0);
-    pulse1.setPPol();
-    pulse1.setPulseInitialPosition(-10.1);
-    pulse1. setFocusPosition( 0.0);
-    //pulse1.setRotationAngleAndCenter( 2.0*M_PI*(-30.0 / 360.0, 0.0);
+    myfield.allocate(&grid);
+    myfield.setAllValuesToZero();
+    
+    laserPulse pulse1;
+    pulse1.type = COS2_PLANE_WAVE;
+    pulse1.polarization = CIRCULAR_POLARIZATION;
+    pulse1.t_FWHM = 12.4;
+    pulse1.laser_pulse_initial_position = -12.5;
+    pulse1.lambda0 = 1.0;
+    pulse1.normalized_amplitude = 198.0*_FACT;
 
     myfield.addPulse(&pulse1);
+    myfield.boundary_conditions();
 
-	myfield.boundary_conditions();
-
-	current.allocate(&grid);
-	current.setAllValuesToZero();
+    current.allocate(&grid);
+    current.setAllValuesToZero();
     //*******************************************END FIELD DEFINITION***********************************************************
 
     //*******************************************BEGIN SPECIES DEFINITION*********************************************************
-	PLASMA plasma1;
-    plasma1.density_function = left_right_linear_ramp;
-    plasma1.setXRangeBox(0.0,100.0);
-    plasma1.setYRangeBox(grid.rmin[1]*0.95,grid.rmax[1]*0.95);
-	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-    plasma1.setLeftRampLength(5.0);
-    plasma1.setRightRampLength(5.0);
-    plasma1.setLeftScaleLength(2.0);
-    plasma1.setRightScaleLength(2.0);
-    plasma1.setDensityCoefficient(0.01);
-    plasma1.setLeftRampMinDensity(0.0);
-    plasma1.setRightRampMinDensity(0.0);
-
+    PLASMA plasma1;
+    plasma1.density_function = box;
+    plasma1.setXRangeBox(0.0,1.0*sqrt(_FACT));
+    plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
+    plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
+    plasma1.setDensityCoefficient(64.0*sqrt(_FACT));
+    
     SPECIE  electrons1(&grid);
-	electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(4, 4, 1);
-	electrons1.setName("ELE1");
-	electrons1.type = ELECTRON;
+    electrons1.plasma = plasma1;
+    electrons1.setParticlesPerCellXYZ(9, 9, 1);
+    electrons1.setName("ELE1");
+    electrons1.type = ELECTRON;
     electrons1.creation();
     species.push_back(&electrons1);
-
-
-	SPECIE ions1(&grid);
-	ions1.plasma = plasma1;
-    ions1.setParticlesPerCellXYZ(4, 4, 1);
-	ions1.setName("ION1");
+    
+    
+    SPECIE ions1(&grid);
+    ions1.plasma = plasma1;
+    ions1.setParticlesPerCellXYZ(9, 9, 1);
+    ions1.setName("ION1");
     ions1.type = ION;
     ions1.Z = 6.0;
     ions1.A = 12.0;
     ions1.creation();
     species.push_back(&ions1);
 
-
-	tempDistrib distribution;
-    distribution.setWaterbag(1.0e-10);
+    tempDistrib distribution;
+    distribution.setWaterbag(1.0e-8);
 
     electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
     ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
-
-
+    
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
         (*spec_iterator)->printParticleNumber();
     }
-
-     //*******************************************END SPECIED DEFINITION***********************************************************
+    //*******************************************END SPECIED DEFINITION***********************************************************
 
     //*******************************************BEGIN DIAGNOSTICS DEFINITION**************************************************
-	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
-
-    emProbe *probe1=new emProbe;
-    probe1->setPointCoordinate(0,0,0);
-    probe1->setName("A");
-
-    outDomain *plane1= new outDomain;
-    plane1->setPointCoordinate(0,0,0);
-    plane1->setFreeDimensions(1 ,0,0);
-    plane1->setName("B");
+    OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
     outDomain *plane2= new outDomain;
     plane2->setPointCoordinate(0,0,0);
-    plane2->setFreeDimensions(1 ,0,1);
-    plane2->setName("D");
-    plane2->setXRange(-20,10);
-    plane2->setYRange(-5,10);
-    plane2->setZRange(-5,10);
-    manager.addEBFieldFrom(0.0, 5.0);
-    manager.addEBFieldFrom(plane2, 0.0, 5.0);
-    //manager.addEBFieldProbeFrom(probe1,0.0,0.1);
-
-    //manager.addSpeciesDensityFrom(electrons1.name, 0.0, 5.0);
-    manager.addSpeciesDensityFrom(plane2,electrons1.name, 0.0, 2.0);
-    //manager.addSpeciesDensityFrom(ions1.name, 0.0, 5.0);
-
-    //manager.addCurrentFrom(0.0, 5.0);
-    //manager.addCurrentFrom(plane1, 0.0, 5.0);
-
-    //manager.addSpeciesPhaseSpaceFrom(electrons1.name, 10.0, 10.0);
-    //manager.addSpeciesPhaseSpaceFrom(ions1.name, 10.0, 10.0);
-
-	manager.addDiagFrom(0.0, 1.0);
-
-	manager.initialize(DIRECTORY_OUTPUT);
+    plane2->setFreeDimensions(1 ,1,1);
+    plane2->setName("SUBD");
+    plane2->setXRange(0,6);
+    
+    manager.addSpeciesDensityFrom(plane2,electrons1.name, 0.0, 0.25);
+    manager.addSpeciesDensityFrom(plane2,ions1.name, 0.0, 0.25);
+    
+    manager.addDiagFrom(0.0, 5.0);
+    
+    manager.initialize(DIRECTORY_OUTPUT);
     //*******************************************END DIAGNOSTICS DEFINITION**************************************************
     grid.setDumpPath(DIRECTORY_DUMP);
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY!!) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	if (grid.myid == grid.master_proc){
-		printf("----- START temporal cicle -----\n");
-		fflush(stdout);
-	}
+    if (grid.myid == grid.master_proc){
+        printf("----- START temporal cicle -----\n");
+        fflush(stdout);
+    }
 
-	int Nstep = grid.getTotalNumberOfTimesteps();
-    int dumpID=1, dumpEvery;
+    int Nstep = grid.getTotalNumberOfTimesteps();
+    int dumpID=1, dumpEvery=40;
+    grid.istep=0;
     if(DO_DUMP){
         dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
     }
-
-    grid.istep=0;
     if (_DO_RESTART){
         dumpID=_RESTART_FROM_DUMP;
-        restartFromDump(&dumpID, &grid, &myfield, species);
+        std::ifstream dumpFile;
+        dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
+        if( dumpFile.good()){
+            grid.reloadDump(dumpFile);
+            myfield.reloadDump(dumpFile);
+            for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+                (*spec_iterator)->reloadDump(dumpFile);
+            }
+            dumpFile.close();
+            dumpID++;
+        }
     }
     while(grid.istep <= Nstep)
     {
-
         grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
         manager.callDiags(grid.istep);
@@ -268,12 +238,24 @@ int main(int narg, char **args)
 
         grid.time += grid.dt;
 
-        moveWindow(&grid, &myfield, species);
-
+        grid.move_window();
+        myfield.move_window();
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+            (*spec_iterator)->move_window();
+        }
         grid.istep++;
         if(DO_DUMP){
             if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-                dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+                std::ofstream dumpFile;
+                dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
+
+                grid.dump(dumpFile);
+                myfield.dump(dumpFile);
+                for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+                    (*spec_iterator)->dump(dumpFile);
+                }
+                dumpFile.close();
+                dumpID++;
             }
         }
     }
@@ -281,5 +263,4 @@ int main(int narg, char **args)
     manager.close();
     MPI_Finalize();
     exit(1);
-
 }
