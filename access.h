@@ -28,9 +28,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #if DIMENSIONALITY==3
 ACCESSO::ACCESSO(){
-	edge = 2;
+    //edge = 2;
 	dimensions = 3;
-	Nexchange = 1;
+    //Nexchange = 1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
 	return (c + Nc*(i + edge) + Nc*Nx*(j + edge) + Nc*Nx*Ny*(k + edge));
@@ -43,9 +43,9 @@ void ACCESSO::alloc_number(int *N_grid, int *N_loc){
 
 #elif DIMENSIONALITY==2
 ACCESSO::ACCESSO(){
-	edge=2;
+    //edge=2;
 	dimensions=2;
-	Nexchange=1;
+    //Nexchange=1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
 	return (c+Nc*(i+edge)+Nc*Nx*(j+edge));
@@ -57,9 +57,9 @@ void ACCESSO::alloc_number(int *N_grid, int *N_loc){
 }
 #elif DIMENSIONALITY==1
 ACCESSO::ACCESSO(){
-	edge=2;
+    //edge=2;
 	dimensions=1;
-	Nexchange=1;
+    //Nexchange=1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
 	return (c+Nc*(i+edge));}

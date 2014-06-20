@@ -106,11 +106,11 @@ template <class T>const T& MAX(const T& a, const T& b){
 class ACCESSO{
 public:
 	ACCESSO();
-	int edge;
+    static const int edge = 2;
 	int indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc);
 	void alloc_number(int *N_grid, int *N_loc);
 	int dimensions;
-	int Nexchange;
+    static const int Nexchange = 1;
 };
 
 //*****LOGOS******

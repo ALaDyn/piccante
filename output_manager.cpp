@@ -1646,14 +1646,6 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
                     itodo[c+3] = 1;
                 }
             }
-//            std::cout << "***********" << myOutputID << "\n";
-//            std::cout << itodo[0] << "  ";
-//            std::cout << itodo[1] << "  ";
-//            std::cout << itodo[2] << "\n";
-//            std::cout << itodo[3] << "  ";
-//            std::cout << itodo[4] << "  ";
-//            std::cout << itodo[5] << "\n";
-//            std::cout << "***********" << myOutputID << "\n";
 
             MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
         }
