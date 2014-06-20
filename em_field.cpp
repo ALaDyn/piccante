@@ -2011,3 +2011,110 @@ void EM_FIELD::dump(std::ofstream &ff){
 void EM_FIELD::reloadDump(std::ifstream &ff){
     ff.read((char*)val, Ntot*Ncomp*sizeof(double));
 }
+
+void EM_FIELD::filterCompAlongX(int comp){
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+
+    double alpha = 10.0;
+    double beta = 1.0;
+
+    double sum = alpha+2.0*beta;
+    alpha = alpha/sum;
+    beta = beta/sum;
+
+    for (int k = 0; k < Nz; k++){
+        for (int j = 0; j < Ny; j++){
+            double oldVEB = VEB(comp,-1,j,k);
+            for (int i = 0; i < Nx; i++){
+                double ttemp = VEB(comp,i,j,k);
+                VEB(comp,i,j,k) = alpha*VEB(comp,i,j,k) + beta*alpha*VEB(comp,i+1,j,k) + beta*oldVEB;
+                oldVEB = ttemp;
+            }
+        }
+
+    }
+}
+
+void EM_FIELD::filterCompAlongY(int comp){
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+
+    double alpha = 10.0;
+    double beta = 1.0;
+
+    double sum = alpha+2.0*beta;
+    alpha = alpha/sum;
+    beta = beta/sum;
+
+    for (int k = 0; k < Nz; k++){
+        for (int i = 0; i < Nx; i++){
+            double oldVEB = VEB(comp,i,-1,k);
+            for (int j = 0; j < Ny; j++){
+                double ttemp = VEB(comp,i,j,k);
+                VEB(comp,i,j,k) = alpha*VEB(comp,i,j,k) + beta*alpha*VEB(comp,i,j+1,k) + beta*oldVEB;
+                oldVEB = ttemp;
+            }
+        }
+
+    }
+}
+
+void EM_FIELD::filterCompAlongZ(int comp){
+    int Nx = mygrid->Nloc[0];
+    int Ny = mygrid->Nloc[1];
+    int Nz = mygrid->Nloc[2];
+
+    double alpha = 10.0;
+    double beta = 1.0;
+
+    double sum = alpha+2.0*beta;
+    alpha = alpha/sum;
+    beta = beta/sum;
+
+    for (int j = 0; j < Ny; j++){
+        for (int i = 0; i < Nx; i++){
+            double oldVEB = VEB(comp,i,j,-1);
+            for (int k = 0; k < Nz; k++){
+                double ttemp = VEB(comp,i,j,k);
+                VEB(comp,i,j,k) = alpha*VEB(comp,i,j,k) + beta*alpha*VEB(comp,i,j,k+1) + beta*oldVEB;
+                oldVEB = ttemp;
+            }
+        }
+
+    }
+}
+
+
+
+void EM_FIELD::filterDirSelect(int comp, int dirflags){
+    if (dirflags & dir_x)
+        filterCompAlongX(comp);
+    if (dirflags & dir_y && acc.dimensions >= 2)
+        filterCompAlongY(comp);
+    if (dirflags & dir_z && acc.dimensions == 3)
+        filterCompAlongZ(comp);
+}
+
+
+ void EM_FIELD::applyFilter(int flags, int dirflags){
+     if (mygrid->isStretched()&&(mygrid->myid==mygrid->master_proc)){
+         std::cout << "WARNING: filtering and stretched grid are not compatible. Proceed at your own risk." << std::endl;
+     }
+
+   if(flags & fltr_Ex)
+       filterDirSelect(0,dirflags);
+   if(flags & fltr_Ey)
+       filterDirSelect(1,dirflags);
+   if(flags & fltr_Ez)
+       filterDirSelect(2,dirflags);
+   if(flags & fltr_Bx)
+       filterDirSelect(3,dirflags);
+   if(flags & fltr_By)
+       filterDirSelect(4,dirflags);
+   if(flags & fltr_Bz)
+       filterDirSelect(5,dirflags);
+
+ }

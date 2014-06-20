@@ -73,6 +73,21 @@ typedef unsigned __int64  uint64_t; */
 #include <unistd.h>
 #endif
 
+enum filterOptions{
+    fltr_Ex = 1 << 0,
+    fltr_Ey = 1 << 1,
+    fltr_Ez = 1 << 2,
+    fltr_Bx = 1 << 3,
+    fltr_By = 1 << 4,
+    fltr_Bz = 1 << 5
+};
+
+enum filterDir{
+    dir_x = 1 << 0,
+    dir_y = 1 << 1,
+    dir_z = 1 << 2
+};
+
 
 
 class EM_FIELD{
@@ -135,6 +150,8 @@ public:
 	void openBoundariesE_1();
 	void openBoundariesE_2();
 	void openBoundariesB();
+
+    void applyFilter(int flags, int dirflags);
 
 	bool areEnergyExtremesAvailable();
     void dump(std::ofstream &ff);
@@ -229,6 +246,12 @@ private:
 		double laser_pulse_initial_position, double t_FWHM,
 		double waist, double focus_position,
 		double xcenter, double angle, pulsePolarization polarization);
+
+    void filterDirSelect(int comp, int dirflags);
+
+    void filterCompAlongX(int comp);
+    void filterCompAlongY(int comp);
+    void filterCompAlongZ(int comp);
 
 	//PRIVATE INLINE FUNCTIONS
 	inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
