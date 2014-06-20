@@ -1027,7 +1027,8 @@ double computeAlpha(double Dx, double Dxi){
 	double alphaMin = 1.01*2.0*Dxi / M_PI; //1% more than minimum
 	double alphaMax = 20 * alphaMin;
 	double difference = 2 * Dx;
-	double guess, result;
+	double guess = 0.0;
+	double result = 0.0;
 
 	while (fabs(difference) > (Dx*0.00001)){
 		guess = 0.5*(alphaMin + alphaMax);
