@@ -2793,9 +2793,6 @@ void OUTPUT_MANAGER::callDiag(request req){
 
     ekinSpecies = new double[myspecies.size()];
 
-    //double t_spec_extrema[SPEC_DIAG_COMP];
-    // double field_extrema[FIELD_DIAG_COMP];
-
     double EE[3], BE[3];
 
     myfield->computeEnergyAndExtremes();
@@ -2859,10 +2856,6 @@ void OUTPUT_MANAGER::callDiag(request req){
         ofSpec.close();
     }
 
-
     delete[] ekinSpecies;
-
-
-
 }
 

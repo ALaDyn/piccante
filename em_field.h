@@ -103,15 +103,12 @@ public:
 	void allocate(GRID *grid);
 	void reallocate();
 	void setAllValuesToZero();
-	void set_const_field_nthcomp(double value, int c);
 
 	int getNcomp();
 	integer_or_halfinteger getCompCoords(int c);
 	bool amIAllocated();
 
-	//void rotor_E(EM_FIELD *rotor);
-	//void rotor_B(EM_FIELD *rotor);
-	void difference(EM_FIELD *right);
+    void difference(EM_FIELD *right);
 
 	void boundary_conditions();  // set on the ghost cells the boundary values  
 
@@ -120,17 +117,7 @@ public:
 	void new_advance_E();
 	void new_advance_E(CURRENT *current);
 
-	void output_Ey(ofstream &ff);
-	void output_nth_comp(ofstream &ff, int c);
-	void output_Ex(ofstream &ff);
-	void output_Bz(ofstream &ff);
-	void output_2D_E(ofstream &ff);
-	void output_2D_B(ofstream &ff);
-	void output_2D_nth_comp(ofstream &ff, int c);
-	void output_2D_nth_comp_human(ofstream &ff, int c);
-	void output_Bz_angle_difference(ofstream &ff, EM_FIELD *right);
-
-	static const int myWidth = 12;
+    static const int myWidth = 12;
 	static const int myNarrowWidth = 6;
 	void init_output_diag(ofstream &ff);
 	void output_diag(int istep, ofstream &ff);
@@ -210,13 +197,9 @@ private:
 	GRID *mygrid;         // pointer to the GIRD object 
 	bool allocated;  //flag 1-0 allocaded-not alloc 
 
-	double* data_EM1D;
-	int* data_int_EM1D;
+    bool EBEnergyExtremesFlag;
 
 	void auxiliary_rotation(double xin, double yin, double &xp, double &yp, double xcenter, double theta);
-
-	bool EBEnergyExtremesFlag;
-
 
     static double cos2_profile(double u);
     static double cos2_plateau_profile(double rise, double plateau, double x);
@@ -228,16 +211,13 @@ private:
 	void pbcExchangeAlongZ(double* send_buffer, double* recv_buffer);
 	void pbc_EB();
 
-
 	void gaussian_pulse(int dimensions, double xx, double yy, double zz,
 		double tt, double lambda, double fwhm,
 		double w0, double* field, pulsePolarization polarization);
 
-
     void initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
 		double laser_pulse_initial_position,
         double t_FWHM, double xcenter, double angle, pulsePolarization polarization, double rise_time);
-
 
 	void initialize_plane_wave_angle(double lambda0, double amplitude,
 		double angle, pulsePolarization polarization);
@@ -248,7 +228,6 @@ private:
 		double xcenter, double angle, pulsePolarization polarization);
 
     void filterDirSelect(int comp, int dirflags);
-
     void filterCompAlongX(int comp);
     void filterCompAlongY(int comp);
     void filterCompAlongZ(int comp);

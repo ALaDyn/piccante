@@ -25,7 +25,6 @@ CURRENT::CURRENT()
 
 void CURRENT::allocate(GRID *grid) //field allocation
 {
-
 	mygrid = grid;
 	acc.alloc_number(N_grid, mygrid->Nloc);
 	Ntot = N_grid[0] * N_grid[1] * N_grid[2];
@@ -68,7 +67,7 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
 CURRENT CURRENT::operator = (CURRENT &destro)
 {
 	if (!destro.allocated){
-		printf("---ERROR---\noperation not permitted\nEM_FIELD=EM_FIELD\nnot allocated\n");
+        printf("---ERROR---\noperation not permitted\nCURRENT=CURRENT\nnot allocated\n");
 		exit(17);
 	}
 	Ncomp = destro.Ncomp;
@@ -193,7 +192,6 @@ void CURRENT::pbc()
 		free(send_buffer);
 		free(recv_buffer);
 
-
 	}
 	if (dimensions >= 2)
 	{
@@ -302,13 +300,9 @@ void CURRENT::pbc()
 
 void CURRENT::eraseDensity(){
 	int i, j, k;
-	//	int Nx, Ny, Nz;
-
-	int Ngx = N_grid[0];
+    int Ngx = N_grid[0];
 	int Ngy = N_grid[1];
 	int Ngz = N_grid[2];
-
-
 
 	for (k = 0; k < Ngz; k++)
 		for (j = 0; j < Ngy; j++)

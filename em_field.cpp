@@ -133,117 +133,25 @@ bool EM_FIELD::areEnergyExtremesAvailable(){
 	return EBEnergyExtremesFlag;
 }
 
-//void EM_FIELD::rotor_E(EM_FIELD *rotor)
-//{
-//	int i,j,k;
-//	int Nx,Ny,Nz;
-//	int dimensions=acc.dimensions;
-//	Nx=mygrid->Nloc[0];
-//	Ny=mygrid->Nloc[1];
-//	Nz=mygrid->Nloc[2];
-
-//	if(dimensions==3)
-//		for(k=0;k<Nz;k++)
-//			for(j=0;j<Ny;j++)
-//				for(i=0;i<Nx;i++)
-//					{
-//						rotor->E0(i,j,k)=(mygrid->dri[1]*(E2(i,j+1,k)-E2(i,j,k))-
-//															mygrid->dri[2]*(E1(i,j,k+1)-E1(i,j,k)));
-//						rotor->E1(i,j,k)=(mygrid->dri[2]*(E0(i,j,k+1)-E0(i,j,k))-
-//															mygrid->dri[0]*(E2(i+1,j,k)-E2(i,j,k)));
-//						rotor->E2(i,j,k)=(mygrid->dri[0]*(E1(i+1,j,k)-E1(i,j,k))-
-//															mygrid->dri[1]*(E0(i,j+1,k)-E0(i,j,k)));
-//					}
-
-//	else if(dimensions==2)
-//		for(j=0;j<Ny;j++)
-//			for(i=0;i<Nx;i++)
-//				{
-//					k=0;
-
-//					rotor->E0(i,j,k)=( mygrid->dri[1]*(E2(i,j+1,k)-E2(i,j,k)));
-//					rotor->E1(i,j,k)=(-mygrid->dri[0]*(E2(i+1,j,k)-E2(i,j,k)));
-//					rotor->E2(i,j,k)=(mygrid->dri[0]*(E1(i+1,j,k)-E1(i,j,k))-
-//														mygrid->dri[1]*(E0(i,j+1,k)-E0(i,j,k)));
-//				}
-//	else if(dimensions==1)
-//		for(i=0;i<Nx;i++)
-//			{
-//				j=0;
-//				k=0;
-
-//				rotor->E0(i,j,k)=0;
-//				rotor->E1(i,j,k)=(-mygrid->dri[0]*(E2(i+1,j,k)-E2(i,j,k)));
-//				rotor->E2(i,j,k)=(mygrid->dri[0]*(E1(i+1,j,k)-E1(i,j,k)));
-//			}
-//}
-
-//void EM_FIELD::rotor_B(EM_FIELD *rotor)
-//{
-//	int i,j,k;
-//	int Nx,Ny,Nz;
-//	int dimensions=acc.dimensions;
-//	Nx=mygrid->Nloc[0];
-//	Ny=mygrid->Nloc[1];
-//	Nz=mygrid->Nloc[2];
-
-//	if(dimensions==3)
-//		for(k=0;k<Nz;k++)
-//			for(j=0;j<Ny;j++)
-//				for(i=0;i<Nx;i++)
-//					{
-//						rotor->B0(i,j,k)=(mygrid->dri[1]*(B2(i,j,k)-B2(i,j-1,k))-
-//															mygrid->dri[2]*(B1(i,j,k)-B1(i,j,k-1)));
-//						rotor->B1(i,j,k)=(mygrid->dri[2]*(B0(i,j,k)-B0(i,j,k-1))-
-//															mygrid->dri[0]*(B2(i,j,k)-B2(i-1,j,k)));
-//						rotor->B2(i,j,k)=(mygrid->dri[0]*(B1(i,j,k)-B1(i-1,j,k))-
-//															mygrid->dri[1]*(B0(i,j,k)-B0(i,j-1,k)));
-//					}
-//	else if(dimensions==2)
-//		for(j=0;j<Ny;j++)
-//			for(i=0;i<Nx;i++)
-//				{
-//					k=0;
-//					rotor->B0(i,j,k)=( mygrid->dri[1]*(B2(i,j,k)-B2(i,j-1,k)));
-//					rotor->B1(i,j,k)=(-mygrid->dri[0]*(B2(i,j,k)-B2(i-1,j,k)));
-//					rotor->B2(i,j,k)=(mygrid->dri[0]*(B1(i,j,k)-B1(i-1,j,k))-
-//														mygrid->dri[1]*(B0(i,j,k)-B0(i,j-1,k)));
-//				}
-//	else if(dimensions==1)
-//		for(i=0;i<Nx;i++)
-//			{
-//				j=k=0;
-//				rotor->B0(i,j,k)=0;
-//				rotor->B1(i,j,k)=(-mygrid->dri[0]*(B2(i,j,k)-B2(i-1,j,k)));
-//				rotor->B2(i,j,k)=( mygrid->dri[0]*(B1(i,j,k)-B1(i-1,j,k)));
-//			}
-//}
-
 int EM_FIELD::pbc_compute_alloc_size(){
 	int dimensions = acc.dimensions;
 	int allocated_size;
-
-
 	int Ngx, Ngy, Ngz, Nc = Ncomp;
-
 
 	Ngx = N_grid[0];
 	Ngy = N_grid[1];
 	Ngz = N_grid[2];
 
-	if (dimensions == 3)
-	{
+    if (dimensions == 3){
 		allocated_size = Nc*Ngy*Ngz*acc.Nexchange;;
 		allocated_size = MAX(allocated_size, Nc*Ngx*Ngz*acc.Nexchange);
 		allocated_size = MAX(allocated_size, Nc*Ngx*Ngy*acc.Nexchange);
 	}
-	else if (dimensions == 2)
-	{
+    else if (dimensions == 2){
 		allocated_size = Nc*Ngy*acc.Nexchange;
 		allocated_size = MAX(allocated_size, Nc*Ngx*acc.Nexchange);
 	}
-	else
-	{
+    else{
 		allocated_size = Nc*acc.Nexchange;
 	}
 	return allocated_size;
@@ -269,7 +177,6 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 	int ileft, iright;
 
 	int sendcount = Nxchng*Ngy*Ngz*Nc;
-
 
 	// ======   send right: send_buff=right_edge
 	for (int k = 0; k < Ngz; k++)
@@ -378,8 +285,6 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
 						VEB(c, i - edge, Ny + j, k - edge) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
 					}
 	}
-
-
 }
 
 void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
@@ -401,7 +306,6 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 	int ileft, iright;
 
 	int sendcount = Ngx*Ngy*Nxchng*Nc;
-
 
 	// ======   send right: send_buff=right_edge
 	for (int k = 0; k < Nxchng; k++)
@@ -439,10 +343,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 				{
 					VEB(c, i - edge, j - edge, Nz + k) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
 				}
-
 }
 
-//ALERT GRIGLIA
 void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
 {
 	EBEnergyExtremesFlag = false;
@@ -452,7 +354,6 @@ void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
 	allocated_size = pbc_compute_alloc_size();
 	send_buffer = new double[allocated_size];
 	recv_buffer = new double[allocated_size];
-
 
 	if (acc.dimensions == 3)
 	{
@@ -480,7 +381,7 @@ void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
 	delete[] send_buffer;
 }
 
-//CORREGGERE PER GRIGLIA STRETCHATA
+//TODO CORREGGERE PER GRIGLIA STRETCHATA
 void EM_FIELD::openBoundariesE_1(){
 	EBEnergyExtremesFlag = false;
 	axisBoundaryConditions xBoundaryConditions = mygrid->getXBoundaryConditions();
@@ -561,7 +462,7 @@ void EM_FIELD::openBoundariesE_2(){
 	}
 }
 
-//CORREGGERE PER GRIGLIA STRETCHATA
+//TODO CORREGGERE PER GRIGLIA STRETCHATA
 void EM_FIELD::openBoundariesB(){
 
 	axisBoundaryConditions xBoundaryConditions = mygrid->getXBoundaryConditions();
@@ -628,37 +529,6 @@ void EM_FIELD::boundary_conditions()  // set on the ghost cells the boundary val
 	EBEnergyExtremesFlag = false;
 	pbc_EB();
 
-	/*if(mygrid->withMovingWindow){
-		int i,j,k,c;
-		int Nx, Nc = Ncomp;
-		//int Ny,Nz,Nc=Ncomp;
-		//int dimensions=acc.dimensions;
-		int edge=acc.edge;
-		//int Ngx,
-		int Ngy, Ngz ;//, sendcount;
-		//int Nx_xchng, Ny_xchng, Nz_xchng;
-		Nx=mygrid->Nloc[0]; //really used points (internal)
-		//Ny=mygrid->Nloc[1];
-		//Nz=mygrid->Nloc[2];
-		//Ngx=N_grid[0];     //size of the allocated fields
-		Ngy=N_grid[1];
-		Ngz=N_grid[2];*/
-
-
-	/*if(mygrid->rmyid[0]==0)
-		for(k=0;k<Ngz;k++)
-		for(j=0;j<Ngy;j++)
-		{
-		//double alpha=mygrid->dt*mygrid->dri[0];
-		//double Cuno=1./(1+alpha);
-		//double Cdue=1-alpha;
-
-		//B2(-1,j-edge,k-edge)=Cuno*(2*E1(0,j-edge,k-edge)-Cdue*B2(0,j-edge,k-edge));
-		//B1(-1,j-edge,k-edge)=Cuno*(2*E2(0,j-edge,k-edge)-Cdue*B1(0,j-edge,k-edge));
-		B2(-1,j-edge,k-edge)=B2(0,j-edge,k-edge);
-		B1(-1,j-edge,k-edge)=B1(0,j-edge,k-edge);
-		}
-		}*/
 }
 
 
@@ -773,14 +643,6 @@ void EM_FIELD::new_advance_E()
 	Nz = mygrid->Nloc[2];
 	dt = mygrid->dt;
 
-	//    std::cout << mygrid->myid << ":  dim: " << dimensions << " Nx: "<< Nx << " Ny: " << Ny << " Nz: " << Nz << std::endl;
-
-	//    struct timeval start, end;
-
-	//    long mtime, seconds, useconds;
-
-	//    gettimeofday(&start, NULL);
-
 	if (dimensions == 3)
 		for (k = 0; k < Nz; k++){
 			dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
@@ -820,12 +682,6 @@ void EM_FIELD::new_advance_E()
 			E1(i, j, k) += dt*(-dxi*(B2(i, j, k) - B2(i - 1, j, k)));
 			E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)));
 		}
-	//    gettimeofday(&end, NULL);
-
-	//    seconds  = end.tv_sec  - start.tv_sec;
-	//    useconds = end.tv_usec - start.tv_usec;
-
-	//    printf("Elapsed time: %ld useconds\n", useconds);
 
 }
 void EM_FIELD::new_advance_E(CURRENT *current)
@@ -841,15 +697,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 	Nz = mygrid->Nloc[2];
 	dt = mygrid->dt;
 
-	//    std::cout << mygrid->myid << ":  dim: " << dimensions << " Nx: "<< Nx << " Ny: " << Ny << " Nz: " << Nz << std::endl;
-
-	//    struct timeval start, end;
-
-	//    long mtime, seconds, useconds;
-
-	//    gettimeofday(&start, NULL);
-
-	if (dimensions == 3)
+    if (dimensions == 3)
 		for (k = 0; k < Nz; k++){
 			dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
 			for (j = 0; j < Ny; j++){
@@ -884,147 +732,8 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 			E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)) - mygrid->den_factor*current->Jz(i, j, k));
 		}
 
-	//        gettimeofday(&end, NULL);
-
-	//        seconds  = end.tv_sec  - start.tv_sec;
-	//        useconds = end.tv_usec - start.tv_usec;
-
-	//        printf("Elapsed time: %ld useconds\n", useconds);
 }
 
-void EM_FIELD::output_Ey(ofstream &ff)
-{
-	int i, N;
-	double x;// y;
-	N = mygrid->Nloc[0];
-	for (i = 0; i < N; i++)
-	{
-		x = mygrid->cirloc[0][i];
-		//y=mygrid->rminloc[1]+(i+0.5)*mygrid->dr[1];
-
-		ff << setprecision(6) << x << " " << E1(i, 0, 0) << "\n";
-	}
-}
-void EM_FIELD::output_nth_comp(ofstream &ff, int c)
-{
-	int i, N;
-	double x;// y;
-	N = mygrid->Nloc[0];
-	for (i = 0; i < N; i++)
-	{
-		x = mygrid->cirloc[0][i];
-		//y=mygrid->rminloc[1]+(i+0.5)*mygrid->dr[1];
-
-		ff << setprecision(6) << x << " " << VEB(c, i, 0, 0) << "\n";
-	}
-}
-void EM_FIELD::output_Ex(ofstream &ff)
-{
-	int i, N;
-	double x;
-	N = mygrid->Nloc[0];
-	for (i = 0; i < N; i++)
-	{
-		x = mygrid->chrloc[0][i];
-		ff << setprecision(6) << x << " " << E0(i, 0, 0) << "\n";
-	}
-}
-void EM_FIELD::output_Bz(ofstream &ff)
-{
-	int i, N, j, k;
-	double x;
-	j = mygrid->Nloc[1] / 2;
-	k = mygrid->Nloc[2] / 2;
-	N = mygrid->Nloc[0];
-	for (i = 0; i < N; i++)
-	{
-		x = mygrid->chrloc[0][i];
-		ff << setprecision(6) << x << " " << B2(i, j, k) << "\n";
-	}
-}
-
-void EM_FIELD::output_2D_E(ofstream &ff)
-{
-	int i, Nx, Ny, j, k;
-	//	double x, y;
-	k = mygrid->Nloc[2] / 2;
-	Nx = mygrid->Nloc[0];
-	Ny = mygrid->Nloc[1];
-
-	for (j = -acc.edge; j < Ny + acc.edge; j++)
-		for (i = -acc.edge; i < Nx + acc.edge; i++)
-		{
-			//y=mygrid->cirloc[1][j];
-			//x=mygrid->cirloc[0][i];
-			ff << setprecision(6) << i << " " << j << " " << E0(i, j, k) << " " << E1(i, j, k) << " " << E2(i, j, k) << "\n";
-		}
-}
-void EM_FIELD::output_2D_B(ofstream &ff)
-{
-	int i, Nx, Ny, j, k;
-	//	double x, y;
-	k = mygrid->Nloc[2] / 2;
-	Nx = mygrid->Nloc[0];
-	Ny = mygrid->Nloc[1];
-
-	for (j = -acc.edge; j < Ny + acc.edge; j++)
-		for (i = -acc.edge; i < Nx + acc.edge; i++)
-		{
-			//y=mygrid->cirloc[1][j];
-			//x=mygrid->cirloc[0][i];
-			ff << setprecision(6) << i << " " << j << " " << B0(i, j, k) << " " << B1(i, j, k) << " " << B2(i, j, k) << "\n";
-		}
-}
-
-void EM_FIELD::output_2D_nth_comp(ofstream &ff, int c)
-{
-	int i, Nx, Ny, j, k;
-	double x, y;
-	k = mygrid->Nloc[2] / 2;
-	Nx = mygrid->Nloc[0];
-	Ny = mygrid->Nloc[1];
-
-	if (c >= Ncomp)
-		return;
-	for (j = 0; j < Ny; j++)
-		for (i = 0; i < Nx; i++)
-		{
-			y = mygrid->cirloc[1][j];
-			x = mygrid->cirloc[0][i];
-			ff << setprecision(6) << x << " " << y << " " << VEB(c, i, j, k) << "\n";
-		}
-}
-void EM_FIELD::output_2D_nth_comp_human(ofstream &ff, int c)
-{
-	int i, Nx, Ny, j, k;
-	k = mygrid->Nloc[2] / 2;
-	Nx = mygrid->Nloc[0];
-	Ny = mygrid->Nloc[1];
-
-	if (c >= Ncomp)
-		return;
-	for (j = 0; j < Ny; j++){
-		for (i = 0; i < Nx; i++)	{
-			ff << setprecision(6) << VEB(c, i, j, k) << "\t";
-		}
-		ff << "\n\n";
-	}
-}
-
-void EM_FIELD::output_Bz_angle_difference(ofstream &ff, EM_FIELD *right)
-{
-	int i, N, k;
-	double x, y;
-	k = mygrid->Nloc[2] / 2;
-	N = mygrid->Nloc[0];
-	for (i = 0; i < N; i++)
-	{
-		x = mygrid->chrloc[1][i];
-		y = mygrid->cirloc[0][i];
-		x = x / sqrt(2) + y / sqrt(2);
-		ff << setprecision(6) << x << " " << (B2(i, i, k) - right->B2(i, i, k)) << "\n";
-	}
-}
 void EM_FIELD::init_output_diag(ofstream &ff)
 {
 	if (mygrid->myid == mygrid->master_proc){
@@ -1043,8 +752,7 @@ void EM_FIELD::init_output_diag(ofstream &ff)
 }
 void EM_FIELD::output_diag(int istep, ofstream &ff)
 {
-	//	double EEnergy[3], BEnergy[3], extrema[14];
-	computeEnergyAndExtremes();
+    computeEnergyAndExtremes();
 
 	if (mygrid->myid == mygrid->master_proc){
 		ff << setw(myNarrowWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << total_energy[6];
@@ -1074,7 +782,6 @@ void EM_FIELD::init_output_extrems(ofstream &ff)
 }
 void EM_FIELD::output_extrems(int istep, ofstream &ff)
 {
-	//	double EEnergy[3], BEnergy[3], extrema[14];
 	computeEnergyAndExtremes();
 	if (mygrid->myid == mygrid->master_proc){
 		ff << " " << setw(myNarrowWidth) << istep << " " << setw(myNarrowWidth) << mygrid->time;
@@ -1557,7 +1264,7 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 			}
 }
 
-//DA RIVEDERE
+//TODO DA RIVEDERE
 /*void inject_field(double angle)
 	{
 	int i,j,k;
@@ -1597,28 +1304,6 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 
 	}*/
 
-void EM_FIELD::set_const_field_nthcomp(double value, int c)
-{
-	int i, j, k;
-	int Nx, Ny, Nz;
-	//double dx, dt, k0, lambda, x, y, z, rx, ry, sigma_z;
-	//double amplitude=1;
-	Nx = mygrid->Nloc[0];
-	Ny = mygrid->Nloc[1];
-	Nz = mygrid->Nloc[2];
-	//k0=2*M_PI/mygrid->lambda0;
-	//dx=mygrid->dr[0];
-	//lambda=mygrid->lambda0;
-	//sigma_z=mygrid->t_FWHM;
-
-	for (k = 0; k < Nz; k++)
-		for (j = 0; j < Ny; j++)
-			for (i = 0; i < Nx; i++)
-			{
-				VEB(c, i, j, k) = value;
-			}
-
-}
 void EM_FIELD::addFieldsFromFile(std::string name){
     ifstream fileEMField (name.c_str(), std::ifstream::in);
     int Nx_in;
@@ -1686,8 +1371,7 @@ fileEMField.close();
 
 void EM_FIELD::move_window()
 {
-	//double buff,move;
-	int Nx, Ngy, Ngz;
+    int Nx, Ngy, Ngz;
 	Nx = mygrid->Nloc[0];
 	Ngy = N_grid[1];
 	Ngz = N_grid[2];
@@ -1696,17 +1380,9 @@ void EM_FIELD::move_window()
 		return;
 
 	static double *send_buffer = NULL, *recv_buffer = NULL;
-	//static bool FIRST_TIME=true;
-	static int shiftCellNumber = 0;
+    static int shiftCellNumber = 0;
 	static int exchangeCellNumber = 0;
-	// if(FIRST_TIME){
-	// 	cell_num=mygrid->imove_mw;
-	// 	sendbuffer=(double *)malloc(Ncomp*cell_num*Ny*Nz*sizeof(double));
-	// 	recvbuffer=(double *)malloc(Ncomp*cell_num*Ny*Nz*sizeof(double));
-	// 	FIRST_TIME=false;
-	// }
-	// else{
-	if (shiftCellNumber != mygrid->imove_mw){
+    if (shiftCellNumber != mygrid->imove_mw){
 		shiftCellNumber = mygrid->imove_mw;
 		exchangeCellNumber = shiftCellNumber + 1;
 		int sendcount;
@@ -1714,8 +1390,7 @@ void EM_FIELD::move_window()
 		send_buffer = (double *)realloc((void*)send_buffer, sendcount*sizeof(double));
 		recv_buffer = (double *)realloc((void*)recv_buffer, sendcount*sizeof(double));
 	}
-	//}		
-	for (int k = 0; k < Ngz; k++){
+    for (int k = 0; k < Ngz; k++){
 		for (int j = 0; j < Ngy; j++){
 			for (int i = 0; i < (exchangeCellNumber); i++){
 				for (int c = 0; c < Ncomp; c++){
@@ -1754,7 +1429,7 @@ void EM_FIELD::move_window()
 			}
 		}
 
-	//WARNING: si dovrebbe poter rimuovere
+    //TODO: si dovrebbe poter rimuovere
 	EM_FIELD::boundary_conditions();
 }
 

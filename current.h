@@ -63,12 +63,12 @@ public:
 
 
 private:
-	ACCESSO acc;    // object distinguishing 1-2-3 D
+    int N_grid[3], Ntot;
+    int ZGrid_factor, YGrid_factor;
+    ACCESSO acc;    // object distinguishing 1-2-3 D
 	double *val; //   THE BIG poiniter
 	GRID *mygrid;         // pointer to the GIRD object 
 	int allocated;  //flag 1-0 allocaded-not alloc
-	int N_grid[3], Ntot;
-	int ZGrid_factor, YGrid_factor;
 
 
 
