@@ -50,15 +50,8 @@ public:
 	integer_or_halfinteger getDensityCoords();
 
 	void pbc();
-	void output_density(ofstream &ff);
-	void output_2D_density(ofstream &ff);
-	void output_2D_current(ofstream &ff);
-	void output_2D_nth_comp(ofstream &ff, int c);
-	void output_2D_nth_comp_human(ofstream &ff, int c);
-	double integrate_field_nth_comp(int c);
-	//void difference(CURRENT *right); 
-	void set_const_field_nthcomp(double value, int c);
-	void eraseDensity();
+
+    void eraseDensity();
 
 	//PUBLIC INLINE FUNCTIONS
 	inline double & Jx(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
