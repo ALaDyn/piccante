@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 1
 
 #include "access.h"
 #include "commons.h"
@@ -50,7 +50,7 @@ using namespace std;
 #include "particle_species.h"
 #include "output_manager.h"
 
-#define NPROC_ALONG_Y 512
+#define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
@@ -65,6 +65,7 @@ using namespace std;
 
 #define _FACT 0.333333
 
+
 int main(int narg, char **args)
 {
 	GRID grid;
@@ -76,11 +77,11 @@ int main(int narg, char **args)
 
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
-    grid.setXrange(-25.0, 20.0);
-    grid.setYrange(-7.5, 7.5);
+    grid.setXrange(-20.0, 20.0);
+    grid.setYrange(-1, 1);
     grid.setZrange(-1, +1);
 
-    grid.setNCells(9180, 3072, 1);
+    grid.setNCells(4000, 1, 1);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -94,7 +95,7 @@ int main(int narg, char **args)
 	grid.mpi_grid_initialize(&narg, args);
 	grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(30.0);
+    grid.setSimulationTime(20.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -121,10 +122,10 @@ int main(int narg, char **args)
     laserPulse pulse1;
     pulse1.type = COS2_PLANE_WAVE;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
     pulse1.polarization = CIRCULAR_POLARIZATION;
-    pulse1.t_FWHM = 12.4;
-    pulse1.laser_pulse_initial_position = -12.5;
+    pulse1.t_FWHM = 9.0;
+    pulse1.laser_pulse_initial_position = -9.5;
     pulse1.lambda0 = 1.0;
-    pulse1.normalized_amplitude = 198.0*_FACT;
+    pulse1.normalized_amplitude = 1.0;
     pulse1.waist = 4.0;
     pulse1.focus_position = 0.0;
     pulse1.rotation = false;
@@ -148,14 +149,14 @@ int main(int narg, char **args)
 	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
 	PLASMA plasma1;
     plasma1.density_function = box;     
-    plasma1.setXRangeBox(0.0,1.0*sqrt(_FACT));      
+    plasma1.setXRangeBox(0.0,10.0);
     plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
     plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-    plasma1.setDensityCoefficient(64.0*sqrt(_FACT));
+    plasma1.setDensityCoefficient(2.0);
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(9, 9, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
@@ -164,7 +165,7 @@ int main(int narg, char **args)
     
     SPECIE ions1(&grid);
     ions1.plasma = plasma1;
-    ions1.setParticlesPerCellXYZ(9, 9, 1);
+    ions1.setParticlesPerCellXYZ(100, 1, 1);
     ions1.setName("ION1");
     ions1.type = ION;
     ions1.Z = 6.0;
@@ -196,11 +197,11 @@ int main(int narg, char **args)
     plane2->setName("SUBD");
     plane2->setXRange(0,6);
     
-       
-    manager.addSpeciesDensityFrom(plane2,electrons1.name, 0.0, 0.25);
-    manager.addSpeciesDensityFrom(plane2,ions1.name, 0.0, 0.25);
+    manager.addEBFieldFrom(0.0,1.0);
+    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 1.0);
+    manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
     
-    manager.addDiagFrom(0.0, 5.0);
+    manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);
     //*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
@@ -263,6 +264,11 @@ int main(int narg, char **args)
         for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
             (*spec_iterator)->momenta_advance(&myfield);
         }
+
+        //        if(grid.istep%FIELD_FILTER_FREQ==0){
+        //            myfield.applyFilter(fltr_Ex, dir_x);
+        //            myfield.boundary_conditions();
+        //        }
 
         grid.time += grid.dt;
 
