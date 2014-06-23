@@ -186,7 +186,7 @@ void OUTPUT_MANAGER::nearestInt(double *rr, int *ri, int *globalri){
         }
     }
 }
-int findIndexMin (double val, double* coords, int numcoords){
+int OUTPUT_MANAGER::findIndexMin (double val, double* coords, int numcoords){
   if (numcoords <= 1)
     return 0;
 
@@ -200,7 +200,7 @@ int findIndexMin (double val, double* coords, int numcoords){
 return 0;
 }
 
-int findIndexMax (double val, double* coords, int numcoords){
+int OUTPUT_MANAGER::findIndexMax (double val, double* coords, int numcoords){
   if (numcoords<= 1)
     return 0;
 
@@ -266,7 +266,7 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
-
+    //TO IMPLEMENT
 }
 
 void OUTPUT_MANAGER::createDiagFile(){
@@ -1028,44 +1028,6 @@ std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, 
     return ss.str();
 }
 
-void OUTPUT_MANAGER::writeEMFieldMap(std::ofstream &output, request req){
-    int uniqueN[3];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
-
-    int Ncomp = myfield->getNcomp();
-
-    for (int c = 0; c < 3; c++)
-        output << uniqueN[c] << "\t";
-
-    output << std::endl;
-
-    for (int c = 0; c < 3; c++)
-        output << mygrid->rnproc[c] << "\t";
-
-    output << std::endl;
-
-    output << "Ncomp: " << Ncomp << std::endl;
-
-    for (int c = 0; c < Ncomp; c++){
-        integer_or_halfinteger crd = myfield->getCompCoords(c);
-        output << c << ":\t" << (int)crd.x << "\t"
-               << (int)crd.y << "\t"
-               << (int)crd.z << std::endl;
-    }
-
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->cir[c][i] << "  ";
-        output << std::endl;
-    }
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->chr[c][i] << "  ";
-        output << std::endl;
-    }
-}
 
 void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
     int Ncomp = myfield->getNcomp();
@@ -1310,24 +1272,7 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
 }
 #endif
 
-void OUTPUT_MANAGER::callEMFieldOld(request req){
 
-    if (mygrid->myid == mygrid->master_proc){
-        std::string nameMap = composeOutputName(outputDir, "EMfield", "", req.dtime, ".map");
-        std::ofstream of1;
-        of1.open(nameMap.c_str());
-        writeEMFieldMap(of1, req);
-        of1.close();
-    }
-
-    std::string nameBin = composeOutputName(outputDir, "EMfield", "", req.dtime, ".bin");
-#if defined(USE_HDF5)
-    writeEMFieldBinaryHDF5(nameBin, req);
-#else
-    writeEMFieldBinary(nameBin, req);
-#endif
-
-}
 void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
     int Ncomp = 3;//myfield->getNcomp();
     int offset=0;
@@ -1879,150 +1824,8 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req){
 }
 
 
-void OUTPUT_MANAGER::writeSpecDensityMap(std::ofstream &output, request req){
-    int uniqueN[3];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
-
-    for (int c = 0; c < 3; c++)
-        output << uniqueN[c] << "\t";
-    output << std::endl;
-    for (int c = 0; c < 3; c++)
-        output << mygrid->rnproc[c] << "\t";
-    output << std::endl;
-
-    output << "Ncomp: " << 1 << std::endl;
-    integer_or_halfinteger crd = mycurrent->getDensityCoords();
-    output << 0 << ":\t" << (int)crd.x << "\t"
-           << (int)crd.y << "\t"
-           << (int)crd.z << std::endl;
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->cir[c][i] << "  ";
-        output << std::endl;
-    }
-
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->chr[c][i] << "  ";
-        output << std::endl;
-    }
-
-}
-
-void OUTPUT_MANAGER::writeSpecDensityOld(std::string fileName, request req){
-    int uniqueN[3];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
-
-    MPI_Offset disp = 0;
-
-    int small_header = 6 * sizeof(int);
-    int big_header = 3 * sizeof(int)+3 * sizeof(int)
-            +2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)
-            +sizeof(int)+3 * sizeof(int);
-
-    MPI_File thefile;
-    MPI_Status status;
-
-    char* nomefile = new char[fileName.size() + 1];
-
-    nomefile[fileName.size()] = 0;
-    sprintf(nomefile, "%s", fileName.c_str());
-
-    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
-                  MPI_INFO_NULL, &thefile);
-
-    //+++++++++++ FILE HEADER  +++++++++++++++++++++
-    // We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
-    // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
-    if (mygrid->myid == 0){
-        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-        MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
-
-        int tNcomp = 1;
-        MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
-        integer_or_halfinteger crd = mycurrent->getDensityCoords();
-        int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
-        MPI_File_write(thefile, tp, 3, MPI_INT, &status);
-
-        for (int c = 0; c < 3; c++)
-            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
-                           MPI_DOUBLE, &status);
-
-        for (int c = 0; c < 3; c++)
-            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
-                           MPI_DOUBLE, &status);
-
-    }
-
-    //****************END OF FILE HEADER
 
 
-    disp = big_header;
-
-    for (int rank = 0; rank < mygrid->myid; rank++)
-        disp += small_header +
-                mygrid->proc_totUniquePoints[rank] * sizeof(float);
-
-    if (disp < 0)
-    {
-        std::cout << "a problem occurred when trying to mpi_file_set_view in writeSpecDensityBinary" << std::endl;
-        std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
-        exit(33);
-    }
-    if (mygrid->myid != 0){
-        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
-    }
-
-    //****************CPU HEADER
-    {
-        int todo[6];
-        todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-        todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-        todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-        todo[3] = mygrid->uniquePointsloc[0];
-        todo[4] = mygrid->uniquePointsloc[1];
-        todo[5] = mygrid->uniquePointsloc[2];
-
-        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
-    }
-    //****************END OF CPU HEADER
-
-
-    //****************CPU DENSITY VALUES
-    {
-        float *todo;
-        int Nx, Ny, Nz;
-
-        Nx = mygrid->uniquePointsloc[0];
-        Ny = mygrid->uniquePointsloc[1];
-        Nz = mygrid->uniquePointsloc[2];
-
-        int size = Nx*Ny*Nz;
-
-        todo = new float[size];
-
-        for (int k = 0; k < Nz; k++)
-            for (int j = 0; j < Ny; j++)
-                for (int i = 0; i < Nx; i++)
-                    todo[i + j*Nx + k*Nx*Ny] =
-                            (float)mycurrent->density(i, j, k);
-
-        MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
-
-        delete[]todo;
-    }
-    //****************END OF CPU DENSITY VALUES
-
-    MPI_File_close(&thefile);
-    delete[] nomefile;
-
-
-}
 void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
     int Ncomp = 1;//myfield->getNcomp();
     int *totUniquePoints;
@@ -2396,152 +2199,10 @@ void OUTPUT_MANAGER::callSpecDensity(request req){
 
 }
 
-void  OUTPUT_MANAGER::writeCurrentMap(std::ofstream &output, request req){
-    int Ncomp = mycurrent->Ncomp;
-
-    int uniqueN[3];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
-
-    for (int c = 0; c < 3; c++)
-        output << uniqueN[c] << "\t";
-    output << std::endl;
-    for (int c = 0; c < 3; c++)
-        output << mygrid->rnproc[c] << "\t";
-    output << std::endl;
-
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->cir[c][i] << "  ";
-        output << std::endl;
-    }
-
-    for (int c = 0; c < 3; c++){
-        for (int i = 0; i < uniqueN[c]; i++)
-            output << mygrid->chr[c][i] << "  ";
-        output << std::endl;
-    }
-}
-
-void  OUTPUT_MANAGER::writeCurrentOld(std::string fileName, request req){
-
-    int Ncomp = 3;
-
-    int uniqueN[3];
-    uniqueN[0] = mygrid->uniquePoints[0];
-    uniqueN[1] = mygrid->uniquePoints[1];
-    uniqueN[2] = mygrid->uniquePoints[2];
 
 
-    MPI_Offset disp = 0;
 
-    int small_header = 6 * sizeof(int);
-    int big_header = 3 * sizeof(int)+3 * sizeof(int)+
-            2 * (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(double)+
-            sizeof(int)+3 * 3 * sizeof(int);
-
-    MPI_File thefile;
-    MPI_Status status;
-
-    char *nomefile = new char[fileName.size() + 1];
-    nomefile[fileName.size()] = 0;
-    sprintf(nomefile, "%s", fileName.c_str());
-
-    MPI_File_open(MPI_COMM_WORLD, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY,
-                  MPI_INFO_NULL, &thefile);
-
-    //+++++++++++ FILE HEADER  +++++++++++++++++++++
-    // We are not using the mygrid->master_proc to write them since it would require a double MPI_File_set_view
-    // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
-    if (mygrid->myid == 0){
-        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-        MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
-        MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
-
-        int tNcomp = 3;
-        MPI_File_write(thefile, &tNcomp, 1, MPI_INT, &status);
-        for (int c = 0; c < 3; c++){
-            integer_or_halfinteger crd = mycurrent->getJCoords(c);
-            int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
-            MPI_File_write(thefile, tp, 3, MPI_INT, &status);
-        }
-
-
-        for (int c = 0; c < 3; c++)
-            MPI_File_write(thefile, mygrid->cir[c], uniqueN[c],
-                           MPI_DOUBLE, &status);
-        for (int c = 0; c < 3; c++)
-            MPI_File_write(thefile, mygrid->chr[c], uniqueN[c],
-                           MPI_DOUBLE, &status);
-    }
-
-    //****************END OF FILE HEADER
-
-    disp = big_header;
-
-    for (int rank = 0; rank < mygrid->myid; rank++)
-        disp += small_header + mygrid->proc_totUniquePoints[rank] * sizeof(float)*Ncomp;
-    if (disp < 0)
-    {
-        std::cout << "a problem occurred when trying to mpi_file_set_view in writeCurrentBinary" << std::endl;
-        std::cout << "myrank=" << mygrid->myid << " disp=" << disp << std::endl;
-        exit(33);
-    }
-
-    if (mygrid->myid != 0){
-        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char*) "native", MPI_INFO_NULL);
-    }
-
-    //****************CPU HEADER
-    {
-        int todo[6];
-        todo[0] = mygrid->rproc_imin[0][mygrid->rmyid[0]];
-        todo[1] = mygrid->rproc_imin[1][mygrid->rmyid[1]];
-        todo[2] = mygrid->rproc_imin[2][mygrid->rmyid[2]];
-        todo[3] = mygrid->uniquePointsloc[0];
-        todo[4] = mygrid->uniquePointsloc[1];
-        todo[5] = mygrid->uniquePointsloc[2];
-
-        MPI_File_write(thefile, todo, 6, MPI_INT, &status);
-    }
-    //****************END OF CPU HEADER
-
-
-    //****************CPU CURRENT VALUES
-    {
-        float *todo;
-        int Nx, Ny, Nz;
-
-        int Nc = Ncomp;
-
-        Nx = mygrid->uniquePointsloc[0];
-        Ny = mygrid->uniquePointsloc[1];
-        Nz = mygrid->uniquePointsloc[2];
-
-        int size = Nx*Ny*Nz*Nc;
-
-        todo = new float[size];
-
-        for (int k = 0; k < Nz; k++)
-            for (int j = 0; j < Ny; j++)
-                for (int i = 0; i < Nx; i++)
-                    for (int c = 0; c < Nc; c++)
-                        todo[c + i*Nc + j*Nx*Nc + k*Nx*Ny*Nc] =
-                                (float)mycurrent->JJ(c, i, j, k);
-
-        MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
-
-        delete[]todo;
-    }
-    //****************END OF CPU CURRENT VALUES
-
-    MPI_File_close(&thefile);
-
-    delete[] nomefile;
-}
-
-void OUTPUT_MANAGER::writeCurrentNew(std::string fileName, request req){
+void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
     int Ncomp = 3;//myfield->getNcomp();
     int *totUniquePoints;
     int shouldIWrite=false;
@@ -2704,16 +2365,10 @@ void OUTPUT_MANAGER::writeCurrentNew(std::string fileName, request req){
 }
 
 void  OUTPUT_MANAGER::callCurrent(request req){
-    if (mygrid->myid == mygrid->master_proc){
-        std::string nameMap = composeOutputName(outputDir, "J", "", req.dtime, ".map");
-        std::ofstream of1;
-        of1.open(nameMap.c_str());
-        writeCurrentMap(of1, req);
-        of1.close();
-    }
+
     std::string nameBin = composeOutputName(outputDir, "J", "", myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
-    writeCurrentNew(nameBin, req);
+    writeCurrent(nameBin, req);
 
 }
 

@@ -218,6 +218,8 @@ private:
 
 	int getIntTime(double dtime);
 
+
+
     void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
 
 	void prepareOutputMap();
@@ -230,26 +232,20 @@ private:
 
     std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
     std::string composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext);
-    void writeEMFieldMap(std::ofstream &output, request req);
 	void writeEMFieldBinary(std::string fileName, request req);
     void writeNewEMFieldBinary(std::string fileName, request req, int comp);
     void writeEMFieldBinaryHDF5(std::string fileName, request req);
-    void callEMFieldOld(request req);
 
     void callEMFieldProbe(request req);
     void writeEBFieldDomain(std::string fileName,  request req);
     void writeEBFieldSubDomain(std::string fileName,  request req);
     void callEMFieldDomain(request req);
 
-    void writeSpecDensityMap(std::ofstream &output, request req);
-    void writeSpecDensityOld(std::string fileName, request req);
     void writeSpecDensity(std::string fileName, request req);
     void writeSpecDensitySubDomain(std::string fileName,  request req);
     void callSpecDensity(request req);
 
-	void writeCurrentMap(std::ofstream &output, request req);
-    void writeCurrentOld(std::string fileName, request req);
-    void writeCurrentNew(std::string fileName, request req);
+    void writeCurrent(std::string fileName, request req);
     void callCurrent(request req);
 
     void writeSpecPhaseSpace(std::string fileName, request req);
@@ -258,6 +254,9 @@ private:
 
 	void callDiag(request req);
     void interpEB(double pos[3], double E[3], double B[3]);
+
+    int findIndexMin (double val, double* coords, int numcoords);
+    int findIndexMax (double val, double* coords, int numcoords);
 };
 
 #endif // DIAG_MANAGER_PLUS_H
