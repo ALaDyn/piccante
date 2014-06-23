@@ -38,6 +38,28 @@ GRID::GRID()
 
 }
 
+GRID::~GRID(){
+    delete[] proc_totUniquePoints;
+    for (int c = 0; c < 3; c++){
+        free(iStretchingDerivativeCorrection[c]);
+        free(hStretchingDerivativeCorrection[c]);
+        free(rproc_rmin[c]);
+        free(rproc_rmax[c]);
+        free(rproc_csimin[c]);
+        free(rproc_csimax[c]);
+        free(rproc_imin[c]);
+        free(rproc_imax[c]);
+        free(rproc_Nloc[c]);
+        free(rproc_NuniquePointsloc[c]);
+        free(cir[c]);
+        free(chr[c]);
+        free(cirloc[c]);
+        free(chrloc[c]);
+    }
+
+
+}
+
 void GRID::initializeStretchParameters(){
 	flagStretched = false;
 	flagStretchedAlong[0] = flagStretchedAlong[1] = flagStretchedAlong[2] = false;

@@ -96,6 +96,7 @@ public:
 	double *hStretchingDerivativeCorrection[3];
 
 	GRID();
+    ~GRID();
 
 	void setXrange(double min, double max);
 	void setYrange(double min, double max);
