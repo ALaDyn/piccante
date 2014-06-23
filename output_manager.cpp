@@ -519,172 +519,102 @@ void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type
     reqList.merge(tempList, requestCompTime);
 }
 
-void OUTPUT_MANAGER::addEBFieldFrom(double startTime, double frequency){
+void OUTPUT_MANAGER::addEBField(outDomain* _domain, double startTime, double frequency, double endTime, whichFieldOut whichOut){
     if (!(checkGrid() && checkEMField()))
         return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endSimTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endSimTime);
 
+    int domainID=0;
+    if(_domain != NULL){
+        domainID=returnDomainIDIfDomainIsInList(_domain);
+        if(domainID<0){
+            myDomains.push_back(_domain);
+            domainID=myDomains.size()-1;
+        }
+    }
+
+    if(whichOut==WHICH_E_AND_B){
+        addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endTime);
+        addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endTime);
+    }
+    else if (whichOut==WHICH_E_ONLY){
+        addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endTime);
+    }
+    else if (whichOut==WHICH_B_ONLY){
+        addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endTime);
+    }
+
+}
+
+void OUTPUT_MANAGER::addEBFieldFrom(double startTime, double frequency){
+    addEBField(NULL,startTime, frequency,  mygrid->getTotalTime(), WHICH_E_AND_B);
 }
 
 void OUTPUT_MANAGER::addEBFieldAt(double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, atTime, 1.0, atTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, atTime, 1.0, atTime);
-
+    addEBField(NULL,atTime, 1.0, atTime, WHICH_E_AND_B);
 }
 
 void OUTPUT_MANAGER::addEBFieldFromTo(double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endTime);
+    addEBField(NULL,startTime, frequency,  endTime, WHICH_E_AND_B);
 }
+
 void OUTPUT_MANAGER::addEBFieldFrom(outDomain* _domain, double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endSimTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endSimTime);
+    addEBField(_domain, startTime, frequency,  mygrid->getTotalTime(),WHICH_E_AND_B);
 }
 
 void OUTPUT_MANAGER::addEBFieldAt(outDomain* _domain, double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, atTime, 1.0, atTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, atTime, 1.0, atTime);
+    addEBField(_domain, atTime, 1.0, atTime, WHICH_E_AND_B);
 }
 
 void OUTPUT_MANAGER::addEBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_E_FIELD, 0,  domainID, startTime, frequency, endTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0,  domainID, startTime, frequency, endTime);
+    addEBField(_domain, startTime, frequency,  endTime, WHICH_E_AND_B);
 }
-//NEW OUTPUT
+
 void OUTPUT_MANAGER::addEFieldFrom(double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endSimTime);
+    addEBField(NULL,startTime, frequency,  mygrid->getTotalTime(), WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addEFieldAt(double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, atTime, 1.0, atTime);
+    addEBField(NULL,atTime, 1.0, atTime, WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addEFieldFromTo(double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_E_FIELD, 0,  0, startTime, frequency, endTime);
+   addEBField(NULL,startTime, frequency,  endTime, WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addBFieldFrom(double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endSimTime);
+    addEBField(NULL,startTime, frequency,  mygrid->getTotalTime(), WHICH_B_ONLY);
 }
 
 void OUTPUT_MANAGER::addBFieldAt(double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, atTime, 1.0, atTime);
+    addEBField(NULL,atTime, 1.0, atTime, WHICH_B_ONLY);
 }
 
 void OUTPUT_MANAGER::addBFieldFromTo(double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_B_FIELD, 0,  0, startTime, frequency, endTime);
+    addEBField(NULL,startTime, frequency,  endTime, WHICH_B_ONLY);
 }
 // SELECTION
 void OUTPUT_MANAGER::addEFieldFrom(outDomain* _domain, double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, startTime, frequency, endSimTime);
-
+    addEBField(_domain,startTime, frequency,  mygrid->getTotalTime(), WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addEFieldAt(outDomain* _domain, double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, atTime, 1.0, atTime);
+    addEBField(_domain,atTime, 1.0, atTime, WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addEFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_E_FIELD,  0, domainID, startTime, frequency, endTime);
+    addEBField(_domain,startTime, frequency,  endTime, WHICH_E_ONLY);
 }
 
 void OUTPUT_MANAGER::addBFieldFrom(outDomain* _domain, double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, startTime, frequency, endSimTime);
-
+    addEBField(_domain ,startTime, frequency,  mygrid->getTotalTime(), WHICH_B_ONLY);
 }
 
 void OUTPUT_MANAGER::addBFieldAt(outDomain* _domain, double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(_domain);
-    if(domainID<0){
-        myDomains.push_back(_domain);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, atTime, 1.0, atTime);
+    addEBField(_domain,atTime, 1.0, atTime, WHICH_B_ONLY);
 }
 
-void OUTPUT_MANAGER::addBFieldFromTo(outDomain* domain_in, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_B_FIELD,  0,domainID, startTime, frequency, endTime);
+void OUTPUT_MANAGER::addBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime){
+    addEBField(_domain,startTime, frequency,  endTime, WHICH_B_ONLY);
 }
 
 

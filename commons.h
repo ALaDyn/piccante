@@ -30,7 +30,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 //*****VERSION*****
-#define CURRENT_VERSION " version 1.2.3"
+#define CURRENT_VERSION " version 1.2.4"
 
 const std::string common_versionLine = "================  "CURRENT_VERSION"  ================";
 

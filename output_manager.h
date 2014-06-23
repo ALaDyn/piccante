@@ -65,6 +65,12 @@ enum diagType{
     OUT_SPEC_DENSITY
     };
 
+enum whichFieldOut{
+    WHICH_E_ONLY,
+    WHICH_B_ONLY,
+    WHICH_E_AND_B
+};
+
 
 struct request{
 	double dtime;
@@ -112,7 +118,7 @@ public:
 	~OUTPUT_MANAGER();
 
 	void initialize(std::string _outputDir);
-	void close();
+	void close();    
 
     void addEBFieldFrom(double startTime, double frequency);
     void addEBFieldAt(double atTime);
@@ -136,7 +142,7 @@ public:
 
     void addBFieldFrom(outDomain* _domain,double startTime, double frequency);
     void addBFieldAt(outDomain* _domain,double atTime);
-    void addBFieldFromTo(outDomain* Plane,double startTime, double frequency, double endTime);
+    void addBFieldFromTo(outDomain* _domain,double startTime, double frequency, double endTime);
 
     void addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
     void addEBFieldProbeAt(emProbe* Probe, double atTime);
@@ -218,6 +224,7 @@ private:
 
 	int getIntTime(double dtime);
 
+    void addEBField(outDomain* _domain,double startTime, double frequency, double endTime, whichFieldOut whichOut);
 
 
     void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
@@ -259,5 +266,5 @@ private:
     int findIndexMax (double val, double* coords, int numcoords);
 };
 
-#endif // DIAG_MANAGER_PLUS_H
+#endif
 
