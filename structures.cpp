@@ -509,66 +509,6 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
 	}
 }
 
-double saw_func(double x){
-	x = fabs(x) - floor(fabs(x) / (2.0*M_PI))*2.0*M_PI;
-	return 2.0*fabs(x - M_PI) / M_PI - 1.0;
-}
-
-double left_saw_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
-	double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
-	double* paramlist = (double*)plist.additional_params;
-	double g_depth = paramlist[0] * 0.5;
-	double g_lambda = paramlist[1];
-	double g_phase = paramlist[2];
-
-	double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
-	double xminbound = plist.rminbox[0] + g_depth*(1.0 - saw_func(phase));
-
-	if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
-		(plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-		(plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
-        if ((x - xminbound) <= plist.left_ramp_length){
-            return (plist.density_coefficient - plist.left_ramp_min_density)*(x - xminbound) / plist.left_ramp_length + plist.left_ramp_min_density;
-		}
-		else{
-			return plist.density_coefficient;
-		}
-	}
-	else{
-		return -1;
-	}
-}
-
-double saw_2_func(double x){
-	x = fabs(x) - floor(fabs(x) / (2.0*M_PI))*2.0*M_PI;
-	return 1.0 - x / M_PI;
-}
-
-double left_saw_2_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
-	double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
-	double* paramlist = (double*)plist.additional_params;
-	double g_depth = paramlist[0] * 0.5;
-	double g_lambda = paramlist[1];
-	double g_phase = paramlist[2];
-
-	double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
-	double xminbound = plist.rminbox[0] + g_depth*(1.0 - saw_2_func(phase));
-
-	if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
-		(plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-		(plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
-        if ((x - xminbound) <= plist.left_ramp_length){
-            return (plist.density_coefficient - plist.left_ramp_min_density)*(x - xminbound) / plist.left_ramp_length + plist.left_ramp_min_density;
-		}
-		else{
-			return plist.density_coefficient;
-		}
-	}
-	else{
-		return -1;
-	}
-}
-
 
 
 //*************************END_PLASMA*****************************
