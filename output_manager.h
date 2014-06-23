@@ -225,7 +225,11 @@ private:
 	int getIntTime(double dtime);
 
     void addEBField(outDomain* _domain,double startTime, double frequency, double endTime, whichFieldOut whichOut);
-
+    void addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime);
+    void addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
+    void addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime);
+    void addSpeciesPhaseSpace(std::string name, double startTime, double frequency, double endTime);
+    void addDiag(double startTime, double frequency, double endTime);
 
     void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
 

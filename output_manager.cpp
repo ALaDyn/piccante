@@ -619,33 +619,8 @@ void OUTPUT_MANAGER::addBFieldFromTo(outDomain* _domain, double startTime, doubl
 
 
 // EM Probe ///////////////////////////////////////
-void OUTPUT_MANAGER::addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domain=returnDomainIfProbeIsInList(Probe);
-    if(domain<0){
-        myEMProbes.push_back(Probe);
-        isThereEMProbe = true;
-        domain=myEMProbes.size()-1;
-    }
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_EB_PROBE,  0,domain, startTime, frequency, endSimTime);
 
-}
-
-void OUTPUT_MANAGER::addEBFieldProbeAt(emProbe* Probe, double atTime){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    int domainID=returnDomainIfProbeIsInList(Probe);
-    if(domainID<0){
-        myEMProbes.push_back(Probe);
-        isThereEMProbe = true;
-        domainID=myEMProbes.size()-1;
-    }
-    addRequestToList(requestList, OUT_EB_PROBE,  0,domainID, atTime, 1.0, atTime);
-}
-
-void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkEMField()))
         return;
     int domainID=returnDomainIfProbeIsInList(Probe);
@@ -657,159 +632,105 @@ void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, dou
     addRequestToList(requestList, OUT_EB_PROBE,  0, domainID, startTime, frequency, endTime);
 }
 
-
-
-void OUTPUT_MANAGER::addSpeciesDensityFrom(std::string name, double startTime, double frequency){
-    if (!(checkGrid() && checkSpecies() && checkCurrent()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,startTime, frequency, endSimTime);
-
+void OUTPUT_MANAGER::addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
+    addEBFieldProbe(Probe,  startTime, frequency, mygrid->getTotalTime());
 }
 
-void OUTPUT_MANAGER::addSpeciesDensityAt(std::string name, double atTime){
-    if (!(checkGrid() && checkSpecies() && checkCurrent()))
-        return;
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,atTime, 1.0, atTime);
+void OUTPUT_MANAGER::addEBFieldProbeAt(emProbe* Probe, double atTime){
+    addEBFieldProbe(Probe,  atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addSpeciesDensityFromTo(std::string name, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkSpecies() && checkCurrent()))
-        return;
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  0,startTime, frequency, endTime);
+void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
+   addEBFieldProbe(Probe,  startTime, frequency, endTime);
 }
 
-void OUTPUT_MANAGER::addSpeciesDensityFrom(outDomain* domain_in, std::string name, double startTime, double frequency){
-    if (!(checkGrid() && checkSpecies() && checkCurrent()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, startTime, frequency, endSimTime);
+// ++++++++++++++++++++++++++++     species density
 
-}
-
-void OUTPUT_MANAGER::addSpeciesDensityAt(outDomain* domain_in, std::string name, double atTime){
+void OUTPUT_MANAGER::addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies() && checkCurrent()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, atTime, 1.0, atTime);
-}
-
-void OUTPUT_MANAGER::addSpeciesDensityFromTo(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkSpecies() && checkCurrent()))
-        return;
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
+    int domainID=0;
+    if (domain_in != NULL){
+        domainID=returnDomainIDIfDomainIsInList(domain_in);
+        if(domainID<0){
+            myDomains.push_back(domain_in);
+            domainID=myDomains.size()-1;
+        }
     }
     addRequestToList(requestList, OUT_SPEC_DENSITY, specNum,  domainID, startTime, frequency, endTime);
 }
 
+void OUTPUT_MANAGER::addSpeciesDensityFrom(std::string name, double startTime, double frequency){
+    addSpeciesDensity(NULL, name, startTime, frequency, mygrid->getTotalTime());
+}
+
+void OUTPUT_MANAGER::addSpeciesDensityAt(std::string name, double atTime){
+    addSpeciesDensity(NULL, name, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addSpeciesDensityFromTo(std::string name, double startTime, double frequency, double endTime){
+    addSpeciesDensity(NULL, name, startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addSpeciesDensityFrom(outDomain* domain_in, std::string name, double startTime, double frequency){
+    addSpeciesDensity(domain_in, name, startTime, frequency, mygrid->getTotalTime());
+}
+
+void OUTPUT_MANAGER::addSpeciesDensityAt(outDomain* domain_in, std::string name, double atTime){
+    addSpeciesDensity(domain_in, name, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addSpeciesDensityFromTo(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
+    addSpeciesDensity(domain_in, name, startTime, frequency, endTime);
+}
+
 // ++++++++++++++++++++++++++++     current
-void OUTPUT_MANAGER::addCurrentFrom(double startTime, double frequency){
+
+void OUTPUT_MANAGER::addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkCurrent()))
         return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_CURRENT, 0,  0,startTime, frequency, endSimTime);
+    int domainID=0;
 
+    if(domain_in != NULL){
+
+        domainID=returnDomainIDIfDomainIsInList(domain_in);
+        if(domainID<0){
+            myDomains.push_back(domain_in);
+            domainID=myDomains.size()-1;
+        }
+    }
+    addRequestToList(requestList, OUT_CURRENT, 0,  domainID, startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addCurrentFrom(double startTime, double frequency){
+    addCurrent(NULL, startTime, frequency, mygrid->getTotalTime());
 }
 
 void OUTPUT_MANAGER::addCurrentAt(double atTime){
-    if (!(checkGrid() && checkCurrent()))
-        return;
-    addRequestToList(requestList, OUT_CURRENT, 0,  0,atTime, 1.0, atTime);
+    addCurrent(NULL, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addCurrentFromTo(double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkCurrent()))
-        return;
-    addRequestToList(requestList, OUT_CURRENT, 0,  0,startTime, frequency, endTime);
+    addCurrent(NULL, startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addCurrentFrom(outDomain* domain_in, double startTime, double frequency){
-    if (!(checkGrid() && checkCurrent()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,startTime, frequency, endSimTime);
-
+    addCurrent(domain_in, startTime, frequency, mygrid->getTotalTime());
 }
 void OUTPUT_MANAGER::addCurrentAt(outDomain* domain_in, double atTime){
-    if (!(checkGrid() && checkCurrent()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,atTime, 1.0, atTime);
+    addCurrent(domain_in, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addCurrentFromTo(outDomain* domain_in, double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkCurrent()))
-        return;
-    int domainID=returnDomainIDIfDomainIsInList(domain_in);
-    if(domainID<0){
-        myDomains.push_back(domain_in);
-        domainID=myDomains.size()-1;
-    }
-    addRequestToList(requestList, OUT_CURRENT, 0,  domainID,startTime, frequency, endTime);
+    addCurrent(domain_in, startTime, frequency, endTime);
 }
 
+// ++++++++++++++++++++++++++++     species binary
 
-
-void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency){
-    if (!(checkGrid() && checkSpecies()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,startTime, frequency, endSimTime);
-
-}
-
-void OUTPUT_MANAGER::addSpeciesPhaseSpaceAt(std::string name, double atTime){
-    if (!(checkGrid() && checkSpecies()))
-        return;
-    int specNum = findSpecName(name);
-    if (specNum < 0)
-        return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,atTime, 1.0, atTime);
-}
-
-void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpace(std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
@@ -818,26 +739,37 @@ void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(std::string name, double startTi
     addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,startTime, frequency, endTime);
 }
 
-void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
-    if (!(checkGrid() && checkEMField()))
-        return;
-    double endSimTime = mygrid->dt * mygrid->getTotalNumberOfTimesteps();
-    addRequestToList(requestList, OUT_DIAG, 0, 0, startTime, frequency, endSimTime);
-    isThereDiag = true;
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency){
+    addSpeciesPhaseSpace(name, startTime, frequency, mygrid->getTotalTime());
 }
 
-void OUTPUT_MANAGER::addDiagAt(double atTime){
-    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
-        return;
-    addRequestToList(requestList, OUT_DIAG, 0,  0,atTime, 1.0, atTime);
-    isThereDiag = true;
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceAt(std::string name, double atTime){
+    addSpeciesPhaseSpace(name, atTime, 1.0, atTime);
 }
 
-void OUTPUT_MANAGER::addDiagFromTo(double startTime, double frequency, double endTime){
-    if (!(checkGrid() && checkCurrent() && checkSpecies() && checkEMField()))
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime){
+     addSpeciesPhaseSpace(name, startTime, frequency, endTime);
+}
+
+// ++++++++++++++++++++++++++++     diag
+
+void OUTPUT_MANAGER::addDiag(double startTime, double frequency, double endTime){
+    if (!(checkGrid() && checkCurrent() && checkEMField()))
         return;
     addRequestToList(requestList, OUT_DIAG, 0,  0,startTime, frequency, endTime);
     isThereDiag = true;
+}
+
+void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
+    addDiag(startTime, frequency, mygrid->getTotalTime());
+}
+
+void OUTPUT_MANAGER::addDiagAt(double atTime){
+    addDiag(atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addDiagFromTo(double startTime, double frequency, double endTime){
+    addDiag(startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::prepareOutputMap(){
