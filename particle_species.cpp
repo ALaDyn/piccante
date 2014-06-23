@@ -2197,56 +2197,7 @@ void SPECIE::current_deposition(CURRENT *current)
 
 }
 
-void SPECIE::add_momenta_wavy_x(double wave_lambda, double waveamp, double wavephase){
-	if (mygrid->with_particles == NO)
-		return;
 
-	if (!allocated){
-		return;
-	}
-
-	int p;
-	double valadd;
-	for (p = 0; p < Np; p++)
-	{
-		valadd = waveamp*cos(2.0*M_PI*(r0(p)) / wave_lambda + wavephase);
-		u0(p) += valadd;
-	}
-}
-
-void SPECIE::add_momenta_wavy_y(double wave_lambda, double waveamp, double wavephase){
-	if (mygrid->with_particles == NO)
-		return;
-
-	if (!allocated){
-		return;
-	}
-
-	int p;
-	double valadd;
-	for (p = 0; p < Np; p++)
-	{
-		valadd = waveamp*cos(2.0*M_PI*(r1(p)) / wave_lambda + wavephase);
-		u1(p) += valadd;
-	}
-}
-
-void SPECIE::add_momenta_wavy_z(double wave_lambda, double waveamp, double wavephase){
-	if (mygrid->with_particles == NO)
-		return;
-
-	if (!allocated){
-		return;
-	}
-
-	int p;
-	double valadd;
-	for (p = 0; p < Np; p++)
-	{
-		valadd = waveamp*cos(2.0*M_PI*(r2(p)) / wave_lambda + wavephase);
-		u2(p) += valadd;
-	}
-}
 
 void SPECIE::add_momenta(double uxin, double uyin, double uzin) //Aggiunge semplicemente un drift a tutta la specie
 {

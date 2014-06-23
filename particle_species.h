@@ -87,9 +87,6 @@ public:
 	void momentaStretchedAdvance(EM_FIELD *ebfield);
 	void momenta_advance_with_friction(EM_FIELD *ebfield, double lambda);
 	void current_deposition(CURRENT *current);
-	void add_momenta_wavy_x(double wave_lambda, double waveamp, double wavephase);
-	void add_momenta_wavy_y(double wave_lambda, double waveamp, double wavephase);
-	void add_momenta_wavy_z(double wave_lambda, double waveamp, double wavephase);
 	void add_momenta(double uxin, double uyin, double uzin);
 	void add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution);
 	void current_deposition_standard(CURRENT *current);
