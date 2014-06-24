@@ -23,6 +23,12 @@ CURRENT::CURRENT()
 	ZGrid_factor = YGrid_factor = 1;
 }
 
+CURRENT::~CURRENT()
+{
+    free(val);
+}
+
+
 void CURRENT::allocate(GRID *grid) //field allocation
 {
 	mygrid = grid;

@@ -40,7 +40,8 @@ public:
 	int Ncomp; // N grid point including ghost cells,N_grid[0]*N_grid[1]*N_grid[2], comp number
 	//double max_value[6],min_value[6];  //12 utility values
 
-	CURRENT();
+    CURRENT();
+    ~CURRENT();
 	void allocate(GRID *grid); //field allocation 
 	void reallocate();	//REALLOCATION only if load balancing is introduced
 	void setAllValuesToZero();
