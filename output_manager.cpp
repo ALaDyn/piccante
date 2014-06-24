@@ -266,7 +266,10 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
-    //TO IMPLEMENT
+     for (std::vector<outDomain*>::iterator it = myDomains.begin() ; it != myDomains.end(); ++it)
+         delete(*it);
+
+
 }
 
 void OUTPUT_MANAGER::createDiagFile(){
@@ -977,7 +980,9 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
         delete[]todo;
     }
 
+
     MPI_File_close(&thefile);
+    delete[] nomefile;
     //////////////////////////// END of collective binary file write
 }
 
@@ -1129,7 +1134,7 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
     }
     H5Pclose(plist_id);
     H5Fclose(file_id);
-
+    delete[] nomefile;
     //////////////////////////// END of collective binary file write
 }
 #endif
@@ -1298,6 +1303,8 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
             delete[]todo;
         }
         MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
     }
     MPI_Comm_free( &sliceCommunicator );
 }
@@ -1492,6 +1499,8 @@ void OUTPUT_MANAGER::writeEBFieldSubDomain(std::string fileName, request req){
             delete[]todo;
         }
         MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
     }
     MPI_Comm_free( &sliceCommunicator );
     MPI_Comm_free( &outputCommunicator );
@@ -1846,6 +1855,8 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
             delete[]todo;
         }
         MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
     }
     MPI_Comm_free( &sliceCommunicator );
 }
@@ -2032,6 +2043,8 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                 delete[]todo;
             }
             MPI_File_close(&thefile);
+            delete[] nomefile;
+            delete[] totUniquePoints;
         }
         MPI_Comm_free( &sliceCommunicator );
         MPI_Comm_free( &outputCommunicator );
@@ -2222,6 +2235,8 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
             delete[]todo;
         }
         MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
     }
     MPI_Comm_free( &sliceCommunicator );
 }
@@ -2282,6 +2297,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     MPI_File_close(&thefile);
     delete[]buf;
     delete[] NfloatLoc;
+    delete[] nomefile;
 
 }
 void OUTPUT_MANAGER::callSpecPhaseSpace(request req){

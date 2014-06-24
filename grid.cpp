@@ -56,8 +56,6 @@ GRID::~GRID(){
         free(cirloc[c]);
         free(chrloc[c]);
     }
-
-
 }
 
 void GRID::initializeStretchParameters(){
