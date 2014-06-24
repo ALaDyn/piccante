@@ -58,6 +58,7 @@ public:
 
 	SPECIE();
 	SPECIE(GRID *grid);
+    ~SPECIE();
 
 	void allocate_species();
 	void erase();

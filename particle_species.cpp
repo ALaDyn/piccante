@@ -52,6 +52,13 @@ void SPECIE::allocate_species()
 	allocated = 1;
 
 }
+void SPECIE::~SPECIE(){
+    for (int c = 0; c < Ncomp; c++){
+        free(*val[c]);
+    }
+     free(val);
+}
+
 void SPECIE::erase()
 {
 	if (mygrid->with_particles == NO)
@@ -245,6 +252,11 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
                         }
                 }
 
+    free(density);
+    free(velocity);
+    free(x_in);
+    free(uy);
+    free(uz);
     return counter;
 }
 void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
@@ -462,6 +474,8 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
     free(density);
     free(velocity);
     free(x_in);
+    free(uy);
+    free(uz);
 }
 
 void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
@@ -579,6 +593,8 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
     free(density);
     free(velocity);
     free(x_in);
+    free(uy);
+    free(uz);
 }
 
 void SPECIE::creation()
