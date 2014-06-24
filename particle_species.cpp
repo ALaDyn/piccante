@@ -52,7 +52,7 @@ void SPECIE::allocate_species()
 	allocated = 1;
 
 }
-void SPECIE::~SPECIE(){
+SPECIE::~SPECIE(){
     for (int c = 0; c < Ncomp; c++){
         free(val[c]);
     }

@@ -32,9 +32,6 @@ EM_FIELD::EM_FIELD()
 }
 
 EM_FIELD::~EM_FIELD(){
-    for (int c = 0; c < Ncomp; c++){
-        free(val[c]);
-    }
     free(val);
 }
 
