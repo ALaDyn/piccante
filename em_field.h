@@ -98,6 +98,7 @@ public:
 
 
 	EM_FIELD();
+    ~EM_FIELD();
 	EM_FIELD operator = (EM_FIELD &destro);
 
 	void allocate(GRID *grid);

@@ -31,6 +31,13 @@ EM_FIELD::EM_FIELD()
 	EBEnergyExtremesFlag = false;
 }
 
+EM_FIELD::~EM_FIELD(){
+    for (int c = 0; c < Ncomp; c++){
+        free(val[c]);
+    }
+    free(val);
+}
+
 void EM_FIELD::allocate(GRID *grid){
 	mygrid = grid;
 	acc.alloc_number(N_grid, mygrid->Nloc);
@@ -1365,8 +1372,15 @@ void EM_FIELD::addFieldsFromFile(std::string name){
 
 
     }
-fileEMField.close();
+    fileEMField.close();
 
+    free(Ex);
+    free(Ey);
+    free(Ez);
+    free(Bx);
+    free(By);
+    free(Bz);
+    free(myx);
 }
 
 void EM_FIELD::move_window()
