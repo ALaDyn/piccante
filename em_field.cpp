@@ -1361,9 +1361,9 @@ void EM_FIELD::addFieldsFromFile(std::string name){
         ihright=(ih+1)%(Nx_in-1);
 
         E0(i,0,0)+=2*M_PI*(wh[0]*Ex[ihleft] + wh[1]*Ex[ihright]);
-        E1(i,0,0)+=2*M_PI*(wi[0]*Ey[ihleft] + wi[1]*Ey[ihright]);
-        E2(i,0,0)+=2*M_PI*(wi[0]*Ez[ihleft] + wi[1]*Ez[ihright]);
-        B0(i,0,0)+=2*M_PI*(wi[0]*Bx[ihleft] + wi[1]*Bx[ihright]);
+        E1(i,0,0)+=2*M_PI*(wi[0]*Ey[iileft] + wi[1]*Ey[iiright]);
+        E2(i,0,0)+=2*M_PI*(wi[0]*Ez[iileft] + wi[1]*Ez[iiright]);
+        B0(i,0,0)+=2*M_PI*(wi[0]*Bx[iileft] + wi[1]*Bx[iiright]);
         B1(i,0,0)+=2*M_PI*(wh[0]*By[ihleft] + wh[1]*By[ihright]);
         B2(i,0,0)+=2*M_PI*(wh[0]*Bz[ihleft] + wh[1]*Bz[ihright]);
 
