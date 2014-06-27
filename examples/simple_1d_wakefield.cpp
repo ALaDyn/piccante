@@ -49,7 +49,7 @@ using namespace std;
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
-
+#include "utilities.h"
 #define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
