@@ -1423,15 +1423,6 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
     MPI_Status status;
     int itodo[6];
     prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
-    std::cout<< "myid=" << mygrid->myid << ": yrange=[";
-    std::cout<< mygrid->rminloc[1] << " : ";
-    std::cout<< mygrid->rmaxloc[1]  << "]  ";
-
-    for(int i=0; i<6 ; i++){
-        std::cout << " " << setw(3) << itodo[i];
-    }
-    std::cout << "\n";
-
     MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 }
 void OUTPUT_MANAGER::prepareFloatField(float *todo, int NN[3], int origin[3], request req){
