@@ -201,12 +201,15 @@ private:
 	bool checkEMField();
 	bool checkCurrent();
 	bool checkSpecies();
-    bool isInMyDomain(double *rr);
+    bool isInMyDomain(double rr[3]);
     bool amIInTheSubDomain(request req);
-    void nearestInt(double *rr, int *ri, int *globalri);
-    void findIntLocalBoundaries(double *rmin, double *rmax, int *imin, int *imax);
-    void findIntGlobalBoundaries(double *rmin, double *rmax, int *imin, int *imax);
-    void findNumberOfProc(int *Nproc, int *imin, int *imax);
+    void nearestInt(double rr[3], int *ri, int *globalri);
+    void setAndCheckRemains(int *remains, bool remainingCoord[]);
+    void findIntLocalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
+    void findIntGlobalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
+    void findNumberOfProc(int *Nproc, int imin[3], int imax[3], int remains[3]);
+    void findGlobalSubdomainUniquePoints(int *uniqueN, int imin[3], int imax[3], int remains[3]);
+    void findLocalSubdomainUniquePoints(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]);
     int findSpecName(std::string name);
     int returnDomainIfProbeIsInList(emProbe *newProbe);
     int returnDomainIDIfDomainIsInList(outDomain *newDomain);
@@ -249,7 +252,7 @@ private:
 
     void callEMFieldProbe(request req);
     void writeEBFieldDomain(std::string fileName,  request req);
-    void writeEBFieldSubDomain(std::string fileName,  request req);
+    void writeGridFieldSubDomain(std::string fileName,  request req);
     void callEMFieldDomain(request req);
 
     void writeSpecDensity(std::string fileName, request req);
@@ -268,6 +271,16 @@ private:
 
     int findIndexMin (double val, double* coords, int numcoords);
     int findIndexMax (double val, double* coords, int numcoords);
+
+    void prepareIntegerBigHeader(int *itodo, int uniqueN[3], int slice_rNproc[3], int Ncomp);
+    void prepareFloatCoordinatesHeader(float *fcir[3], int uniqueN[3], int imin[3]);
+    void writeBigHeader(MPI_File thefile, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp);
+    void prepareIntegerSmallHeader(int *itodo, int uniqueLocN[3], int imin[3], int remains[3]);
+    void writeSmallHeader(MPI_File thefile, int uniqueLocN[3], int imin[3], int remains[3]);
+    void prepareFloatField(float *todo, int uniqueLocN[3], int origin[3], request req);
+    void findDispForSetView(MPI_Offset *disp, int myOutputID, int *totUniquePoints, int big_header, int small_header, int Ncomp);
+    void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
+    void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3],  request req);
 };
 
 #endif
