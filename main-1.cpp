@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 1
+#define DIMENSIONALITY 2
 
 #include "access.h"
 #include "commons.h"
@@ -49,8 +49,9 @@ using namespace std;
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
+#include "utilities.h"
 
-#define NPROC_ALONG_Y 1
+#define NPROC_ALONG_Y 8
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
@@ -78,10 +79,10 @@ int main(int narg, char **args)
 	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
     grid.setXrange(-20.0, 20.0);
-    grid.setYrange(-1, 1);
+    grid.setYrange(-20.0, 20.0);
     grid.setZrange(-1, +1);
 
-    grid.setNCells(4000, 1, 1);
+    grid.setNCells(1000, 1000, 1);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -120,8 +121,8 @@ int main(int narg, char **args)
     myfield.setAllValuesToZero();
     
     laserPulse pulse1;
-    pulse1.type = COS2_PLANE_WAVE;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
-    pulse1.polarization = CIRCULAR_POLARIZATION;
+    pulse1.type = GAUSSIAN;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
+    pulse1.polarization = P_POLARIZATION;
     pulse1.t_FWHM = 9.0;
     pulse1.laser_pulse_initial_position = -9.5;
     pulse1.lambda0 = 1.0;
@@ -156,7 +157,7 @@ int main(int narg, char **args)
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(100, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(1, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
@@ -170,15 +171,15 @@ int main(int narg, char **args)
     ions1.type = ION;
     ions1.Z = 6.0;
     ions1.A = 12.0;
-    ions1.creation();
-    species.push_back(&ions1);
+    //ions1.creation();
+    //species.push_back(&ions1);
 
     
     tempDistrib distribution;
     distribution.setWaterbag(1.0e-8);
 
     electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
-    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
+    //ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
     
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -191,15 +192,16 @@ int main(int narg, char **args)
     OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
     
-    outDomain *plane2= new outDomain;
-    plane2->setPointCoordinate(0,0,0);
-    plane2->setFreeDimensions(1 ,1,1);
-    plane2->setName("SUBD");
-    plane2->setXRange(0,6);
-    
-    manager.addEBFieldFrom(0.0,1.0);
-    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 1.0);
-    manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
+    outDomain *domain1= new outDomain;
+    domain1->setPointCoordinate(0,0,0);
+    domain1->setFreeDimensions(1 ,1,1);
+    domain1->setName("SUBD");
+    domain1->setXRange(-10,6);
+    domain1->setYRange(-5,5);
+
+    manager.addEFieldFrom(domain1, 0.0,1.0);
+    manager.addSpeciesDensityFrom(domain1, electrons1.name, 0.0, 1.0);
+    //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
     
     manager.addDiagFrom(0.0, 1.0);
     
@@ -207,30 +209,20 @@ int main(int narg, char **args)
     //*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
     grid.setDumpPath(DIRECTORY_DUMP);
 	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CICLO PRINCIPALE (NON MODIFICARE) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	if (grid.myid == grid.master_proc){
-		printf("----- START temporal cicle -----\n");
-		fflush(stdout);
-	}
+    if (grid.myid == grid.master_proc){
+        printf("----- START temporal cicle -----\n");
+        fflush(stdout);
+    }
 
-	int Nstep = grid.getTotalNumberOfTimesteps();
-    int dumpID=1, dumpEvery=40;
-    grid.istep=0;
+    int Nstep = grid.getTotalNumberOfTimesteps();
+    int dumpID=1, dumpEvery;
     if(DO_DUMP){
         dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
     }
+    grid.istep=0;
     if (_DO_RESTART){
         dumpID=_RESTART_FROM_DUMP;
-        std::ifstream dumpFile;
-        dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
-        if( dumpFile.good()){
-            grid.reloadDump(dumpFile);
-            myfield.reloadDump(dumpFile);
-            for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-                (*spec_iterator)->reloadDump(dumpFile);
-            }
-            dumpFile.close();
-            dumpID++;
-        }
+        restartFromDump(&dumpID, &grid, &myfield, species);
     }
     while(grid.istep <= Nstep)
     {
@@ -272,24 +264,12 @@ int main(int narg, char **args)
 
         grid.time += grid.dt;
 
-        grid.move_window();
-        myfield.move_window();
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-            (*spec_iterator)->move_window();
-        }
+        moveWindow(&grid, &myfield, species);
+
         grid.istep++;
         if(DO_DUMP){
             if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-                std::ofstream dumpFile;
-                dumpFile.open( grid.composeDumpFileName(dumpID).c_str() );
-
-                grid.dump(dumpFile);
-                myfield.dump(dumpFile);
-                for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-                    (*spec_iterator)->dump(dumpFile);
-                }
-                dumpFile.close();
-                dumpID++;
+                dumpFilesForRestart(&dumpID, &grid, &myfield, species);
             }
         }
     }
