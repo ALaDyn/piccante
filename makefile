@@ -7,7 +7,7 @@ OPT = -O3
 
 LFLAGS = -Wall
 
-LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system 
+LIB = -lgsl -lgslcblas 
 
 all : $(EXE)
 
