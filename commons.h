@@ -21,7 +21,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
-//#define USE_LOCALBOOST
+
 #include <string>
 #if defined(_MSC_VER)
 #include <cstdint>

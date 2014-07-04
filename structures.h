@@ -132,9 +132,9 @@ public:
     void setCos2PlaneWave();
     void setCos2PlateauPlaneWave();
 
-    void setPPol();
-    void setSPol();
-    void setCPol();
+    void setPPolarization();
+    void setSPolarization();
+    void setCircularPolarization();
 
 };
 

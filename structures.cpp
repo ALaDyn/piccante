@@ -628,15 +628,15 @@ void laserPulse::setCos2PlateauPlaneWave(){
     type=COS2_PLATEAU_PLANE_WAVE;
 }
 
-void laserPulse::setPPol(){
+void laserPulse::setPPolarization(){
     polarization=P_POLARIZATION;
 }
 
-void laserPulse::setSPol(){
+void laserPulse::setSPolarization(){
     polarization=S_POLARIZATION;
 }
 
-void laserPulse::setCPol(){
+void laserPulse::setCircularPolarization(){
     polarization=CIRCULAR_POLARIZATION;
 }
 
