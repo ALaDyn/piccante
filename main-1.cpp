@@ -26,15 +26,15 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <iomanip>
 #include <cstring>
-#include <ctime>       /* time */
+#include <ctime>
 #if defined(_MSC_VER)
-#include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
+#include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
 #else
-#include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
+#include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #endif
-#include <cstdarg> //Per chiamare funzioni con numero variabile di argomenti
+#include <cstdarg>
 #include <vector>
 
 using namespace std;
@@ -69,14 +69,14 @@ using namespace std;
 
 int main(int narg, char **args)
 {
-	GRID grid;
-	EM_FIELD myfield;
-	CURRENT current;
-	std::vector<SPECIE*> species;
-	vector<SPECIE*>::const_iterator spec_iterator;
+    GRID grid;
+    EM_FIELD myfield;
+    CURRENT current;
+    std::vector<SPECIE*> species;
+    vector<SPECIE*>::const_iterator spec_iterator;
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
-	//*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
+    //*******************************************BEGIN GRID DEFINITION*******************************************************
 
     grid.setXrange(-20.0, 20.0);
     grid.setYrange(-20.0, 20.0);
@@ -93,8 +93,8 @@ int main(int narg, char **args)
     grid.setYandNyRightStretchedGrid(8.0,21);
 
     grid.setBoundaries(xPBC | yPBC | zPBC); //LUNGO Z c'è solo PBC al momento !
-	grid.mpi_grid_initialize(&narg, args);
-	grid.setCourantFactor(0.98);
+    grid.mpi_grid_initialize(&narg, args);
+    grid.setCourantFactor(0.98);
 
     grid.setSimulationTime(20.0);
 
@@ -105,7 +105,7 @@ int main(int narg, char **args)
     //grid.setBetaMovingWindow(1.0);
     //grid.setFrequencyMovingWindow(20);
 
-    grid.setMasterProc(0);	
+    grid.setMasterProc(0);
     
     srand(time(NULL));
     grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -114,9 +114,9 @@ int main(int narg, char **args)
     
     grid.visualDiag();
     
-    //********************************************FINE DEFINIZIONE GRIGLIA********************************************************
-    
-    //*******************************************INIZIO DEFINIZIONE CAMPI*********************************************************
+    //********************************************END GRID DEFINITION********************************************************
+
+    //*******************************************BEGIN FIELD DEFINITION*********************************************************
     myfield.allocate(&grid);
     myfield.setAllValuesToZero();
     
@@ -130,7 +130,7 @@ int main(int narg, char **args)
     pulse1.setFocusPosition( 0.0);
     pulse1.setLambda(1.0);
     pulse1.setFocusPosition(0.0);
-//    pulse1.setRotationAngleAndCenter(2.0*M_PI*(-30.0 / 360.0), 0.0);
+    //    pulse1.setRotationAngleAndCenter(2.0*M_PI*(-30.0 / 360.0), 0.0);
 
     myfield.addPulse(&pulse1);
 
@@ -140,15 +140,15 @@ int main(int narg, char **args)
 
     //myfield.addPulse(&pulse2);
 
-	myfield.boundary_conditions();
+    myfield.boundary_conditions();
 
-	current.allocate(&grid);
-	current.setAllValuesToZero();
-	//*******************************************FINE DEFINIZIONE CAMPI***********************************************************
+    current.allocate(&grid);
+    current.setAllValuesToZero();
+    //*******************************************END FIELD DEFINITION***********************************************************
 
-	//*******************************************INIZIO DEFINIZIONE SPECIE*********************************************************
-	PLASMA plasma1;
-    plasma1.density_function = box;     
+    //*******************************************BEGIN SPECIES DEFINITION*********************************************************
+    PLASMA plasma1;
+    plasma1.density_function = box;
     plasma1.setXRangeBox(0.0,10.0);
     plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
     plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
@@ -156,10 +156,10 @@ int main(int narg, char **args)
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(1, 1, 1);       //Se < 1 il nPPC viene sostituito con 1
+    electrons1.setParticlesPerCellXYZ(1, 1, 1);
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
-    electrons1.creation();                            //electrons.isTestSpecies=true disabilita deposizione corrente.
+    electrons1.creation();
     species.push_back(&electrons1);
     
     
@@ -185,9 +185,9 @@ int main(int narg, char **args)
         (*spec_iterator)->printParticleNumber();
     }
 
-	//    //*******************************************FINE DEFINIZIONE CAMPI***********************************************************
+    //*******************************************END SPECIED DEFINITION***********************************************************
 
-	//*******************************************INIZIO DEFINIZIONE DIAGNOSTICHE**************************************************
+    //*******************************************BEGIN DIAGNOSTICS DEFINITION**************************************************
     OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
     
@@ -205,9 +205,9 @@ int main(int narg, char **args)
     manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);
-    //*******************************************FINE DEFINIZIONE DIAGNOSTICHE**************************************************
+    //*******************************************END DIAGNOSTICS DEFINITION**************************************************
     grid.setDumpPath(DIRECTORY_DUMP);
-	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CICLO PRINCIPALE (NON MODIFICARE) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY!!) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     if (grid.myid == grid.master_proc){
         printf("----- START temporal cicle -----\n");
         fflush(stdout);
