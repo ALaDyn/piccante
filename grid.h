@@ -41,15 +41,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include"commons.h"
-
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-
-#if defined(USE_LOCALBOOST)
-#include "boost/filesystem.hpp"
-#endif
-#include "boost/filesystem.hpp"
 
 enum axisBoundaryConditions{
 	_notAssigned,

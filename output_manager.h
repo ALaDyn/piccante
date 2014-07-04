@@ -36,15 +36,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <sstream>
 #include "commons.h"
-
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-
-#if defined(USE_LOCALBOOST)
-#include "boost/filesystem.hpp"
-#endif
-
 #if defined(USE_HDF5)
 #include <hdf5.h>
 #endif

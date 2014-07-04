@@ -3,13 +3,17 @@ EXE = piccante
 
 OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o
 
-OPT = -O3 -DUSE_LOCALBOOST
+OPT = -O3 
 
 LFLAGS = -Wall
 
 LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system 
 
 all : $(EXE)
+
+boost : OPT = -O3 -DUSE_BOOST
+boost : LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system 
+boost : $(EXE)
 
 hdf5 : OPT = -O3 -I/usr/lib/hdf5-1.8.12/hdf5/include -DUSE_HDF5
 hdf5 : LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system -lhdf5  -L/usr/lib/hdf5-1.8.12/hdf5/lib

@@ -1387,7 +1387,7 @@ double GRID::getMarkMW(){
 }
 
 void GRID::setDumpPath(std::string _dumpDir){
-#if (defined (USE_BOOST) || defined(USE_LOCALBOOST))
+#if defined (USE_BOOST)
     if (myid == master_proc){
         if ( !boost::filesystem::exists(_dumpDir) ){
             boost::filesystem::create_directories(_dumpDir);

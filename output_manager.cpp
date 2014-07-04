@@ -431,7 +431,7 @@ void OUTPUT_MANAGER::createEMProbeFiles(){
 }
 
 void OUTPUT_MANAGER::initialize(std::string _outputDir){
-#if (defined (USE_BOOST) || defined(USE_LOCALBOOST))
+#if defined (USE_BOOST)
     std::string _newoutputDir;
     std::stringstream ss;
     time_t timer;

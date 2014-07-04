@@ -14,15 +14,9 @@
 #include <fstream>
 #include <sstream>
 #include "commons.h"
-
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-
-#if defined(USE_LOCALBOOST)
-#include "boost/filesystem.hpp"
-#endif
-
 #include "grid.h"
 #include "structures.h"
 #include "em_field.h"
