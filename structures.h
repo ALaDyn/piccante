@@ -51,7 +51,8 @@ public:
     void setLeftScaleLength(double slength);
     void setRightScaleLength(double slength);
     void setDensityCoefficient(double dcoeff);
-	void setRampMinDensity(double minden);
+    void setDensityCoefficient(double dcoeff, double lambda);
+    void setRampMinDensity(double minden);
     void setLeftRampMinDensity(double minden);
     void setRightRampMinDensity(double minden);
     void setAdditionalParams(void* addpar);

@@ -11,8 +11,8 @@ LIB = -lgsl -lgslcblas
 
 all : $(EXE)
 
-boost : OPT = -O3 -DUSE_BOOST
-boost : LIB = -lgsl -lgslcblas -lboost_filesystem -lboost_system 
+boost : OPT = -O3 -DUSE_BOOST -I./boost
+boost : LIB = -lgsl -lgslcblas # -lboost_filesystem -lboost_system 
 boost : $(EXE)
 
 hdf5 : OPT = -O3 -I/usr/lib/hdf5-1.8.12/hdf5/include -DUSE_HDF5

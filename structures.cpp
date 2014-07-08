@@ -110,7 +110,11 @@ void PLASMA::setRightScaleLength(double slength){
 }
 
 void PLASMA::setDensityCoefficient(double dcoeff){
-	params.density_coefficient = dcoeff;
+    params.density_coefficient = dcoeff;
+}
+
+void PLASMA::setDensityCoefficient(double dcoeff, double lambda){
+    params.density_coefficient = dcoeff*lambda*lambda;
 }
 
 void PLASMA::setRampMinDensity(double minden){
