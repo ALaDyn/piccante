@@ -201,7 +201,8 @@ int main(int narg, char **args)
     manager.addEFieldFrom(domain1, 0.0,1.0);
     manager.addSpeciesDensityFrom(domain1, electrons1.name, 0.0, 1.0);
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
-    
+    manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
+    manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
     manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);

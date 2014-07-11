@@ -786,25 +786,46 @@ void OUTPUT_MANAGER::addCurrentFromTo(outDomain* domain_in, double startTime, do
 
 // ++++++++++++++++++++++++++++     species binary
 
-void OUTPUT_MANAGER::addSpeciesPhaseSpace(std::string name, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
     if (!(checkGrid() && checkSpecies()))
         return;
     int specNum = findSpecName(name);
     if (specNum < 0)
         return;
-    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  0,startTime, frequency, endTime);
+    int domainID=0;
+
+    if(domain_in != NULL){
+        domainID=returnDomainIDIfDomainIsInList(domain_in);
+        if(domainID<0){
+            myDomains.push_back(domain_in);
+            domainID=myDomains.size()-1;
+        }
+    }
+    addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum,  domainID,startTime, frequency, endTime);
 }
 
 void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency){
-    addSpeciesPhaseSpace(name, startTime, frequency, mygrid->getTotalTime());
+    addSpeciesPhaseSpace(NULL, name, startTime, frequency, mygrid->getTotalTime());
 }
 
 void OUTPUT_MANAGER::addSpeciesPhaseSpaceAt(std::string name, double atTime){
-    addSpeciesPhaseSpace(name, atTime, 1.0, atTime);
+    addSpeciesPhaseSpace(NULL, name, atTime, 1.0, atTime);
 }
 
 void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime){
-     addSpeciesPhaseSpace(name, startTime, frequency, endTime);
+     addSpeciesPhaseSpace(NULL, name, startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(outDomain* domain_in, std::string name, double startTime, double frequency){
+    addSpeciesPhaseSpace(domain_in, name, startTime, frequency, mygrid->getTotalTime());
+}
+
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceAt(outDomain* domain_in, std::string name, double atTime){
+    addSpeciesPhaseSpace(domain_in, name, atTime, 1.0, atTime);
+}
+
+void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
+     addSpeciesPhaseSpace(domain_in, name, startTime, frequency, endTime);
 }
 
 // ++++++++++++++++++++++++++++     diag
@@ -2390,12 +2411,115 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     delete[] nomefile;
 
 }
+int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
+    double rmin[3], rmax[3];
+    for (int c=0;c<3;c++){
+        rmin[c]=myDomains[req.domain]->rmin[c];
+        rmax[c]=myDomains[req.domain]->rmax[c];
+    }
+    int counter=0;
+    double rr[3];
+    SPECIE* spec = myspecies[req.target];
+    for (int p = 0; p < spec->Np; p++){
+        rr[0]=spec->r0(p);
+        rr[1]=spec->r1(p);
+        rr[2]=spec->r2(p);
+
+        if(rmax[0]>= rr[0] && rmin[0] < rr[0]){
+            if (mygrid->accesso.dimensions<2||(rmax[1]>= rr[1] && rmin[1] < rr[1])){
+                if (mygrid->accesso.dimensions<3||(rmax[2]>= rr[2] && rmin[2] < rr[2])){
+                    counter++;
+                }
+            }
+        }
+    }
+
+}
+
+void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request req){
+
+    SPECIE* spec = myspecies[req.target];
+    int shouldIWrite=false;
+
+    shouldIWrite=amIInTheSubDomain(req);
+    MPI_Comm outputCommunicator;
+    MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
+    int myOutputID, outputNProc;
+    MPI_Comm_rank(outputCommunicator,&myOutputID);
+    MPI_Comm_size(outputCommunicator, &outputNProc);
+
+    int outputNPart=findNumberOfParticlesInSubdomain(req);
+    int* NfloatLoc = new int[outputNProc];
+    NfloatLoc[myOutputID] = outputNPart*spec->Ncomp;
+
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
+
+    MPI_Offset disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+        disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+    MPI_File thefile;
+    MPI_Status status;
+
+    char *nomefile = new char[fileName.size() + 1];
+    nomefile[fileName.size()] = 0;
+    sprintf(nomefile, "%s", fileName.c_str());
+
+    if(shouldIWrite){
+        MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+
+        float *buf;
+        int dimensione = 100000;
+        buf = new float[dimensione*spec->Ncomp];
+
+        double rr[3];
+        int counter=0;
+        double rmin[3], rmax[3];
+        for (int c=0;c<3;c++){
+            rmin[c]=myDomains[req.domain]->rmin[c];
+            rmax[c]=myDomains[req.domain]->rmax[c];
+        }
+
+        for (int p = 0; p < spec->Np; p++){
+            rr[0]=spec->r0(p);
+            rr[1]=spec->r1(p);
+            rr[2]=spec->r2(p);
+            if(rmax[0]>= rr[0] && rmin[0] < rr[0]){
+                if (mygrid->accesso.dimensions<2||(rmax[1]>= rr[1] && rmin[1] < rr[1])){
+                    if (mygrid->accesso.dimensions<3||(rmax[2]>= rr[2] && rmin[2] < rr[2])){
+                        for (int c = 0; c < spec->Ncomp; c++){
+                            buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
+                        }
+                        counter++;
+                    }
+                }
+            }
+            if(counter==dimensione){
+                MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+                counter=0;
+            }
+        }
+        if(counter>0){
+          MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+        }
+        MPI_File_close(&thefile);
+        delete[]buf;
+    }
+    delete[] NfloatLoc;
+    delete[] nomefile;
+}
+
 void OUTPUT_MANAGER::callSpecPhaseSpace(request req){
     std::string name = myspecies[req.target]->name;
-
-    std::string nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
-
-    writeSpecPhaseSpace(nameBin, req);
+    std::string nameBin;
+    if(req.domain==0){
+        nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
+        writeSpecPhaseSpace(nameBin, req);
+    }
+    else{
+        nameBin = composeOutputName(outputDir, "PHASESPACE", name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
+        writeSpecPhaseSpaceSubDomain(nameBin, req);
+    }
 }
 
 

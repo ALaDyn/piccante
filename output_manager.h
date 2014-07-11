@@ -164,6 +164,10 @@ public:
     void addCurrentAt(outDomain* Plane, double atTime);
     void addCurrentFromTo(outDomain* Plane, double startTime, double frequency, double endTime);
 
+    void addSpeciesPhaseSpaceFrom(outDomain* domain_in, std::string name, double startTime, double frequency);
+    void addSpeciesPhaseSpaceAt(outDomain* domain_in, std::string name, double atTime);
+    void addSpeciesPhaseSpaceFromTo(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
+
     void addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency);
     void addSpeciesPhaseSpaceAt(std::string name, double atTime);
     void addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime);
@@ -231,7 +235,7 @@ private:
     void addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime);
     void addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
     void addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime);
-    void addSpeciesPhaseSpace(std::string name, double startTime, double frequency, double endTime);
+    void addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
     void addDiag(double startTime, double frequency, double endTime);
 
     void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
@@ -263,6 +267,7 @@ private:
     void callCurrent(request req);
 
     void writeSpecPhaseSpace(std::string fileName, request req);
+    void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);
     void callSpecPhaseSpace(request req);
 
 
@@ -281,6 +286,7 @@ private:
     void findDispForSetView(MPI_Offset *disp, int myOutputID, int *totUniquePoints, int big_header, int small_header, int Ncomp);
     void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
     void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3],  request req);
+    int findNumberOfParticlesInSubdomain(request req);
 };
 
 #endif
