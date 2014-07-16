@@ -54,10 +54,17 @@ outDomain::outDomain(){
     remainingCoord[0]=remainingCoord[1]=1;
     remainingCoord[2]=1;
     subselection=false;
+    overrideFlag=false;
+    followMovingWindowFlag=false;
     rmin[0]=rmin[1]=rmin[2]=-1e10;
     rmax[0]=rmax[1]=rmax[2]=+1e10;
 
 }
+
+void outDomain::followMovingWindow(){
+    followMovingWindowFlag=true;
+}
+
 bool outDomain::compareDomains(outDomain *rhs){
     if(coordinates[0]==rhs->coordinates[0]&&
             coordinates[1]==rhs->coordinates[1]&&
@@ -66,7 +73,9 @@ bool outDomain::compareDomains(outDomain *rhs){
             remainingCoord[1]==rhs->remainingCoord[1]&&
             remainingCoord[2]==rhs->remainingCoord[2]&&
             name.c_str()==rhs->name.c_str()&&
-            subselection==rhs->subselection){
+            subselection==rhs->subselection&&
+            followMovingWindowFlag==rhs->followMovingWindowFlag&&
+            overrideFlag==rhs->overrideFlag){
         if(!subselection)
             return true;
         else if(rmin[0]==rhs->rmin[0]&&
@@ -88,7 +97,7 @@ void outDomain::setFreeDimensions(bool flagX, bool flagY, bool flagZ){
 void outDomain::setPointCoordinate(double X, double Y, double Z){
     coordinates[0]=X;
     coordinates[1]=Y;
-    coordinates[2]=Z;
+    coordinates[2]=Z;    
 }
 void outDomain::setName(string iname){
     name = iname;
@@ -314,6 +323,7 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
     isThereDiag = false;
 
     outDomain *domain1= new outDomain;
+    domain1->overrideFlag=true;
     myDomains.push_back(domain1);
 
 }
@@ -1228,6 +1238,15 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
     int ri[3];
     int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
 
+    if(myDomains[req.domain]->overrideFlag){
+        rr[0] = 0.5*(mygrid->rmin[0] + mygrid->rmax[0]);
+        rr[1] = 0.5*(mygrid->rmin[1] + mygrid->rmax[1]);
+        rr[2] = 0.5*(mygrid->rmin[2] + mygrid->rmax[2]);
+        remains[0] = 1;
+        remains[1] = 1;
+        remains[2] = 1;
+    }
+
     for(int c=0;c<3;c++){
         if(remains[c]){
             uniqueN[c] = mygrid->uniquePoints[c];
@@ -1238,6 +1257,7 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
             slice_rNproc[c] = 1;
         }
     }
+
 
     shouldIWrite=isInMyDomain(rr);
 
@@ -1819,6 +1839,16 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
     int ri[3];
     int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
 
+    if(myDomains[req.domain]->overrideFlag){
+        rr[0] = 0.5*(mygrid->rmin[0] + mygrid->rmax[0]);
+        rr[1] = 0.5*(mygrid->rmin[1] + mygrid->rmax[1]);
+        rr[2] = 0.5*(mygrid->rmin[2] + mygrid->rmax[2]);
+        remains[0] = 1;
+        remains[1] = 1;
+        remains[2] = 1;
+    }
+
+
     for(int c=0;c<3;c++){
         if(remains[c]){
             uniqueN[c] = mygrid->uniquePoints[c];
@@ -2196,6 +2226,16 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
     double rr[3]={myDomains[req.domain]->coordinates[0],myDomains[req.domain]->coordinates[1],myDomains[req.domain]->coordinates[2]};
     int ri[3];
     int remains[3]={myDomains[req.domain]->remainingCoord[0],myDomains[req.domain]->remainingCoord[1],myDomains[req.domain]->remainingCoord[2]};
+
+    if(myDomains[req.domain]->overrideFlag){
+        rr[0] = 0.5*(mygrid->rmin[0] + mygrid->rmax[0]);
+        rr[1] = 0.5*(mygrid->rmin[1] + mygrid->rmax[1]);
+        rr[2] = 0.5*(mygrid->rmin[2] + mygrid->rmax[2]);
+        remains[0] = 1;
+        remains[1] = 1;
+        remains[2] = 1;
+    }
+
 
     for(int c=0;c<3;c++){
         if(remains[c]){

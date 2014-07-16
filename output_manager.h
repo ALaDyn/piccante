@@ -94,6 +94,8 @@ struct outDomain{
     double coordinates[3];
     bool remainingCoord[3], subselection;
     double rmin[3], rmax[3];
+    bool overrideFlag;
+    bool followMovingWindowFlag;
     std::string name;
     outDomain();
     bool compareDomains(outDomain* rhs);
@@ -103,8 +105,7 @@ struct outDomain{
     void setXRange(double min, double max);
     void setYRange(double min, double max);
     void setZRange(double min, double max);
-
-
+    void followMovingWindow();
 };
 
 bool requestCompTime(const request &first, const request &second);
