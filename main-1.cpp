@@ -122,6 +122,7 @@ int main(int narg, char **args)
     
     laserPulse pulse1;
     pulse1.setGaussianPulse();
+    pulse1.set
     pulse1.setWaist(4.0);
     pulse1.setDurationFWHM(9.0);
     pulse1.setNormalizedAmplitude(1.0);

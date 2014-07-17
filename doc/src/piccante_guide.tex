@@ -438,44 +438,44 @@ Here the EM field is allocated and initialised to zero.
 
 \begin{lstlisting}
 	laserPulse pulse1;
-	pulse1.type = COS2_PLANE_WAVE;
-	pulse1.polarization = P_POLARIZATION;
-	pulse1.t_FWHM = 5.0;
-	pulse1.laser_pulse_initial_position = -6.0;
-	pulse1.lambda0 = 1.0;
-	pulse1.normalized_amplitude = 1.0;
+	pulse1.setCos2PlaneWave();
+   	pulse1.setPPolarization();
+   	pulse1.setDurationFWHM(5.0);
+   	pulse1.setPulseInitialPosition(-6.0);
+   	pulse1.setLambda(1.0);
+   	pulse1.setNormalizedAmplitude(1.0);
 
 	myfield.addPulse(&pulse1);
 \end{lstlisting}
 Here a 1D laser pulse is added to the EM field. \\
-\verb+type = COS2_PLANE_WAVE+ sets the pulse type (use only \verb+ COS2_PLANE_WAVE+ in 1D).\\
-\verb+polarization = P_POLARIZATION+ sets the polarization of the laser pulse (options are: \texttt{P\_POLARIZATION}, \texttt{S\_POLARIZATION} and \texttt{CIRCULAR\_POLARIZATION}).\\
-\verb+t_FWHM = 5.0+ sets the FWHM of the pulse.\\
-\verb+laser_pulse_initial_position = -6.0+ sets the initial position along x of the center of the pulse.\\
-\verb+lambda0 = 1.0+ sets the wavelength of the pulse.\\
-\verb+normalized_amplitude = 1.0+ sets the normalized amplitude of the pulse.\\
+\verb+setCos2PlaneWave()+ sets the pulse type (use only \verb+ setCos2PlaneWave()+ in 1D).\\
+\verb+setPPolarization()+ sets the polarization of the laser pulse (options are: \texttt{setPPolarization()}, \texttt{setSPolarization()} and \texttt{setCircularPolarization()}).\\
+\verb+tsetDurationFWHM(5.0)+ sets the FWHM of the pulse.\\
+\verb+setPulseInitialPosition(-6.0)+ sets the initial position along x of the center of the pulse.\\
+\verb+setLambda(1.0)+ sets the wavelength of the pulse.\\
+\verb+setNormalizedAmplitude(1.0)+ sets the normalized amplitude of the pulse.\\
 \subsection{Gaussian laser pulse}
 \begin{lstlisting}
 	laserPulse pulse1;
-	pulse1.type = GAUSSIAN;
-	pulse1.polarization = P_POLARIZATION;
-	pulse1.t_FWHM = 5.0;
-	pulse1.laser_pulse_initial_position = -6.0;
-	pulse1.lambda0 = 1.0;
-	pulse1.normalized_amplitude = 1.0;
+	pulse1.setGaussianPulse();
+   	pulse1.setPPolarization();
+   	pulse1.setDurationFWHM(5.0);
+   	pulse1.setPulseInitialPosition(-6.0);
+   	pulse1.setLambda(1.0);
+   	pulse1.setNormalizedAmplitude(1.0);
     
-	pulse1.waist = 3.0;
-	pulse1.focus_position = 0.0;
-    
-	pulse1.rotation = false;
-	pulse1.angle = 2.0*M_PI*(-90.0 / 360.0);
-	pulse1.rotation_center_along_x = 0.0;
+	pulse1.setWaist(3.0);
+	
+   	pulse1.setFocusPosition(0.0);
+	
+	pulse1.setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0);
 
 	myfield.addPulse(&pulse1);
 \end{lstlisting}
 This is an example of the definition of a Gaussian laser pulse.\\
-In addition to the \verb+COS2_PLANE_WAVE+ pulse, in this case \verb+waist+ and \verb+focus_position+.\\
-In 2 or 3 dimensions, if an oblique incidence pulse is required, \verb+rotation+ needs to be set to \verb+true+,   \verb+rotation_center_along_x+ needs to be defined and an \verb+angle+ should be set (in radians).
+In addition to the \verb+setCos2PlaneWave()+ pulse, in this case \verb+waist+ and \verb+focus_position+.\\
+In 2 or 3 dimensions, if an oblique incidence pulse is required,\\
+\verb+setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0)+ enables rotation and set the angle in radians (first argument) and rotation center on the x axis (second argument) .
 \subsection{EM field finalization}
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	myfield.boundary_conditions();

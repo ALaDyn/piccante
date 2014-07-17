@@ -118,18 +118,16 @@ int main(int narg, char **args)
 	myfield.setAllValuesToZero();
 	
 	laserPulse pulse1;
-	pulse1.type = COS2_PLANE_WAVE;                        //Opzioni : GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE
-	pulse1.polarization = P_POLARIZATION;
-	pulse1.t_FWHM = 5.0;
-	pulse1.laser_pulse_initial_position = -6.0;
-	pulse1.lambda0 = 1.0;
-	pulse1.normalized_amplitude = 1.0;
+    pulse1.setCos2PlaneWave();
+    pulse1.setPPolarization();
+    pulse1.setDurationFWHM(5.0);
+    pulse1.setPulseInitialPosition(-6.0);
+    pulse1.setLambda(1.0);
+    pulse1.setNormalizedAmplitude(1.0);
 	
-	//pulse1.waist = 3.0;
-	//pulse1.focus_position = 0.0;
-	//pulse1.rotation = false;
-	//pulse1.angle = 2.0*M_PI*(-90.0 / 360.0);
-	//pulse1.rotation_center_along_x = 0.0;
+    //pulse1.setWaist(3.0);
+    //pulse1.setFocusPosition(0.0);
+    //pulse1.setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0);
 	
 	myfield.addPulse(&pulse1);
 	
