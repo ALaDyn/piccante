@@ -210,7 +210,7 @@ int main(int narg, char **args)
 	//    //species.push_back(&ions2);
 
 	tempDistrib distribution;
-    distribution.setMaxwell(1.0e-2);
+    distribution.setSpecial(1.0e-2);
 
     electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
 	//    ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
