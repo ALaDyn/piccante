@@ -2473,7 +2473,7 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
             }
         }
     }
-
+return counter;
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request req){
