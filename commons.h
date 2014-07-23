@@ -15,8 +15,8 @@ You should have received a copy of the GNU General Public License
 along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef __COMMONS_h__
-#define __COMMONS_h__
+#ifndef __COMMONS_H__
+#define __COMMONS_H__
 
 #define _USE_MATH_DEFINES
 //#define USE_HDF5

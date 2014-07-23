@@ -15,8 +15,8 @@ You should have received a copy of the GNU General Public License
 along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef _OUTPUT_MANAGER_H_
-#define _OUTPUT_MANAGER_H_
+#ifndef __OUTPUT_MANAGER_H__
+#define __OUTPUT_MANAGER_H__
 
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS

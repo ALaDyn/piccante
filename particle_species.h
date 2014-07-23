@@ -15,8 +15,8 @@ You should have received a copy of the GNU General Public License
 along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef _PARTICLE_SPECIES_H_
-#define _PARTICLE_SPECIES_H_
+#ifndef __PARTICLE_SPECIES_H__
+#define __PARTICLE_SPECIES_H__
 
 #define _USE_MATH_DEFINES
 
