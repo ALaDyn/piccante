@@ -29,8 +29,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <malloc.h>
 #include <cmath>
 #include <iomanip>
-#include <cstdlib>
-#include <cstring>
+//#include <cstdlib>
+//#include <cstring>
 #include <ctime>       /* time */
 #if defined(_MSC_VER)
 #include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
