@@ -26,7 +26,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(_MSC_VER)
 #include <cstdint>
 #else
-#include <stdint.h>
+//#include <stdint.h>
 #endif
 
 //*****VERSION*****
