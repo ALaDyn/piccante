@@ -183,8 +183,10 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 	int sendcount = Nxchng*Ngy*Ngz*Nc;
 
 	// ======   send right: send_buff=right_edge
+
 	for (int k = 0; k < Ngz; k++)
 		for (int j = 0; j < Ngy; j++)
+
 			for (int i = 0; i < Nxchng; i++)
 				for (int c = 0; c < Nc; c++)
 				{
@@ -200,8 +202,10 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 
 	// ====== add recv_buffer to left_edge and send back to left the result
 	if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != 0)){
+
 		for (int k = 0; k < Ngz; k++)
 			for (int j = 0; j < Ngy; j++)
+
 				for (int i = 0; i < Nxchng; i++)
 					for (int c = 0; c < Nc; c++)
 					{
@@ -217,8 +221,10 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 		MPI_COMM_WORLD, &status);
 
 	if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))){
+
 		for (int k = 0; k < Ngz; k++)
 			for (int j = 0; j < Ngy; j++)
+
 				for (int i = 0; i < Nxchng; i++)
 					for (int c = 0; c < Nc; c++)
 					{
@@ -250,8 +256,10 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
 	int sendcount = Ngx*Nxchng*Ngz*Nc;
 
 	// ======   send right: send_buff=right_edge
+
 	for (int k = 0; k < Ngz; k++)
 		for (int j = 0; j < Nxchng; j++)
+
 			for (int i = 0; i < Ngx; i++)
 				for (int c = 0; c < Nc; c++)
 				{
@@ -265,8 +273,10 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
 		MPI_COMM_WORLD, &status);
 	// ======   send right: send_buff=right_edge    
 	if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != 0)){
+
 		for (int k = 0; k < Ngz; k++)
 			for (int j = 0; j < Nxchng; j++)
+
 				for (int i = 0; i < Ngx; i++)
 					for (int c = 0; c < Nc; c++)
 					{
@@ -281,8 +291,10 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
 		MPI_COMM_WORLD, &status);
 	// ====== copy recv_buffer to the right edge    
 	if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != (mygrid->rnproc[1] - 1))){
+
 		for (int k = 0; k < Ngz; k++)
 			for (int j = 0; j < Nxchng; j++)
+
 				for (int i = 0; i < Ngx; i++)
 					for (int c = 0; c < Nc; c++)
 					{
@@ -312,8 +324,10 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 	int sendcount = Ngx*Ngy*Nxchng*Nc;
 
 	// ======   send right: send_buff=right_edge
+
 	for (int k = 0; k < Nxchng; k++)
 		for (int j = 0; j < Ngy; j++)
+
 			for (int i = 0; i < Ngx; i++)
 				for (int c = 0; c < Nc; c++)
 				{
@@ -326,8 +340,10 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 		MPI_COMM_WORLD, &status);
 
 	// ====== update left boundary and send edge to left receive from right
+
 	for (int k = 0; k < Nxchng; k++)
 		for (int j = 0; j < Ngy; j++)
+
 			for (int i = 0; i < Ngx; i++)
 				for (int c = 0; c < Nc; c++)
 				{
@@ -340,8 +356,10 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 		recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
 		MPI_COMM_WORLD, &status);
 	// ====== update right edge
+
 	for (int k = 0; k < Nxchng; k++)
 		for (int j = 0; j < Ngy; j++)
+
 			for (int i = 0; i < Ngx; i++)
 				for (int c = 0; c < Nc; c++)
 				{
@@ -550,6 +568,7 @@ void EM_FIELD::new_halfadvance_B()
 	dt = mygrid->dt;
 
 	if (dimensions == 3)
+        #pragma omp parallel for private(i,j)
 		for (k = 0; k < Nz; k++){
 			dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
 			for (j = 0; j < Ny; j++){
@@ -563,6 +582,7 @@ void EM_FIELD::new_halfadvance_B()
 			}
 		}
 	else if (dimensions == 2)
+         #pragma omp parallel for private(i)
 		for (j = 0; j < Ny; j++){
 			dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
 			for (i = 0; i < Nx; i++){
@@ -575,6 +595,7 @@ void EM_FIELD::new_halfadvance_B()
 			}
 		}
 	else if (dimensions == 1)
+        #pragma omp parallel for
 		for (i = 0; i < Nx; i++){
 			j = 0;
 			k = 0;
@@ -648,6 +669,7 @@ void EM_FIELD::new_advance_E()
 	dt = mygrid->dt;
 
 	if (dimensions == 3)
+        #pragma omp parallel for private(i,j)
 		for (k = 0; k < Nz; k++){
 			dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
 			for (j = 0; j < Ny; j++){
@@ -664,6 +686,7 @@ void EM_FIELD::new_advance_E()
 			}
 		}
 	else if (dimensions == 2)
+        #pragma omp parallel for private(i)
 		for (j = 0; j < Ny; j++){
 			dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
 			for (i = 0; i < Nx; i++){
@@ -677,6 +700,7 @@ void EM_FIELD::new_advance_E()
 			}
 		}
 	else if (dimensions == 1)
+        #pragma omp parallel for
 		for (i = 0; i < Nx; i++){
 			j = 0;
 			k = 0;

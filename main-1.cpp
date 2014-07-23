@@ -37,6 +37,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
+
 using namespace std;
 
 #define DIMENSIONALITY 2
@@ -51,7 +52,7 @@ using namespace std;
 #include "output_manager.h"
 #include "utilities.h"
 
-#define NPROC_ALONG_Y 8
+#define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
@@ -160,7 +161,7 @@ int main(int narg, char **args)
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();
-    species.push_back(&electrons1);
+    //species.push_back(&electrons1);
     
     
     SPECIE ions1(&grid);
@@ -198,12 +199,12 @@ int main(int narg, char **args)
     domain1->setXRange(-10,6);
     domain1->setYRange(-5,5);
 
-    manager.addEFieldFrom(domain1, 0.0,1.0);
-    manager.addSpeciesDensityFrom(domain1, electrons1.name, 0.0, 1.0);
+    //manager.addEFieldFrom(domain1, 0.0,1.0);
+    //manager.addSpeciesDensityFrom(domain1, electrons1.name, 0.0, 1.0);
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
-    manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
-    manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
-    manager.addDiagFrom(0.0, 1.0);
+    //manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
+    //manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
+    //manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);
     //*******************************************END DIAGNOSTICS DEFINITION**************************************************
@@ -235,11 +236,11 @@ int main(int narg, char **args)
         myfield.new_halfadvance_B();
         myfield.boundary_conditions();
 
-        current.setAllValuesToZero();
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-            (*spec_iterator)->current_deposition_standard(&current);
-        }
-        current.pbc();
+//        current.setAllValuesToZero();
+//        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+//            (*spec_iterator)->current_deposition_standard(&current);
+//        }
+//        current.pbc();
 
         for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
             (*spec_iterator)->position_parallel_pbc();

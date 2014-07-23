@@ -25,6 +25,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "structures.h"
 #include "grid.h"
 #include "current.h"
+#include <omp.h>
 
 #if defined(_MSC_VER)
 #include <ctime>
