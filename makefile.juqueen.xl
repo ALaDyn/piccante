@@ -6,10 +6,9 @@ OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o outpu
 OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
 GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
-GSL_INC = /bgsys/local/gsl/1.15_O3g/include/
+GSL_INC = /bgsys/local/gsl/1.15_O3g/include
 BOOST_LIB = /bgsys/local/boost/1.47.0/lib
 BOOST_INC = /bgsys/local/boost/1.47.0
-#-I$(GSL_INCLUDE) -L$(GSL_LIB)
 
 LIB = -lgsl -lgslcblas -lboost_system-1_47 -lboost_filesystem-1_47
 
