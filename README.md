@@ -16,6 +16,6 @@ A paper that describes the technical features of ``piccante`` is under developme
 
 ### Papers containing simulations done with piccante ###
 
-1) A. Sgattoni, S. Sinigardi, L. Stefano, F. Pegoraro, A. Macchi, Laser-Driven Rayleigh-Taylor Instability: Plasmonics Effects and Three-Dimensional Structures, [arXiv:1404.1260](http://arxiv.org/pdf/1404.1260.pdf), submitted to Phys. Rev. Lett.
+1) A. Sgattoni, S. Sinigardi, L. Fedeli, F. Pegoraro, A. Macchi, Laser-Driven Rayleigh-Taylor Instability: Plasmonics Effects and Three-Dimensional Structures, [arXiv:1404.1260](http://arxiv.org/pdf/1404.1260.pdf), submitted to Phys. Rev. Lett.
 
 2) A. Sgattoni, S. Sinigardi, A. Macchi,  High Energy Gain in Three-Dimensional Simulations of Light Sail Acceleration, [arXiv:1403.2709](http://arxiv.org/pdf/1403.2709.pdf), submitted to Appl. Phys. Lett.
