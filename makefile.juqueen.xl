@@ -6,12 +6,12 @@ OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o outpu
 OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
 GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
-GSL_INC = /bgsys/local/gsl/1.15_O3g/include
-BOOST_LIB = /usr/lib64/
-BOOST_INC = /usr/include/
+GSL_INC = /bgsys/local/gsl/1.15_O3g/include/
+BOOST_LIB = /bgsys/local/boost/1.47.0/lib
+BOOST_INC = /bgsys/local/boost/1.47.0
 #-I$(GSL_INCLUDE) -L$(GSL_LIB)
 
-LIB = -lgsl -lgslcblas -lboost_system -lboost_filesystem 
+LIB = -lgsl -lgslcblas -lboost_system-1_47 -lboost_filesystem-1_47
 
 all : $(EXE)
 
@@ -29,32 +29,33 @@ deb2 : $(EXE)
 
 
 $(EXE) : $(OBJ)
-				$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -L$(BOOST_LIB) -I$(GSL_INC) -I$(BOOST_INC) $(LIB) 
+	$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -L$(BOOST_LIB) -I$(GSL_INC) -I$(BOOST_INC) $(LIB) 
 
 main-1.o: main-1.cpp 
-				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c main-1.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c main-1.cpp
 
 grid.o : grid.cpp 
-				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c grid.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c grid.cpp
 
 structures.o : structures.cpp
-					$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c structures.cpp 
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c structures.cpp 
 
 current.o : current.cpp 
-					$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c current.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c current.cpp
 
-em_field.o: em_field.cpp
-						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c em_field.cpp
+em_field.o : em_field.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c em_field.cpp
 
-particle_species.o: particle_species.cpp
-						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c particle_species.cpp 
+particle_species.o : particle_species.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c particle_species.cpp 
 
-output_manager.o:  output_manager.cpp 
-						$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c output_manager.cpp
+output_manager.o :  output_manager.cpp 
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c output_manager.cpp
 
-utilities.o: utilities.cpp 
+utilities.o : utilities.cpp 
 	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c utilities.cpp
+
 clean :
-				rm $(OBJ) *~
+	rm $(OBJ) *~
 
 
