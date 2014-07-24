@@ -33,8 +33,8 @@ void CURRENT::allocate(GRID *grid) //field allocation
 {
 	mygrid = grid;
 	acc.alloc_number(N_grid, mygrid->Nloc);
-	Ntot = N_grid[0] * N_grid[1] * N_grid[2];
-	if (N_grid[2] == 1)
+    Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
+    if (N_grid[2] == 1)
 		ZGrid_factor = 0;
 	if (N_grid[1] == 1)
 		YGrid_factor = 0;
@@ -51,8 +51,8 @@ void CURRENT::reallocate()
 		exit(17);
 	}
 	acc.alloc_number(N_grid, mygrid->Nloc);
-	Ntot = N_grid[0] * N_grid[1] * N_grid[2];
-	if (N_grid[2] == 1)
+    Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
+    if (N_grid[2] == 1)
 		ZGrid_factor = 0;
 	if (N_grid[1] == 1)
 		YGrid_factor = 0;
