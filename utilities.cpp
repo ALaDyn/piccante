@@ -54,5 +54,9 @@ void dumpFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vec
     dumpFile.close();
     dumpID++;
     _dumpID[0]=dumpID;
+    MPI_Barrier(MPI_COMM_WORLD);
+    if(mygrid->myid==mygrid->master_proc){
+        printf("\t DUMP #%i done!\n", (dumpID-1));
+    }
 }
 
