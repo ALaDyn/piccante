@@ -29,6 +29,17 @@ void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspeci
 void restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species){
     int dumpID=_dumpID[0];
     std::ifstream dumpFile;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(mygrid->myid==mygrid->master_proc){
+        time_t timer;
+        std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+        struct tm * now = localtime(&timer);
+
+       printf("   restart from DUMP #%i ... %2.2i:%2.2i:%2.2i\n", (dumpID), now->tm_hour, now->tm_min, now->tm_sec);
+       fflush(stdout);
+    }
     dumpFile.open( mygrid->composeDumpFileName(dumpID).c_str() );
     if( dumpFile.good()){
         mygrid->reloadDump(dumpFile);
@@ -38,6 +49,16 @@ void restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<
         }
         dumpFile.close();
         dumpID++;
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    if(mygrid->myid==mygrid->master_proc){
+        time_t timer;
+        std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+        struct tm * now = localtime(&timer);
+
+       printf("  ... DONE %2.2i:%2.2i:%2.2i\n",now->tm_hour, now->tm_min, now->tm_sec);
+       fflush(stdout);
     }
     _dumpID[0]=dumpID;
 }
