@@ -438,6 +438,20 @@ void EM_FIELD::openBoundariesE_1(){
 				E2(ii, last_cell + 1, kk) = 2.0*B0(ii, last_cell, kk) - E2(ii, last_cell, kk);
 			}
 	}
+
+    if ((zBoundaryConditions == _Open) && (mygrid->rmyid[2] == (mygrid->rnproc[2] - 1)))
+    {
+        int ii, jj;
+        int last_cell = mygrid->Nloc[2] - 1;
+        for (int j = 0; j < N_grid[1]; j++)
+            for (int i = 0; i < N_grid[0]; i++)
+            {
+                ii = i - edge;
+                jj = j - edge;
+                E0(ii, jj, last_cell + 1) = 2.0*B1(ii, jj, last_cell) - E0(ii, jj, last_cell);
+                E1(ii, jj, last_cell + 1) = -2.0*B0(ii, jj, last_cell) - E1(ii, jj, last_cell);
+            }
+    }
 }
 
 void EM_FIELD::openBoundariesE_2(){
@@ -482,6 +496,24 @@ void EM_FIELD::openBoundariesE_2(){
 				E2(ii, last_cell + 1, kk) = +c1*(2.0*B0(ii, last_cell, kk) - c2*E2(ii, last_cell, kk));//?
 			}
 	}
+
+    if ((zBoundaryConditions == _Open) && (mygrid->rmyid[2] == (mygrid->rnproc[2] - 1)))
+    {
+        double alpha = (mygrid->dt / mygrid->dr[2])*mygrid->iStretchingDerivativeCorrection[2][0];
+        double c1 = 1. / (1 + alpha*0.5);
+        double c2 = (1 - alpha*0.5);
+
+        int ii, jj;
+        int last_cell = mygrid->Nloc[2] - 1;
+        for (int j = 0; j < N_grid[1]; j++)
+            for (int i = 0; i < N_grid[0]; i++)
+            {
+                ii = i - edge;
+                jj = j - edge;
+                E0(ii, jj, last_cell + 1) = +c1*(2.0*B1(ii, jj, last_cell) - c2*E0(ii, jj, last_cell));
+                E1(ii, jj, last_cell + 1) = -c1*(2.0*B0(ii, jj, last_cell) + c2*E1(ii, jj, last_cell));//?
+            }
+    }
 }
 
 //TODO CORREGGERE PER GRIGLIA STRETCHATA
@@ -539,8 +571,8 @@ void EM_FIELD::openBoundariesB(){
 			{
 				ii = i - edge;
 				jj = j - edge;
-				B1(ii, jj, -1) = c1*(2.0*E2(ii, jj, 0) - c2*B1(ii, jj, 0));
-				B2(ii, jj, -1) = c1*(2.0*E1(ii, jj, 0) - c2*B2(ii, jj, 0));
+                B1(ii, jj, -1) = -c1*(2.0*E0(ii, jj, 0) + c2*B1(ii, jj, 0));
+                B0(ii, jj, -1) = c1*(2.0*E1(ii, jj, 0) - c2*B0(ii, jj, 0));
 			}
 	}
 }

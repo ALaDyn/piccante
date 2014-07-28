@@ -40,7 +40,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 3
 
 #include "access.h"
 #include "commons.h"
@@ -79,11 +79,11 @@ int main(int narg, char **args)
 
     //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-    grid.setXrange(-20.0, 20.0);
-    grid.setYrange(-20.0, 20.0);
-    grid.setZrange(-1, +1);
+    grid.setXrange(-1., 1.);
+    grid.setYrange(-1., 1.);
+    grid.setZrange(-10.0, 10.0);
 
-    grid.setNCells(1000, 1000, 1);
+    grid.setNCells(32, 32, 1024);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -93,11 +93,11 @@ int main(int narg, char **args)
     //grid.setXandNxRightStretchedGrid(20.0,1000);
     grid.setYandNyRightStretchedGrid(8.0,21);
 
-    grid.setBoundaries(xPBC | yPBC | zPBC); //LUNGO Z c'è solo PBC al momento !
+    grid.setBoundaries(xPBC | yPBC | zOpen); //LUNGO Z c'è solo PBC al momento !
     grid.mpi_grid_initialize(&narg, args);
-    grid.setCourantFactor(0.98);
+    grid.setCourantFactor(0.8);
 
-    grid.setSimulationTime(20.0);
+    grid.setSimulationTime(50.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -124,16 +124,16 @@ int main(int narg, char **args)
     laserPulse pulse1;
     pulse1.setGaussianPulse();
     pulse1.setWaist(4.0);
-    pulse1.setDurationFWHM(9.0);
+    pulse1.setDurationFWHM(5.0);
     pulse1.setNormalizedAmplitude(1.0);
-    pulse1.setPPolarization();
-    pulse1.setPulseInitialPosition(-10.1);
+    pulse1.setCircularPolarization();
+    pulse1.setPulseInitialPosition(0.0);
     pulse1.setFocusPosition( 0.0);
     pulse1.setLambda(1.0);
     pulse1.setFocusPosition(0.0);
-    //    pulse1.setRotationAngleAndCenter(2.0*M_PI*(-30.0 / 360.0), 0.0);
+    pulse1.setRotationAngleAndCenter(2.0*M_PI*(90.0 / 360.0), 0.0);
 
-    myfield.addPulse(&pulse1);
+    //myfield.addPulse(&pulse1);
 
     laserPulse pulse2;
     pulse2 = pulse1;
@@ -150,10 +150,10 @@ int main(int narg, char **args)
     //*******************************************BEGIN SPECIES DEFINITION*********************************************************
     PLASMA plasma1;
     plasma1.density_function = box;
-    plasma1.setXRangeBox(0.0,10.0);
-    plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
-    plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-    plasma1.setDensityCoefficient(2.0);
+    plasma1.setXRangeBox(-1.0,1.0);
+    plasma1.setYRangeBox(-1.0,1.0);
+    plasma1.setZRangeBox(-1.0,1.0);
+    plasma1.setDensityCoefficient(1.0);
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
@@ -161,7 +161,7 @@ int main(int narg, char **args)
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();
-    //species.push_back(&electrons1);
+    species.push_back(&electrons1);
     
     
     SPECIE ions1(&grid);
@@ -176,7 +176,7 @@ int main(int narg, char **args)
 
     
     tempDistrib distribution;
-    distribution.setWaterbag(1.0e-8);
+    distribution.setMaxwell(0.1);
 
     electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
     //ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
@@ -204,7 +204,7 @@ int main(int narg, char **args)
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
-    //manager.addDiagFrom(0.0, 1.0);
+    manager.addDiagFrom(0.0, 0.25);
     
     manager.initialize(DIRECTORY_OUTPUT);
     //*******************************************END DIAGNOSTICS DEFINITION**************************************************
@@ -236,11 +236,11 @@ int main(int narg, char **args)
         myfield.new_halfadvance_B();
         myfield.boundary_conditions();
 
-//        current.setAllValuesToZero();
-//        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-//            (*spec_iterator)->current_deposition_standard(&current);
-//        }
-//        current.pbc();
+        current.setAllValuesToZero();
+        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+           (*spec_iterator)->current_deposition_standard(&current);
+        }
+        current.pbc();
 
         for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
             (*spec_iterator)->position_parallel_pbc();
