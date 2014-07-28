@@ -114,7 +114,7 @@ void PLASMA::setDensityCoefficient(double dcoeff){
 }
 
 void PLASMA::setDensityCoefficient(double dcoeff, double lambda){
-    params.density_coefficient = dcoeff*lambda*lambda;
+    params.density_coefficient = dcoeff/(lambda*lambda);
 }
 
 void PLASMA::setRampMinDensity(double minden){
