@@ -43,7 +43,7 @@ void EM_FIELD::allocate(GRID *grid){
 	if (N_grid[1] == 1)
 		YGrid_factor = 0;
 
-	Ntot = N_grid[0] * N_grid[1] * N_grid[2];
+    Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
 	Ncomp = 6;
 	val = (double *)malloc(Ntot*Ncomp*sizeof(double));
 	allocated = true;
@@ -62,8 +62,8 @@ void EM_FIELD::reallocate(){
 	if (N_grid[1] == 1)
 		YGrid_factor = 0;
 
-	Ntot = N_grid[0] * N_grid[1] * N_grid[2];
-	Ncomp = 6;
+    Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
+    Ncomp = 6;
 	val = (double *)realloc((void*)val, Ntot*Ncomp*sizeof(double));
 	EBEnergyExtremesFlag = false;
 }

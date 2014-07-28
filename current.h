@@ -64,14 +64,13 @@ public:
 
 
 private:
-    int N_grid[3], Ntot;
+    int N_grid[3];
+    long int Ntot;
     int ZGrid_factor, YGrid_factor;
     ACCESSO acc;    // object distinguishing 1-2-3 D
 	double *val; //   THE BIG poiniter
 	GRID *mygrid;         // pointer to the GIRD object 
 	int allocated;  //flag 1-0 allocaded-not alloc
-
-
 
 	//PRIVATE INLINE FUNCTIONS
 	inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){

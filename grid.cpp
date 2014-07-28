@@ -439,7 +439,7 @@ void GRID::printProcInformations()
 {
     printf("========== %19s ==========\n", "GRID_INITIALIZATION");
     printf("master_proc=%i:\n", myid);
-    double dtotcell=uniquePoints[0]*uniquePoints[1]*uniquePoints[2];
+    double dtotcell=((long int)uniquePoints[0])*((long int)uniquePoints[1])*uniquePoints[2];
     printf("Ncells   =%g :     ( %5i, %5i, %5i)\n", dtotcell, uniquePoints[0], uniquePoints[1], uniquePoints[2]);
     printf("Nprocs   =%6i :     ( %5i, %5i, %5i)\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
     printf("Xrange = [ %6g : %6g ]\n", rmin[0], rmax[0]);

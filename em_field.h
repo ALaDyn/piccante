@@ -192,7 +192,8 @@ public:
 
 
 private:
-	int N_grid[3], Ntot, Ncomp;
+    int N_grid[3], Ncomp;
+    long int Ntot;
 	int ZGrid_factor, YGrid_factor;
 	ACCESSO acc;    // object distinguishing 1-2-3 D
 	double *val; //   THE BIG poiniter
