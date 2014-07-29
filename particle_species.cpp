@@ -1601,8 +1601,10 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 
 void SPECIE::current_deposition(CURRENT *current)
 {
-	if (mygrid->with_particles == NO)
-		return;
+    if (mygrid->with_particles == NO)
+        return;
+    if (mygrid->with_current == NO)
+        return;
 
 	double dt, gamma_i;
 	int p, c;  // particle_int, component_int
@@ -1615,21 +1617,27 @@ void SPECIE::current_deposition(CURRENT *current)
 	double s0x, s0y, s0z, dsx, dsy, dsz;
 	double J[3][5][5][5], W[3][5][5][5], norm, vz, vy;
 
-	dt = mygrid->dt;
+    dt = mygrid->dt;
 
-	printf("accesso.dimensions=%i\n", accesso.dimensions);
 	if (accesso.dimensions == 3)
 		for (p = 0; p < Np; p++)
 		{
 			memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
 			memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
-			gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-			for (c = 0; c < accesso.dimensions; c++)
-			{
-				xx1[c] = ru(c, p);
-				ru(c, p) += dt*gamma_i*u0(p);
-				xx2[c] = ru(c, p);
-			}
+            gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+            xx1[0] = ru(0, p);
+            ru(0, p) += dt*gamma_i*u0(p);
+            xx2[0] = ru(0, p);
+
+            xx1[1] = ru(1, p);
+            ru(1, p) += dt*gamma_i*u1(p);
+            xx2[1] = ru(1, p);
+
+            xx1[2] = ru(2, p);
+            ru(2, p) += dt*gamma_i*u2(p);
+            xx2[2] = ru(2, p);
+
 			for (c = 0; c < accesso.dimensions; c++)
 			{
 				r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
@@ -1645,7 +1653,7 @@ void SPECIE::current_deposition(CURRENT *current)
 				w1[c][4] = 0;
 				w1[c][3] = 0.5*(0.25 + r12 + r1);
 				w1[c][2] = 0.75 - r12;
-				w1[c][1] = 1. - w1[c][1] - w1[c][2];
+                w1[c][1] = 1. - w1[c][3] - w1[c][2];
 				w1[c][0] = 0;
 
 				w2[c][(4 + di) % 5] = 0.;
@@ -1669,20 +1677,20 @@ void SPECIE::current_deposition(CURRENT *current)
 						s0x = w1[0][ti];
 						s0y = w1[1][tj];
 						s0z = w1[2][tk];
-						dsx = w1[0][ti] - w2[0][ti];
-						dsy = w1[1][tj] - w2[1][tj];
-						dsz = w1[2][tk] - w2[2][tk];
+                        dsx = -w1[0][ti] + w2[0][ti];
+                        dsy = -w1[1][tj] + w2[1][tj];
+                        dsz = -w1[2][tk] + w2[2][tk];
 
-						W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + UN_TERZO*dsy*dsz);
-						W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + UN_TERZO*dsz*dsx);
-						W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy);
+                        W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + UN_TERZO*dsy*dsz)/dt;
+                        W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + UN_TERZO*dsz*dsx)/dt;
+                        W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy)/dt;
 
 						J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
 						J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
 						J[2][ti][tj][tk] = -mygrid->dr[2] * W[2][ti][tj][0];
-						current->Jx(i2, j2, k2) += w(p)*J[0][ti][tj][tk];
-						current->Jy(i2, j2, k2) += w(p)*J[1][ti][tj][tk];
-						current->Jz(i2, j2, k2) += w(p)*J[2][ti][tj][tk];
+                        current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
+                        current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
+                        current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
 
 					}
 				}
@@ -1695,13 +1703,16 @@ void SPECIE::current_deposition(CURRENT *current)
 			memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
 			gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 			vz = gamma_i*u2(p);
-			ru(2, p) += dt*vz;
-			for (c = 0; c < accesso.dimensions; c++)
-			{
-				xx1[c] = ru(c, p);
-				ru(c, p) += dt*gamma_i*u0(p);
-				xx2[c] = ru(c, p);
-			}
+            //ru(2, p) += dt*vz;
+
+            xx1[0] = ru(0, p);
+            ru(0, p) += dt*gamma_i*u0(p);
+            xx2[0] = ru(0, p);
+
+            xx1[1] = ru(1, p);
+            ru(1, p) += dt*gamma_i*u1(p);
+            xx2[1] = ru(1, p);
+
 			for (c = 0; c < accesso.dimensions; c++)
 			{
 				r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
@@ -1721,7 +1732,7 @@ void SPECIE::current_deposition(CURRENT *current)
 				w1[c][4] = 0;
 				w1[c][3] = 0.5*(0.25 + r12 + r1);
 				w1[c][2] = 0.75 - r12;
-				w1[c][1] = 1. - w1[c][1] - w1[c][2];
+                w1[c][1] = 1. - w1[c][3] - w1[c][2];
 				w1[c][0] = 0;
 
 				w2[c][(4 + di) % 5] = 0.;
@@ -1744,20 +1755,20 @@ void SPECIE::current_deposition(CURRENT *current)
 					s0x = w1[0][ti];
 					s0y = w1[1][tj];
 
-					dsx = w1[0][ti] - w2[0][ti];
-					dsy = w1[1][tj] - w2[1][tj];
+                    dsx = -w1[0][ti] + w2[0][ti];
+                    dsy = -w1[1][tj] + w2[1][tj];
 
 
-					W[0][0][tj][tk] += norm*dsx*(s0y + 0.5*dsy);
-					W[1][ti][0][tk] += norm*dsy*(s0x + 0.5*dsx);
+                    W[0][0][tj][tk] += norm*dsx*(s0y + 0.5*dsy)/dt;
+                    W[1][ti][0][tk] += norm*dsy*(s0x + 0.5*dsx)/dt;
 					W[2][ti][tj][0] = norm*vz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy);
 
-					J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
+                    J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
 					J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
 					J[2][ti][tj][tk] = W[2][ti][tj][0];
-					current->Jx(i2, j2, k2) += w(p)*J[0][ti][tj][tk];
-					current->Jy(i2, j2, k2) += w(p)*J[1][ti][tj][tk];
-					current->Jz(i2, j2, k2) += w(p)*J[2][ti][tj][tk];
+                    current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
+                    current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
+                    current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
 
 				}
 			}
@@ -1771,8 +1782,8 @@ void SPECIE::current_deposition(CURRENT *current)
 			gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 			vy = gamma_i*u1(p);
 			vz = gamma_i*u2(p);
-			ru(1, p) += dt*vy;
-			ru(2, p) += dt*vz;
+//			ru(1, p) += dt*vy;
+//			ru(2, p) += dt*vz;
 			for (c = 0; c < accesso.dimensions; c++)
 			{
 				xx1[c] = ru(c, p);
@@ -1794,7 +1805,7 @@ void SPECIE::current_deposition(CURRENT *current)
 				w1[c][4] = 0;
 				w1[c][3] = 0.5*(0.25 + r12 + r1);
 				w1[c][2] = 0.75 - r12;
-				w1[c][1] = 1. - w1[c][1] - w1[c][2];
+                w1[c][1] = 1. - w1[c][3] - w1[c][2];
 				w1[c][0] = 0;
 
 				w2[c][(4 + di) % 5] = 0.;
@@ -1814,18 +1825,18 @@ void SPECIE::current_deposition(CURRENT *current)
 				i2 = ti + ii1[0] - 2;
 
 				s0x = w1[0][ti];
-				dsx = w1[0][ti] - w2[0][ti];
+                dsx = w2[0][ti] - w1[0][ti];
 
-				W[0][0][tj][tk] += norm*dsx;
+                W[0][0][tj][tk] += norm*dsx/mygrid->dt;
 				W[1][ti][0][tk] = norm*vy*(s0x + 0.5*dsx);
 				W[2][ti][tj][0] = norm*vz*(s0x + 0.5*dsx);
 
-				J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
-				J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
+                J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
+                J[1][ti][tj][tk] = W[1][ti][0][tk];
 				J[2][ti][tj][tk] = W[2][ti][tj][0];
-				current->Jx(i2, j2, k2) += w(p)*J[0][ti][tj][tk];
-				current->Jy(i2, j2, k2) += w(p)*J[1][ti][tj][tk];
-				current->Jz(i2, j2, k2) += w(p)*J[2][ti][tj][tk];
+                current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
+                current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
+                current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
 
 			}
 
@@ -2171,12 +2182,6 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 		}
 		return;
 	}
-
-
-
-
-
-
 
 	switch (accesso.dimensions)
 	{

@@ -52,7 +52,7 @@ using namespace std;
 #include "output_manager.h"
 #include "utilities.h"
 
-#define NPROC_ALONG_Y 1
+#define NPROC_ALONG_Y 2
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
@@ -67,6 +67,8 @@ using namespace std;
 
 #define _FACT 0.333333
 
+//#define ESIRKEPOV
+
 
 int main(int narg, char **args)
 {
@@ -79,11 +81,11 @@ int main(int narg, char **args)
 
     //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-    grid.setXrange(-1., 1.);
-    grid.setYrange(-1., 1.);
-    grid.setZrange(-10.0, 10.0);
+    grid.setXrange(-0.5, 0.5);
+    grid.setYrange(-0.5, 0.5);
+    grid.setZrange(-0.5, 0.5);
 
-    grid.setNCells(32, 32, 1024);
+    grid.setNCells(50, 50, 50);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -93,11 +95,11 @@ int main(int narg, char **args)
     //grid.setXandNxRightStretchedGrid(20.0,1000);
     grid.setYandNyRightStretchedGrid(8.0,21);
 
-    grid.setBoundaries(xPBC | yPBC | zOpen); //LUNGO Z c'è solo PBC al momento !
+    grid.setBoundaries(xPBC | yPBC | zPBC); //LUNGO Z c'è solo PBC al momento !
     grid.mpi_grid_initialize(&narg, args);
-    grid.setCourantFactor(0.8);
+    grid.setCourantFactor(0.98);
 
-    grid.setSimulationTime(50.0);
+    grid.setSimulationTime(10.0);
 
     grid.with_particles = YES;//NO;
     grid.with_current = YES;//YES;
@@ -122,16 +124,16 @@ int main(int narg, char **args)
     myfield.setAllValuesToZero();
     
     laserPulse pulse1;
-    pulse1.setGaussianPulse();
+    pulse1.setCos2PlaneWave();
     pulse1.setWaist(4.0);
     pulse1.setDurationFWHM(5.0);
     pulse1.setNormalizedAmplitude(1.0);
     pulse1.setCircularPolarization();
-    pulse1.setPulseInitialPosition(0.0);
+    pulse1.setPulseInitialPosition(-5.1);
     pulse1.setFocusPosition( 0.0);
     pulse1.setLambda(1.0);
     pulse1.setFocusPosition(0.0);
-    pulse1.setRotationAngleAndCenter(2.0*M_PI*(90.0 / 360.0), 0.0);
+   // pulse1.setRotationAngleAndCenter(2.0*M_PI*(90.0 / 360.0), 0.0);
 
     //myfield.addPulse(&pulse1);
 
@@ -150,23 +152,32 @@ int main(int narg, char **args)
     //*******************************************BEGIN SPECIES DEFINITION*********************************************************
     PLASMA plasma1;
     plasma1.density_function = box;
-    plasma1.setXRangeBox(-1.0,1.0);
-    plasma1.setYRangeBox(-1.0,1.0);
-    plasma1.setZRangeBox(-1.0,1.0);
+    plasma1.setXRangeBox(-0.5,0.5);
+    plasma1.setYRangeBox(-0.5,0.5);
+    plasma1.setZRangeBox(-0.5,0.5);
     plasma1.setDensityCoefficient(1.0);
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(1, 1, 1);
+    electrons1.setParticlesPerCellXYZ(2, 2, 1);
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();
     species.push_back(&electrons1);
+
+    SPECIE  electrons2(&grid);
+    electrons2.plasma = plasma1;
+    electrons2.setParticlesPerCellXYZ(2, 2, 1);
+    electrons2.setName("ELE2");
+    electrons2.type = ELECTRON;
+    electrons2.creation();
+    species.push_back(&electrons2);
+
     
     
     SPECIE ions1(&grid);
     ions1.plasma = plasma1;
-    ions1.setParticlesPerCellXYZ(100, 1, 1);
+    ions1.setParticlesPerCellXYZ(200, 1, 1);
     ions1.setName("ION1");
     ions1.type = ION;
     ions1.Z = 6.0;
@@ -176,9 +187,10 @@ int main(int narg, char **args)
 
     
     tempDistrib distribution;
-    distribution.setMaxwell(0.1);
+    distribution.setWaterbag(0.001);
 
-    electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
+    electrons1.add_momenta(rng,0.0,0.0,-1.0,distribution);
+    electrons2.add_momenta(rng,0.0,0.0,1.0,distribution);
     //ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
     
 
@@ -199,12 +211,14 @@ int main(int narg, char **args)
     domain1->setXRange(-10,6);
     domain1->setYRange(-5,5);
 
-    //manager.addEFieldFrom(domain1, 0.0,1.0);
-    //manager.addSpeciesDensityFrom(domain1, electrons1.name, 0.0, 1.0);
+    manager.addEFieldFrom(0.0,1.0);
+    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 1.0);
+    manager.addSpeciesDensityFrom(electrons2.name, 0.0, 1.0);
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
-    manager.addDiagFrom(0.0, 0.25);
+    manager.addCurrentFrom(0.0,1.0);
+    manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);
     //*******************************************END DIAGNOSTICS DEFINITION**************************************************
@@ -238,7 +252,12 @@ int main(int narg, char **args)
 
         current.setAllValuesToZero();
         for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+#ifdef ESIRKEPOV
+           (*spec_iterator)->current_deposition(&current);
+#else
            (*spec_iterator)->current_deposition_standard(&current);
+#endif
+
         }
         current.pbc();
 
