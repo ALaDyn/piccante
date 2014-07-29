@@ -43,20 +43,26 @@ void SPECIE::allocate_species()
 {
 	if (mygrid->with_particles == NO)
 		return;
-
-	//val = (double*)malloc((Np*Ncomp)*sizeof(double));
+#ifdef _ACC_SINGLE_POINTER
+    val = (double*)malloc((Np*Ncomp)*sizeof(double));
+#else
 	val = (double**)malloc(Ncomp*sizeof(double*));
 	for (int c = 0; c < Ncomp; c++){
 		val[c] = (double*)malloc(Np*sizeof(double));
 	}
+#endif
 	allocated = 1;
 
 }
 SPECIE::~SPECIE(){
+#ifdef _ACC_SINGLE_POINTER
+    free(val);
+#else
     for (int c = 0; c < Ncomp; c++){
         free(val[c]);
     }
      free(val);
+#endif
 }
 
 void SPECIE::erase()
@@ -67,11 +73,14 @@ void SPECIE::erase()
 	if (!allocated){
 		printf("ERROR: species not allocated!!!\n");
         exit(11);
-	}
-	//memset((void*)val, 0, (Np*Ncomp)*sizeof(double));
-	for (int c = 0; c < Ncomp; c++){
-		memset((void*)val[c], 0, Np*sizeof(double));
-	}
+    }
+#ifdef _ACC_SINGLE_POINTER
+    memset((void*)val, 0, (Np*Ncomp)*sizeof(double));
+#else
+    for (int c = 0; c < Ncomp; c++){
+        memset((void*)val[c], 0, Np*sizeof(double));
+    }
+#endif
 }
 void SPECIE::reallocate_species()
 {
@@ -83,12 +92,13 @@ void SPECIE::reallocate_species()
 		printf("\nERROR: species not allocated\n\n");
         exit(11);
 	}
-
-	//val = (double *)realloc((void*)val, Np*Ncomp*sizeof(double));
+#ifdef _ACC_SINGLE_POINTER
+    val = (double *)realloc((void*)val, Np*Ncomp*sizeof(double));
+#else
 	for (int c = 0; c < Ncomp; c++){
 		val[c] = (double *)realloc((void*)val[c], Np*sizeof(double));
 	}
-
+#endif
 }
 
 SPECIE SPECIE::operator = (SPECIE &destro)
@@ -118,10 +128,13 @@ SPECIE SPECIE::operator = (SPECIE &destro)
 		allocate_species();
 	}
 	else reallocate_species();
-	//memcpy((void*)val, (void*)destro.val, Np*Ncomp*sizeof(double));
+#ifdef _ACC_SINGLE_POINTER
+    memcpy((void*)val, (void*)destro.val, Np*Ncomp*sizeof(double));
+#else
 	for (int c = 0; c < Ncomp; c++){
 		memcpy((void*)val[c], (void*)destro.val[c], Np*sizeof(double));
 	}
+#endif
 	return *this;
 }
 

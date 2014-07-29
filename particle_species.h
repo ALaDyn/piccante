@@ -45,10 +45,7 @@ public:
 	double minima[7], maxima[7];   //components minima and maxima
 	double total_momentum[3], total_energy;     //
 	std::string name;
-	bool isTestSpecies;
-
-
-	double **val;
+    bool isTestSpecies;
 
 	ACCESSO accesso;
 	PLASMA  plasma;
@@ -108,27 +105,35 @@ public:
 	void printParticleNumber();
 
 
-	//PUBLIC INLINE FUNCTIONS
-	//	inline double &ru(int c, int np) { return val[c + np*Ncomp]; }
-	//	inline double &r0(int np) { return val[np*Ncomp + 0]; }
-	//	inline double &r1(int np) { return val[np*Ncomp + 1]; }
-	//	inline double &r2(int np) { return val[np*Ncomp + 2]; }
-	//	inline double &u0(int np) { return val[np*Ncomp + 3]; }
-	//	inline double &u1(int np) { return val[np*Ncomp + 4]; }
-	//	inline double &u2(int np) { return val[np*Ncomp + 5]; }
-	//	inline double &w(int np) { return val[np*Ncomp + 6]; }
+    //PUBLIC INLINE FUNCTIONS
+#ifdef _ACC_SINGLE_POINTER
+    inline double &ru(int c, int np) { return val[c + np*Ncomp]; }
+    inline double &r0(int np) { return val[np*Ncomp + 0]; }
+    inline double &r1(int np) { return val[np*Ncomp + 1]; }
+    inline double &r2(int np) { return val[np*Ncomp + 2]; }
+    inline double &u0(int np) { return val[np*Ncomp + 3]; }
+    inline double &u1(int np) { return val[np*Ncomp + 4]; }
+    inline double &u2(int np) { return val[np*Ncomp + 5]; }
+    inline double &w(int np) { return val[np*Ncomp + 6]; }
+#else
+    inline double &ru(int c, int np) { return val[c][np]; }
+    inline double &r0(int np) { return val[0][np]; }
+    inline double &r1(int np) { return val[1][np]; }
+    inline double &r2(int np) { return val[2][np]; }
+    inline double &u0(int np) { return val[3][np]; }
+    inline double &u1(int np) { return val[4][np]; }
+    inline double &u2(int np) { return val[5][np]; }
+    inline double &w(int np) { return val[6][np]; }
+#endif
 
-	inline double &ru(int c, int np) { return val[c][np]; }
-	inline double &r0(int np) { return val[0][np]; }
-	inline double &r1(int np) { return val[1][np]; }
-	inline double &r2(int np) { return val[2][np]; }
-	inline double &u0(int np) { return val[3][np]; }
-	inline double &u1(int np) { return val[4][np]; }
-	inline double &u2(int np) { return val[5][np]; }
-	inline double &w(int np) { return val[6][np]; }
 
 
 private:
+#ifdef _ACC_SINGLE_POINTER
+    double *val;
+#else
+    double **val;
+#endif
 	long long lastParticle;
 	double savedExtrema[14];
 	double savedEnergy;

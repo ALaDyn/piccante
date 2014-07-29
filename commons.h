@@ -18,6 +18,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __COMMONS_H__
 #define __COMMONS_H__
 
+#define _ACC_SINGLE_POINTER
+
 #define _USE_MATH_DEFINES
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1

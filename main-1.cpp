@@ -40,7 +40,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 3
+#define DIMENSIONALITY 2
 
 #include "access.h"
 #include "commons.h"
@@ -81,11 +81,11 @@ int main(int narg, char **args)
 
     //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-    grid.setXrange(-0.5, 0.5);
-    grid.setYrange(-0.5, 0.5);
+    grid.setXrange(-2, 2);
+    grid.setYrange(-2, 2);
     grid.setZrange(-0.5, 0.5);
 
-    grid.setNCells(50, 50, 50);
+    grid.setNCells(200, 200, 1);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -152,14 +152,14 @@ int main(int narg, char **args)
     //*******************************************BEGIN SPECIES DEFINITION*********************************************************
     PLASMA plasma1;
     plasma1.density_function = box;
-    plasma1.setXRangeBox(-0.5,0.5);
-    plasma1.setYRangeBox(-0.5,0.5);
+    plasma1.setXRangeBox(-2,2);
+    plasma1.setYRangeBox(-2,2);
     plasma1.setZRangeBox(-0.5,0.5);
     plasma1.setDensityCoefficient(1.0);
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(2, 2, 1);
+    electrons1.setParticlesPerCellXYZ(3, 3, 1);
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();
@@ -167,7 +167,7 @@ int main(int narg, char **args)
 
     SPECIE  electrons2(&grid);
     electrons2.plasma = plasma1;
-    electrons2.setParticlesPerCellXYZ(2, 2, 1);
+    electrons2.setParticlesPerCellXYZ(3, 3, 1);
     electrons2.setName("ELE2");
     electrons2.type = ELECTRON;
     electrons2.creation();
@@ -211,13 +211,13 @@ int main(int narg, char **args)
     domain1->setXRange(-10,6);
     domain1->setYRange(-5,5);
 
-    manager.addEFieldFrom(0.0,1.0);
-    manager.addSpeciesDensityFrom(electrons1.name, 0.0, 1.0);
-    manager.addSpeciesDensityFrom(electrons2.name, 0.0, 1.0);
+    //manager.addEFieldFrom(0.0,1.0);
+    //manager.addSpeciesDensityFrom(electrons1.name, 0.0, 1.0);
+    //manager.addSpeciesDensityFrom(electrons2.name, 0.0, 1.0);
     //manager.addSpeciesDensityFrom(ions1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 1.0);
     //manager.addSpeciesPhaseSpaceFrom(domain1, electrons1.name, 0.0, 1.0);
-    manager.addCurrentFrom(0.0,1.0);
+    //manager.addCurrentFrom(0.0,1.0);
     manager.addDiagFrom(0.0, 1.0);
     
     manager.initialize(DIRECTORY_OUTPUT);
