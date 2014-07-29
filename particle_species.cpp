@@ -51,6 +51,7 @@ void SPECIE::allocate_species()
 		val[c] = (double*)malloc(Np*sizeof(double));
 	}
 #endif
+    valSize = Np;
 	allocated = 1;
 
 }
@@ -84,21 +85,37 @@ void SPECIE::erase()
 }
 void SPECIE::reallocate_species()
 {
-	if (mygrid->with_particles == NO)
-		return;
+    if (mygrid->with_particles == NO)
+        return;
 
-	if (!allocated)
-	{
-		printf("\nERROR: species not allocated\n\n");
+    if (!allocated)
+    {
+        printf("\nERROR: species not allocated\n\n");
         exit(11);
-	}
+    }
+    if (Np>valSize){
+        valSize = Np+allocsize;
 #ifdef _ACC_SINGLE_POINTER
-    val = (double *)realloc((void*)val, Np*Ncomp*sizeof(double));
+        val = (double *)realloc((void*)val, valSize*Ncomp*sizeof(double));
 #else
-	for (int c = 0; c < Ncomp; c++){
-		val[c] = (double *)realloc((void*)val[c], Np*sizeof(double));
-	}
+        for (int c = 0; c < Ncomp; c++){
+            val[c] = (double *)realloc((void*)val[c], valSize*sizeof(double));
+        }
 #endif
+    }
+    else if (Np < (valSize - allocsize) ){
+        valSize = Np + allocsize;
+#ifdef _ACC_SINGLE_POINTER
+        val = (double *)realloc((void*)val, valSize*Ncomp*sizeof(double));
+#else
+        for (int c = 0; c < Ncomp; c++){
+            val[c] = (double *)realloc((void*)val[c], valSize*sizeof(double));
+        }
+#endif
+    }
+    else{
+        return;
+    }
 }
 
 SPECIE SPECIE::operator = (SPECIE &destro)

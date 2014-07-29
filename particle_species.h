@@ -134,6 +134,7 @@ private:
 #else
     double **val;
 #endif
+    int valSize;
 	long long lastParticle;
 	double savedExtrema[14];
 	double savedEnergy;
