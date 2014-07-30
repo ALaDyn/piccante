@@ -2545,6 +2545,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
         MPI_File_close(&thefile);
         delete[]buf;
     }
+    MPI_Comm_free( &outputCommunicator );
     delete[] NfloatLoc;
     delete[] nomefile;
 }
