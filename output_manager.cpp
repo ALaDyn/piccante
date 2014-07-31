@@ -2480,8 +2480,8 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
 
     SPECIE* spec = myspecies[req.target];
     int shouldIWrite=false;
-
     shouldIWrite=amIInTheSubDomain(req);
+
     MPI_Comm outputCommunicator;
     MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
     int myOutputID, outputNProc;
@@ -2495,7 +2495,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
 
     MPI_Offset disp = 0;
-    for (int pp = 0; pp < mygrid->myid; pp++)
+    for (int pp = 0; pp < myOutputID; pp++)
         disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
     MPI_File thefile;
     MPI_Status status;
