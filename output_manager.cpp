@@ -2424,9 +2424,9 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
     MPI_File thefile;
-    printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
-    printf("NfloatLoc[%i] = %i \n", mygrid->myid,NfloatLoc[mygrid->myid] );
-printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
+    //printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
+    //printf("NfloatLoc[%i] = %i \n", mygrid->myid,NfloatLoc[mygrid->myid] );
+    //printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
 
     char *nomefile = new char[fileName.size() + 1];
     nomefile[fileName.size()] = 0;
@@ -2445,7 +2445,7 @@ printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
     buf = new float[dimensione*outputNComp];
     passaggi = spec->Np / dimensione;
     resto = spec->Np % dimensione;
-    printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
+    //printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
 
     for (int i = 0; i < passaggi; i++){
         for (int p = 0; p < dimensione; p++){
@@ -2454,8 +2454,8 @@ printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
                 buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*i);
             }
             if(flagMarker){
-                buf[c + p*outputNComp] = *( (float*)(&(spec->pettorale(p+ dimensione*i))) ) ;
-                buf[c + 1 + p*outputNComp] = *((float*)(&(spec->pettorale(p+ dimensione*i)))+1 );
+                buf[c + p*outputNComp] = *( (float*)(&(spec->marker(p+ dimensione*i))) ) ;
+                buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p+ dimensione*i)))+1 );
                 //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
             }
         }
@@ -2467,8 +2467,8 @@ printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
             buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*passaggi);
         }
         if(flagMarker){
-            buf[c + p*outputNComp] = *( (float*)(&(spec->pettorale(p+ dimensione*passaggi))) ) ;
-            buf[c + 1 + p*outputNComp] = *((float*)(&(spec->pettorale(p+ dimensione*passaggi)))+1 );
+            buf[c + p*outputNComp] = *( (float*)(&(spec->marker(p+ dimensione*passaggi))) ) ;
+            buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p+ dimensione*passaggi)))+1 );
             //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
         }
     }
