@@ -1,3 +1,5 @@
+/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+
 /*******************************************************************************
 This file is part of piccante.
 
@@ -64,7 +66,8 @@ public:
     void creation();
     void creationFromFile1D(std::string name);
     void move_window();
-	//	void output_bin(ofstream &ff);
+    void addMarker();
+    bool amIWithMarker();
 	void output(ofstream &ff);
 	static const int myWidth = 12;
 	static const int myNarrowWidth = 6;
@@ -115,6 +118,8 @@ public:
     inline double &u1(int np) { return val[np*Ncomp + 4]; }
     inline double &u2(int np) { return val[np*Ncomp + 5]; }
     inline double &w(int np) { return val[np*Ncomp + 6]; }
+    inline long int &marker(int np) { return *((long int*)(val+(np*Ncomp + 7))); }
+    //inline long int &marker(int np) { return *((long int*)(&dummy)); }
 #else
     inline double &ru(int c, int np) { return val[c][np]; }
     inline double &r0(int np) { return val[0][np]; }
@@ -124,6 +129,8 @@ public:
     inline double &u1(int np) { return val[4][np]; }
     inline double &u2(int np) { return val[5][np]; }
     inline double &w(int np) { return val[6][np]; }
+    inline long int &marker(int np) { return *((long int*)(&val[7][np])); }
+    //inline long int &marker(int np) { return *((long int*)(&dummy)); }
 #endif
 
 
@@ -134,12 +141,13 @@ private:
 #else
     double **val;
 #endif
+    double dummy;
     int valSize;
 	long long lastParticle;
 	double savedExtrema[14];
 	double savedEnergy;
 	bool energyExtremesFlag;
-
+    bool flagWithMarker;
 	void callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin);
 	void callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyin, double uzin);
 	void callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin);

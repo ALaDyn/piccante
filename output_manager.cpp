@@ -1,3 +1,5 @@
+/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+
 /*******************************************************************************
 This file is part of piccante.
 
@@ -2403,16 +2405,28 @@ void  OUTPUT_MANAGER::callCurrent(request req){
 void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
     SPECIE* spec = myspecies[req.target];
-
     int* NfloatLoc = new int[mygrid->nproc];
-    NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
-
+    int outputNComp, NCompFloat;
+    bool flagMarker=spec->amIWithMarker();
+    if(flagMarker){
+        NCompFloat = spec->Ncomp-1;
+        outputNComp = spec->Ncomp+1;
+        NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+    }
+    else{
+        NCompFloat = spec->Ncomp;
+        outputNComp = spec->Ncomp;
+        NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+    }
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
 
     MPI_Offset disp = 0;
     for (int pp = 0; pp < mygrid->myid; pp++)
         disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
     MPI_File thefile;
+    //printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
+    //printf("NfloatLoc[%i] = %i \n", mygrid->myid,NfloatLoc[mygrid->myid] );
+    //printf("flagMarker=%i        disp=%i\n", flagMarker, disp);
 
     char *nomefile = new char[fileName.size() + 1];
     nomefile[fileName.size()] = 0;
@@ -2428,23 +2442,37 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     int dimensione, passaggi, resto;
 
     dimensione = 100000;
-    buf = new float[dimensione*spec->Ncomp];
+    buf = new float[dimensione*outputNComp];
     passaggi = spec->Np / dimensione;
     resto = spec->Np % dimensione;
+    //printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
+
     for (int i = 0; i < passaggi; i++){
         for (int p = 0; p < dimensione; p++){
-            for (int c = 0; c < spec->Ncomp; c++){
-                buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*i);
+            int c;
+            for (c = 0; c < NCompFloat; c++){
+                buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*i);
+            }
+            if(flagMarker){
+                buf[c + p*outputNComp] = *( (float*)(&(spec->marker(p+ dimensione*i))) ) ;
+                buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p+ dimensione*i)))+1 );
+                //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
             }
         }
-        MPI_File_write(thefile, buf, dimensione*spec->Ncomp, MPI_FLOAT, &status);
+        MPI_File_write(thefile, buf, dimensione*outputNComp, MPI_FLOAT, &status);
     }
     for (int p = 0; p < resto; p++){
-        for (int c = 0; c < spec->Ncomp; c++){
-            buf[c + p*spec->Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
+        int c ;
+        for (c = 0; c < NCompFloat; c++){
+            buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*passaggi);
+        }
+        if(flagMarker){
+            buf[c + p*outputNComp] = *( (float*)(&(spec->marker(p+ dimensione*passaggi))) ) ;
+            buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p+ dimensione*passaggi)))+1 );
+            //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
         }
     }
-    MPI_File_write(thefile, buf, resto*spec->Ncomp, MPI_FLOAT, &status);
+    MPI_File_write(thefile, buf, resto*outputNComp, MPI_FLOAT, &status);
     MPI_File_close(&thefile);
     delete[]buf;
     delete[] NfloatLoc;
@@ -2480,8 +2508,8 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
 
     SPECIE* spec = myspecies[req.target];
     int shouldIWrite=false;
-
     shouldIWrite=amIInTheSubDomain(req);
+
     MPI_Comm outputCommunicator;
     MPI_Comm_split(mygrid->cart_comm,shouldIWrite,0,&outputCommunicator);
     int myOutputID, outputNProc;
@@ -2495,7 +2523,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
 
     MPI_Offset disp = 0;
-    for (int pp = 0; pp < mygrid->myid; pp++)
+    for (int pp = 0; pp < myOutputID; pp++)
         disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
     MPI_File thefile;
     MPI_Status status;
@@ -2545,6 +2573,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
         MPI_File_close(&thefile);
         delete[]buf;
     }
+    MPI_Comm_free( &outputCommunicator );
     delete[] NfloatLoc;
     delete[] nomefile;
 }
@@ -2552,12 +2581,20 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
 void OUTPUT_MANAGER::callSpecPhaseSpace(request req){
     std::string name = myspecies[req.target]->name;
     std::string nameBin;
+    std::string outputName;
+    if(myspecies[req.target]->amIWithMarker()){
+        outputName="PHASESPACE_WM";
+    }
+    else{
+        outputName="PHASESPACE";
+    }
+
     if(req.domain==0){
-        nameBin = composeOutputName(outputDir, "PHASESPACE", name, req.dtime, ".bin");
+        nameBin = composeOutputName(outputDir, outputName, name, req.dtime, ".bin");
         writeSpecPhaseSpace(nameBin, req);
     }
     else{
-        nameBin = composeOutputName(outputDir, "PHASESPACE", name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
+        nameBin = composeOutputName(outputDir, outputName, name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
         writeSpecPhaseSpaceSubDomain(nameBin, req);
     }
 }

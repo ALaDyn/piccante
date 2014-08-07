@@ -1,3 +1,5 @@
+/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+
 /*******************************************************************************
 This file is part of piccante.
 
@@ -20,17 +22,18 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 SPECIE::SPECIE()
 {
-	Ncomp = 7;
+    Ncomp = 7;
 	allocated = 0;
 	Z = A = 0;
 	isTestSpecies = false;
 	spectrum.values = NULL;
 	energyExtremesFlag = false;
 	lastParticle = 0;
+    flagWithMarker = false;
 }
 SPECIE::SPECIE(GRID *grid)
 {
-	Ncomp = 7;
+    Ncomp = 7;
 	allocated = 0;
 	Z = A = 0;
 	mygrid = grid;
@@ -38,6 +41,7 @@ SPECIE::SPECIE(GRID *grid)
 	spectrum.values = NULL;
 	energyExtremesFlag = false;
 	lastParticle = 0;
+    flagWithMarker = false;
 }
 void SPECIE::allocate_species()
 {
@@ -163,6 +167,13 @@ SPECIE SPECIE::operator = (SPECIE &destro)
 
 std::string SPECIE::getName(){
 	return name;
+}
+
+void SPECIE::addMarker(){
+    flagWithMarker = true;
+}
+bool SPECIE::amIWithMarker(){
+    return flagWithMarker;
 }
 
 void SPECIE::computeParticleMassChargeCoupling(){
@@ -331,6 +342,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                                             r2(counter) = zloc + dzp*(kp + 0.5);
                                             u0(counter) = u1(counter) = u2(counter) = 0;
                                             w(counter) = weight;
+                                            marker(counter) = (counter + disp);
                                             if (isTestSpecies)
                                                 w(counter) = (double)(counter + disp);
                                             counter++;
@@ -395,6 +407,7 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
                                             r2(counter) = myz;
                                             u0(counter) = u1(counter) = u2(counter) = 0;
                                             w(counter) = weight*mydx*mydy*mydz;
+                                            marker(counter) = (counter + disp);
                                             if (isTestSpecies)
                                                 w(counter) = (double)(counter + disp);
                                             counter++;
@@ -494,7 +507,8 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
                                             u1(counter) = myuy;
                                             u2(counter) = myuz;
 											w(counter) = weight;
-											if (isTestSpecies)
+                                            marker(counter) = (counter + disp);
+                                            if (isTestSpecies)
 												w(counter) = (double)(counter + disp);
 											counter++;
 										}
@@ -632,7 +646,9 @@ void SPECIE::creation()
 	if (mygrid->with_particles == NO)
 		return;
 
-
+    if(flagWithMarker){
+        Ncomp = 8;
+    }
 	double plasmarmin[3], plasmarmax[3];
 
 	SPECIE::computeParticleMassChargeCoupling();
@@ -738,49 +754,7 @@ void SPECIE::move_window()
 	if (!mygrid->shouldIMove)
 		return;
 
-	//     Lplasma[i]=plasma_rmax_loc[i]-plasma_rmin_loc[i];
-	//     if(Lplasma[i]<0)
-	// 			Lplasma[i]=0;
-	//     myPart[i]=(int)(ceil(Lplasma[i]*mygrid->dri[i])*npc[i]);
-	//     if(myPart[i]>=1)
-	// 			myPart[i]+=npc[i];
-	//     NPC*=npc[i];
-	//     //      myPart[i]=(int)(mygrid->imove_mw*npc[i]);
-	//     //if(myPart[i]>=1)
-	//     //	myPart[i]+=npc[i];
-	//     //NPC*=npc[i];
-	//   }
-	//   for(i=1;i<accesso.dimensions;i++)
-	//     {
-	// 			if(plasma.rmin[i]>mygrid->rminloc[i])
-	// 				plasma_rmin_loc[i]=plasma.rmin[i];
-	// 			else
-	// 				plasma_rmin_loc[i]=mygrid->rminloc[i];
-
-	// 			if(plasma.rmax[i]<mygrid->rmaxloc[i])
-	// 				plasma_rmax_loc[i]=plasma.rmax[i];
-	// 			else
-	// 				plasma_rmax_loc[i]=mygrid->rmaxloc[i];
-
-	// 			Lplasma[i]=plasma_rmax_loc[i]-plasma_rmin_loc[i];
-	// 			if(Lplasma[i]<0)
-	// 				Lplasma[i]=0;
-	// 			myPart[i]=(int)(ceil(Lplasma[i]*mygrid->dri[i])*npc[i]);
-	// 			if(myPart[i]>=1)
-	// 				myPart[i]+=npc[i];
-	// 			NPC*=npc[i];
-	//     }
-
-	//   myNp=myPart[0]*myPart[1]*myPart[2];
-
-	//   if(myNp)
-	//     {
-	// 			// printf("Np=%i\n",Np);
-	// 			// printf("NPC=%i\tmyNp=%i\n",NPC,myNp);
-	// 			counter=Np;
-
 	SPECIE::position_parallel_pbc();
-
 
 	double plasmarmin[3], plasmarmax[3];
 
