@@ -1460,10 +1460,388 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 		}
 		break;
 	}
-
-
-
 }
+
+
+void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
+{
+    energyExtremesFlag = false;
+
+    if (mygrid->with_particles == NO)
+        return;
+    if (mygrid->isStretched()){
+        //SPECIE::momentaStretchedAdvance(ebfield);
+        std::cout << "RR not yet implemented with stretched grid!" << std::endl;
+        exit(13);
+        return;
+    }
+    double dt, gamma_i;
+    int p, c;  // particle_int, component_int
+    int i, j, k, i1, j1, k1, i2, j2, k2;
+    //int indexMaxQuadraticShape[]={1,4};
+    int hii[3], wii[3];           // half integer index,   whole integer index
+    double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
+    double rr, rh, rr2, rh2;          // local coordinate to integer grid point and to half integer,     local coordinate squared
+    double dvol, xx[3];           // tensor_product,       absolute particle position
+    double E[3], B[3];
+    double u_plus[3], u_minus[3], u_prime[3], tee[3], ess[3], dummy;
+    double oldP[3];
+    double pn[3]; double vn[3]; double fLorentz[3]; double fLorentz2; double vdotE2; double gamman;
+
+    dt = mygrid->dt;
+
+    double RRcoefficient = 4.0/3.0*M_PI*(CLASSICAL_ELECTRON_RADIUS/lambda);
+
+    switch (accesso.dimensions)
+    {
+
+    case 3:
+        for (p = 0; p < Np; p++)
+        {
+            //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+            for (c = 0; c < 3; c++)
+            {
+                xx[c] = ru(c, p);
+                hiw[c][1] = wiw[c][1] = 1;
+                hii[c] = wii[c] = 0;
+            }
+            for (c = 0; c < 3; c++)
+            {
+                rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+                rh = rr - 0.5;
+                wii[c] = (int)floor(rr + 0.5); //whole integer int
+                hii[c] = (int)floor(rr);     //half integer int
+                rr -= wii[c];
+                rh -= hii[c];
+                rr2 = rr*rr;
+                rh2 = rh*rh;
+
+                wiw[c][1] = 0.75 - rr2;
+                wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+                wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+                hiw[c][1] = 0.75 - rh2;
+                hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+                hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+            }
+            E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+            for (k = 0; k < 3; k++)
+            {
+                k1 = k + wii[2] - 1;
+                k2 = k + hii[2] - 1;
+                for (j = 0; j < 3; j++)
+                {
+                    j1 = j + wii[1] - 1;
+                    j2 = j + hii[1] - 1;
+                    for (i = 0; i < 3; i++)
+                    {
+                        i1 = i + wii[0] - 1;
+                        i2 = i + hii[0] - 1;
+                        dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+                        dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+                        dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                        dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+                        dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+                        dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+                    }
+                }
+            }
+
+            oldP[0] = ru(3,p);
+            oldP[1] = ru(4,p);
+            oldP[2] = ru(5,p);
+
+            u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+            u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+            u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+            gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+            tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+            tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+            tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+            u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+            u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+            u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+            dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+            ess[0] = 2 * dummy*tee[0];
+            ess[1] = 2 * dummy*tee[1];
+            ess[2] = 2 * dummy*tee[2];
+
+            u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+            u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+            u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+            ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+            ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+            ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+            pn[0] = 0.5*(oldP[0]+ru(3, p));
+            pn[1] = 0.5*(oldP[1]+ru(4, p));
+            pn[2] = 0.5*(oldP[2]+ru(5, p));
+
+            gamman = sqrt(1.0+(pn[0]*pn[0]+pn[1]*pn[1]+pn[2]*pn[2]));
+
+            vn[0] = pn[0]/gamman;
+            vn[1] = pn[1]/gamman;
+            vn[2] = pn[2]/gamman;
+
+            fLorentz[0] = coupling*(E[0]+ vn[1]*B[2]-vn[2]*B[1]);
+            fLorentz[1] = coupling*(E[1]+ vn[2]*B[0]-vn[0]*B[2]);
+            fLorentz[2] = coupling*(E[2]+ vn[0]*B[1]-vn[1]*B[0]);
+
+            fLorentz2 = fLorentz[0]*fLorentz[0]+fLorentz[1]*fLorentz[1]+fLorentz[2]*fLorentz[2];
+
+            vdotE2 = vn[0]*E[0]+ vn[1]*E[1] + vn[2]*E[2];
+            vdotE2 = vdotE2*vdotE2;
+
+            ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[0]*dt;
+            ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[1]*dt;
+            ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[2]*dt;
+
+
+        }
+        break;
+
+    case 2:
+        for (p = 0; p < Np; p++)
+        {
+            //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+            for (c = 0; c < 3; c++)
+            {
+                xx[c] = ru(c, p);
+                hiw[c][1] = wiw[c][1] = 1;
+                hii[c] = wii[c] = 0;
+            }
+            for (c = 0; c < 2; c++)
+            {
+                rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+                rh = rr - 0.5;
+                wii[c] = (int)floor(rr + 0.5); //whole integer int
+                hii[c] = (int)floor(rr);     //half integer int
+                rr -= wii[c];
+                rh -= hii[c];
+                rr2 = rr*rr;
+                rh2 = rh*rh;
+
+                wiw[c][1] = 0.75 - rr2;
+                wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+                wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+                hiw[c][1] = 0.75 - rh2;
+                hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+                hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+            }
+            E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+            k1 = k2 = 0;
+            for (j = 0; j < 3; j++)
+            {
+                j1 = j + wii[1] - 1;
+                j2 = j + hii[1] - 1;
+                for (i = 0; i < 3; i++)
+                {
+                    i1 = i + wii[0] - 1;
+                    i2 = i + hii[0] - 1;
+                    dvol = hiw[0][i] * wiw[1][j],
+                        E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+                    dvol = wiw[0][i] * hiw[1][j],
+                        E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+                    dvol = wiw[0][i] * wiw[1][j],
+                        E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                    dvol = wiw[0][i] * hiw[1][j],
+                        B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+                    dvol = hiw[0][i] * wiw[1][j],
+                        B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+                    dvol = hiw[0][i] * hiw[1][j],
+                        B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+                }
+            }
+
+            oldP[0] = ru(3,p);
+            oldP[1] = ru(4,p);
+            oldP[2] = ru(5,p);
+
+            u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+            u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+            u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+            gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+            tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+            tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+            tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+            u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+            u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+            u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+            dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+            ess[0] = 2 * dummy*tee[0];
+            ess[1] = 2 * dummy*tee[1];
+            ess[2] = 2 * dummy*tee[2];
+
+            u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+            u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+            u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+            ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+            ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+            ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);            
+
+            pn[0] = 0.5*(oldP[0]+ru(3, p));
+            pn[1] = 0.5*(oldP[1]+ru(4, p));
+            pn[2] = 0.5*(oldP[2]+ru(5, p));
+
+            gamman = sqrt(1.0+(pn[0]*pn[0]+pn[1]*pn[1]+pn[2]*pn[2]));
+
+            vn[0] = pn[0]/gamman;
+            vn[1] = pn[1]/gamman;
+            vn[2] = pn[2]/gamman;
+
+            fLorentz[0] = coupling*(E[0]+ vn[1]*B[2]-vn[2]*B[1]);
+            fLorentz[1] = coupling*(E[1]+ vn[2]*B[0]-vn[0]*B[2]);
+            fLorentz[2] = coupling*(E[2]+ vn[0]*B[1]-vn[1]*B[0]);
+
+            fLorentz2 = fLorentz[0]*fLorentz[0]+fLorentz[1]*fLorentz[1]+fLorentz[2]*fLorentz[2];
+
+            vdotE2 = vn[0]*E[0]+ vn[1]*E[1] + vn[2]*E[2];
+            vdotE2 = vdotE2*vdotE2;
+
+            ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[0]*dt;
+            ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[1]*dt;
+            ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[2]*dt;
+
+        }
+        break;
+
+    case 1:
+        for (p = 0; p < Np; p++)
+        {
+            //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+            for (c = 0; c < 3; c++)
+            {
+                xx[c] = ru(c, p);
+                hiw[c][1] = wiw[c][1] = 1;
+                hii[c] = wii[c] = 0;
+            }
+            for (c = 0; c < 1; c++)
+            {
+                rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+                rh = rr - 0.5;
+                wii[c] = (int)floor(rr + 0.5); //whole integer int
+                hii[c] = (int)floor(rr);     //half integer int
+                rr -= wii[c];
+                rh -= hii[c];
+                rr2 = rr*rr;
+                rh2 = rh*rh;
+
+                wiw[c][1] = 0.75 - rr2;
+                wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+                wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+                hiw[c][1] = 0.75 - rh2;
+                hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+                hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+            }
+            E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+            k1 = k2 = j1 = j2 = 0;
+            for (i = 0; i < 3; i++)
+            {
+                i1 = i + wii[0] - 1;
+                i2 = i + hii[0] - 1;
+                dvol = hiw[0][i],
+                    E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+                dvol = wiw[0][i],
+                    E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+                dvol = wiw[0][i],
+                    E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                dvol = wiw[0][i],
+                    B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+                dvol = hiw[0][i],
+                    B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+                dvol = hiw[0][i],
+                    B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            }
+
+            oldP[0] = ru(3,p);
+            oldP[1] = ru(4,p);
+            oldP[2] = ru(5,p);
+
+            u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+            u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+            u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+            gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+            tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+            tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+            tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+            u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+            u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+            u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+            dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+            ess[0] = 2 * dummy*tee[0];
+            ess[1] = 2 * dummy*tee[1];
+            ess[2] = 2 * dummy*tee[2];
+
+            u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+            u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+            u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+            ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+            ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+            ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);            
+
+            pn[0] = 0.5*(oldP[0]+ru(3, p));
+            pn[1] = 0.5*(oldP[1]+ru(4, p));
+            pn[2] = 0.5*(oldP[2]+ru(5, p));
+
+            gamman = sqrt(1.0+(pn[0]*pn[0]+pn[1]*pn[1]+pn[2]*pn[2]));
+
+            vn[0] = pn[0]/gamman;
+            vn[1] = pn[1]/gamman;
+            vn[2] = pn[2]/gamman;
+
+            fLorentz[0] = coupling*(E[0]+ vn[1]*B[2]-vn[2]*B[1]);
+            fLorentz[1] = coupling*(E[1]+ vn[2]*B[0]-vn[0]*B[2]);
+            fLorentz[2] = coupling*(E[2]+ vn[0]*B[1]-vn[1]*B[0]);
+
+            fLorentz2 = fLorentz[0]*fLorentz[0]+fLorentz[1]*fLorentz[1]+fLorentz[2]*fLorentz[2];
+
+            vdotE2 = vn[0]*E[0]+ vn[1]*E[1] + vn[2]*E[2];
+            vdotE2 = vdotE2*vdotE2;
+
+            ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[0]*dt;
+            ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[1]*dt;
+            ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2-vdotE2)*vn[2]*dt;
+
+        }
+        break;
+    }
+}
+
+
+
+
 void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 {
 	energyExtremesFlag = false;
