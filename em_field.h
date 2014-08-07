@@ -147,28 +147,42 @@ public:
 	bool areEnergyExtremesAvailable();
     void dump(std::ofstream &ff);
     void reloadDump(std::ifstream &ff);
-	//PUBLIC INLINE FUNCTIONS
-	inline double & E0(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline double & E1(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline double & E2(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline double & B0(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline  double & B1(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 4, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline double & B2(int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 5, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
-	inline double & VEB(int c, int i, int j, int k){
-		return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-	}
+    //PUBLIC INLINE FUNCTIONS
+    inline double & E0(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           0, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline double & E1(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           1, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline double & E2(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           2, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline double & B0(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           3, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline  double & B1(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           4, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline double & B2(int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           5, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
+    inline double & VEB(int c, int i, int j, int k){
+      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+                           c, i, j, k,
+                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    }
 
 	//  inline double & E0(int i,int j,int k){
 	//      int indice=(0+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
@@ -237,10 +251,10 @@ private:
     void filterCompAlongY(int comp);
     void filterCompAlongZ(int comp);
 
-	//PRIVATE INLINE FUNCTIONS
-	inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-		return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
-	}
+    //PRIVATE INLINE FUNCTIONS
+    inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+      return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
+    }
 
 
 };

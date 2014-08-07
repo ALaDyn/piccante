@@ -1,5 +1,3 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
-
 /*******************************************************************************
 This file is part of piccante.
 
@@ -42,7 +40,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 2
+#define DIMENSIONALITY 1
 
 #include "access.h"
 #include "commons.h"
@@ -54,7 +52,7 @@ using namespace std;
 #include "output_manager.h"
 #include "utilities.h"
 
-#define NPROC_ALONG_Y 2
+#define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
@@ -85,10 +83,10 @@ int main(int narg, char **args)
   //*******************************************BEGIN GRID DEFINITION*******************************************************
 
   grid.setXrange(-25, 25);
-  grid.setYrange(-25, 25);
+  grid.setYrange(-0.5, 0.5);
   grid.setZrange(-0.5, 0.5);
 
-  grid.setNCells(1000, 1000, 1);
+  grid.setNCells(10000, 1, 1);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -102,7 +100,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.92);
 
-  grid.setSimulationTime(300.0);
+  grid.setSimulationTime(25.0);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -130,7 +128,7 @@ int main(int narg, char **args)
   pulse1.setCos2PlaneWave();
   pulse1.setWaist(4.0);
   pulse1.setDurationFWHM(5.0);
-  pulse1.setNormalizedAmplitude(10.0);
+  pulse1.setNormalizedAmplitude(100.0);
   pulse1.setPPolarization();
   pulse1.setPulseInitialPosition(-5.0);
   pulse1.setFocusPosition( 0.0);
@@ -138,7 +136,7 @@ int main(int narg, char **args)
   pulse1.setFocusPosition(0.0);
   // pulse1.setRotationAngleAndCenter(2.0*M_PI*(90.0 / 360.0), 0.0);
 
-  //myfield.addPulse(&pulse1);
+  myfield.addPulse(&pulse1);
 
   laserPulse pulse2;
   pulse2 = pulse1;
@@ -155,51 +153,33 @@ int main(int narg, char **args)
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
   PLASMA plasma1;
   plasma1.density_function = box;
-  plasma1.setXRangeBox(-50.0,50.0);
-  plasma1.setYRangeBox(-50.0,50.0);
+  plasma1.setXRangeBox(0.0,5.0);
+  plasma1.setYRangeBox(-0.5,0.5);
   plasma1.setZRangeBox(-0.5,0.5);
-  plasma1.setDensityCoefficient(0.25);
+  plasma1.setDensityCoefficient(20.0);
 
   SPECIE  electrons1(&grid);
   electrons1.plasma = plasma1;
-  electrons1.setParticlesPerCellXYZ(7, 7, 1);
+  electrons1.setParticlesPerCellXYZ(500, 1, 1);
   electrons1.setName("ELE1");
   electrons1.type = ELECTRON;
   electrons1.creation();
   species.push_back(&electrons1);
 
-  SPECIE  electrons2(&grid);
-  electrons2.plasma = plasma1;
-  electrons2.setParticlesPerCellXYZ(7, 7, 1);
-  electrons2.setName("ELE2");
-  electrons2.type = ELECTRON;
-  electrons2.creation();
-  species.push_back(&electrons2);
-
-  SPECIE  positrons1(&grid);
-  positrons1.plasma = plasma1;
-  positrons1.setParticlesPerCellXYZ(7, 7, 1);
-  positrons1.setName("POS1");
-  positrons1.type = POSITRON;
-  positrons1.creation();
-  species.push_back(&positrons1);
-
-  SPECIE  positrons2(&grid);
-  positrons2.plasma = plasma1;
-  positrons2.setParticlesPerCellXYZ(7, 7, 1);
-  positrons2.setName("POS2");
-  positrons2.type = POSITRON;
-  positrons2.creation();
-  species.push_back(&positrons2);
+  SPECIE  ions1(&grid);
+  ions1.plasma = plasma1;
+  ions1.setParticlesPerCellXYZ(200, 1, 1);
+  ions1.setName("POS2");
+  ions1.type = POSITRON;
+  ions1.creation();
+  species.push_back(&ions1);
 
 
   tempDistrib distribution;
   distribution.setWaterbag(1.0e-4);
 
-  electrons1.add_momenta(rng,0.0,0.0,+200.0,distribution);
-  electrons2.add_momenta(rng,0.0,0.0,-200.0,distribution);
-  positrons1.add_momenta(rng,0.0,0.0,+200.0,distribution);
-  positrons2.add_momenta(rng,0.0,0.0,-200.0,distribution);
+  electrons1.add_momenta(rng,0.0,0.0,0.0,distribution);
+  ions1.add_momenta(rng,0.0,0.0,0.0,distribution);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->printParticleNumber();
@@ -220,13 +200,7 @@ int main(int narg, char **args)
 
   manager.addEBFieldFrom(0.0,5.0);
   manager.addSpeciesDensityFrom(electrons1.name, 0.0, 5.0);
-  manager.addSpeciesDensityFrom(electrons2.name, 0.0, 5.0);
-  manager.addSpeciesDensityFrom(positrons1.name, 0.0, 5.0);
-  manager.addSpeciesDensityFrom(positrons2.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(positrons2.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(positrons2.name, 0.0, 5.0);
+  manager.addSpeciesDensityFrom(ions1.name, 0.0, 5.0);
   manager.addCurrentFrom(0.0,5.0);
   manager.addDiagFrom(0.0, 0.5);
 
