@@ -82,11 +82,11 @@ int main(int narg, char **args)
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-  grid.setXrange(-25, 25);
-  grid.setYrange(-0.5, 0.5);
+  grid.setXrange(-20, 20);
+  grid.setYrange(-20, 20);
   grid.setZrange(-0.5, 0.5);
 
-  grid.setNCells(10000, 1, 1);
+  grid.setNCells(1000, 1000, 1);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -100,7 +100,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.92);
 
-  grid.setSimulationTime(25.0);
+  grid.setSimulationTime(2.0);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -153,14 +153,14 @@ int main(int narg, char **args)
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
   PLASMA plasma1;
   plasma1.density_function = box;
-  plasma1.setXRangeBox(0.0,5.0);
+  plasma1.setXRangeBox(-5.0,5.0);
   plasma1.setYRangeBox(-0.5,0.5);
   plasma1.setZRangeBox(-0.5,0.5);
   plasma1.setDensityCoefficient(20.0);
 
   SPECIE  electrons1(&grid);
   electrons1.plasma = plasma1;
-  electrons1.setParticlesPerCellXYZ(500, 1, 1);
+  electrons1.setParticlesPerCellXYZ(1, 2, 3);
   electrons1.setName("ELE1");
   electrons1.type = ELECTRON;
   electrons1.creation();
@@ -168,11 +168,11 @@ int main(int narg, char **args)
 
   SPECIE  ions1(&grid);
   ions1.plasma = plasma1;
-  ions1.setParticlesPerCellXYZ(200, 1, 1);
+  ions1.setParticlesPerCellXYZ(1, 2, 3);
   ions1.setName("POS2");
   ions1.type = POSITRON;
-  ions1.creation();
-  species.push_back(&ions1);
+  //ions1.creation();
+  //species.push_back(&ions1);
 
 
   tempDistrib distribution;

@@ -2625,8 +2625,8 @@ void OUTPUT_MANAGER::callDiag(request req){
     double etotKin = 0.0;
     for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
         (*spec_iterator)->computeKineticEnergyWExtrems();
-        ekinSpecies[specie++] = (*spec_iterator)->total_energy;
-        etotKin += (*spec_iterator)->total_energy;
+        ekinSpecies[specie++] = (*spec_iterator)->totalEnergy;
+        etotKin += (*spec_iterator)->totalEnergy;
     }
     double etot = etotKin + etotFields;
 

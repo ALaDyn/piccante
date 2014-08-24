@@ -23,7 +23,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 SPECIE::SPECIE()
 {
     Ncomp = 7;
-	allocated = 0;
+        allocated = false;
 	Z = A = 0;
 	isTestSpecies = false;
 	spectrum.values = NULL;
@@ -34,7 +34,7 @@ SPECIE::SPECIE()
 SPECIE::SPECIE(GRID *grid)
 {
     Ncomp = 7;
-	allocated = 0;
+        allocated = false;
 	Z = A = 0;
 	mygrid = grid;
 	isTestSpecies = false;
@@ -56,7 +56,7 @@ void SPECIE::allocate_species()
 	}
 #endif
     valSize = Np;
-	allocated = 1;
+        allocated = true;
 
 }
 SPECIE::~SPECIE(){
@@ -132,13 +132,13 @@ SPECIE SPECIE::operator = (SPECIE &destro)
 	coupling = destro.coupling;
 	Numerical2Physical_particles = destro.Numerical2Physical_particles;
 	mygrid = destro.mygrid;
-	q = destro.q;
+	chargeSign = destro.chargeSign;
 	mass = destro.mass;
 	plasma = destro.plasma;
 	isTestSpecies = destro.isTestSpecies;
 	for (int i = 0; i < 3; i++)
 	{
-		npcAlong[i] = destro.npcAlong[i];
+		particlePerCellXYZ[i] = destro.particlePerCellXYZ[i];
 		minima[i] = destro.minima[i];
 		minima[3 + i] = destro.minima[3 + i];
 		maxima[i] = destro.maxima[i];
@@ -181,13 +181,13 @@ void SPECIE::computeParticleMassChargeCoupling(){
 		coupling = -1.;
 		mass = 1.0;
 		Z = -1.0;
-		q = -1.0;
+		chargeSign = -1.0;
 	}
 	if (type == POSITRON){
 		coupling = 1.;
 		mass = 1.0;
 		Z = 1.0;
-		q = 1.0;
+		chargeSign = 1.0;
 	}
 	if (type == ION){
 		if (Z == 0 || A == 0)
@@ -199,7 +199,7 @@ void SPECIE::computeParticleMassChargeCoupling(){
 			coupling = Z / (1.8362e3*A);
 			mass = 1.8362e3*A;
 		}
-		q = 1.0;
+		chargeSign = 1.0;
 	}
 }
 int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]){
@@ -222,7 +222,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 					if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
 						if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
 							if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
-								counter += npc;
+								counter += particlePerCell;
 						}
 			}
 	return counter;
@@ -289,7 +289,7 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
                             value=wh[0]*density[ihleft] + wh[1]*density[ihright];
 
                             if (value>0)
-                                counter += npc;
+                                counter += particlePerCell;
                         }
                 }
 
@@ -309,9 +309,9 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
     double dx = mygrid->dr[0];
     double dy = mygrid->dr[1];
     double dz = mygrid->dr[2];
-    double dxp = dx / npcAlong[0];
-    double dyp = dy / npcAlong[1];
-    double dzp = dz / npcAlong[2];
+    double dxp = dx / particlePerCellXYZ[0];
+    double dyp = dy / particlePerCellXYZ[1];
+    double dzp = dz / particlePerCellXYZ[2];
     double  weight;
 
     for (int k = 0; k < Nz; k++)
@@ -328,14 +328,14 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                         {
                             if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
                             {
-                                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
+                                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / particlePerCell;
 
                                 xloc -= 0.5*dx;
                                 yloc -= 0.5*dy;
                                 zloc -= 0.5*dz;
-                                for (int ip = 0; ip < npcAlong[0]; ip++)
-                                    for (int jp = 0; jp < npcAlong[1]; jp++)
-                                        for (int kp = 0; kp < npcAlong[2]; kp++)
+                                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                                    for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                                        for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
                                         {
                                             r0(counter) = xloc + dxp*(ip + 0.5);
                                             r1(counter) = yloc + dyp*(jp + 0.5);
@@ -353,64 +353,64 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 }
 
 void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
-    int counter = oldNumberOfParticles;
-    double xloc, yloc, zloc;
-    double myx, myy, myz;
-    double mydx, mydy, mydz;
-    double mycsix, mycsiy, mycsiz;
-    double csilocx, csilocy, csilocz;
-    int Nx = mygrid->Nloc[0];
-    int Ny = mygrid->Nloc[1];
-    int Nz = mygrid->Nloc[2];
-    double dx = mygrid->dr[0];
-    double dy = mygrid->dr[1];
-    double dz = mygrid->dr[2];
-    double dxp = dx / npcAlong[0];
-    double dyp = dy / npcAlong[1];
-    double dzp = dz / npcAlong[2];
-    double  weight;
+  int counter = oldNumberOfParticles;
+  double xloc, yloc, zloc;
+  double myx, myy, myz;
+  double mydx, mydy, mydz;
+  double mycsix, mycsiy, mycsiz;
+  double csilocx, csilocy, csilocz;
+  int Nx = mygrid->Nloc[0];
+  int Ny = mygrid->Nloc[1];
+  int Nz = mygrid->Nloc[2];
+  double dx = mygrid->dr[0];
+  double dy = mygrid->dr[1];
+  double dz = mygrid->dr[2];
+  double dxp = dx / particlePerCellXYZ[0];
+  double dyp = dy / particlePerCellXYZ[1];
+  double dzp = dz / particlePerCellXYZ[2];
+  double  weight;
 
-    for (int k = 0; k < Nz; k++){
-        zloc = mygrid->chrloc[2][k];
-        csilocz = mygrid->csiminloc[2] + dz*k;
-        for (int j = 0; j < Ny; j++){
-            yloc = mygrid->chrloc[1][j];
-            csilocy = mygrid->csiminloc[1] + dy*j;
-            for (int i = 0; i<Nx; i++){
-                xloc = mygrid->chrloc[0][i];
-                csilocx = mygrid->csiminloc[0] + dx*i;
+  for (int k = 0; k < Nz; k++){
+      zloc = mygrid->chrloc[2][k];
+      csilocz = mygrid->csiminloc[2] + dz*k;
+      for (int j = 0; j < Ny; j++){
+          yloc = mygrid->chrloc[1][j];
+          csilocy = mygrid->csiminloc[1] + dy*j;
+          for (int i = 0; i<Nx; i++){
+              xloc = mygrid->chrloc[0][i];
+              csilocx = mygrid->csiminloc[0] + dx*i;
 
-                if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0]){
-                    if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1]){
-                        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
+              if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0]){
+                  if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1]){
+                      if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
                         {
-                            if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
+                          if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A)>0)
                             {
-                                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / npc;
-                                for (int kp = 0; kp < npcAlong[2]; kp++){
-                                    mycsiz = csilocz + dzp*(kp + 0.5);
-                                    myz = mygrid->stretchGrid(mycsiz, 2);
-                                    mydz = mygrid->derivativeStretchingFunction(mycsiz, 2);
+                              weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / particlePerCell;
+                              for (int kp = 0; kp < particlePerCellXYZ[2]; kp++){
+                                  mycsiz = csilocz + dzp*(kp + 0.5);
+                                  myz = mygrid->stretchGrid(mycsiz, 2);
+                                  mydz = mygrid->derivativeStretchingFunction(mycsiz, 2);
 
-                                    for (int jp = 0; jp < npcAlong[1]; jp++){
-                                        mycsiy = csilocy + dyp*(jp + 0.5);
-                                        myy = mygrid->stretchGrid(mycsiy, 1);
-                                        mydy = mygrid->derivativeStretchingFunction(mycsiy, 1);
+                                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++){
+                                      mycsiy = csilocy + dyp*(jp + 0.5);
+                                      myy = mygrid->stretchGrid(mycsiy, 1);
+                                      mydy = mygrid->derivativeStretchingFunction(mycsiy, 1);
 
-                                        for (int ip = 0; ip < npcAlong[0]; ip++){
-                                            mycsix = csilocx + dxp*(ip + 0.5);
-                                            myx = mygrid->stretchGrid(mycsix, 0);
-                                            mydx = mygrid->derivativeStretchingFunction(mycsix, 0);
+                                      for (int ip = 0; ip < particlePerCellXYZ[0]; ip++){
+                                          mycsix = csilocx + dxp*(ip + 0.5);
+                                          myx = mygrid->stretchGrid(mycsix, 0);
+                                          mydx = mygrid->derivativeStretchingFunction(mycsix, 0);
 
-                                            r0(counter) = myx;
-                                            r1(counter) = myy;
-                                            r2(counter) = myz;
-                                            u0(counter) = u1(counter) = u2(counter) = 0;
-                                            w(counter) = weight*mydx*mydy*mydz;
-                                            marker(counter) = (counter + disp);
-                                            if (isTestSpecies)
-                                                w(counter) = (double)(counter + disp);
-                                            counter++;
+                                          r0(counter) = myx;
+                                          r1(counter) = myy;
+                                          r2(counter) = myz;
+                                          u0(counter) = u1(counter) = u2(counter) = 0;
+                                          w(counter) = weight*mydx*mydy*mydz;
+                                          marker(counter) = (counter + disp);
+                                          if (isTestSpecies)
+                                            w(counter) = (double)(counter + disp);
+                                          counter++;
                                         }
                                     }
                                 }
@@ -421,8 +421,8 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
             }
         }
     }
-
 }
+
 void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
 	int counter = oldNumberOfParticles;
 	double xloc, yloc, zloc;
@@ -432,9 +432,9 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
 	double dx = mygrid->dr[0];
 	double dy = mygrid->dr[1];
 	double dz = mygrid->dr[2];
-	double dxp = dx / npcAlong[0];
-	double dyp = dy / npcAlong[1];
-	double dzp = dz / npcAlong[2];
+	double dxp = dx / particlePerCellXYZ[0];
+	double dyp = dy / particlePerCellXYZ[1];
+	double dzp = dz / particlePerCellXYZ[2];
 	double  weight;
     double myuy, myuz;
 
@@ -490,15 +490,15 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
                             if (denValue>0)
 							{
                                 velValue=wh[0]*velocity[ihleft] + wh[1]*velocity[ihright];
-                                weight = denValue / npc;
+                                weight = denValue / particlePerCell;
 								xloc -= 0.5*dx;
 								yloc -= 0.5*dy;
 								zloc -= 0.5*dz;
                                 myuy  = wh[0]*uy[ihleft] + wh[1]*uy[ihright];
                                 myuz  = wh[0]*uz[ihleft] + wh[1]*uz[ihright];
-                                for (int ip = 0; ip < npcAlong[0]; ip++)
-									for (int jp = 0; jp < npcAlong[1]; jp++)
-										for (int kp = 0; kp < npcAlong[2]; kp++)
+                                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                                                                        for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                                                                                for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
 										{
 											r0(counter) = xloc + dxp*(ip + 0.5);
 											r1(counter) = yloc + dyp*(jp + 0.5);
@@ -535,9 +535,9 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 	double dx = mygrid->dr[0];
 	double dy = mygrid->dr[1];
 	double dz = mygrid->dr[2];
-	double dxp = dx / npcAlong[0];
-	double dyp = dy / npcAlong[1];
-    double dzp = dz / npcAlong[2];
+	double dxp = dx / particlePerCellXYZ[0];
+	double dyp = dy / particlePerCellXYZ[1];
+    double dzp = dz / particlePerCellXYZ[2];
 	double  weight;
     double myuy, myuz;
 
@@ -596,20 +596,20 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
                             if (denValue>0)
 							{
                                 velValue=wh[0]*velocity[ihleft] + wh[1]*velocity[ihright];
-                                weight = denValue/ npc;
+                                weight = denValue/ particlePerCell;
                                 myuy  = wh[0]*uy[ihleft] + wh[1]*uy[ihright];
                                 myuz  = wh[0]*uz[ihleft] + wh[1]*uz[ihright];
-                                for (int kp = 0; kp < npcAlong[2]; kp++){
+                                for (int kp = 0; kp < particlePerCellXYZ[2]; kp++){
 									mycsiz = csilocz + dzp*(kp + 0.5);
 									myz = mygrid->stretchGrid(mycsiz, 2);
 									mydz = mygrid->derivativeStretchingFunction(mycsiz, 2);
 
-									for (int jp = 0; jp < npcAlong[1]; jp++){
+									for (int jp = 0; jp < particlePerCellXYZ[1]; jp++){
 										mycsiy = csilocy + dyp*(jp + 0.5);
 										myy = mygrid->stretchGrid(mycsiy, 1);
 										mydy = mygrid->derivativeStretchingFunction(mycsiy, 1);
 
-										for (int ip = 0; ip < npcAlong[0]; ip++){
+										for (int ip = 0; ip < particlePerCellXYZ[0]; ip++){
 											mycsix = csilocx + dxp*(ip + 0.5);
                                             myx = mygrid->stretchGrid(mycsix, 0);
 											mydx = mygrid->derivativeStretchingFunction(mycsix, 0);
@@ -641,52 +641,72 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
     free(uz);
 }
 
+void SPECIE::setNumberOfParticlePerCell(){
+  particlePerCell = 1;
+  for (int c = 0; c < 3; c++){
+      if (c < accesso.dimensions){
+          particlePerCell *= particlePerCellXYZ[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
+        }
+      else{
+          particlePerCellXYZ[c] = 1;
+        }
+    }
+}
+void SPECIE::setLocalPlasmaMinimaAndMaxima(double *plasmarmin, double *plasmarmax){
+  for (int c = 0; c < 3; c++){
+      if (c < accesso.dimensions){
+          plasmarmin[c] = MAX(plasma.params.rminbox[c], mygrid->rminloc[c]);
+          plasmarmax[c] = MIN(plasma.params.rmaxbox[c], mygrid->rmaxloc[c]);
+        }
+      else{
+          plasmarmin[c] = mygrid->rminloc[c];
+          plasmarmax[c] = mygrid->rmaxloc[c];
+        }
+    }
+
+}
+long long SPECIE::getSumNewParticlesOfAllPreviousProcessors(int number){
+  int* NpartLoc = new int[mygrid->nproc];
+  NpartLoc[mygrid->myid] = number;
+
+  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
+  long long disp = lastParticle;
+  for (int pp = 0; pp < mygrid->myid; pp++)
+    disp += NpartLoc[pp];
+  for (int pp = 0; pp < mygrid->nproc; pp++)
+    lastParticle += (long long)NpartLoc[pp];
+  delete[] NpartLoc;
+  return disp;
+}
+
 void SPECIE::creation()
 {
-	if (mygrid->with_particles == NO)
-		return;
+  if (mygrid->with_particles == NO)
+    return;
 
-    if(flagWithMarker){
-        Ncomp = 8;
+  if(flagWithMarker){
+      Ncomp = 8;
     }
-	double plasmarmin[3], plasmarmax[3];
 
-	SPECIE::computeParticleMassChargeCoupling();
-	npc = 1;
-	for (int c = 0; c < 3; c++){
-		if (c < accesso.dimensions){
-			plasmarmin[c] = MAX(plasma.params.rminbox[c], mygrid->rminloc[c]);
-			plasmarmax[c] = MIN(plasma.params.rmaxbox[c], mygrid->rmaxloc[c]);
-			npc *= npcAlong[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
-		}
-		else{
-			plasmarmin[c] = mygrid->rminloc[c];
-			plasmarmax[c] = mygrid->rmaxloc[c];
-			npcAlong[c] = 1;
-		}
-	}
+  computeParticleMassChargeCoupling();
+  setNumberOfParticlePerCell();
 
-	Np = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
-	allocate_species();
+  double plasmarmin[3], plasmarmax[3];
+  setLocalPlasmaMinimaAndMaxima(plasmarmin, plasmarmax);
+  Np = getNumberOfParticlesWithin(plasmarmin, plasmarmax);
 
-	int* NpartLoc = new int[mygrid->nproc];
-	NpartLoc[mygrid->myid] = Np;
+  allocate_species();
 
-	MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-	long long disp = 0;
-	for (int pp = 0; pp < mygrid->myid; pp++)
-		disp += NpartLoc[pp];
-	for (int pp = 0; pp < mygrid->nproc; pp++)
-		lastParticle += (long long)NpartLoc[pp];
+  printf("0- ID= %i Np= %i\n", mygrid->myid, Np);
 
+  printf("1- ID= %i last particles = %i\n", mygrid->myid, lastParticle);
+  long long disp = getSumNewParticlesOfAllPreviousProcessors(Np);
+  printf("2- ID= %i last particles = %i\n", mygrid->myid, lastParticle);
 
-	if (mygrid->isStretched())
-		SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
-	else
-		SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
-
-	delete[] NpartLoc;
-
+  if (mygrid->isStretched())
+    createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
+  else
+    createParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
 }
 
 
@@ -702,22 +722,20 @@ void SPECIE::creationFromFile1D(std::string name){
     fileDensity >> n_points;
     fileDensity >> temp;
     fileDensity >> plasmaXMin >> plasmaXMax;
-
-
     fileDensity.close();
 
     SPECIE::computeParticleMassChargeCoupling();
-    npc = 1;
+    particlePerCell = 1;
     for (int c = 0; c < 3; c++){
         if (c < 1){
             plasmarmin[c] = MAX(plasmaXMin, mygrid->rminloc[c]);
             plasmarmax[c] = MIN(plasmaXMax, mygrid->rmaxloc[c]);
-            npc *= npcAlong[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
+            particlePerCell *= particlePerCellXYZ[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
         }
         else{
             plasmarmin[c] = mygrid->rminloc[c];
             plasmarmax[c] = mygrid->rmaxloc[c];
-            npcAlong[c] = 1;
+            particlePerCellXYZ[c] = 1;
         }
     }
 
@@ -749,58 +767,38 @@ void SPECIE::creationFromFile1D(std::string name){
 
 void SPECIE::move_window()
 {
-	if (!mygrid->with_particles)
-		return;
-	if (!mygrid->shouldIMove)
-		return;
+  if (!mygrid->with_particles)
+    return;
+  if (!mygrid->shouldIMove)
+    return;
 
-	SPECIE::position_parallel_pbc();
+  SPECIE::position_parallel_pbc();
 
-	double plasmarmin[3], plasmarmax[3];
+  double plasmarmin[3], plasmarmax[3];
+  setLocalPlasmaMinimaAndMaxima(plasmarmin, plasmarmax);
+  plasmarmin[0] = mygrid->rmaxloc[0] - mygrid->fmove_mw;
 
-	plasmarmin[0] = mygrid->rmaxloc[0] - mygrid->fmove_mw;
-	plasmarmax[0] = MIN(plasma.params.rmaxbox[0], mygrid->rmaxloc[0]);
-	for (int c = 1; c < 3; c++){
-		if (c < accesso.dimensions){
-			plasmarmin[c] = MAX(plasma.params.rminbox[c], mygrid->rminloc[c]);
-			plasmarmax[c] = MIN(plasma.params.rmaxbox[c], mygrid->rmaxloc[c]);
-		}
-		else{
-			plasmarmin[c] = mygrid->rminloc[c];
-			plasmarmax[c] = mygrid->rmaxloc[c];
-		}
-	}
+  int newNumberOfParticles, oldNumberOfParticles= Np;
 
-	int newNumberOfParticles, oldNumberOfParticles;
-
-    if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
-
-        oldNumberOfParticles = Np;
-        newNumberOfParticles = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
-        Np += newNumberOfParticles;
-        reallocate_species();
+  if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
+      newNumberOfParticles = SPECIE::getNumberOfParticlesWithin(plasmarmin, plasmarmax);
     }
-    else{
-        newNumberOfParticles=0;
+  else{
+      newNumberOfParticles=0;
     }
-    int* NpartLoc = new int[mygrid->nproc];
-    NpartLoc[mygrid->myid] = newNumberOfParticles;
+  Np += newNumberOfParticles;
+  reallocate_species();
 
-    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-    long long disp = lastParticle;
-    for (int pp = 0; pp < mygrid->myid; pp++)
-        disp += NpartLoc[pp];
+  long long disp=getSumNewParticlesOfAllPreviousProcessors(newNumberOfParticles);
 
-    for (int pp = 0; pp < mygrid->nproc; pp++)
-        lastParticle += (long long)NpartLoc[pp];
-    if ((mygrid->rmyid[0] == (mygrid->rnproc[0] - 1))&&newNumberOfParticles>0){
+  if ((mygrid->rmyid[0] == (mygrid->rnproc[0] - 1))&&newNumberOfParticles>0){
 
-        if (mygrid->isStretched())
-            SPECIE::createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
-        else
-            SPECIE::createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
+      if (mygrid->isStretched())
+        createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
+      else
+        createParticlesWithinFrom(plasmarmin, plasmarmax, oldNumberOfParticles, disp);
     }
-    delete[] NpartLoc;
+
 }
 //void SPECIE::output_bin(ofstream &ff)
 //{
@@ -838,9 +836,9 @@ void SPECIE::output_diag(int istep, ofstream &ff){
 	//double extrema[14];
 	computeKineticEnergyWExtrems();
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << total_energy;
+		ff << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << totalEnergy;
 		for (int c = 0; c < 3; c++){
-			ff << " " << setw(myWidth) << total_momentum[c];
+			ff << " " << setw(myWidth) << totalMomentum[c];
 		}
 		ff << endl;
 	}
@@ -889,9 +887,9 @@ void SPECIE::output_stat(int istep, ofstream &fdiag, ofstream &fextrem, ofstream
 	computeKineticEnergyWExtrems();
 
 	if (mygrid->myid == mygrid->master_proc){
-		fdiag << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << total_energy;
+		fdiag << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << totalEnergy;
 		for (int c = 0; c < 3; c++){
-			fdiag << " " << setw(myWidth) << total_momentum[c];
+			fdiag << " " << setw(myWidth) << totalMomentum[c];
 		}
 		fdiag << endl;
 
@@ -2070,9 +2068,9 @@ void SPECIE::current_deposition(CURRENT *current)
 						J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
 						J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
 						J[2][ti][tj][tk] = -mygrid->dr[2] * W[2][ti][tj][0];
-                        current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
-                        current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
-                        current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
+			current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
+			current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
+			current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
 
 					}
 				}
@@ -2148,9 +2146,9 @@ void SPECIE::current_deposition(CURRENT *current)
                     J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
 					J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
 					J[2][ti][tj][tk] = W[2][ti][tj][0];
-                    current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
-                    current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
-                    current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
+		    current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
+		    current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
+		    current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
 
 				}
 			}
@@ -2216,9 +2214,9 @@ void SPECIE::current_deposition(CURRENT *current)
                 J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
                 J[1][ti][tj][tk] = W[1][ti][0][tk];
 				J[2][ti][tj][tk] = W[2][ti][tj][0];
-                current->Jx(i2, j2, k2) += q*w(p)*J[0][ti][tj][tk];
-                current->Jy(i2, j2, k2) += q*w(p)*J[1][ti][tj][tk];
-                current->Jz(i2, j2, k2) += q*w(p)*J[2][ti][tj][tk];
+		current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
+		current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
+		current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
 
 			}
 
@@ -2620,11 +2618,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 						i2 = i + hii[0] - 1;
 
 						dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-							current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * q;
+							current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
 						dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-							current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * q;
+							current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
 						dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-							current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * q;
+							current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
 
 					}
 				}
@@ -2681,11 +2679,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 					i1 = i + wii[0] - 1;
 					i2 = i + hii[0] - 1;
 					dvol = hiw[0][i] * wiw[1][j],
-						current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * q;
+						current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
 					dvol = wiw[0][i] * hiw[1][j],
-						current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * q;
+						current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
 					dvol = wiw[0][i] * wiw[1][j],
-						current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * q;
+						current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
 				}
 			}
 		}
@@ -2736,11 +2734,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 				i1 = i + wii[0] - 1;
 				i2 = i + hii[0] - 1;
 				dvol = hiw[0][i],
-					current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * q;
+					current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
 				dvol = wiw[0][i],
-					current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * q;
+					current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
 				dvol = wiw[0][i],
-					current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * q;
+					current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
 
 			}
 		}
@@ -2863,11 +2861,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 							i1 = i + wii[0] - 1;
 							i2 = i + hii[0] - 1;
 							dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-								current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * q;
+								current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
 							dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-								current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * q;
+								current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
 							dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-								current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * q;
+								current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 
 						}
 					}
@@ -2887,11 +2885,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 						i1 = i + wii[0] - 1;
 						i2 = i + hii[0] - 1;
 						dvol = hiw[0][i] * wiw[1][j],
-							current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * q;
+							current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
 						dvol = wiw[0][i] * hiw[1][j],
-							current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * q;
+							current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
 						dvol = wiw[0][i] * wiw[1][j],
-							current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * q;
+							current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 					}
 				}
 				break;
@@ -2905,11 +2903,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 					i1 = i + wii[0] - 1;
 					i2 = i + hii[0] - 1;
 					dvol = hiw[0][i],
-						current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * q;
+						current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
 					dvol = wiw[0][i],
-						current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * q;
+						current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
 					dvol = wiw[0][i],
-						current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * q;
+						current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 
 				}
 				break;
@@ -3108,9 +3106,9 @@ void SPECIE::setParticlesPerCellXYZ(int numX, int numY, int numZ){
 	numX = (numX <= 0) ? 1 : numX;
 	numY = (numY <= 0) ? 1 : numY;
 	numZ = (numZ <= 0) ? 1 : numZ;
-	npcAlong[0] = numX;
-	npcAlong[1] = numY;
-	npcAlong[2] = numZ;
+	particlePerCellXYZ[0] = numX;
+	particlePerCellXYZ[1] = numY;
+	particlePerCellXYZ[2] = numZ;
 }
 
 void SPECIE::setName(std::string iname){
@@ -3129,7 +3127,7 @@ double SPECIE::getKineticEnergy(){
 	for (int p = 0; p < Np; p++){
 		energy += (sqrt(1.0 + (u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p))) - 1.0)*w(p);
 	}
-	energy *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*q;
+	energy *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*chargeSign;
 	return energy;
 }
 
@@ -3157,18 +3155,18 @@ void SPECIE::computeKineticEnergyWExtrems(){
 
 
 	double energy = 0.0;
-	total_energy = 0.0;
-	total_momentum[0] = 0;
-	total_momentum[1] = 0;
-	total_momentum[2] = 0;
+	totalEnergy = 0.0;
+	totalMomentum[0] = 0;
+	totalMomentum[1] = 0;
+	totalMomentum[2] = 0;
 	double gamma_minus_1 = 0;
 
 	for (int p = 0; p < Np; p++){
 		gamma_minus_1 = (sqrt(1.0 + (u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p))) - 1.0);
 		energy += gamma_minus_1*w(p);
-		total_momentum[0] += u0(p)*w(p);
-		total_momentum[1] += u1(p)*w(p);
-		total_momentum[2] += u2(p)*w(p);
+		totalMomentum[0] += u0(p)*w(p);
+		totalMomentum[1] += u1(p)*w(p);
+		totalMomentum[2] += u2(p)*w(p);
 
 		if (r0(p) <= minima[0])minima[0] = r0(p);
 		if (r1(p) <= minima[1])minima[1] = r1(p);
@@ -3189,14 +3187,14 @@ void SPECIE::computeKineticEnergyWExtrems(){
 		if (gamma_minus_1 <= minima[6])minima[6] = gamma_minus_1;
 		if (gamma_minus_1 >= maxima[6])maxima[6] = gamma_minus_1;
 	}
-	energy *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*q;
-	total_momentum[0] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*q;
-	total_momentum[1] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*q;
-	total_momentum[2] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*q;
+	energy *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*chargeSign;
+	totalMomentum[0] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*chargeSign;
+	totalMomentum[1] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*chargeSign;
+	totalMomentum[2] *= mass*mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] * mygrid->ref_den*M_PI / coupling*chargeSign;
 
 
-	MPI_Allreduce(&energy, &total_energy, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, total_momentum, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&energy, &totalEnergy, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, totalMomentum, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	MPI_Allreduce(MPI_IN_PLACE, minima, 7, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 	MPI_Allreduce(MPI_IN_PLACE, maxima, 7, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 

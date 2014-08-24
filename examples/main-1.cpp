@@ -156,7 +156,7 @@ int main(int narg, char **args)
     
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(1, 1, 1);
+    electrons1.setParticlesPerCellXYZ(1, 2, 3);
     electrons1.setName("ELE1");
     electrons1.type = ELECTRON;
     electrons1.creation();
