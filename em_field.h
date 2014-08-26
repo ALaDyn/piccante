@@ -23,10 +23,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include <mpi.h>
-#include "commons.h"
-#include "structures.h"
-#include "grid.h"
-#include "current.h"
 #include <omp.h>
 
 #if defined(_MSC_VER)
@@ -74,7 +70,15 @@ typedef unsigned __int64  uint64_t; */
 #else
 #include <sys/time.h>
 #include <unistd.h>
+#include <stdlib.h>
 #endif
+
+
+#include "commons.h"
+#include "structures.h"
+#include "grid.h"
+#include "current.h"
+
 
 enum filterOptions{
     fltr_Ex = 1 << 0,
@@ -123,10 +127,10 @@ public:
 
     static const int myWidth = 12;
 	static const int myNarrowWidth = 6;
-	void init_output_diag(ofstream &ff);
-	void output_diag(int istep, ofstream &ff);
-	void init_output_extrems(ofstream &ff);
-	void output_extrems(int istep, ofstream &ff);
+	void init_output_diag(std::ofstream &ff);
+	void output_diag(int istep, std::ofstream &ff);
+	void init_output_extrems(std::ofstream &ff);
+	void output_extrems(int istep, std::ofstream &ff);
 
 	void smooth_filter(int filter_points);
 

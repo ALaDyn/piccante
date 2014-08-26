@@ -796,62 +796,64 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 
 }
 
-void EM_FIELD::init_output_diag(ofstream &ff)
+void EM_FIELD::init_output_diag(std::ofstream &ff)
 {
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << "#step" << " " << setw(myWidth) << "time" << " " << setw(myWidth) << "Etot";
-		ff << " " << setw(myWidth) << "Ex2";
-		ff << " " << setw(myWidth) << "Ey2";
-		ff << " " << setw(myWidth) << "Ez2";
-		ff << " " << setw(myWidth) << "Bx2";
-		ff << " " << setw(myWidth) << "By2";
-		ff << " " << setw(myWidth) << "Bz2";
-		ff << " " << setw(myWidth) << "Sx";
-		ff << " " << setw(myWidth) << "Sy";
-		ff << " " << setw(myWidth) << "Sz";
-		ff << endl;
+		ff << std::setw(myNarrowWidth) << "#step" 
+		   << " " << std::setw(myWidth) << "time"
+		   << " " << std::setw(myWidth) << "Etot"
+		   << " " << std::setw(myWidth) << "Ex2"
+		   << " " << std::setw(myWidth) << "Ey2"
+		   << " " << std::setw(myWidth) << "Ez2"
+		   << " " << std::setw(myWidth) << "Bx2"
+		   << " " << std::setw(myWidth) << "By2"
+		   << " " << std::setw(myWidth) << "Bz2"
+		   << " " << std::setw(myWidth) << "Sx"
+		   << " " << std::setw(myWidth) << "Sy"
+		   << " " << std::setw(myWidth) << "Sz"
+		   << std::endl;
 	}
 }
-void EM_FIELD::output_diag(int istep, ofstream &ff)
+void EM_FIELD::output_diag(int istep, std::ofstream &ff)
 {
     computeEnergyAndExtremes();
 
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << total_energy[6];
+		ff << std::setw(myNarrowWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << total_energy[6];
 
 		for (int c = 0; c < 6; c++){
-			ff << " " << setw(myWidth) << total_energy[c];
+			ff << " " << std::setw(myWidth) << total_energy[c];
 		}
 		for (int c = 0; c < 3; c++){
-			ff << " " << setw(myWidth) << total_momentum[c];
+			ff << " " << std::setw(myWidth) << total_momentum[c];
 		}
-		ff << endl;
+		ff << std::endl;
 	}
 }
-void EM_FIELD::init_output_extrems(ofstream &ff)
+void EM_FIELD::init_output_extrems(std::ofstream &ff)
 {
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << "#step" << " " << setw(myWidth) << "time";
-		ff << " " << setw(myWidth) << "Exmin" << " " << setw(myWidth) << "Exmax";
-		ff << " " << setw(myWidth) << "Eymin" << " " << setw(myWidth) << "Eymax";
-		ff << " " << setw(myWidth) << "Ezmin" << " " << setw(myWidth) << "Ezmax";
-		ff << " " << setw(myWidth) << "Bxmin" << " " << setw(myWidth) << "Bxmax";
-		ff << " " << setw(myWidth) << "Bymin" << " " << setw(myWidth) << "Bymax";
-		ff << " " << setw(myWidth) << "Bzmin" << " " << setw(myWidth) << "Bzmax";
-		ff << " " << setw(myWidth) << "Emax" << " " << setw(myWidth) << "Bmax";
-		ff << endl;
+		ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time";
+		ff << " " << std::setw(myWidth) << "Exmin" << " " << std::setw(myWidth) << "Exmax";
+		ff << " " << std::setw(myWidth) << "Eymin" << " " << std::setw(myWidth) << "Eymax";
+		ff << " " << std::setw(myWidth) << "Ezmin" << " " << std::setw(myWidth) << "Ezmax";
+		ff << " " << std::setw(myWidth) << "Bxmin" << " " << std::setw(myWidth) << "Bxmax";
+		ff << " " << std::setw(myWidth) << "Bymin" << " " << std::setw(myWidth) << "Bymax";
+		ff << " " << std::setw(myWidth) << "Bzmin" << " " << std::setw(myWidth) << "Bzmax";
+		ff << " " << std::setw(myWidth) << "Emax" << " " << std::setw(myWidth) << "Bmax";
+		ff << std::endl;
 	}
 }
-void EM_FIELD::output_extrems(int istep, ofstream &ff)
+void EM_FIELD::output_extrems(int istep, std::ofstream &ff)
 {
 	computeEnergyAndExtremes();
 	if (mygrid->myid == mygrid->master_proc){
-		ff << " " << setw(myNarrowWidth) << istep << " " << setw(myNarrowWidth) << mygrid->time;
+		ff << " " << std::setw(myNarrowWidth) << istep << " " << std::setw(myNarrowWidth) << mygrid->time;
 		for (int c = 0; c < 6; c++)
 		{
-			ff << " " << setw(myWidth) << minima[c] << " " << setw(myWidth) << maxima[c];
+			ff << " " << std::setw(myWidth) << minima[c] << " " << std::setw(myWidth) << maxima[c];
 		}
-		ff << " " << setw(myWidth) << maxima[6] << " " << setw(myWidth) << maxima[7] << endl;
+		ff << " " << std::setw(myWidth) << maxima[6] << " " << std::setw(myWidth) << maxima[7] << std::endl;
 	}
 }
 void EM_FIELD::difference(EM_FIELD *right)
@@ -1367,7 +1369,7 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 	}*/
 
 void EM_FIELD::addFieldsFromFile(std::string name){
-    ifstream fileEMField (name.c_str(), std::ifstream::in);
+	std::ifstream fileEMField(name.c_str(), std::ifstream::in);
     int Nx_in;
     int Nx    = mygrid->Nloc[0];
     double *Ex, *Ey, *Ez, *Bx, *By, *Bz, *myx;

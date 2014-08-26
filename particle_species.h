@@ -66,18 +66,18 @@ public:
   void move_window();
   void addMarker();
   bool amIWithMarker();
-  void output(ofstream &ff);
+  void output(std::ofstream &ff);
   static const int myWidth = 12;
   static const int myNarrowWidth = 6;
 
   std::string getName();
 
-  void init_output_diag(ofstream &ff);
-  void output_diag(int istep, ofstream &ff);
-  void init_output_extrems(ofstream &ff);
-  void output_extrems(int istep, ofstream &ff);
-  void init_output_stat(ofstream &fdiag, ofstream &fextrem);
-  void output_stat(int istep, ofstream &fdiag, ofstream &fextrem, ofstream &fspectrum);
+  void init_output_diag(std::ofstream &ff);
+  void output_diag(int istep, std::ofstream &ff);
+  void init_output_extrems(std::ofstream &ff);
+  void output_extrems(int istep, std::ofstream &ff);
+  void init_output_stat(std::ofstream &fdiag, std::ofstream &fextrem);
+  void output_stat(int istep, std::ofstream &fdiag, std::ofstream &fextrem, std::ofstream &fspectrum);
   void position_advance();
   void position_pbc();
   void position_parallel_pbc();
@@ -96,7 +96,7 @@ public:
   void setName(std::string iname);
   double getKineticEnergy();
   void computeKineticEnergyWExtrems();
-  void outputSpectrum(ofstream &fspectrum);
+  void outputSpectrum(std::ofstream &fspectrum);
 
   void dump(std::ofstream &f);
   void reloadDump(std::ifstream &f);

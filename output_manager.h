@@ -23,13 +23,15 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "stdlib.h"
+
 #include <mpi.h>
 #include <iomanip>
 #if defined(_MSC_VER)
 #include <cstdint>
+#include <cstdlib>
 #else
 #include <stdint.h>
+#include <stdlib.h>
 #endif
 #include <vector>
 #include <list>
@@ -50,7 +52,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "em_field.h"
 #include "particle_species.h"
 
-using namespace std;
+
 
 #define OUTPUT_SIZE_TIME_DIAG 7
 

@@ -35,7 +35,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "grid.h"
 #include "structures.h"
 
-using namespace std;
 
 class CURRENT{
 public:
