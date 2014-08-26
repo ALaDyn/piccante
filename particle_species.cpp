@@ -697,11 +697,7 @@ void SPECIE::creation()
 
   allocate_species();
 
-  printf("0- ID= %i Np= %i\n", mygrid->myid, Np);
-
-  printf("1- ID= %i last particles = %i\n", mygrid->myid, lastParticle);
   long long disp = getSumNewParticlesOfAllPreviousProcessors(Np);
-  printf("2- ID= %i last particles = %i\n", mygrid->myid, lastParticle);
 
   if (mygrid->isStretched())
     createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
