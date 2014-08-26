@@ -20,12 +20,13 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
-#include <iomanip>
 #if defined(_MSC_VER)
+#define _CRT_SECURE_NO_WARNINGS
 #include <cstdint>
 #else
 #include <stdint.h>
 #endif
+#include <iomanip>
 #include <vector>
 #include <list>
 #include <map>
