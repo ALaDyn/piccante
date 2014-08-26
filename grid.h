@@ -28,16 +28,17 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
-//#include <cstdlib>
+//#include <malloc.h>
 //#include <cstring>
 #include <ctime>       /* time */
 #if defined(_MSC_VER)
+#include <cstdlib>
 #include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
 #include "gsl/gsl_randist.h"
 #else
+#include <stdlib.h>
 #include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
 #include <gsl/gsl_randist.h>
 #endif

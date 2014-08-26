@@ -45,7 +45,7 @@ void emProbe::setPointCoordinate(double X, double Y, double Z){
     coordinates[1]=Y;
     coordinates[2]=Z;
 }
-void emProbe::setName(string iname){
+void emProbe::setName(std::string iname){
     name = iname;
 }
 
@@ -101,7 +101,7 @@ void outDomain::setPointCoordinate(double X, double Y, double Z){
     coordinates[1]=Y;
     coordinates[2]=Z;    
 }
-void outDomain::setName(string iname){
+void outDomain::setName(std::string iname){
     name = iname;
 }
 void outDomain::setXRange(double min, double max){
@@ -356,15 +356,15 @@ void OUTPUT_MANAGER::createDiagFile(){
 
     of1.open(diagFileName.c_str(), std::ofstream::out | std::ofstream::trunc);
 
-    of1 << " " << setw(diagNarrowWidth) << "#istep" << " " << setw(diagWidth) << "time";
-    of1 << " " << setw(diagWidth) << "Etot";
-    of1 << " " << setw(diagWidth) << "Ex2" << " " << setw(diagWidth) << "Ey2" << " " << setw(diagWidth) << "Ez2";
-    of1 << " " << setw(diagWidth) << "Bx2" << " " << setw(diagWidth) << "By2" << " " << setw(diagWidth) << "Bz2";
+	of1 << " " << std::setw(diagNarrowWidth) << "#istep" << " " << std::setw(diagWidth) << "time";
+	of1 << " " << std::setw(diagWidth) << "Etot";
+	of1 << " " << std::setw(diagWidth) << "Ex2" << " " << std::setw(diagWidth) << "Ey2" << " " << std::setw(diagWidth) << "Ez2";
+	of1 << " " << std::setw(diagWidth) << "Bx2" << " " << std::setw(diagWidth) << "By2" << " " << std::setw(diagWidth) << "Bz2";
 
     std::vector<SPECIE*>::const_iterator spec_iterator;
 
     for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++){
-        of1 << " " << setw(diagWidth) << (*spec_iterator)->name;
+		of1 << " " << std::setw(diagWidth) << (*spec_iterator)->name;
     }
 
     of1 << std::endl;
@@ -1816,9 +1816,9 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req){
                 interpEB(rr,EE,BB);
                 std::ofstream of0;
                 of0.open(myEMProbes[req.domain]->fileName.c_str(), std::ios::app);
-                of0 << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << req.dtime;
-                of0 << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
-                of0 << " " << setw(diagWidth) << BB[0] << " " << setw(diagWidth) << BB[1] << " " << setw(diagWidth) << BB[2];
+				of0 << " " << std::setw(diagNarrowWidth) << req.itime << " " << std::setw(diagWidth) << req.dtime;
+				of0 << " " << std::setw(diagWidth) << EE[0] << " " << std::setw(diagWidth) << EE[1] << " " << std::setw(diagWidth) << EE[2];
+				of0 << " " << std::setw(diagWidth) << BB[0] << " " << std::setw(diagWidth) << BB[1] << " " << std::setw(diagWidth) << BB[2];
                 of0 << "\n";
                 of0.close();
             }
@@ -2634,13 +2634,13 @@ void OUTPUT_MANAGER::callDiag(request req){
         std::ofstream outStat;
         outStat.open(diagFileName.c_str(), std::ios::app);
 
-        outStat << " " << setw(diagNarrowWidth) << req.itime << " " << setw(diagWidth) << tw;
-        outStat << " " << setw(diagWidth) << etot;
-        outStat << " " << setw(diagWidth) << EE[0] << " " << setw(diagWidth) << EE[1] << " " << setw(diagWidth) << EE[2];
-        outStat << " " << setw(diagWidth) << BE[0] << " " << setw(diagWidth) << BE[1] << " " << setw(diagWidth) << BE[2];
+		outStat << " " << std::setw(diagNarrowWidth) << req.itime << " " << std::setw(diagWidth) << tw;
+		outStat << " " << std::setw(diagWidth) << etot;
+		outStat << " " << std::setw(diagWidth) << EE[0] << " " << std::setw(diagWidth) << EE[1] << " " << std::setw(diagWidth) << EE[2];
+		outStat << " " << std::setw(diagWidth) << BE[0] << " " << std::setw(diagWidth) << BE[1] << " " << std::setw(diagWidth) << BE[2];
 
         for (specie = 0; specie < myspecies.size(); specie++){
-            outStat << " " << setw(diagWidth) << ekinSpecies[specie];
+			outStat << " " << std::setw(diagWidth) << ekinSpecies[specie];
         }
         outStat << std::endl;
 

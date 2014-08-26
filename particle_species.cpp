@@ -229,7 +229,7 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
 }
 int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double plasmarmax[], std::string name){
 
-    ifstream fileDensity (name.c_str(), std::ifstream::in);
+	std::ifstream fileDensity(name.c_str(), std::ifstream::in);
     int Nx_in;
     double xmin, xmax, dx_in;
     double temp;
@@ -438,7 +438,7 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
 	double  weight;
     double myuy, myuz;
 
-    ifstream fileDensity (name.c_str(), std::ifstream::in);
+	std::ifstream fileDensity(name.c_str(), std::ifstream::in);
     int Nx_in;
     double xmin, xmax, dx_in;
     double temp;
@@ -541,7 +541,7 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 	double  weight;
     double myuy, myuz;
 
-    ifstream fileDensity (name.c_str(), std::ifstream::in);
+	std::ifstream fileDensity(name.c_str(), std::ifstream::in);
     int Nx_in;
     double xmin, xmax, dx_in;
     double temp;
@@ -707,7 +707,7 @@ void SPECIE::creation()
 
 
 void SPECIE::creationFromFile1D(std::string name){
-    ifstream fileDensity (name.c_str(), std::ifstream::in);
+	std::ifstream fileDensity(name.c_str(), std::ifstream::in);
 
     if (mygrid->with_particles == NO)
         return;
@@ -803,7 +803,7 @@ void SPECIE::move_window()
 
 //	ff.write((char *)val, sizeof(double)*Ncomp*Np);
 //}
-void SPECIE::output(ofstream &ff)
+void SPECIE::output(std::ofstream &ff)
 {
 	if (mygrid->with_particles == NO)
 		return;
@@ -816,66 +816,66 @@ void SPECIE::output(ofstream &ff)
 	}
 }
 
-void SPECIE::init_output_diag(ofstream &ff){
+void SPECIE::init_output_diag(std::ofstream &ff){
 	if (mygrid->with_particles == NO)
 		return;
 
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << "#step" << " " << setw(myWidth) << "time" << " " << setw(myWidth) << "Etot";
-		ff << " " << setw(myWidth) << "Px" << " " << setw(myWidth) << "Py" << " " << setw(myWidth) << "Pz" << endl;
+		ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time" << " " << std::setw(myWidth) << "Etot";
+		ff << " " << std::setw(myWidth) << "Px" << " " << std::setw(myWidth) << "Py" << " " << std::setw(myWidth) << "Pz" << std::endl;
 	}
 }
-void SPECIE::output_diag(int istep, ofstream &ff){
+void SPECIE::output_diag(int istep, std::ofstream &ff){
 	if (mygrid->with_particles == NO)
 		return;
 
 	//double extrema[14];
 	computeKineticEnergyWExtrems();
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << totalEnergy;
+		ff << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
 		for (int c = 0; c < 3; c++){
-			ff << " " << setw(myWidth) << totalMomentum[c];
+			ff << " " << std::setw(myWidth) << totalMomentum[c];
 		}
-		ff << endl;
+		ff << std::endl;
 	}
 }
-void SPECIE::init_output_extrems(ofstream &ff){
+void SPECIE::init_output_extrems(std::ofstream &ff){
 	if (mygrid->with_particles == NO)
 		return;
 
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << "#step" << " " << setw(myWidth) << "time";
-		ff << " " << setw(myWidth) << "xmin" << " " << setw(myWidth) << "xmax";
-		ff << " " << setw(myWidth) << "ymin" << " " << setw(myWidth) << "ymax";
-		ff << " " << setw(myWidth) << "zmin" << " " << setw(myWidth) << "zmax";
-		ff << " " << setw(myWidth) << "pxmin" << " " << setw(myWidth) << "pxmax";
-		ff << " " << setw(myWidth) << "pymin" << " " << setw(myWidth) << "pymax";
-		ff << " " << setw(myWidth) << "pzmin" << " " << setw(myWidth) << "pzmax";
-		ff << " " << setw(myWidth) << "gammamin" << " " << setw(myWidth) << "gammamax" << endl;
+		ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time"
+			<< " " << std::setw(myWidth) << "xmin" << " " << std::setw(myWidth) << "xmax"
+			<< " " << std::setw(myWidth) << "ymin" << " " << std::setw(myWidth) << "ymax"
+			<< " " << std::setw(myWidth) << "zmin" << " " << std::setw(myWidth) << "zmax"
+			<< " " << std::setw(myWidth) << "pxmin" << " " << std::setw(myWidth) << "pxmax"
+			<< " " << std::setw(myWidth) << "pymin" << " " << std::setw(myWidth) << "pymax"
+			<< " " << std::setw(myWidth) << "pzmin" << " " << std::setw(myWidth) << "pzmax"
+			<< " " << std::setw(myWidth) << "gammamin" << " " << std::setw(myWidth) << "gammamax" << std::endl;
 	}
 }
-void SPECIE::output_extrems(int istep, ofstream &ff){
+void SPECIE::output_extrems(int istep, std::ofstream &ff){
 	if (mygrid->with_particles == NO)
 		return;
 
 	//double extrema[14];
 	computeKineticEnergyWExtrems();
 	if (mygrid->myid == mygrid->master_proc){
-		ff << setw(myNarrowWidth) << istep << " " << setw(myWidth) << mygrid->time;
+		ff << std::setw(myNarrowWidth) << istep << " " << std::setw(myWidth) << mygrid->time;
 		for (int c = 0; c < 7; c++){
-			ff << " " << setw(myWidth) << minima[c] << " " << setw(myWidth) << maxima[c];
+			ff << " " << std::setw(myWidth) << minima[c] << " " << std::setw(myWidth) << maxima[c];
 		}
-		ff << endl;
+		ff << std::endl;
 	}
 }
-void SPECIE::init_output_stat(ofstream &fdiag, ofstream &fextrem){
+void SPECIE::init_output_stat(std::ofstream &fdiag, std::ofstream &fextrem){
 	if (mygrid->with_particles == NO)
 		return;
 
 	init_output_extrems(fextrem);
 	init_output_diag(fdiag);
 }
-void SPECIE::output_stat(int istep, ofstream &fdiag, ofstream &fextrem, ofstream &fspectrum){
+void SPECIE::output_stat(int istep, std::ofstream &fdiag, std::ofstream &fextrem, std::ofstream &fspectrum){
 	if (mygrid->with_particles == NO)
 		return;
 
@@ -883,45 +883,45 @@ void SPECIE::output_stat(int istep, ofstream &fdiag, ofstream &fextrem, ofstream
 	computeKineticEnergyWExtrems();
 
 	if (mygrid->myid == mygrid->master_proc){
-		fdiag << setw(myWidth) << istep << " " << setw(myWidth) << mygrid->time << " " << setw(myWidth) << totalEnergy;
+		fdiag << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
 		for (int c = 0; c < 3; c++){
-			fdiag << " " << setw(myWidth) << totalMomentum[c];
+			fdiag << " " << std::setw(myWidth) << totalMomentum[c];
 		}
-		fdiag << endl;
+		fdiag << std::endl;
 
-		fextrem << setw(myNarrowWidth) << istep << " " << setw(myWidth) << mygrid->time;
+		fextrem << std::setw(myNarrowWidth) << istep << " " << std::setw(myWidth) << mygrid->time;
 		for (int c = 0; c < 7; c++){
-			fextrem << " " << setw(myWidth) << minima[c] << " " << setw(myWidth) << maxima[c];
+			fextrem << " " << std::setw(myWidth) << minima[c] << " " << std::setw(myWidth) << maxima[c];
 		}
-		fextrem << endl;
+		fextrem << std::endl;
 
-		fspectrum << "#" << setw(myWidth) << "Ebinmin";
-		fspectrum << " " << setw(myWidth) << "Ebinmax";
-		fspectrum << " " << setw(myWidth) << "value";
-		fspectrum << endl;
+		fspectrum << "#" << std::setw(myWidth) << "Ebinmin";
+		fspectrum << " " << std::setw(myWidth) << "Ebinmax";
+		fspectrum << " " << std::setw(myWidth) << "value";
+		fspectrum << std::endl;
 		for (int ibin = 0; ibin < spectrum.Nbin; ibin++){
-			fspectrum << " " << setw(myWidth) << (ibin*spectrum.Dk);
-			fspectrum << " " << setw(myWidth) << ((ibin + 1)*spectrum.Dk);
-			fspectrum << " " << setw(myWidth) << (spectrum.values[ibin]);
-			fspectrum << endl;
+			fspectrum << " " << std::setw(myWidth) << (ibin*spectrum.Dk);
+			fspectrum << " " << std::setw(myWidth) << ((ibin + 1)*spectrum.Dk);
+			fspectrum << " " << std::setw(myWidth) << (spectrum.values[ibin]);
+			fspectrum << std::endl;
 
 		}
 	}
 
 }
 
-void SPECIE::outputSpectrum(ofstream &fspectrum){
+void SPECIE::outputSpectrum(std::ofstream &fspectrum){
 	computeKineticEnergyWExtrems();
 	if (mygrid->myid == mygrid->master_proc){
-		fspectrum << "#" << setw(myWidth) << "Ebinmin";
-		fspectrum << " " << setw(myWidth) << "Ebinmax";
-		fspectrum << " " << setw(myWidth) << "value";
-		fspectrum << endl;
+		fspectrum << "#" << std::setw(myWidth) << "Ebinmin";
+		fspectrum << " " << std::setw(myWidth) << "Ebinmax";
+		fspectrum << " " << std::setw(myWidth) << "value";
+		fspectrum << std::endl;
 		for (int ibin = 0; ibin < spectrum.Nbin; ibin++){
-			fspectrum << " " << setw(myWidth) << (ibin*spectrum.Dk);
-			fspectrum << " " << setw(myWidth) << ((ibin + 1)*spectrum.Dk);
-			fspectrum << " " << setw(myWidth) << (spectrum.values[ibin]);
-			fspectrum << endl;
+			fspectrum << " " << std::setw(myWidth) << (ibin*spectrum.Dk);
+			fspectrum << " " << std::setw(myWidth) << ((ibin + 1)*spectrum.Dk);
+			fspectrum << " " << std::setw(myWidth) << (spectrum.values[ibin]);
+			fspectrum << std::endl;
 
 		}
 	}
@@ -2425,25 +2425,21 @@ double densityFunctionMaxwell(double px, double alpha, double temp){
     return exp( -( sqrt(alpha*alpha+px*px)-alpha)/temp) ;
 }
 void SPECIE::callSpecial(gsl_rng* ext_rng, double Ta){
-    double ptot;
-        double temp;
-        double phi;
-        double segno;
-        double alpha;
-        double cos_theta, sin_theta;
-        double auxPX, auxDF;
-        for (int p = 0; p < Np; p++)
-            {
-                double uperp2=u1(p)*u1(p)-u2(p)*u2(p);
-                alpha=sqrt(1+uperp2);
-                while(1){
-                    auxDF=gsl_ran_flat(ext_rng, 0.0, 1.0);
-                    auxPX=gsl_ran_flat(ext_rng, -50*sqrt(Ta),50*sqrt(Ta));
-                    if(densityFunctionMaxwell(auxPX, alpha, Ta)>auxDF)
-                        break;
-                }
-                u0(p) = auxPX;
-            }
+	//double ptot, temp, cos_theta, sin_theta, segno, phi;
+    double alpha;
+    double auxPX, auxDF;
+    for (int p = 0; p < Np; p++)
+    {
+        double uperp2=u1(p)*u1(p)-u2(p)*u2(p);
+        alpha=sqrt(1+uperp2);
+        while(1){
+            auxDF=gsl_ran_flat(ext_rng, 0.0, 1.0);
+            auxPX=gsl_ran_flat(ext_rng, -50*sqrt(Ta),50*sqrt(Ta));
+            if(densityFunctionMaxwell(auxPX, alpha, Ta)>auxDF)
+                break;
+        }
+        u0(p) = auxPX;
+    }
 }
 
 void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
