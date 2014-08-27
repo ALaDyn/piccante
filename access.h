@@ -30,46 +30,46 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #if DIMENSIONALITY==3
 ACCESSO::ACCESSO(){
-    //edge = 2;
-    dimensions = 3;
-    //Nexchange = 1;
+  //edge = 2;
+  dimensions = 3;
+  //Nexchange = 1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-    return (c + Nc*(i + edge) + Nc*Nx*(j + edge) + Nc*Nx*Ny*(k + edge));
+  return (c + Nc*(i + edge) + Nc*Nx*(j + edge) + Nc*Nx*Ny*(k + edge));
 }
 void ACCESSO::alloc_number(int *N_grid, int *N_loc){
-    N_grid[0] = N_loc[0] + 2 * edge;
-    N_grid[1] = N_loc[1] + 2 * edge;
-    N_grid[2] = N_loc[2] + 2 * edge;
+  N_grid[0] = N_loc[0] + 2 * edge;
+  N_grid[1] = N_loc[1] + 2 * edge;
+  N_grid[2] = N_loc[2] + 2 * edge;
 }
 
 #elif DIMENSIONALITY==2
 ACCESSO::ACCESSO(){
-    //edge=2;
-    dimensions=2;
-    //Nexchange=1;
+  //edge=2;
+  dimensions=2;
+  //Nexchange=1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-    return (c+Nc*(i+edge)+Nc*Nx*(j+edge));
+  return (c+Nc*(i+edge)+Nc*Nx*(j+edge));
 }
 void ACCESSO::alloc_number(int *N_grid, int *N_loc){
-    N_grid[0]=N_loc[0]+2*edge;
-    N_grid[1]=N_loc[1]+2*edge;
-    N_grid[2]=1;
+  N_grid[0]=N_loc[0]+2*edge;
+  N_grid[1]=N_loc[1]+2*edge;
+  N_grid[2]=1;
 }
 #elif DIMENSIONALITY==1
 ACCESSO::ACCESSO(){
-    //edge=2;
-    dimensions = 1;
-    //Nexchange=1;
+  //edge=2;
+  dimensions = 1;
+  //Nexchange=1;
 }
 int ACCESSO::indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-    return (c + Nc*(i + edge));
+  return (c + Nc*(i + edge));
 }
 void ACCESSO::alloc_number(int *N_grid, int *N_loc){
-    N_grid[0] = N_loc[0] + 2 * edge;
-    N_grid[1] = 1;
-    N_grid[2] = 1;
+  N_grid[0] = N_loc[0] + 2 * edge;
+  N_grid[1] = 1;
+  N_grid[2] = 1;
 }
 #else
 #error DIMENSIONALITY must be set to 1,2 or 3 !

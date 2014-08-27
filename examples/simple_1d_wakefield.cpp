@@ -65,209 +65,209 @@ using namespace std;
 
 int main(int narg, char **args)
 {
-	GRID grid;
-	EM_FIELD myfield;
-	CURRENT current;
-	std::vector<SPECIE*> species;
-	vector<SPECIE*>::const_iterator spec_iterator;
-	int istep;
-	gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+  GRID grid;
+  EM_FIELD myfield;
+  CURRENT current;
+  std::vector<SPECIE*> species;
+  vector<SPECIE*>::const_iterator spec_iterator;
+  int istep;
+  gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
-	//*******************************************BEGIN GRID DEFINITION*******************************************************
-	
-	grid.setXrange(-50.0, 0.0);
-	grid.setYrange(-1.0, 1.0);
-	grid.setZrange(-1.0, +1.0);
-	
-	grid.setNCells(2500, 0, 0);
-	grid.setNProcsAlongY(NPROC_ALONG_Y);
-	grid.setNProcsAlongZ(NPROC_ALONG_Z);
-	
-	//grid.enableStretchedGrid();
-	//grid.setXandNxLeftStretchedGrid(-15.0,1000);
-	//grid.setYandNyLeftStretchedGrid(-5.0, 70);
-	//grid.setXandNxRightStretchedGrid(15.0,1000);
-	//grid.setYandNyRightStretchedGrid(5.0, 70);
-	
-	grid.setBoundaries(xOpen | yOpen | zPBC); 
-	grid.mpi_grid_initialize(&narg, args);
-	grid.setCourantFactor(0.98);
-	
-	grid.setSimulationTime(60.0);
-	
-	grid.with_particles = YES;
-	grid.with_current = YES;
-	
-	grid.setStartMovingWindow(0);
-	grid.setBetaMovingWindow(1.0);
-	//grid.setFrequencyMovingWindow(FREQUENCY);
-	
-	grid.setMasterProc(0);	
-	
-	srand(time(NULL));
-	grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
-	
-	grid.finalize();
-	
-	grid.visualDiag();
-		//********************************************END GRID DEFINITION********************************************************
+  //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-	//*******************************************BEGIN FIELD DEFINITION*********************************************************	
+  grid.setXrange(-50.0, 0.0);
+  grid.setYrange(-1.0, 1.0);
+  grid.setZrange(-1.0, +1.0);
 
-	myfield.allocate(&grid);
-	myfield.setAllValuesToZero();
-	
-	laserPulse pulse1;
-    pulse1.setCos2PlaneWave();
-    pulse1.setPPolarization();
-    pulse1.setDurationFWHM(5.0);
-    pulse1.setPulseInitialPosition(-6.0);
-    pulse1.setLambda(1.0);
-    pulse1.setNormalizedAmplitude(1.0);
-	
-    //pulse1.setWaist(3.0);
-    //pulse1.setFocusPosition(0.0);
-    //pulse1.setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0);
-	
-	myfield.addPulse(&pulse1);
-	
-	myfield.boundary_conditions();
-	
-	current.allocate(&grid);
-	current.setAllValuesToZero();
+  grid.setNCells(2500, 0, 0);
+  grid.setNProcsAlongY(NPROC_ALONG_Y);
+  grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
-	//*******************************************END FIELD DEFINITION***********************************************************
+  //grid.enableStretchedGrid();
+  //grid.setXandNxLeftStretchedGrid(-15.0,1000);
+  //grid.setYandNyLeftStretchedGrid(-5.0, 70);
+  //grid.setXandNxRightStretchedGrid(15.0,1000);
+  //grid.setYandNyRightStretchedGrid(5.0, 70);
 
-	//*******************************************BEGIN SPECIES DEFINITION*********************************************************
+  grid.setBoundaries(xOpen | yOpen | zPBC);
+  grid.mpi_grid_initialize(&narg, args);
+  grid.setCourantFactor(0.98);
 
-	PLASMA plasma1;
-	plasma1.density_function = left_soft_ramp;
-	plasma1.setXRangeBox(0.0,100.0);          
-	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
-	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
-	plasma1.setRampLength(20.0);                    
-	plasma1.setDensityCoefficient(0.01);         
-	plasma1.setRampMinDensity(0.0);              
+  grid.setSimulationTime(60.0);
+
+  grid.with_particles = YES;
+  grid.with_current = YES;
+
+  grid.setStartMovingWindow(0);
+  grid.setBetaMovingWindow(1.0);
+  //grid.setFrequencyMovingWindow(FREQUENCY);
+
+  grid.setMasterProc(0);
+
+  srand(time(NULL));
+  grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+
+  grid.finalize();
+
+  grid.visualDiag();
+  //********************************************END GRID DEFINITION********************************************************
+
+  //*******************************************BEGIN FIELD DEFINITION*********************************************************	
+
+  myfield.allocate(&grid);
+  myfield.setAllValuesToZero();
+
+  laserPulse pulse1;
+  pulse1.setCos2PlaneWave();
+  pulse1.setPPolarization();
+  pulse1.setDurationFWHM(5.0);
+  pulse1.setPulseInitialPosition(-6.0);
+  pulse1.setLambda(1.0);
+  pulse1.setNormalizedAmplitude(1.0);
+
+  //pulse1.setWaist(3.0);
+  //pulse1.setFocusPosition(0.0);
+  //pulse1.setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0);
+
+  myfield.addPulse(&pulse1);
+
+  myfield.boundary_conditions();
+
+  current.allocate(&grid);
+  current.setAllValuesToZero();
+
+  //*******************************************END FIELD DEFINITION***********************************************************
+
+  //*******************************************BEGIN SPECIES DEFINITION*********************************************************
+
+  PLASMA plasma1;
+  plasma1.density_function = left_soft_ramp;
+  plasma1.setXRangeBox(0.0, 100.0);
+  plasma1.setYRangeBox(grid.rmin[1], grid.rmax[1]);
+  plasma1.setZRangeBox(grid.rmin[2], grid.rmax[2]);
+  plasma1.setRampLength(20.0);
+  plasma1.setDensityCoefficient(0.01);
+  plasma1.setRampMinDensity(0.0);
 
 
-	SPECIE  electrons1(&grid);
-	electrons1.plasma = plasma1;
-	electrons1.setParticlesPerCellXYZ(100, 1, 1);  
-	electrons1.setName("ELE1");
-	electrons1.type = ELECTRON;
-	electrons1.creation();     
-	species.push_back(&electrons1);
+  SPECIE  electrons1(&grid);
+  electrons1.plasma = plasma1;
+  electrons1.setParticlesPerCellXYZ(100, 1, 1);
+  electrons1.setName("ELE1");
+  electrons1.type = ELECTRON;
+  electrons1.creation();
+  species.push_back(&electrons1);
 
-	SPECIE ions1(&grid);
-	ions1.plasma = plasma1;
-	ions1.setParticlesPerCellXYZ(100, 1, 1);
-	ions1.setName("ION1");
-	ions1.type = ION;
-	ions1.Z = 6.0;
-	ions1.A = 12.0;
-	ions1.creation();
-	species.push_back(&ions1);
-	
-	tempDistrib distribution;
-	distribution.setMaxwell(1.0);
-	
-	electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
-	ions1.add_momenta(rng,0.0, 0.0, 0.0, distribution);
-	
-	//*******************************************END SPECIES DEFINITION***********************************************************
+  SPECIE ions1(&grid);
+  ions1.plasma = plasma1;
+  ions1.setParticlesPerCellXYZ(100, 1, 1);
+  ions1.setName("ION1");
+  ions1.type = ION;
+  ions1.Z = 6.0;
+  ions1.A = 12.0;
+  ions1.creation();
+  species.push_back(&ions1);
 
-	//*******************************************BEGIN DIAG DEFINITION**************************************************
+  tempDistrib distribution;
+  distribution.setMaxwell(1.0);
 
-	OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
-	
-	manager.addEFieldFrom(0.0, 2.0);
-	manager.addBFieldFrom(0.0, 2.0);
-	
-	manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
-	manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
-	
-	manager.addCurrentFrom(0.0, 5.0);
-	
-	manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-	
-	manager.addDiagFrom(0.0, 1.0);
-	
-	manager.initialize(DIRECTORY_OUTPUT);
-	
-	//*******************************************END DIAG DEFINITION**************************************************
+  electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
+  ions1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
 
-	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  //*******************************************END SPECIES DEFINITION***********************************************************
 
-	if (grid.myid == grid.master_proc){
-		printf("----- START temporal cicle -----\n");
-		fflush(stdout);
-	}
-	
-	int Nstep = grid.getTotalNumberOfTimesteps();
-    int dumpID=1, dumpEvery;
-    if(DO_DUMP){
-		dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
-	}
-    grid.istep=0;
-    if (_DO_RESTART){
-        dumpID=_RESTART_FROM_DUMP;
-        restartFromDump(&dumpID, &grid, &myfield, species);
+  //*******************************************BEGIN DIAG DEFINITION**************************************************
+
+  OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
+
+  manager.addEFieldFrom(0.0, 2.0);
+  manager.addBFieldFrom(0.0, 2.0);
+
+  manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
+  manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
+
+  manager.addCurrentFrom(0.0, 5.0);
+
+  manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
+
+  manager.addDiagFrom(0.0, 1.0);
+
+  manager.initialize(DIRECTORY_OUTPUT);
+
+  //*******************************************END DIAG DEFINITION**************************************************
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  if (grid.myid == grid.master_proc){
+    printf("----- START temporal cicle -----\n");
+    fflush(stdout);
+  }
+
+  int Nstep = grid.getTotalNumberOfTimesteps();
+  int dumpID = 1, dumpEvery;
+  if (DO_DUMP){
+    dumpEvery = (int)TIME_BTW_DUMP / grid.dt;
+  }
+  grid.istep = 0;
+  if (_DO_RESTART){
+    dumpID = _RESTART_FROM_DUMP;
+    restartFromDump(&dumpID, &grid, &myfield, species);
+  }
+  while (grid.istep <= Nstep)
+  {
+
+    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+
+
+    manager.callDiags(grid.istep);
+
+    myfield.openBoundariesE_1();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
+
+    current.setAllValuesToZero();
+
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->current_deposition_standard(&current);
     }
-    while(grid.istep <= Nstep)
-		{
-			
-			grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-			
-			
-			manager.callDiags(grid.istep); 
-			
-			myfield.openBoundariesE_1();
-			myfield.new_halfadvance_B();
-			myfield.boundary_conditions();
-			
-			current.setAllValuesToZero();
-			
-			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-				(*spec_iterator)->current_deposition_standard(&current);
-			}
-			
-			current.pbc();
-			
-			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-				(*spec_iterator)->position_parallel_pbc();
-			}	
-			
-			myfield.openBoundariesB();
-			myfield.new_advance_E(&current);
-			
-			myfield.boundary_conditions();
-			
-			myfield.openBoundariesE_2();
-			myfield.new_halfadvance_B();
-			
-			myfield.boundary_conditions();
-			
-			for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-				(*spec_iterator)->momenta_advance(&myfield);
-			}
-			
-			grid.time += grid.dt;
-			
-			
-            moveWindow(&grid, &myfield, species);
 
-            grid.istep++;
-            if(DO_DUMP){
-                if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-                    dumpFilesForRestart(&dumpID, &grid, &myfield, species);
-                }
-            }
-		}
-	
-	manager.close();
-	MPI_Finalize();
-	exit(1);
-	
+    current.pbc();
+
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->position_parallel_pbc();
+    }
+
+    myfield.openBoundariesB();
+    myfield.new_advance_E(&current);
+
+    myfield.boundary_conditions();
+
+    myfield.openBoundariesE_2();
+    myfield.new_halfadvance_B();
+
+    myfield.boundary_conditions();
+
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->momenta_advance(&myfield);
+    }
+
+    grid.time += grid.dt;
+
+
+    moveWindow(&grid, &myfield, species);
+
+    grid.istep++;
+    if (DO_DUMP){
+      if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
+        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+      }
+    }
+  }
+
+  manager.close();
+  MPI_Finalize();
+  exit(1);
+
 }
 
 

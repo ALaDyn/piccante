@@ -33,23 +33,23 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 struct PLASMAparams{
-    double rminbox[3];
-    double rmaxbox[3];
-    double left_ramp_length;
-    double right_ramp_length;
-    double left_scale_length;
-    double right_scale_length;
-    double density_coefficient;
-    double left_ramp_min_density;
-    double right_ramp_min_density;
-    void *additional_params;
+  double rminbox[3];
+  double rmaxbox[3];
+  double left_ramp_length;
+  double right_ramp_length;
+  double left_scale_length;
+  double right_scale_length;
+  double density_coefficient;
+  double left_ramp_min_density;
+  double right_ramp_min_density;
+  void *additional_params;
 };
 #define NBIN_SPECTRUM 1000;
 struct SPECIEspectrum{
-    double Kmax;
-    double Dk;
-    int Nbin;
-    double *values;
+  double Kmax;
+  double Dk;
+  int Nbin;
+  double *values;
 };
 
 typedef double(*distrib_function)(double x, double y, double z, PLASMAparams plist, double Z, double A);
@@ -57,30 +57,30 @@ typedef double(*distrib_function)(double x, double y, double z, PLASMAparams pli
 class PLASMA
 {
 public:
-    PLASMAparams params;
-    distrib_function density_function;
+  PLASMAparams params;
+  distrib_function density_function;
 
-    PLASMA();
-    PLASMA(const PLASMA& other);
-    PLASMA operator=(const PLASMA& p1);
-    void setRampLength(double rlength);
-    void setLeftRampLength(double rlength);
-    void setRightRampLength(double rlength);
-    void setScaleLength(double slength);
-    void setLeftScaleLength(double slength);
-    void setRightScaleLength(double slength);
-    void setDensityCoefficient(double dcoeff);
-    void setDensityCoefficient(double dcoeff, double lambda);
-    void setRampMinDensity(double minden);
-    void setLeftRampMinDensity(double minden);
-    void setRightRampMinDensity(double minden);
-    void setAdditionalParams(void* addpar);
-    void setMinBox(double xmin, double ymin, double zmin);
-    void setMaxBox(double xmax, double ymax, double zmax);
-    void setXRangeBox(double xmin, double xmax);
-    void setYRangeBox(double ymin, double ymax);
-    void setZRangeBox(double zmin, double zmax);
-    ~PLASMA();
+  PLASMA();
+  PLASMA(const PLASMA& other);
+  PLASMA operator=(const PLASMA& p1);
+  void setRampLength(double rlength);
+  void setLeftRampLength(double rlength);
+  void setRightRampLength(double rlength);
+  void setScaleLength(double slength);
+  void setLeftScaleLength(double slength);
+  void setRightScaleLength(double slength);
+  void setDensityCoefficient(double dcoeff);
+  void setDensityCoefficient(double dcoeff, double lambda);
+  void setRampMinDensity(double minden);
+  void setLeftRampMinDensity(double minden);
+  void setRightRampMinDensity(double minden);
+  void setAdditionalParams(void* addpar);
+  void setMinBox(double xmin, double ymin, double zmin);
+  void setMaxBox(double xmax, double ymax, double zmax);
+  void setXRangeBox(double xmin, double xmax);
+  void setYRangeBox(double ymin, double ymax);
+  void setZRangeBox(double zmin, double zmax);
+  ~PLASMA();
 };
 
 //Pre-defined density functions
@@ -117,44 +117,44 @@ enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 class laserPulse
 {
 public:
-    laserPulseType type;
-    pulsePolarization polarization;
-    double t_FWHM;
-    double waist;
-    double focus_position;
-    double laser_pulse_initial_position;
-    double normalized_amplitude;
-    double lambda0;
-    bool rotation;
-    double angle;
-    double rotation_center_along_x;
-    double rise_time;
+  laserPulseType type;
+  pulsePolarization polarization;
+  double t_FWHM;
+  double waist;
+  double focus_position;
+  double laser_pulse_initial_position;
+  double normalized_amplitude;
+  double lambda0;
+  bool rotation;
+  double angle;
+  double rotation_center_along_x;
+  double rise_time;
 
 
-    laserPulse();
-    ~laserPulse();
-    laserPulse(const laserPulse& other);
-    laserPulse operator=(const laserPulse& p1);
-    void setFocusPosition(double _focus_position);
-    void setPulseInitialPosition(double _laser_pulse_initial_position);
-    void setLambda(double _lambda0);
-    void setWaist(double _waist);
-    void setDurationFWHM(double _t_FWHM);
-    void setNormalizedAmplitude(double _normalized_amplitude);
-    void setRiseTime(double _rise_time);
-    void setRotationAngleAndCenter(double _angle, double _rotation_center_along_x);
-    void setGaussianPulse(double _waist, double _t_FWHM, double _normalized_amplitude);
-    void setPlaneWave(double _normalized_amplitude);
-    void setCos2PlaneWave(double _t_FWHM, double _normalized_amplitude);
-    void setCos2PlateauPlaneWave(double _t_FWHM, double _rise_time, double _normalized_amplitude);
-    void setGaussianPulse();
-    void setPlaneWave();
-    void setCos2PlaneWave();
-    void setCos2PlateauPlaneWave();
+  laserPulse();
+  ~laserPulse();
+  laserPulse(const laserPulse& other);
+  laserPulse operator=(const laserPulse& p1);
+  void setFocusPosition(double _focus_position);
+  void setPulseInitialPosition(double _laser_pulse_initial_position);
+  void setLambda(double _lambda0);
+  void setWaist(double _waist);
+  void setDurationFWHM(double _t_FWHM);
+  void setNormalizedAmplitude(double _normalized_amplitude);
+  void setRiseTime(double _rise_time);
+  void setRotationAngleAndCenter(double _angle, double _rotation_center_along_x);
+  void setGaussianPulse(double _waist, double _t_FWHM, double _normalized_amplitude);
+  void setPlaneWave(double _normalized_amplitude);
+  void setCos2PlaneWave(double _t_FWHM, double _normalized_amplitude);
+  void setCos2PlateauPlaneWave(double _t_FWHM, double _rise_time, double _normalized_amplitude);
+  void setGaussianPulse();
+  void setPlaneWave();
+  void setCos2PlaneWave();
+  void setCos2PlateauPlaneWave();
 
-    void setPPolarization();
-    void setSPolarization();
-    void setCircularPolarization();
+  void setPPolarization();
+  void setSPolarization();
+  void setCircularPolarization();
 
 };
 
@@ -165,9 +165,9 @@ public:
 #define _NULL_CRD -1;
 
 struct integer_or_halfinteger{
-    char x;
-    char y;
-    char z;
+  char x;
+  char y;
+  char z;
 };
 
 //************** PARTICLES DISTRIBUTION FUNCTION *******
@@ -176,29 +176,29 @@ enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXW
 class tempDistrib{
 public:
 
-    tempDistribType type;
+  tempDistribType type;
 
-    tempDistrib();
-    void setWaterbag(double _p0);
-    void setWaterbag3Temp(double _p0_x, double _p0_y, double _p0_z);
-    void setUnifSphere(double _p0);
-    void setSupergaussian(double _p0, double _alpha);
-    void setMaxwell(double _temp);
-    void setJuttner(double _a);
-    void setSpecial(double _a);
+  tempDistrib();
+  void setWaterbag(double _p0);
+  void setWaterbag3Temp(double _p0_x, double _p0_y, double _p0_z);
+  void setUnifSphere(double _p0);
+  void setSupergaussian(double _p0, double _alpha);
+  void setMaxwell(double _temp);
+  void setJuttner(double _a);
+  void setSpecial(double _a);
 
-    bool isInit();
+  bool isInit();
 
-    friend class SPECIE;
+  friend class SPECIE;
 private:
-    double p0;
-    double p0_x;
-    double p0_y;
-    double p0_z;
-    double alpha;
-    double temp;
-    double a;
-    bool init;
+  double p0;
+  double p0_x;
+  double p0_y;
+  double p0_z;
+  double alpha;
+  double temp;
+  double a;
+  bool init;
 
 };
 

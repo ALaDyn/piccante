@@ -76,28 +76,28 @@ int main(int narg, char **args)
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-  grid.setXrange(-4.0,4.0);
-  grid.setYrange(-4.0,4.0);
-  grid.setZrange(-0.5 ,+0.5);
+  grid.setXrange(-4.0, 4.0);
+  grid.setYrange(-4.0, 4.0);
+  grid.setZrange(-0.5, +0.5);
 
-  grid.setNCells(1024,1024,100);
+  grid.setNCells(1024, 1024, 100);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
   //grid.enableStretchedGrid();
-  grid.setXandNxLeftStretchedGrid(-20.0,250);
-  grid.setXandNxRightStretchedGrid(20.0,250);
-  grid.setYandNyLeftStretchedGrid(-20.0,250);
-  grid.setYandNyRightStretchedGrid(20.0,250);
+  grid.setXandNxLeftStretchedGrid(-20.0, 250);
+  grid.setXandNxRightStretchedGrid(20.0, 250);
+  grid.setYandNyLeftStretchedGrid(-20.0, 250);
+  grid.setYandNyRightStretchedGrid(20.0, 250);
 
-  grid.setBoundaries(xPBC|yPBC|zPBC);
+  grid.setBoundaries(xPBC | yPBC | zPBC);
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
   grid.setSimulationTime(100.05);
 
   grid.with_particles = YES;//NO;
-  grid.with_current   = YES;//YES;
+  grid.with_current = YES;//YES;
   //double start, beta_mw;	int frequency_of_shifts;
   //grid.setMovingWindow(start=0, beta_mw=0.0, frequency_of_shifts=10);
 
@@ -105,8 +105,8 @@ int main(int narg, char **args)
 
   grid.finalize();
 
-  srand (time(NULL));
-  grid.initRNG(rng,RANDOM_NUMBER_GENERATOR_SEED);
+  srand(time(NULL));
+  grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.visualDiag();
 
@@ -127,7 +127,7 @@ int main(int narg, char **args)
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
   PLASMA plasma1;
   plasma1.density_function = box;
-  plasma1.setMinBox(-10.0 , -10.0, grid.rmin[2]);
+  plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
   plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);
   plasma1.setRampLength(0.2);
   plasma1.setDensityCoefficient(1.0);
@@ -136,16 +136,16 @@ int main(int narg, char **args)
   electrons1.plasma = plasma1;
   electrons1.setParticlesPerCellXYZ(10, 10, 1);
   electrons1.setName("ELE1");
-  electrons1.type=ELECTRON;
+  electrons1.type = ELECTRON;
   electrons1.creation();
   species.push_back(&electrons1);
 
 
   SPECIE electrons2(&grid);
-  electrons2.plasma=plasma1;
+  electrons2.plasma = plasma1;
   electrons2.setParticlesPerCellXYZ(10, 10, 1);
   electrons2.setName("ELE2");
-  electrons2.type=ELECTRON;
+  electrons2.type = ELECTRON;
   electrons2.creation();
   species.push_back(&electrons2);
 
@@ -154,12 +154,12 @@ int main(int narg, char **args)
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
 
-  electrons1.add_momenta(rng,0.0, 0.0, -1.0, distribution);
-  electrons2.add_momenta(rng,0.0, 0.0, 1.0, distribution);
+  electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
+  electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->printParticleNumber();
-    }
+    (*spec_iterator)->printParticleNumber();
+  }
 
   //*******************************************END SPECIES DEFINITION***********************************************************
 
@@ -167,18 +167,18 @@ int main(int narg, char **args)
 
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  manager.addEFieldFrom(5.0,5.0);
-  manager.addBFieldFrom(5.0,5.0);
+  manager.addEFieldFrom(5.0, 5.0);
+  manager.addBFieldFrom(5.0, 5.0);
 
-  manager.addSpeciesDensityFrom("ELE1", 5.0,5.0);
-  manager.addSpeciesDensityFrom("ELE2", 5.0,5.0);
+  manager.addSpeciesDensityFrom("ELE1", 5.0, 5.0);
+  manager.addSpeciesDensityFrom("ELE2", 5.0, 5.0);
 
-  manager.addCurrentFrom(5.0,5.0);
+  manager.addCurrentFrom(5.0, 5.0);
 
-  manager.addSpeciesPhaseSpaceFrom("ELE1", 5.0,5.0);
-  manager.addSpeciesPhaseSpaceFrom("ELE2", 5.0,5.0);
+  manager.addSpeciesPhaseSpaceFrom("ELE1", 5.0, 5.0);
+  manager.addSpeciesPhaseSpaceFrom("ELE2", 5.0, 5.0);
 
-  manager.addDiagFrom(0.0,2.0);
+  manager.addDiagFrom(0.0, 2.0);
 
   manager.initialize(DIRECTORY_OUTPUT);
 
@@ -186,78 +186,78 @@ int main(int narg, char **args)
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   if (grid.myid == grid.master_proc){
-      printf("----- START temporal cicle -----\n");
-      fflush(stdout);
-    }
+    printf("----- START temporal cicle -----\n");
+    fflush(stdout);
+  }
 
   int Nstep = grid.getTotalNumberOfTimesteps();
-  int dumpID=1, dumpEvery;
-  if(DO_DUMP){
-      dumpEvery= (int)TIME_BTW_DUMP/grid.dt;
-    }
-  grid.istep=0;
+  int dumpID = 1, dumpEvery;
+  if (DO_DUMP){
+    dumpEvery = (int)TIME_BTW_DUMP / grid.dt;
+  }
+  grid.istep = 0;
   if (_DO_RESTART){
-      dumpID=_RESTART_FROM_DUMP;
-      restartFromDump(&dumpID, &grid, &myfield, species);
-    }
-  while(grid.istep <= Nstep)
-    {
+    dumpID = _RESTART_FROM_DUMP;
+    restartFromDump(&dumpID, &grid, &myfield, species);
+  }
+  while (grid.istep <= Nstep)
+  {
 
-      grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
-      manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
 
-      myfield.openBoundariesE_1();
-      myfield.new_halfadvance_B();
-      myfield.boundary_conditions();
+    myfield.openBoundariesE_1();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
 
-      current.setAllValuesToZero();
-      for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    current.setAllValuesToZero();
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
 #ifdef ESIRKEPOV
-          (*spec_iterator)->current_deposition(&current);
+      (*spec_iterator)->current_deposition(&current);
 #else
-          (*spec_iterator)->current_deposition_standard(&current);
+      (*spec_iterator)->current_deposition_standard(&current);
 #endif
 
-        }
-      current.pbc();
-
-      for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-          (*spec_iterator)->position_parallel_pbc();
-        }
-
-      myfield.openBoundariesB();
-      myfield.new_advance_E(&current);
-
-      myfield.boundary_conditions();
-      myfield.openBoundariesE_2();
-      myfield.new_halfadvance_B();
-      myfield.boundary_conditions();
-
-      for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-#ifdef RADIATION_FRICTION
-          (*spec_iterator)->momenta_advance_with_friction(&myfield, lambda);
-#else
-          (*spec_iterator)->momenta_advance(&myfield);
-#endif
-        }
-
-      //        if(grid.istep%FIELD_FILTER_FREQ==0){
-      //            myfield.applyFilter(fltr_Ex, dir_x);
-      //            myfield.boundary_conditions();
-      //        }
-
-      grid.time += grid.dt;
-
-      moveWindow(&grid, &myfield, species);
-
-      grid.istep++;
-      if(DO_DUMP){
-          if (grid.istep!=0 && !(grid.istep % (dumpEvery))) {
-              dumpFilesForRestart(&dumpID, &grid, &myfield, species);
-            }
-        }
     }
+    current.pbc();
+
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->position_parallel_pbc();
+    }
+
+    myfield.openBoundariesB();
+    myfield.new_advance_E(&current);
+
+    myfield.boundary_conditions();
+    myfield.openBoundariesE_2();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
+
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+#ifdef RADIATION_FRICTION
+      (*spec_iterator)->momenta_advance_with_friction(&myfield, lambda);
+#else
+      (*spec_iterator)->momenta_advance(&myfield);
+#endif
+    }
+
+    //        if(grid.istep%FIELD_FILTER_FREQ==0){
+    //            myfield.applyFilter(fltr_Ex, dir_x);
+    //            myfield.boundary_conditions();
+    //        }
+
+    grid.time += grid.dt;
+
+    moveWindow(&grid, &myfield, species);
+
+    grid.istep++;
+    if (DO_DUMP){
+      if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
+        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+      }
+    }
+  }
 
   manager.close();
   MPI_Finalize();

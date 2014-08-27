@@ -93,23 +93,23 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 
 //*****USEFUL FUNCTIONS*****
 template <class T>const T& MIN(const T& a, const T& b){
-    return (a < b) ? a : b;
+  return (a < b) ? a : b;
 }
 
 template <class T>const T& MAX(const T& a, const T& b){
-    return (a > b) ? a : b;
+  return (a > b) ? a : b;
 }
 
 
 //*****ACCESS PROTOTYPE*****
 class ACCESSO{
 public:
-    ACCESSO();
-    static const int edge = 2;
-    int indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc);
-    void alloc_number(int *N_grid, int *N_loc);
-    int dimensions;
-    static const int Nexchange = 1;
+  ACCESSO();
+  static const int edge = 2;
+  int indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc);
+  void alloc_number(int *N_grid, int *N_loc);
+  int dimensions;
+  static const int Nexchange = 1;
 };
 
 //*****LOGOS******
