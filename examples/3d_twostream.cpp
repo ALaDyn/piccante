@@ -31,7 +31,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
 #else
-#include <gsl/gsl_rng.h> 
+#include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #endif
 #include <cstdarg>
@@ -116,8 +116,8 @@ int main(int narg, char **args)
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
 
-    myfield.boundary_conditions();
-  //myfield.smooth_filter(10);   
+  myfield.boundary_conditions();
+  //myfield.smooth_filter(10);
 
   current.allocate(&grid);
   current.setAllValuesToZero();

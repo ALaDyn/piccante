@@ -140,7 +140,6 @@ int main(int narg, char **args)
   electrons1.creation();
   species.push_back(&electrons1);
 
-
   SPECIE electrons2(&grid);
   electrons2.plasma = plasma1;
   electrons2.setParticlesPerCellXYZ(10, 10, 1);
@@ -148,8 +147,6 @@ int main(int narg, char **args)
   electrons2.type = ELECTRON;
   electrons2.creation();
   species.push_back(&electrons2);
-
-
 
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
@@ -160,11 +157,9 @@ int main(int narg, char **args)
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();
   }
-
   //*******************************************END SPECIES DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
-
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
   manager.addEFieldFrom(5.0, 5.0);
@@ -181,7 +176,6 @@ int main(int narg, char **args)
   manager.addDiagFrom(0.0, 2.0);
 
   manager.initialize(DIRECTORY_OUTPUT);
-
   //*******************************************END DIAG DEFINITION**************************************************
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
