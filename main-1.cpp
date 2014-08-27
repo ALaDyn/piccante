@@ -22,7 +22,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
 #include <cstring>
@@ -36,8 +35,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include <cstdarg>
 #include <vector>
-
-
 
 
 #define DIMENSIONALITY 1

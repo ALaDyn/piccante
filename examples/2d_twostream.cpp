@@ -22,7 +22,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
 #include <cstring>
@@ -37,9 +36,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-//using namespace std;
 
 #define DIMENSIONALITY 2
+
 #include "access.h"
 #include "commons.h"
 #include "grid.h"
@@ -47,7 +46,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 #include "particle_species.h"
-//#include "diag_manager.h"
 #include "output_manager.h"
 #include "utilities.h"
 

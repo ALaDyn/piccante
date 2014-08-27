@@ -22,11 +22,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
 #include <cstring>
-#include <ctime>       /* time */
+#include <ctime>
 #if defined(_MSC_VER)
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
@@ -36,8 +35,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include <cstdarg>
 #include <vector>
-
-using namespace std;
 
 #define DIMENSIONALITY 1
 
@@ -69,7 +66,7 @@ int main(int narg, char **args)
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;
-  vector<SPECIE*>::const_iterator spec_iterator;
+  std::vector<SPECIE*>::const_iterator spec_iterator;
   int istep;
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 

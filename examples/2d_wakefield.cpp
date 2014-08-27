@@ -22,7 +22,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
 #include <cstring>
@@ -37,7 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-using namespace std;
 
 #define DIMENSIONALITY 2
 
@@ -71,7 +69,7 @@ int main(int narg, char **args)
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;
-  vector<SPECIE*>::const_iterator spec_iterator;
+  std::vector<SPECIE*>::const_iterator spec_iterator;
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
