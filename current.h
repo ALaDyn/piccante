@@ -38,29 +38,29 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 class CURRENT{
 public:
-	int Ncomp; // N grid point including ghost cells,N_grid[0]*N_grid[1]*N_grid[2], comp number
-	//double max_value[6],min_value[6];  //12 utility values
+    int Ncomp; // N grid point including ghost cells,N_grid[0]*N_grid[1]*N_grid[2], comp number
+    //double max_value[6],min_value[6];  //12 utility values
 
     CURRENT();
     ~CURRENT();
-	void allocate(GRID *grid); //field allocation 
-	void reallocate();	//REALLOCATION only if load balancing is introduced
-	void setAllValuesToZero();
-	CURRENT operator = (CURRENT &destro);
+    void allocate(GRID *grid); //field allocation 
+    void reallocate();	//REALLOCATION only if load balancing is introduced
+    void setAllValuesToZero();
+    CURRENT operator = (CURRENT &destro);
 
-	integer_or_halfinteger getJCoords(int c);
-	integer_or_halfinteger getDensityCoords();
+    integer_or_halfinteger getJCoords(int c);
+    integer_or_halfinteger getDensityCoords();
 
-	void pbc();
+    void pbc();
 
     void eraseDensity();
 
-	//PUBLIC INLINE FUNCTIONS
-	inline double & Jx(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-	inline double & Jy(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-	inline double & Jz(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-	inline double & density(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-	inline double & JJ(int c, int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+    //PUBLIC INLINE FUNCTIONS
+    inline double & Jx(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+    inline double & Jy(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+    inline double & Jz(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+    inline double & density(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+    inline double & JJ(int c, int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
 
 
 
@@ -69,14 +69,14 @@ private:
     long int Ntot;
     int ZGrid_factor, YGrid_factor;
     ACCESSO acc;    // object distinguishing 1-2-3 D
-	double *val; //   THE BIG poiniter
-	GRID *mygrid;         // pointer to the GIRD object 
-	int allocated;  //flag 1-0 allocaded-not alloc
+    double *val; //   THE BIG poiniter
+    GRID *mygrid;         // pointer to the GIRD object 
+    int allocated;  //flag 1-0 allocaded-not alloc
 
-	//PRIVATE INLINE FUNCTIONS
-	inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-		return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
-	}
+    //PRIVATE INLINE FUNCTIONS
+    inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+        return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
+    }
 
 
 };

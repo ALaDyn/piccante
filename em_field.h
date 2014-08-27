@@ -99,156 +99,156 @@ enum filterDir{
 
 class EM_FIELD{
 public:
-	double minima[6], maxima[8];  //14 utility values minima: Exmin Eymin, ..., Bzmin;     maxima: Exmax, Eymax, ..., Bzmax, Emax, Bmax
-	double total_energy[7];  // Ex2, Ey2, Ez2, Bx2, By2, Bz2 E2+B2 (totalenergy)
-	double total_momentum[3];  // pointing vector Sx Sy Sz
+    double minima[6], maxima[8];  //14 utility values minima: Exmin Eymin, ..., Bzmin;     maxima: Exmax, Eymax, ..., Bzmax, Emax, Bmax
+    double total_energy[7];  // Ex2, Ey2, Ez2, Bx2, By2, Bz2 E2+B2 (totalenergy)
+    double total_momentum[3];  // pointing vector Sx Sy Sz
 
 
-	EM_FIELD();
+    EM_FIELD();
     ~EM_FIELD();
-	EM_FIELD operator = (EM_FIELD &destro);
+    EM_FIELD operator = (EM_FIELD &destro);
 
-	void allocate(GRID *grid);
-	void reallocate();
-	void setAllValuesToZero();
+    void allocate(GRID *grid);
+    void reallocate();
+    void setAllValuesToZero();
 
-	int getNcomp();
-	integer_or_halfinteger getCompCoords(int c);
-	bool amIAllocated();
+    int getNcomp();
+    integer_or_halfinteger getCompCoords(int c);
+    bool amIAllocated();
 
     void difference(EM_FIELD *right);
 
-	void boundary_conditions();  // set on the ghost cells the boundary values  
+    void boundary_conditions();  // set on the ghost cells the boundary values  
 
-	void new_halfadvance_B();
-	void new_advance_B();
-	void new_advance_E();
-	void new_advance_E(CURRENT *current);
+    void new_halfadvance_B();
+    void new_advance_B();
+    void new_advance_E();
+    void new_advance_E(CURRENT *current);
 
     static const int myWidth = 12;
-	static const int myNarrowWidth = 6;
-	void init_output_diag(std::ofstream &ff);
-	void output_diag(int istep, std::ofstream &ff);
-	void init_output_extrems(std::ofstream &ff);
-	void output_extrems(int istep, std::ofstream &ff);
+    static const int myNarrowWidth = 6;
+    void init_output_diag(std::ofstream &ff);
+    void output_diag(int istep, std::ofstream &ff);
+    void init_output_extrems(std::ofstream &ff);
+    void output_extrems(int istep, std::ofstream &ff);
 
-	void smooth_filter(int filter_points);
+    void smooth_filter(int filter_points);
 
-	void addPulse(laserPulse* pulse);
+    void addPulse(laserPulse* pulse);
     void addFieldsFromFile(std::string name);
 
-	void move_window();
+    void move_window();
 
-	double getEBenergy(double* EEnergy, double* BEnergy);
-	void computeEnergyAndExtremes();
+    double getEBenergy(double* EEnergy, double* BEnergy);
+    void computeEnergyAndExtremes();
 
-	void openBoundariesE_1();
-	void openBoundariesE_2();
-	void openBoundariesB();
+    void openBoundariesE_1();
+    void openBoundariesE_2();
+    void openBoundariesB();
 
     void applyFilter(int flags, int dirflags);
 
-	bool areEnergyExtremesAvailable();
+    bool areEnergyExtremesAvailable();
     void dump(std::ofstream &ff);
     void reloadDump(std::ifstream &ff);
     //PUBLIC INLINE FUNCTIONS
     inline double & E0(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           0, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            0, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline double & E1(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           1, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            1, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline double & E2(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           2, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            2, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline double & B0(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           3, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            3, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline  double & B1(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           4, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            4, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline double & B2(int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           5, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            5, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
     inline double & VEB(int c, int i, int j, int k){
-      return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
-                           c, i, j, k,
-                           N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+            c, i, j, k,
+            N_grid[0], N_grid[1], N_grid[2], Ncomp)];
     }
 
-	//  inline double & E0(int i,int j,int k){
-	//      int indice=(0+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline double & E1(int i,int j,int k){
-	//      int indice=(1+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline double & E2(int i,int j,int k){
-	//      int indice=(2+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline double & B0(int i,int j,int k){
-	//      int indice=(3+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline  double & B1(int i,int j,int k){
-	//      int indice=(4+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline double & B2(int i,int j,int k){
-	//      int indice=(5+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
-	//  inline double & VEB(int c,int i,int j,int k){
-	//      int indice=(c+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
-	//      return val[indice];}
+    //  inline double & E0(int i,int j,int k){
+    //      int indice=(0+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline double & E1(int i,int j,int k){
+    //      int indice=(1+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline double & E2(int i,int j,int k){
+    //      int indice=(2+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline double & B0(int i,int j,int k){
+    //      int indice=(3+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline  double & B1(int i,int j,int k){
+    //      int indice=(4+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline double & B2(int i,int j,int k){
+    //      int indice=(5+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
+    //  inline double & VEB(int c,int i,int j,int k){
+    //      int indice=(c+Ncomp*(i+acc.edge)+YGrid_factor*Ncomp*N_grid[0]*(j+acc.edge)+ZGrid_factor*Ncomp*N_grid[0]*N_grid[1]*(k+acc.edge));
+    //      return val[indice];}
 
 
 private:
     int N_grid[3], Ncomp;
     long int Ntot;
-	int ZGrid_factor, YGrid_factor;
-	ACCESSO acc;    // object distinguishing 1-2-3 D
-	double *val; //   THE BIG poiniter
-	GRID *mygrid;         // pointer to the GIRD object 
-	bool allocated;  //flag 1-0 allocaded-not alloc 
+    int ZGrid_factor, YGrid_factor;
+    ACCESSO acc;    // object distinguishing 1-2-3 D
+    double *val; //   THE BIG poiniter
+    GRID *mygrid;         // pointer to the GIRD object 
+    bool allocated;  //flag 1-0 allocaded-not alloc 
 
     bool EBEnergyExtremesFlag;
 
-	void auxiliary_rotation(double xin, double yin, double &xp, double &yp, double xcenter, double theta);
+    void auxiliary_rotation(double xin, double yin, double &xp, double &yp, double xcenter, double theta);
 
     static double cos2_profile(double u);
     static double cos2_plateau_profile(double rise, double plateau, double x);
-	static double cossin_profile(double u);
+    static double cossin_profile(double u);
 
-	int pbc_compute_alloc_size();
-	void pbcExchangeAlongX(double* send_buffer, double* recv_buffer);
-	void pbcExchangeAlongY(double* send_buffer, double* recv_buffer);
-	void pbcExchangeAlongZ(double* send_buffer, double* recv_buffer);
-	void pbc_EB();
+    int pbc_compute_alloc_size();
+    void pbcExchangeAlongX(double* send_buffer, double* recv_buffer);
+    void pbcExchangeAlongY(double* send_buffer, double* recv_buffer);
+    void pbcExchangeAlongZ(double* send_buffer, double* recv_buffer);
+    void pbc_EB();
 
-	void gaussian_pulse(int dimensions, double xx, double yy, double zz,
-		double tt, double lambda, double fwhm,
-		double w0, double* field, pulsePolarization polarization);
+    void gaussian_pulse(int dimensions, double xx, double yy, double zz,
+        double tt, double lambda, double fwhm,
+        double w0, double* field, pulsePolarization polarization);
 
     void initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
-		double laser_pulse_initial_position,
+        double laser_pulse_initial_position,
         double t_FWHM, double xcenter, double angle, pulsePolarization polarization, double rise_time);
 
-	void initialize_plane_wave_angle(double lambda0, double amplitude,
-		double angle, pulsePolarization polarization);
+    void initialize_plane_wave_angle(double lambda0, double amplitude,
+        double angle, pulsePolarization polarization);
 
-	void initialize_gaussian_pulse_angle(double lambda0, double amplitude,
-		double laser_pulse_initial_position, double t_FWHM,
-		double waist, double focus_position,
-		double xcenter, double angle, pulsePolarization polarization);
+    void initialize_gaussian_pulse_angle(double lambda0, double amplitude,
+        double laser_pulse_initial_position, double t_FWHM,
+        double waist, double focus_position,
+        double xcenter, double angle, pulsePolarization polarization);
 
     void filterDirSelect(int comp, int dirflags);
     void filterCompAlongX(int comp);
@@ -257,7 +257,7 @@ private:
 
     //PRIVATE INLINE FUNCTIONS
     inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-      return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
+        return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
     }
 
 

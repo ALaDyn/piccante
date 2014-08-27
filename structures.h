@@ -33,8 +33,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 struct PLASMAparams{
-	double rminbox[3];
-	double rmaxbox[3];
+    double rminbox[3];
+    double rmaxbox[3];
     double left_ramp_length;
     double right_ramp_length;
     double left_scale_length;
@@ -46,10 +46,10 @@ struct PLASMAparams{
 };
 #define NBIN_SPECTRUM 1000;
 struct SPECIEspectrum{
-	double Kmax;
-	double Dk;
-	int Nbin;
-	double *values;
+    double Kmax;
+    double Dk;
+    int Nbin;
+    double *values;
 };
 
 typedef double(*distrib_function)(double x, double y, double z, PLASMAparams plist, double Z, double A);
@@ -57,13 +57,13 @@ typedef double(*distrib_function)(double x, double y, double z, PLASMAparams pli
 class PLASMA
 {
 public:
-	PLASMAparams params;
-	distrib_function density_function;
+    PLASMAparams params;
+    distrib_function density_function;
 
-	PLASMA();
-	PLASMA(const PLASMA& other);
-	PLASMA operator=(const PLASMA& p1);
-	void setRampLength(double rlength);
+    PLASMA();
+    PLASMA(const PLASMA& other);
+    PLASMA operator=(const PLASMA& p1);
+    void setRampLength(double rlength);
     void setLeftRampLength(double rlength);
     void setRightRampLength(double rlength);
     void setScaleLength(double slength);
@@ -75,12 +75,12 @@ public:
     void setLeftRampMinDensity(double minden);
     void setRightRampMinDensity(double minden);
     void setAdditionalParams(void* addpar);
-	void setMinBox(double xmin, double ymin, double zmin);
-	void setMaxBox(double xmax, double ymax, double zmax);
-	void setXRangeBox(double xmin, double xmax);
-	void setYRangeBox(double ymin, double ymax);
-	void setZRangeBox(double zmin, double zmax);
-	~PLASMA();
+    void setMinBox(double xmin, double ymin, double zmin);
+    void setMaxBox(double xmax, double ymax, double zmax);
+    void setXRangeBox(double xmin, double xmax);
+    void setYRangeBox(double ymin, double ymax);
+    void setZRangeBox(double zmin, double zmax);
+    ~PLASMA();
 };
 
 //Pre-defined density functions
@@ -111,30 +111,30 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
 
 
 //************** LASER PULSE TYPES *******
-enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE};
+enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
 enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 
 class laserPulse
 {
 public:
-	laserPulseType type;
-	pulsePolarization polarization;
-	double t_FWHM;
-	double waist;
-	double focus_position;
-	double laser_pulse_initial_position;
-	double normalized_amplitude;
-	double lambda0;
-	bool rotation;
-	double angle;
-	double rotation_center_along_x;
+    laserPulseType type;
+    pulsePolarization polarization;
+    double t_FWHM;
+    double waist;
+    double focus_position;
+    double laser_pulse_initial_position;
+    double normalized_amplitude;
+    double lambda0;
+    bool rotation;
+    double angle;
+    double rotation_center_along_x;
     double rise_time;
 
 
-	laserPulse();
-	~laserPulse();
-	laserPulse(const laserPulse& other);
-	laserPulse operator=(const laserPulse& p1);
+    laserPulse();
+    ~laserPulse();
+    laserPulse(const laserPulse& other);
+    laserPulse operator=(const laserPulse& p1);
     void setFocusPosition(double _focus_position);
     void setPulseInitialPosition(double _laser_pulse_initial_position);
     void setLambda(double _lambda0);
@@ -165,41 +165,40 @@ public:
 #define _NULL_CRD -1;
 
 struct integer_or_halfinteger{
-	char x;
-	char y;
-	char z;
+    char x;
+    char y;
+    char z;
 };
 
 //************** PARTICLES DISTRIBUTION FUNCTION *******
-enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER , SPECIAL};
+enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER, SPECIAL };
 
 class tempDistrib{
 public:
 
-	tempDistribType type;
+    tempDistribType type;
 
-
-	tempDistrib();
-	void setWaterbag(double _p0);
-	void setWaterbag3Temp(double _p0_x, double _p0_y, double _p0_z);
-	void setUnifSphere(double _p0);
-	void setSupergaussian(double _p0, double _alpha);
-	void setMaxwell(double _temp);
-	void setJuttner(double _a);
+    tempDistrib();
+    void setWaterbag(double _p0);
+    void setWaterbag3Temp(double _p0_x, double _p0_y, double _p0_z);
+    void setUnifSphere(double _p0);
+    void setSupergaussian(double _p0, double _alpha);
+    void setMaxwell(double _temp);
+    void setJuttner(double _a);
     void setSpecial(double _a);
 
-	bool isInit();
+    bool isInit();
 
-	friend class SPECIE;
+    friend class SPECIE;
 private:
-	double p0;
-	double p0_x;
-	double p0_y;
-	double p0_z;
-	double alpha;
-	double temp;
-	double a;
-	bool init;
+    double p0;
+    double p0_x;
+    double p0_y;
+    double p0_z;
+    double alpha;
+    double temp;
+    double a;
+    bool init;
 
 };
 

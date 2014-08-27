@@ -63,11 +63,11 @@ enum diagType{
     OUT_E_FIELD,
     OUT_B_FIELD,
     OUT_SPEC_PHASE_SPACE,
-	OUT_DIAG,
+    OUT_DIAG,
     OUT_CURRENT,
     OUT_EB_PROBE,
     OUT_SPEC_DENSITY
-    };
+};
 
 enum whichFieldOut{
     WHICH_E_ONLY,
@@ -77,10 +77,10 @@ enum whichFieldOut{
 
 
 struct request{
-	double dtime;
-	int itime;
-	diagType type;
-	int target;
+    double dtime;
+    int itime;
+    diagType type;
+    int target;
     int domain;
 };
 
@@ -119,19 +119,19 @@ class OUTPUT_MANAGER
 {
 
 public:
-	OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies);
-	~OUTPUT_MANAGER();
+    OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies);
+    ~OUTPUT_MANAGER();
 
-	void initialize(std::string _outputDir);
-	void close();    
+    void initialize(std::string _outputDir);
+    void close();
 
     void addEBFieldFrom(double startTime, double frequency);
     void addEBFieldAt(double atTime);
     void addEBFieldFromTo(double startTime, double frequency, double endTime);
 
-    void addEBFieldFrom(outDomain* _domain,double startTime, double frequency);
-    void addEBFieldAt(outDomain* _domain,double atTime);
-    void addEBFieldFromTo(outDomain* _domain,double startTime, double frequency, double endTime);
+    void addEBFieldFrom(outDomain* _domain, double startTime, double frequency);
+    void addEBFieldAt(outDomain* _domain, double atTime);
+    void addEBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime);
 
     void addEFieldFrom(double startTime, double frequency);
     void addEFieldAt(double atTime);
@@ -141,13 +141,13 @@ public:
     void addBFieldAt(double atTime);
     void addBFieldFromTo(double startTime, double frequency, double endTime);
 
-    void addEFieldFrom(outDomain* _domain,double startTime, double frequency);
-    void addEFieldAt(outDomain* _domain,double atTime);
-    void addEFieldFromTo(outDomain* _domain,double startTime, double frequency, double endTime);
+    void addEFieldFrom(outDomain* _domain, double startTime, double frequency);
+    void addEFieldAt(outDomain* _domain, double atTime);
+    void addEFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime);
 
-    void addBFieldFrom(outDomain* _domain,double startTime, double frequency);
-    void addBFieldAt(outDomain* _domain,double atTime);
-    void addBFieldFromTo(outDomain* _domain,double startTime, double frequency, double endTime);
+    void addBFieldFrom(outDomain* _domain, double startTime, double frequency);
+    void addBFieldAt(outDomain* _domain, double atTime);
+    void addBFieldFromTo(outDomain* _domain, double startTime, double frequency, double endTime);
 
     void addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency);
     void addEBFieldProbeAt(emProbe* Probe, double atTime);
@@ -177,39 +177,39 @@ public:
     void addSpeciesPhaseSpaceAt(std::string name, double atTime);
     void addSpeciesPhaseSpaceFromTo(std::string name, double startTime, double frequency, double endTime);
 
-	void addDiagFrom(double startTime, double frequency);
-	void addDiagAt(double atTime);
-	void addDiagFromTo(double startTime, double frequency, double endTime);
+    void addDiagFrom(double startTime, double frequency);
+    void addDiagAt(double atTime);
+    void addDiagFromTo(double startTime, double frequency, double endTime);
 
 
-	void autoVisualDiag();
+    void autoVisualDiag();
 
-	void callDiags(int istep);
+    void callDiags(int istep);
 
 
 private:
-	GRID* mygrid;
-	EM_FIELD* myfield;
-	CURRENT* mycurrent;
-	std::vector<SPECIE*> myspecies;
+    GRID* mygrid;
+    EM_FIELD* myfield;
+    CURRENT* mycurrent;
+    std::vector<SPECIE*> myspecies;
     std::vector<emProbe*> myEMProbes;
     std::vector<outDomain*> myDomains;
 
-	bool isThereGrid;
-	bool isThereCurrent;
-	bool isThereField;
-	bool isThereSpecList;
+    bool isThereGrid;
+    bool isThereCurrent;
+    bool isThereField;
+    bool isThereSpecList;
 
-	std::string outputDir;
-	bool amIInit;
+    std::string outputDir;
+    bool amIInit;
 
-	bool isThereDiag;
+    bool isThereDiag;
     bool isThereEMProbe;
 
-	bool checkGrid();
-	bool checkEMField();
-	bool checkCurrent();
-	bool checkSpecies();
+    bool checkGrid();
+    bool checkEMField();
+    bool checkCurrent();
+    bool checkSpecies();
     bool isInMyDomain(double rr[3]);
     bool amIInTheSubDomain(request req);
     void nearestInt(double rr[3], int *ri, int *globalri);
@@ -223,49 +223,49 @@ private:
     int returnDomainIfProbeIsInList(emProbe *newProbe);
     int returnDomainIDIfDomainIsInList(outDomain *newDomain);
     std::string diagFileName;
-	std::string extremaFieldFileName;
-	std::vector<std::string> extremaSpecFileNames;
+    std::string extremaFieldFileName;
+    std::vector<std::string> extremaSpecFileNames;
 
-	std::list<request> requestList;
-	std::vector<int> timeList;
-	std::map< int, std::vector<request> > allOutputs;
+    std::list<request> requestList;
+    std::vector<int> timeList;
+    std::map< int, std::vector<request> > allOutputs;
 
-	static const int diagWideWidth = 16;
-	static const int diagNarrowWidth = 6;
-	static const int diagWidth = 10;
+    static const int diagWideWidth = 16;
+    static const int diagNarrowWidth = 6;
+    static const int diagWidth = 10;
 
-	int getIntTime(double dtime);
+    int getIntTime(double dtime);
 
-    void addEBField(outDomain* _domain,double startTime, double frequency, double endTime, whichFieldOut whichOut);
+    void addEBField(outDomain* _domain, double startTime, double frequency, double endTime, whichFieldOut whichOut);
     void addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime);
     void addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
     void addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime);
     void addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime);
     void addDiag(double startTime, double frequency, double endTime);
 
-    void addRequestToList(std::list<request>& timeList, diagType type, int target,  int domain, double startTime, double frequency, double endTime);
+    void addRequestToList(std::list<request>& timeList, diagType type, int target, int domain, double startTime, double frequency, double endTime);
 
-	void prepareOutputMap();
+    void prepareOutputMap();
 
-	void createDiagFile();
-	void createExtremaFiles();
+    void createDiagFile();
+    void createExtremaFiles();
     void createEMProbeFiles();
 
-	void processOutputEntry(request req);
+    void processOutputEntry(request req);
 
     std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
     std::string composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext);
-	void writeEMFieldBinary(std::string fileName, request req);
+    void writeEMFieldBinary(std::string fileName, request req);
     void writeNewEMFieldBinary(std::string fileName, request req, int comp);
     void writeEMFieldBinaryHDF5(std::string fileName, request req);
 
     void callEMFieldProbe(request req);
-    void writeEBFieldDomain(std::string fileName,  request req);
-    void writeGridFieldSubDomain(std::string fileName,  request req);
+    void writeEBFieldDomain(std::string fileName, request req);
+    void writeGridFieldSubDomain(std::string fileName, request req);
     void callEMFieldDomain(request req);
 
     void writeSpecDensity(std::string fileName, request req);
-    void writeSpecDensitySubDomain(std::string fileName,  request req);
+    void writeSpecDensitySubDomain(std::string fileName, request req);
     void callSpecDensity(request req);
 
     void writeCurrent(std::string fileName, request req);
@@ -276,11 +276,11 @@ private:
     void callSpecPhaseSpace(request req);
 
 
-	void callDiag(request req);
+    void callDiag(request req);
     void interpEB(double pos[3], double E[3], double B[3]);
 
-    int findIndexMin (double val, double* coords, int numcoords);
-    int findIndexMax (double val, double* coords, int numcoords);
+    int findIndexMin(double val, double* coords, int numcoords);
+    int findIndexMax(double val, double* coords, int numcoords);
 
     void prepareIntegerBigHeader(int *itodo, int uniqueN[3], int slice_rNproc[3], int Ncomp);
     void prepareFloatCoordinatesHeader(float *fcir[3], int uniqueN[3], int imin[3]);
@@ -290,7 +290,7 @@ private:
     void prepareFloatField(float *todo, int uniqueLocN[3], int origin[3], request req);
     void findDispForSetView(MPI_Offset *disp, int myOutputID, int *totUniquePoints, int big_header, int small_header, int Ncomp);
     void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
-    void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3],  request req);
+    void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
     int findNumberOfParticlesInSubdomain(request req);
 };
 

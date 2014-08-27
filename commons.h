@@ -93,40 +93,40 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 
 //*****USEFUL FUNCTIONS*****
 template <class T>const T& MIN(const T& a, const T& b){
-	return (a<b) ? a : b;
+    return (a < b) ? a : b;
 }
 
 template <class T>const T& MAX(const T& a, const T& b){
-	return (a>b) ? a : b;
+    return (a > b) ? a : b;
 }
 
 
 //*****ACCESS PROTOTYPE*****
 class ACCESSO{
 public:
-	ACCESSO();
+    ACCESSO();
     static const int edge = 2;
-	int indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc);
-	void alloc_number(int *N_grid, int *N_loc);
-	int dimensions;
+    int indice(int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc);
+    void alloc_number(int *N_grid, int *N_loc);
+    int dimensions;
     static const int Nexchange = 1;
 };
 
 //*****LOGOS******
 
 const std::string common_logo =
-        "\n"
-        "         d8b                                    888                \n"
-        "         Y8P                                    888                \n"
-        "                                                888                \n"
-        "88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.      \n"
-        "888 \"88b 888 d88P\"   d88P\"        \"88b 888 \"88b 888   d8P  Y8b\n"
-        "888  888 888 888     888      .d888888 888  888 888   88888888     \n"
-        "888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.         \n"
-        "88888P\"  888  \"Y8888P \"Y8888P \"Y888888 888  888  \"Y888 \"Y8888\n"
-        "888                                                                \n"
-        "888                                                                \n"
-        "888                                                                \n";
+"\n"
+"         d8b                                    888                \n"
+"         Y8P                                    888                \n"
+"                                                888                \n"
+"88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.      \n"
+"888 \"88b 888 d88P\"   d88P\"        \"88b 888 \"88b 888   d8P  Y8b\n"
+"888  888 888 888     888      .d888888 888  888 888   88888888     \n"
+"888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.         \n"
+"88888P\"  888  \"Y8888P \"Y8888P \"Y888888 888  888  \"Y888 \"Y8888\n"
+"888                                                                \n"
+"888                                                                \n"
+"888                                                                \n";
 
 //**********************************
 //http://patorjk.com/software/taag
