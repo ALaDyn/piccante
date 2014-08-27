@@ -39,7 +39,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-#define DIMENSIONALITY 3
+#define DIMENSIONALITY 2
 #include "access.h"
 #include "commons.h"
 #include "grid.h"
@@ -75,11 +75,11 @@ int main(int narg, char **args)
 
    //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-    grid.setXrange(-2.0,2.0);
-    grid.setYrange(-2.0,2.0);
+    grid.setXrange(-5.0,5.0);
+    grid.setYrange(-5.0,5.0);
     grid.setZrange(-0.5 ,+0.5);
 
-    grid.setNCells(400,400,100);
+    grid.setNCells(2000,2000,100);
     grid.setNProcsAlongY(NPROC_ALONG_Y);
     grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -151,11 +151,10 @@ int main(int narg, char **args)
     plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);    
     plasma1.setRampLength(0.2);                     
     plasma1.setDensityCoefficient(1.0);         
-    plasma1.setRampMinDensity(0.001);           
 
     SPECIE  electrons1(&grid);
     electrons1.plasma = plasma1;
-    electrons1.setParticlesPerCellXYZ(3, 3, 3);       
+    electrons1.setParticlesPerCellXYZ(10, 10, 1);
     electrons1.setName("ELE1");
     electrons1.type=ELECTRON;
     electrons1.creation();                            
@@ -164,7 +163,7 @@ int main(int narg, char **args)
 
     SPECIE electrons2(&grid);
     electrons2.plasma=plasma1;
-    electrons2.setParticlesPerCellXYZ(3, 3, 3);
+    electrons2.setParticlesPerCellXYZ(10, 10, 1);
     electrons2.setName("ELE2");
     electrons2.type=ELECTRON;
     electrons2.creation();                            
