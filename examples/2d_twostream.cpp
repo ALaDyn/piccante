@@ -51,7 +51,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_manager.h"
 #include "utilities.h"
 
-#define NPROC_ALONG_Y 16
+#define NPROC_ALONG_Y 32
 #define NPROC_ALONG_Z 8
 
 #define _RESTART_FROM_DUMP 1
@@ -70,7 +70,7 @@ int main(int narg, char **args)
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;
-  vector<SPECIE*>::const_iterator spec_iterator;
+  std::vector<SPECIE*>::const_iterator spec_iterator;
   int istep;
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
@@ -80,7 +80,7 @@ int main(int narg, char **args)
   grid.setYrange(-4.0,4.0);
   grid.setZrange(-0.5 ,+0.5);
 
-  grid.setNCells(1000,1000,100);
+  grid.setNCells(1024,1024,100);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -182,7 +182,6 @@ int main(int narg, char **args)
 
   manager.initialize(DIRECTORY_OUTPUT);
 
-  manager.autoVisualDiag();
   //*******************************************END DIAG DEFINITION**************************************************
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
