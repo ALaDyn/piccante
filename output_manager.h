@@ -210,18 +210,18 @@ private:
   bool checkEMField();
   bool checkCurrent();
   bool checkSpecies();
-  bool isInMyDomain(double rr[3]);
+  bool isThePointInMyDomain(double rr[3]);
   bool amIInTheSubDomain(request req);
   void nearestInt(double rr[3], int *ri, int *globalri);
   void setAndCheckRemains(int *remains, bool remainingCoord[]);
-  void findIntLocalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
-  void findIntGlobalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
-  void findNumberOfProc(int *Nproc, int imin[3], int imax[3], int remains[3]);
-  void findGlobalSubdomainUniquePoints(int *uniqueN, int imin[3], int imax[3], int remains[3]);
-  void findLocalSubdomainUniquePoints(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]);
-  int findSpecName(std::string name);
-  int returnDomainIfProbeIsInList(emProbe *newProbe);
-  int returnDomainIDIfDomainIsInList(outDomain *newDomain);
+  void findLocalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
+  void findGlobalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax);
+  void findNumberOfProcsWithinSubdomain(int *Nproc, int imin[3], int imax[3], int remains[3]);
+  void findGlobalSubdomainUniquePointsNumber(int *uniqueN, int imin[3], int imax[3], int remains[3]);
+  void findLocalSubdomainUniquePointsNumber(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]);
+  int findSpecIndexInMyspeciesVector(std::string name);
+  int findProbeIndexInMyprobeVector(emProbe *newProbe);
+  int findDomainIndexInMydomainsVector(outDomain *newDomain);
   std::string diagFileName;
   std::string extremaFieldFileName;
   std::vector<std::string> extremaSpecFileNames;
@@ -234,7 +234,7 @@ private:
   static const int diagNarrowWidth = 6;
   static const int diagWidth = 10;
 
-  int getIntTime(double dtime);
+  int getIntegerTime(double dtime);
 
   void addEBField(outDomain* _domain, double startTime, double frequency, double endTime, whichFieldOut whichOut);
   void addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime);
@@ -279,8 +279,8 @@ private:
   void callDiag(request req);
   void interpEB(double pos[3], double E[3], double B[3]);
 
-  int findIndexMin(double val, double* coords, int numcoords);
-  int findIndexMax(double val, double* coords, int numcoords);
+  int findLeftNeightbourPoint(double val, double* coords, int numcoords);
+  int findRightNeightbourPoint(double val, double* coords, int numcoords);
 
   void prepareIntegerBigHeader(int *itodo, int uniqueN[3], int slice_rNproc[3], int Ncomp);
   void prepareFloatCoordinatesHeader(float *fcir[3], int uniqueN[3], int imin[3]);

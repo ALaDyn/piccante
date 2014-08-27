@@ -143,171 +143,8 @@ bool requestCompUnique(const request &first, const request &second){
     (first.domain == second.domain));
 }
 
-bool OUTPUT_MANAGER::isInMyDomain(double rr[3]){
-  if (rr[0] >= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
-    if (mygrid->accesso.dimensions < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
-      if (mygrid->accesso.dimensions < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
-        return true;
-      }
-    }
-  }
-  return false;
-}
-bool OUTPUT_MANAGER::amIInTheSubDomain(request req){
-  double rmin[3], rmax[3];
-  for (int c = 0; c < 3; c++){
-    rmin[c] = myDomains[req.domain]->rmin[c];
-    rmax[c] = myDomains[req.domain]->rmax[c];
-  }
-  if (rmax[0] >= mygrid->rminloc[0] && rmin[0] < mygrid->rmaxloc[0]){
-    if (mygrid->accesso.dimensions < 2 || (rmax[1] >= mygrid->rminloc[1] && rmin[1] < mygrid->rmaxloc[1])){
-      if (mygrid->accesso.dimensions < 3 || (rmax[2] >= mygrid->rminloc[2] && rmin[2] < mygrid->rmaxloc[2])){
-        return true;
-      }
-    }
-  }
-  return false;
-}
 
-
-void OUTPUT_MANAGER::nearestInt(double rr[], int *ri, int *globalri){
-  int c;
-  if (mygrid->isStretched()){
-    for (c = 0; c < mygrid->accesso.dimensions; c++){
-      double mycsi = mygrid->unStretchGrid(rr[c], c);
-      double xx = mygrid->dri[c] * (mycsi - mygrid->csiminloc[c]);
-      ri[c] = (int)floor(xx + 0.5); //whole integer int
-      mycsi = mygrid->unStretchGrid(rr[c], c);
-      xx = mygrid->dri[c] * (mycsi - mygrid->csimin[c]);
-      globalri[c] = (int)floor(xx + 0.5);
-    }
-    for (; c < 3; c++){
-      ri[c] = globalri[c] = 0;
-    }
-  }
-  else{
-    for (c = 0; c < mygrid->accesso.dimensions; c++){
-      double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
-      ri[c] = (int)floor(xx + 0.5); //whole integer int
-      xx = mygrid->dri[c] * (rr[c] - mygrid->rmin[c]);
-      globalri[c] = (int)floor(xx + 0.5);
-    }
-    for (; c < 3; c++){
-      ri[c] = globalri[c] = 0;
-    }
-  }
-}
-int OUTPUT_MANAGER::findIndexMin(double val, double* coords, int numcoords){
-  if (numcoords <= 1)
-    return 0;
-
-  if (val <= coords[0])
-    return 0;
-
-  for (int i = 1; i < numcoords; i++){
-    if (val < coords[i])
-      return (i - 1);
-  }
-  return 0;
-}
-
-int OUTPUT_MANAGER::findIndexMax(double val, double* coords, int numcoords){
-  int indexMax = 0;
-  if (numcoords <= 1)
-    return 0;
-
-  if (val >= coords[numcoords - 1])
-    return (numcoords - 1);
-
-  for (int i = (numcoords - 1); i >= 0; i--){
-    if (val > coords[i])
-      return (i + 1);
-  }
-  return 0;
-}
-void OUTPUT_MANAGER::setAndCheckRemains(int *remains, bool remainingCoord[3]){
-  for (int c = 0; c < 3; c++){
-    if (c < mygrid->accesso.dimensions)
-      remains[c] = remainingCoord[c];
-    else
-      remains[c] = 0;
-  }
-}
-
-
-void OUTPUT_MANAGER::findIntLocalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax){
-  for (int c = 0; c < 3; c++){
-    imin[c] = findIndexMin(rmin[c], mygrid->cirloc[c], mygrid->Nloc[c]);
-    imax[c] = findIndexMax(rmax[c], mygrid->cirloc[c], mygrid->Nloc[c]);
-  }
-}
-void OUTPUT_MANAGER::findIntGlobalBoundaries(double rmin[3], double rmax[3], int *imin, int *imax){
-  for (int c = 0; c < 3; c++){
-    imin[c] = findIndexMin(rmin[c], mygrid->cir[c], mygrid->NGridNodes[c]);
-    imax[c] = findIndexMax(rmax[c], mygrid->cir[c], mygrid->NGridNodes[c]);
-  }
-}
-void OUTPUT_MANAGER::findNumberOfProc(int *Nproc, int imin[3], int imax[3], int remains[3]){
-  int mymin, mymax;
-  for (int c = 0; c < 3; c++){
-    if (remains[c]){
-      if (imax[c] >= (mygrid->NGridNodes[c] - 1))
-        mymax = mygrid->rnproc[c] - 1;
-      for (int proc = 0; proc < mygrid->rnproc[c]; proc++){
-        if (mygrid->rproc_imin[c][proc] <= imin[c] && mygrid->rproc_imax[c][proc] > imin[c])
-          mymin = proc;
-        if (mygrid->rproc_imin[c][proc] <= imax[c] && mygrid->rproc_imax[c][proc] > imax[c])
-          mymax = proc;
-      }
-
-      Nproc[c] = mymax - mymin + 1;
-    }
-    else
-      Nproc[c] = 1;
-  }
-}
-
-void OUTPUT_MANAGER::findGlobalSubdomainUniquePoints(int *uniqueN, int imin[3], int imax[3], int remains[3]){
-  for (int c = 0; c < 3; c++){
-    if (remains[c]){
-      if (imin[c] < 0){
-        printf("ERROR: subdomain minimum is wrong (component=%i, imin[c]=%i\n", c, imin[c]);
-        exit(118);
-      }
-
-      if (imax[c] < (mygrid->uniquePoints[c]))
-        uniqueN[c] = imax[c] - imin[c] + 1;
-      else
-        uniqueN[c] = mygrid->uniquePoints[c] - imin[c];
-    }
-    else{
-      uniqueN[c] = 1;
-    }
-  }
-}
-
-void OUTPUT_MANAGER::findLocalSubdomainUniquePoints(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]){
-  for (int c = 0; c < 3; c++){
-    if (remains[c]){
-      if (locimin[c] < 0){
-        printf("ERROR: subdomain local minimum is wrong (component=%i, locimin[c]=%i\n", c, locimin[c]);
-        exit(118);
-      }
-
-      if (locimax[c] < (mygrid->uniquePointsloc[c]))
-        uniqueLocN[c] = locimax[c] - locimin[c] + 1;
-      else
-        uniqueLocN[c] = mygrid->uniquePointsloc[c] - locimin[c];
-    }
-    else{
-      uniqueLocN[c] = 1;
-    }
-  }
-
-}
-
-OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies)
-{
+OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies){
   mygrid = _mygrid;
   isThereGrid = (mygrid != NULL) ? true : false;
 
@@ -327,14 +164,11 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   outDomain *domain1 = new outDomain;
   domain1->overrideFlag = true;
   myDomains.push_back(domain1);
-
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
   for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); ++it)
     delete(*it);
-
-
 }
 
 void OUTPUT_MANAGER::createDiagFile(){
@@ -347,15 +181,9 @@ void OUTPUT_MANAGER::createDiagFile(){
       return;
   }
 
-  std::stringstream ss;
-  ss << outputDir << "/diag.dat";
-
-  diagFileName = ss.str();
-
   std::ofstream of1;
-
+  diagFileName = outputDir + "/diag.dat";
   of1.open(diagFileName.c_str(), std::ofstream::out | std::ofstream::trunc);
-
   of1 << " " << std::setw(diagNarrowWidth) << "#istep" << " " << std::setw(diagWidth) << "time";
   of1 << " " << std::setw(diagWidth) << "Etot";
   of1 << " " << std::setw(diagWidth) << "Ex2" << " " << std::setw(diagWidth) << "Ey2" << " " << std::setw(diagWidth) << "Ez2";
@@ -373,21 +201,17 @@ void OUTPUT_MANAGER::createDiagFile(){
 }
 
 void OUTPUT_MANAGER::createExtremaFiles(){
-
-  if (checkGrid()){
+//  if (checkGrid()){
     if (mygrid->myid != mygrid->master_proc)
       return;
-  }
-  else{
-    if (mygrid->myid != 0)
-      return;
-  }
+  //}
+  //else{
+  //  if (mygrid->myid != 0)
+  //    return;
+ // }
 
   if (checkEMField()){
-    std::stringstream ss0;
-    ss0 << outputDir << "/EXTREMES_EMfield.dat";
-    extremaFieldFileName = ss0.str();
-
+    extremaFieldFileName = outputDir + "/EXTREMES_EMfield.dat";
     std::ofstream of0;
     of0.open(extremaFieldFileName.c_str());
     myfield->init_output_extrems(of0);
@@ -463,6 +287,10 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir){
   outputDir = _outputDir;
   prepareOutputMap();
 
+  if (!checkGrid()){
+    return;
+  }
+
   if (isThereDiag){
     createDiagFile();
     createExtremaFiles();
@@ -480,12 +308,9 @@ void OUTPUT_MANAGER::close(){
 
 bool OUTPUT_MANAGER::checkGrid(){
   if (!isThereGrid){
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == 0){
+    if (mygrid->myid == mygrid->master_proc){
       std::cout << "WARNING! No valid GRID pointer provided. Output request will be ignored." << std::endl;
     }
-
   }
   return isThereGrid;
 }
@@ -494,7 +319,7 @@ bool OUTPUT_MANAGER::checkEMField(){
   if (!isThereField){
     int myid;
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == 0){
+    if (myid == mygrid->master_proc){
       std::cout << "WARNING! No valid FIELD pointer provided. Output request will be ignored." << std::endl;
     }
   }
@@ -505,7 +330,7 @@ bool OUTPUT_MANAGER::checkCurrent(){
   if (!isThereCurrent){
     int myid;
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == 0){
+    if (myid == mygrid->master_proc){
       std::cout << "WARNING! No valid CURRENT pointer provided. Output request will be ignored." << std::endl;
     }
   }
@@ -516,14 +341,14 @@ bool OUTPUT_MANAGER::checkSpecies(){
   if (!isThereSpecList){
     int myid;
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == 0){
+    if (myid == mygrid->master_proc){
       std::cout << "WARNING! Empty SPECIES list provided. Output request will be ignored." << std::endl;
     }
   }
   return isThereSpecList;
 }
 
-int OUTPUT_MANAGER::getIntTime(double dtime){
+int OUTPUT_MANAGER::getIntegerTime(double dtime){
   if (dtime == 0.0)
     return 0;
 
@@ -533,7 +358,7 @@ int OUTPUT_MANAGER::getIntTime(double dtime){
   return (step <= Nsteps) ? (step) : (-1);
 }
 
-int OUTPUT_MANAGER::findSpecName(std::string name){
+int OUTPUT_MANAGER::findSpecIndexInMyspeciesVector(std::string name){
   int pos = 0;
   for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++){
     if ((*it)->getName() == name){
@@ -541,14 +366,12 @@ int OUTPUT_MANAGER::findSpecName(std::string name){
     }
     pos++;
   }
-  int myid;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-  if (myid == 0){
+  if (mygrid->myid == mygrid->master_proc){
     std::cout << "WARNING! Species" << name << " not in species list !" << std::endl;
   }
   return -1;
 }
-int OUTPUT_MANAGER::returnDomainIfProbeIsInList(emProbe *newProbe){
+int OUTPUT_MANAGER::findProbeIndexInMyprobeVector(emProbe *newProbe){
   int pos = 0;
   for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++){
     if ((*it)->compareProbes(newProbe)){
@@ -559,7 +382,7 @@ int OUTPUT_MANAGER::returnDomainIfProbeIsInList(emProbe *newProbe){
   return -1;
 
 }
-int OUTPUT_MANAGER::returnDomainIDIfDomainIsInList(outDomain *newDomain){
+int OUTPUT_MANAGER::findDomainIndexInMydomainsVector(outDomain *newDomain){
   int pos = 0;
   for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); it++){
     if ((*it)->compareDomains(newDomain)){
@@ -577,7 +400,7 @@ void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type
   for (double ttime = startTime; ttime <= endTime; ttime += frequency){
     request req;
     req.dtime = ttime;
-    req.itime = getIntTime(ttime);
+    req.itime = getIntegerTime(ttime);
     req.type = type;
     req.target = target;
     req.domain = domain;
@@ -587,31 +410,6 @@ void OUTPUT_MANAGER::addRequestToList(std::list<request>& reqList, diagType type
   reqList.merge(tempList, requestCompTime);
 }
 
-void OUTPUT_MANAGER::addEBField(outDomain* _domain, double startTime, double frequency, double endTime, whichFieldOut whichOut){
-  if (!(checkGrid() && checkEMField()))
-    return;
-
-  int domainID = 0;
-  if (_domain != NULL){
-    domainID = returnDomainIDIfDomainIsInList(_domain);
-    if (domainID < 0){
-      myDomains.push_back(_domain);
-      domainID = myDomains.size() - 1;
-    }
-  }
-
-  if (whichOut == WHICH_E_AND_B){
-    addRequestToList(requestList, OUT_E_FIELD, 0, domainID, startTime, frequency, endTime);
-    addRequestToList(requestList, OUT_B_FIELD, 0, domainID, startTime, frequency, endTime);
-  }
-  else if (whichOut == WHICH_E_ONLY){
-    addRequestToList(requestList, OUT_E_FIELD, 0, domainID, startTime, frequency, endTime);
-  }
-  else if (whichOut == WHICH_B_ONLY){
-    addRequestToList(requestList, OUT_B_FIELD, 0, domainID, startTime, frequency, endTime);
-  }
-
-}
 
 void OUTPUT_MANAGER::addEBFieldFrom(double startTime, double frequency){
   addEBField(NULL, startTime, frequency, mygrid->getTotalTime(), WHICH_E_AND_B);
@@ -685,21 +483,33 @@ void OUTPUT_MANAGER::addBFieldFromTo(outDomain* _domain, double startTime, doubl
   addEBField(_domain, startTime, frequency, endTime, WHICH_B_ONLY);
 }
 
-
-// EM Probe ///////////////////////////////////////
-
-void OUTPUT_MANAGER::addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime){
+void OUTPUT_MANAGER::addEBField(outDomain* _domain, double startTime, double frequency, double endTime, whichFieldOut whichOut){
   if (!(checkGrid() && checkEMField()))
     return;
-  int domainID = returnDomainIfProbeIsInList(Probe);
-  if (domainID < 0){
-    myEMProbes.push_back(Probe);
-    isThereEMProbe = true;
-    domainID = myEMProbes.size() - 1;
+
+  int domainID = 0;
+  if (_domain != NULL){
+    domainID = findDomainIndexInMydomainsVector(_domain);
+    if (domainID < 0){
+      myDomains.push_back(_domain);
+      domainID = myDomains.size() - 1;
+    }
   }
-  addRequestToList(requestList, OUT_EB_PROBE, 0, domainID, startTime, frequency, endTime);
+
+  if (whichOut == WHICH_E_AND_B){
+    addRequestToList(requestList, OUT_E_FIELD, 0, domainID, startTime, frequency, endTime);
+    addRequestToList(requestList, OUT_B_FIELD, 0, domainID, startTime, frequency, endTime);
+  }
+  else if (whichOut == WHICH_E_ONLY){
+    addRequestToList(requestList, OUT_E_FIELD, 0, domainID, startTime, frequency, endTime);
+  }
+  else if (whichOut == WHICH_B_ONLY){
+    addRequestToList(requestList, OUT_B_FIELD, 0, domainID, startTime, frequency, endTime);
+  }
+
 }
 
+// EM Probe ///////////////////////////////////////
 void OUTPUT_MANAGER::addEBFieldProbeFrom(emProbe* Probe, double startTime, double frequency){
   addEBFieldProbe(Probe, startTime, frequency, mygrid->getTotalTime());
 }
@@ -711,26 +521,19 @@ void OUTPUT_MANAGER::addEBFieldProbeAt(emProbe* Probe, double atTime){
 void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, double frequency, double endTime){
   addEBFieldProbe(Probe, startTime, frequency, endTime);
 }
-
-// ++++++++++++++++++++++++++++     species density
-
-void OUTPUT_MANAGER::addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
-  if (!(checkGrid() && checkSpecies() && checkCurrent()))
+void OUTPUT_MANAGER::addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime){
+  if (!(checkGrid() && checkEMField()))
     return;
-  int specNum = findSpecName(name);
-  if (specNum < 0)
-    return;
-  int domainID = 0;
-  if (domain_in != NULL){
-    domainID = returnDomainIDIfDomainIsInList(domain_in);
-    if (domainID < 0){
-      myDomains.push_back(domain_in);
-      domainID = myDomains.size() - 1;
-    }
+  int domainID = findProbeIndexInMyprobeVector(Probe);
+  if (domainID < 0){
+    myEMProbes.push_back(Probe);
+    isThereEMProbe = true;
+    domainID = myEMProbes.size() - 1;
   }
-  addRequestToList(requestList, OUT_SPEC_DENSITY, specNum, domainID, startTime, frequency, endTime);
+  addRequestToList(requestList, OUT_EB_PROBE, 0, domainID, startTime, frequency, endTime);
 }
 
+// ++++++++++++++++++++++++++++     species density
 void OUTPUT_MANAGER::addSpeciesDensityFrom(std::string name, double startTime, double frequency){
   addSpeciesDensity(NULL, name, startTime, frequency, mygrid->getTotalTime());
 }
@@ -755,24 +558,24 @@ void OUTPUT_MANAGER::addSpeciesDensityFromTo(outDomain* domain_in, std::string n
   addSpeciesDensity(domain_in, name, startTime, frequency, endTime);
 }
 
-// ++++++++++++++++++++++++++++     current
-
-void OUTPUT_MANAGER::addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime){
-  if (!(checkGrid() && checkCurrent()))
+void OUTPUT_MANAGER::addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
+  if (!(checkGrid() && checkSpecies() && checkCurrent()))
+    return;
+  int specNum = findSpecIndexInMyspeciesVector(name);
+  if (specNum < 0)
     return;
   int domainID = 0;
-
   if (domain_in != NULL){
-
-    domainID = returnDomainIDIfDomainIsInList(domain_in);
+    domainID = findDomainIndexInMydomainsVector(domain_in);
     if (domainID < 0){
       myDomains.push_back(domain_in);
       domainID = myDomains.size() - 1;
     }
   }
-  addRequestToList(requestList, OUT_CURRENT, 0, domainID, startTime, frequency, endTime);
+  addRequestToList(requestList, OUT_SPEC_DENSITY, specNum, domainID, startTime, frequency, endTime);
 }
 
+// ++++++++++++++++++++++++++++     current
 void OUTPUT_MANAGER::addCurrentFrom(double startTime, double frequency){
   addCurrent(NULL, startTime, frequency, mygrid->getTotalTime());
 }
@@ -796,26 +599,23 @@ void OUTPUT_MANAGER::addCurrentFromTo(outDomain* domain_in, double startTime, do
   addCurrent(domain_in, startTime, frequency, endTime);
 }
 
-// ++++++++++++++++++++++++++++     species binary
-
-void OUTPUT_MANAGER::addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
-  if (!(checkGrid() && checkSpecies()))
-    return;
-  int specNum = findSpecName(name);
-  if (specNum < 0)
+void OUTPUT_MANAGER::addCurrent(outDomain* domain_in, double startTime, double frequency, double endTime){
+  if (!(checkGrid() && checkCurrent()))
     return;
   int domainID = 0;
 
   if (domain_in != NULL){
-    domainID = returnDomainIDIfDomainIsInList(domain_in);
+
+    domainID = findDomainIndexInMydomainsVector(domain_in);
     if (domainID < 0){
       myDomains.push_back(domain_in);
       domainID = myDomains.size() - 1;
     }
   }
-  addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum, domainID, startTime, frequency, endTime);
+  addRequestToList(requestList, OUT_CURRENT, 0, domainID, startTime, frequency, endTime);
 }
 
+// ++++++++++++++++++++++++++++     species binary
 void OUTPUT_MANAGER::addSpeciesPhaseSpaceFrom(std::string name, double startTime, double frequency){
   addSpeciesPhaseSpace(NULL, name, startTime, frequency, mygrid->getTotalTime());
 }
@@ -840,14 +640,25 @@ void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(outDomain* domain_in, std::strin
   addSpeciesPhaseSpace(domain_in, name, startTime, frequency, endTime);
 }
 
-// ++++++++++++++++++++++++++++     diag
-
-void OUTPUT_MANAGER::addDiag(double startTime, double frequency, double endTime){
-  if (!(checkGrid() && checkCurrent() && checkEMField()))
+void OUTPUT_MANAGER::addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime){
+  if (!(checkGrid() && checkSpecies()))
     return;
-  addRequestToList(requestList, OUT_DIAG, 0, 0, startTime, frequency, endTime);
-  isThereDiag = true;
+  int specNum = findSpecIndexInMyspeciesVector(name);
+  if (specNum < 0)
+    return;
+  int domainID = 0;
+
+  if (domain_in != NULL){
+    domainID = findDomainIndexInMydomainsVector(domain_in);
+    if (domainID < 0){
+      myDomains.push_back(domain_in);
+      domainID = myDomains.size() - 1;
+    }
+  }
+  addRequestToList(requestList, OUT_SPEC_PHASE_SPACE, specNum, domainID, startTime, frequency, endTime);
 }
+
+// ++++++++++++++++++++++++++++     diag
 
 void OUTPUT_MANAGER::addDiagFrom(double startTime, double frequency){
   addDiag(startTime, frequency, mygrid->getTotalTime());
@@ -859,6 +670,13 @@ void OUTPUT_MANAGER::addDiagAt(double atTime){
 
 void OUTPUT_MANAGER::addDiagFromTo(double startTime, double frequency, double endTime){
   addDiag(startTime, frequency, endTime);
+}
+
+void OUTPUT_MANAGER::addDiag(double startTime, double frequency, double endTime){
+  if (!(checkGrid() && checkCurrent() && checkEMField()))
+    return;
+  addRequestToList(requestList, OUT_DIAG, 0, 0, startTime, frequency, endTime);
+  isThereDiag = true;
 }
 
 void OUTPUT_MANAGER::prepareOutputMap(){
@@ -883,26 +701,6 @@ void OUTPUT_MANAGER::prepareOutputMap(){
 
 }
 
-void OUTPUT_MANAGER::autoVisualDiag(){
-  int myid;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-  if (myid == 0){
-    std::cout << "*******OUTPUT MANAGER DEBUG***********" << std::endl;
-    std::map< int, std::vector<request> >::iterator itMap;
-    for (std::vector<int>::iterator itD = timeList.begin(); itD != timeList.end(); itD++) {
-      std::map< int, std::vector<request> >::iterator itMapD;
-      itMapD = allOutputs.find(*itD);
-      if (itMapD != allOutputs.end()){
-        std::cout << *itD << " ";
-        for (std::vector<request>::iterator itR = itMapD->second.begin(); itR != itMapD->second.end(); itR++)
-          std::cout << "(" << itR->type << "," << itR->target << ")";
-        std::cout << std::endl;
-      }
-
-    }
-    std::cout << "**************************************" << std::endl;
-  }
-}
 
 void OUTPUT_MANAGER::processOutputEntry(request req){
   switch (req.type){
@@ -1261,7 +1059,7 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
   }
 
 
-  shouldIWrite = isInMyDomain(rr);
+  shouldIWrite = isThePointInMyDomain(rr);
 
   MPI_Comm sliceCommunicator;
   int mySliceID, sliceNProc;
@@ -1508,6 +1306,20 @@ void OUTPUT_MANAGER::prepareFloatField(float *todo, int NN[3], int origin[3], re
       }
     }
   }
+  else if (req.type == OUT_CURRENT){
+    Ncomp = 3;
+    for (int k = 0; k < Nz; k++){
+      kk = k + origin[2];
+      for (int j = 0; j < Ny; j++){
+        jj = j + origin[1];
+        for (int i = 0; i < Nx; i++){
+          ii = i + origin[0];
+          for (int c = 0; c < Ncomp; c++)
+            todo[c + i*Ncomp + j*Nx + k*Ny*Nx] = (float)mycurrent->JJ(c, ii, jj, kk);
+        }
+      }
+    }
+  }
 
 }
 
@@ -1541,6 +1353,8 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
     Ncomp = 3;
   else if (req.type == OUT_SPEC_DENSITY)
     Ncomp = 1;
+  else if (req.type == OUT_CURRENT)
+    Ncomp = 3;
 
   int origin[3];
   int size = Ncomp*uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
@@ -1561,6 +1375,8 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     Ncomp = 3;
   else if (req.type == OUT_SPEC_DENSITY)
     Ncomp = 1;
+  else if (req.type == OUT_CURRENT)
+    Ncomp = 3;
 
   int *totUniquePoints;
   int isInMyHyperplane = false, shouldIWrite = false;
@@ -1569,14 +1385,14 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   int imin[3], imax[3], locimin[3], locimax[3];
 
   setAndCheckRemains(remains, myDomains[req.domain]->remainingCoord);
-  findIntGlobalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
-  findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
-  findNumberOfProc(slice_rNproc, imin, imax, remains);
+  findGlobalIntegerBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
+  findLocalIntegerBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
+  findNumberOfProcsWithinSubdomain(slice_rNproc, imin, imax, remains);
 
-  findGlobalSubdomainUniquePoints(uniqueN, imin, imax, remains);
-  findLocalSubdomainUniquePoints(uniqueLocN, locimin, locimax, remains);
+  findGlobalSubdomainUniquePointsNumber(uniqueN, imin, imax, remains);
+  findLocalSubdomainUniquePointsNumber(uniqueLocN, locimin, locimax, remains);
 
-  isInMyHyperplane = isInMyDomain(myDomains[req.domain]->coordinates);
+  isInMyHyperplane = isThePointInMyDomain(myDomains[req.domain]->coordinates);
 
   MPI_Comm sliceCommunicator;
   int mySliceID, sliceNProc;
@@ -1862,7 +1678,7 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
     }
   }
 
-  shouldIWrite = isInMyDomain(rr);
+  shouldIWrite = isThePointInMyDomain(rr);
 
   MPI_Comm sliceCommunicator;
   int mySliceID, sliceNProc;
@@ -2017,9 +1833,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
   int remains[3] = { myDomains[req.domain]->remainingCoord[0], myDomains[req.domain]->remainingCoord[1], myDomains[req.domain]->remainingCoord[2] };
   int imin[3], imax[3], locimin[3], locimax[3];
 
-  findIntGlobalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
-  findIntLocalBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
-  findNumberOfProc(slice_rNproc, imin, imax, remains);
+  findGlobalIntegerBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, imin, imax);
+  findLocalIntegerBoundaries(myDomains[req.domain]->rmin, myDomains[req.domain]->rmax, locimin, locimax);
+  findNumberOfProcsWithinSubdomain(slice_rNproc, imin, imax, remains);
 
   for (int c = 0; c < 3; c++){
     if (remains[c]){
@@ -2044,7 +1860,7 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
     }
   }
 
-  isInMyHyperplane = isInMyDomain(rr);
+  isInMyHyperplane = isThePointInMyDomain(rr);
 
   MPI_Comm sliceCommunicator;
   int mySliceID, sliceNProc;
@@ -2250,7 +2066,7 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
     }
   }
 
-  shouldIWrite = isInMyDomain(rr);
+  shouldIWrite = isThePointInMyDomain(rr);
 
   MPI_Comm sliceCommunicator;
   int mySliceID, sliceNProc;
@@ -2673,5 +2489,185 @@ void OUTPUT_MANAGER::callDiag(request req){
   }
 
   delete[] ekinSpecies;
+}
+
+bool OUTPUT_MANAGER::isThePointInMyDomain(double rr[3]){
+  if (rr[0] >= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
+    if (mygrid->accesso.dimensions < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
+      if (mygrid->accesso.dimensions < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+bool OUTPUT_MANAGER::amIInTheSubDomain(request req){
+  double rmin[3], rmax[3];
+  for (int c = 0; c < 3; c++){
+    rmin[c] = myDomains[req.domain]->rmin[c];
+    rmax[c] = myDomains[req.domain]->rmax[c];
+  }
+  if (rmax[0] >= mygrid->rminloc[0] && rmin[0] < mygrid->rmaxloc[0]){
+    if (mygrid->accesso.dimensions < 2 || (rmax[1] >= mygrid->rminloc[1] && rmin[1] < mygrid->rmaxloc[1])){
+      if (mygrid->accesso.dimensions < 3 || (rmax[2] >= mygrid->rminloc[2] && rmin[2] < mygrid->rmaxloc[2])){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+void OUTPUT_MANAGER::nearestInt(double rr[], int *ri, int *globalri){
+  int c;
+  if (mygrid->isStretched()){
+    for (c = 0; c < mygrid->accesso.dimensions; c++){
+      double mycsi = mygrid->unStretchGrid(rr[c], c);
+      double xx = mygrid->dri[c] * (mycsi - mygrid->csiminloc[c]);
+      ri[c] = (int)floor(xx + 0.5); //whole integer int
+      mycsi = mygrid->unStretchGrid(rr[c], c);
+      xx = mygrid->dri[c] * (mycsi - mygrid->csimin[c]);
+      globalri[c] = (int)floor(xx + 0.5);
+    }
+    for (; c < 3; c++){
+      ri[c] = globalri[c] = 0;
+    }
+  }
+  else{
+    for (c = 0; c < mygrid->accesso.dimensions; c++){
+      double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
+      ri[c] = (int)floor(xx + 0.5); //whole integer int
+      xx = mygrid->dri[c] * (rr[c] - mygrid->rmin[c]);
+      globalri[c] = (int)floor(xx + 0.5);
+    }
+    for (; c < 3; c++){
+      ri[c] = globalri[c] = 0;
+    }
+  }
+}
+int OUTPUT_MANAGER::findLeftNeightbourPoint(double val, double* coords, int numcoords){
+  if (numcoords <= 1)
+    return 0;
+  if (val <= coords[0])
+    return 0;
+  for (int i = 1; i < numcoords; i++){
+    if (val < coords[i])
+      return (i - 1);
+  }
+  return 0;
+}
+
+int OUTPUT_MANAGER::findRightNeightbourPoint(double val, double* coords, int numcoords){
+  int indexMax = 0;
+  if (numcoords <= 1)
+    return 0;
+  if (val >= coords[numcoords - 1])
+    return (numcoords - 1);
+  for (int i = (numcoords - 1); i >= 0; i--){
+    if (val > coords[i])
+      return (i + 1);
+  }
+  return 0;
+}
+void OUTPUT_MANAGER::setAndCheckRemains(int *remains, bool remainingCoord[3]){
+  for (int c = 0; c < 3; c++){
+    if (c < mygrid->accesso.dimensions)
+      remains[c] = remainingCoord[c];
+    else
+      remains[c] = 0;
+  }
+}
+
+
+void OUTPUT_MANAGER::findLocalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax){
+  for (int c = 0; c < 3; c++){
+    imin[c] = findLeftNeightbourPoint(rmin[c], mygrid->cirloc[c], mygrid->Nloc[c]);
+    imax[c] = findRightNeightbourPoint(rmax[c], mygrid->cirloc[c], mygrid->Nloc[c]);
+  }
+}
+void OUTPUT_MANAGER::findGlobalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax){
+  for (int c = 0; c < 3; c++){
+    imin[c] = findLeftNeightbourPoint(rmin[c], mygrid->cir[c], mygrid->NGridNodes[c]);
+    imax[c] = findRightNeightbourPoint(rmax[c], mygrid->cir[c], mygrid->NGridNodes[c]);
+  }
+}
+void OUTPUT_MANAGER::findNumberOfProcsWithinSubdomain(int *Nproc, int imin[3], int imax[3], int remains[3]){
+  int mymin, mymax;
+  for (int c = 0; c < 3; c++){
+    if (remains[c]){
+      if (imax[c] >= (mygrid->NGridNodes[c] - 1))
+        mymax = mygrid->rnproc[c] - 1;
+      for (int proc = 0; proc < mygrid->rnproc[c]; proc++){
+        if (mygrid->rproc_imin[c][proc] <= imin[c] && mygrid->rproc_imax[c][proc] > imin[c])
+          mymin = proc;
+        if (mygrid->rproc_imin[c][proc] <= imax[c] && mygrid->rproc_imax[c][proc] > imax[c])
+          mymax = proc;
+      }
+
+      Nproc[c] = mymax - mymin + 1;
+    }
+    else
+      Nproc[c] = 1;
+  }
+}
+
+void OUTPUT_MANAGER::findGlobalSubdomainUniquePointsNumber(int *uniqueN, int imin[3], int imax[3], int remains[3]){
+  for (int c = 0; c < 3; c++){
+    if (remains[c]){
+      if (imin[c] < 0){
+        printf("ERROR: subdomain minimum is wrong (component=%i, imin[c]=%i\n", c, imin[c]);
+        exit(118);
+      }
+
+      if (imax[c] < (mygrid->uniquePoints[c]))
+        uniqueN[c] = imax[c] - imin[c] + 1;
+      else
+        uniqueN[c] = mygrid->uniquePoints[c] - imin[c];
+    }
+    else{
+      uniqueN[c] = 1;
+    }
+  }
+}
+
+void OUTPUT_MANAGER::findLocalSubdomainUniquePointsNumber(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]){
+  for (int c = 0; c < 3; c++){
+    if (remains[c]){
+      if (locimin[c] < 0){
+        printf("ERROR: subdomain local minimum is wrong (component=%i, locimin[c]=%i\n", c, locimin[c]);
+        exit(118);
+      }
+
+      if (locimax[c] < (mygrid->uniquePointsloc[c]))
+        uniqueLocN[c] = locimax[c] - locimin[c] + 1;
+      else
+        uniqueLocN[c] = mygrid->uniquePointsloc[c] - locimin[c];
+    }
+    else{
+      uniqueLocN[c] = 1;
+    }
+  }
+
+}
+
+void OUTPUT_MANAGER::autoVisualDiag(){
+  int myid;
+  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+  if (myid == 0){
+    std::cout << "*******OUTPUT MANAGER DEBUG***********" << std::endl;
+    std::map< int, std::vector<request> >::iterator itMap;
+    for (std::vector<int>::iterator itD = timeList.begin(); itD != timeList.end(); itD++) {
+      std::map< int, std::vector<request> >::iterator itMapD;
+      itMapD = allOutputs.find(*itD);
+      if (itMapD != allOutputs.end()){
+        std::cout << *itD << " ";
+        for (std::vector<request>::iterator itR = itMapD->second.begin(); itR != itMapD->second.end(); itR++)
+          std::cout << "(" << itR->type << "," << itR->target << ")";
+        std::cout << std::endl;
+      }
+
+    }
+    std::cout << "**************************************" << std::endl;
+  }
 }
 
