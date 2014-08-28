@@ -1250,7 +1250,6 @@ void OUTPUT_MANAGER::prepareIntegerSmallHeader(int *itodo, int uniqueLocN[], int
         itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]] - imin[c];
       else
         itodo[c] = 0;
-
       itodo[c + 3] = uniqueLocN[c];
     }
     else{
@@ -1400,6 +1399,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   MPI_Comm_rank(sliceCommunicator, &mySliceID);
   MPI_Comm_size(sliceCommunicator, &sliceNProc);
   MPI_Allreduce(MPI_IN_PLACE, &isInMyHyperplane, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+
   if (isInMyHyperplane)
     shouldIWrite = amIInTheSubDomain(req);
 
@@ -1414,47 +1414,34 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
   MPI_Offset disp = 0;
-  const int small_header = 6 * sizeof(int);
-  const int big_header = (1 + 3 + 3 + 1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+  const int smallHeaderSize = (3+3) * sizeof(int);
+  const int bigHeaderSize = (1+3+3+1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
 
   MPI_File thefile;
-  //MPI_Status status;
-  char* nomefile = new char[fileName.size() + 1];
-  nomefile[fileName.size()] = 0;
-  sprintf(nomefile, "%s", fileName.c_str());
+  char* nomefile = new char[fileName.length() + 1];
+  strcpy(nomefile, fileName.c_str());
 
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
-    //+++++++++++ FILE HEADER  +++++++++++++++++++++
     if (myOutputID == 0){
       MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
       writeBigHeader(thefile, uniqueN, imin, slice_rNproc, Ncomp);
     }
-    //*********** END HEADER *****************
-
-
-    //*********** SET VIEW *****************
-    if (myOutputID != 0){
-      findDispForSetView(&disp, myOutputID, totUniquePoints, big_header, small_header, Ncomp);
+    else{
+      findDispForSetView(&disp, myOutputID, totUniquePoints, bigHeaderSize, smallHeaderSize, Ncomp);
       MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     }
 
-    //+++++++++++ Write CPU HEADER  +++++++++++++++++++++
-        {
-          writeSmallHeader(thefile, uniqueLocN, imin, remains);
-        }
-    //+++++++++++ Write CPU Field Values  +++++++++++++++++++++
-        {
-          writeCPUFieldValues(thefile, uniqueLocN, locimin, remains, req);
+    writeSmallHeader(thefile, uniqueLocN, imin, remains);
+    writeCPUFieldValues(thefile, uniqueLocN, locimin, remains, req);
 
-        }
     MPI_File_close(&thefile);
-    delete[] nomefile;
-    delete[] totUniquePoints;
   }
   MPI_Comm_free(&sliceCommunicator);
   MPI_Comm_free(&outputCommunicator);
+  delete[] nomefile;
+  delete[] totUniquePoints;
 }
 
 
@@ -1462,22 +1449,22 @@ void OUTPUT_MANAGER::callEMFieldDomain(request req){
 
   if (req.type == OUT_E_FIELD){
     std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-    if (!myDomains[req.domain]->subselection)
-      writeEBFieldDomain(nameBin, req);
-    else
+//    if (!myDomains[req.domain]->subselection)
+//      writeEBFieldDomain(nameBin, req);
+//    else
       writeGridFieldSubDomain(nameBin, req);
   }
   else if (req.type == OUT_B_FIELD){
     std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-    if (!myDomains[req.domain]->subselection)
-      writeEBFieldDomain(nameBin, req);
-    else
+//    if (!myDomains[req.domain]->subselection)
+//      writeEBFieldDomain(nameBin, req);
+//    else
       writeGridFieldSubDomain(nameBin, req);
   }
 
 }
 
-void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
+void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[3], double B[3]){
   int hii[3], wii[3];
   double hiw[3][3], wiw[3][3];
   double rr, rh, rr2, rh2;
@@ -1491,7 +1478,7 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
   }
   if (mygrid->isStretched()){
     for (int c = 0; c < mygrid->accesso.dimensions; c++){
-      mycsi[c] = mygrid->unStretchGrid(pos[c], c);
+      mycsi[c] = mygrid->unStretchGrid(position[c], c);
       rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
 
       rh = rr - 0.5;
@@ -1513,7 +1500,7 @@ void OUTPUT_MANAGER::interpEB(double pos[3], double E[3], double B[3]){
   }
   else{
     for (int c = 0; c < mygrid->accesso.dimensions; c++){
-      rr = mygrid->dri[c] * (pos[c] - mygrid->rminloc[c]);
+      rr = mygrid->dri[c] * (position[c] - mygrid->rminloc[c]);
       rh = rr - 0.5;
       wii[c] = (int)floor(rr + 0.5); //whole integer int
       hii[c] = (int)floor(rr);     //half integer int
@@ -1629,7 +1616,7 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req){
   if (rr[0] >= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
     if (mygrid->accesso.dimensions < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
       if (mygrid->accesso.dimensions < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
-        interpEB(rr, EE, BB);
+        interpolateEBFieldsToPosition(rr, EE, BB);
         std::ofstream of0;
         of0.open(myEMProbes[req.domain]->fileName.c_str(), std::ios::app);
         of0 << " " << std::setw(diagNarrowWidth) << req.itime << " " << std::setw(diagWidth) << req.dtime;
@@ -2014,23 +2001,13 @@ void OUTPUT_MANAGER::callSpecDensity(request req){
   myspecies[req.target]->density_deposition_standard(mycurrent);
   mycurrent->pbc();
 
-  //    if (mygrid->myid == mygrid->master_proc){
-  //        std::string nameMap = composeOutputName(outputDir, "DENS", name, req.dtime, ".map");
-  //        std::ofstream of1;
-  //        of1.open(nameMap.c_str());
-  //        writeSpecDensityMap(of1, req);
-  //        of1.close();
-  //    }
-
   std::string nameBin = composeOutputName(outputDir, "DENS", myspecies[req.target]->name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
-  if (!myDomains[req.domain]->subselection)
-    writeSpecDensity(nameBin, req);
-  else
+//  if (!myDomains[req.domain]->subselection){
+//    writeSpecDensity(nameBin, req);
+//  }
+//  else
     writeGridFieldSubDomain(nameBin, req);
-
-
-
 }
 
 
@@ -2215,6 +2192,7 @@ void  OUTPUT_MANAGER::callCurrent(request req){
   std::string nameBin = composeOutputName(outputDir, "J", "", myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
 
   writeCurrent(nameBin, req);
+
 
 }
 

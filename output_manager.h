@@ -260,7 +260,8 @@ private:
   void writeEMFieldBinaryHDF5(std::string fileName, request req);
 
   void callEMFieldProbe(request req);
-  void writeEBFieldDomain(std::string fileName, request req);
+  void interpolateEBFieldsToPosition(double pos[3], double E[3], double B[3]);
+
   void writeGridFieldSubDomain(std::string fileName, request req);
   void callEMFieldDomain(request req);
 
@@ -277,7 +278,6 @@ private:
 
 
   void callDiag(request req);
-  void interpEB(double pos[3], double E[3], double B[3]);
 
   int findLeftNeightbourPoint(double val, double* coords, int numcoords);
   int findRightNeightbourPoint(double val, double* coords, int numcoords);
@@ -292,6 +292,9 @@ private:
   void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
   void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
   int findNumberOfParticlesInSubdomain(request req);
+
+  void writeEBFieldDomain(std::string fileName, request req);
+
 };
 
 #endif
