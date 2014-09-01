@@ -151,7 +151,6 @@ int main(int narg, char **args)
   electrons1.creation();
   species.push_back(&electrons1);
 
-
   SPECIE ions1(&grid);
   ions1.plasma = plasma1;
   ions1.setParticlesPerCellXYZ(2, 2, 2);

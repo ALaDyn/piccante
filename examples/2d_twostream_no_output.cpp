@@ -160,18 +160,21 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  manager.addEFieldFrom(5.0, 5.0);
-  manager.addBFieldFrom(5.0, 5.0);
+  double startOutputA=5.0, freqOutputA=5.0;
+  double startOutputB=0.0, freqOutputB=1.0;
 
-  manager.addSpeciesDensityFrom("ELE1", 5.0, 5.0);
-  manager.addSpeciesDensityFrom("ELE2", 5.0, 5.0);
+  manager.addDiagFrom(startOutputB, freqOutputB);
 
-  manager.addCurrentFrom(5.0, 5.0);
+  manager.addEFieldFrom(startOutputA, freqOutputA);
+  manager.addBFieldFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesPhaseSpaceFrom("ELE1", 5.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom("ELE2", 5.0, 5.0);
+  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
 
-  manager.addDiagFrom(0.0, 2.0);
+  manager.addCurrentFrom(startOutputA, freqOutputA);
+
+  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
 
   manager.initialize(DIRECTORY_OUTPUT);
   //*******************************************END DIAG DEFINITION**************************************************
@@ -197,7 +200,7 @@ int main(int narg, char **args)
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
-    manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    //manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

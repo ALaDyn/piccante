@@ -292,7 +292,7 @@ private:
   void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
   void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
   int findNumberOfParticlesInSubdomain(request req);
-
+  int findNcompForThisGridOutput(request req);
   void writeEBFieldDomain(std::string fileName, request req);
 
 };

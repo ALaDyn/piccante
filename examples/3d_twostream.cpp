@@ -93,7 +93,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
-  grid.setSimulationTime(100.05);
+  grid.setSimulationTime(10.0);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -134,7 +134,7 @@ int main(int narg, char **args)
 
   SPECIE  electrons1(&grid);
   electrons1.plasma = plasma1;
-  electrons1.setParticlesPerCellXYZ(4, 4, 4);
+  electrons1.setParticlesPerCellXYZ(3, 3, 3);
   electrons1.setName("ELE1");
   electrons1.type = ELECTRON;
   electrons1.creation();
@@ -143,7 +143,7 @@ int main(int narg, char **args)
 
   SPECIE electrons2(&grid);
   electrons2.plasma = plasma1;
-  electrons2.setParticlesPerCellXYZ(4, 4, 4);
+  electrons2.setParticlesPerCellXYZ(3, 3, 3);
   electrons2.setName("ELE2");
   electrons2.type = ELECTRON;
   electrons2.creation();
@@ -165,18 +165,22 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  manager.addEFieldFrom(5.0, 5.0);
-  manager.addBFieldFrom(5.0, 5.0);
+  double startOutputA=0.0, freqOutputA=5.0;
+  double startOutputB=0.0, freqOutputB=1.0;
 
-  manager.addSpeciesDensityFrom("ELE1", 5.0, 5.0);
-  manager.addSpeciesDensityFrom("ELE2", 5.0, 5.0);
+  manager.addDiagFrom(startOutputB, freqOutputB);
 
-  manager.addCurrentFrom(5.0, 5.0);
+  manager.addEFieldFrom(startOutputA, freqOutputA);
+  manager.addBFieldFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesPhaseSpaceFrom("ELE1", 5.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom("ELE2", 5.0, 5.0);
+  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
 
-  manager.addDiagFrom(0.0, 2.0);
+  manager.addCurrentFrom(startOutputA, freqOutputA);
+
+  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
+
 
   manager.initialize(DIRECTORY_OUTPUT);
   //*******************************************END DIAG DEFINITION**************************************************
