@@ -22,11 +22,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <malloc.h>
 #include <cmath>
 #include <iomanip>
 #include <cstring>
-#include <ctime>       /* time */
+#include <ctime>
 #if defined(_MSC_VER)
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
@@ -37,7 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-//using namespace std;
 
 #define DIMENSIONALITY 2
 #include "access.h"
@@ -47,14 +45,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 #include "particle_species.h"
-//#include "diag_manager.h"
 #include "output_manager.h"
 #include "utilities.h"
 
 #define NPROC_ALONG_Y 32
-#define NPROC_ALONG_Z 8
+#define Xfactor 1.0
 #define Yfactor 1.0
-#define Xfactor 0.5
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
@@ -204,10 +200,8 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-    manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

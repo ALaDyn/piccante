@@ -46,7 +46,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 #include "particle_species.h"
-//#include "diag_manager.h"
 #include "output_manager.h"
 #include "utilities.h"
 
@@ -208,10 +207,8 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-    manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

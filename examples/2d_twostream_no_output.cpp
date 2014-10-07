@@ -25,7 +25,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <iomanip>
 #include <cstring>
-#include <ctime>       /* time */
+#include <ctime>
 #if defined(_MSC_VER)
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
@@ -36,9 +36,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-
 #define DIMENSIONALITY 2
-
 #include "access.h"
 #include "commons.h"
 #include "grid.h"
@@ -50,11 +48,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "utilities.h"
 
 #define NPROC_ALONG_Y 32
-#define NPROC_ALONG_Z 8
+#define Xfactor 1.0
+#define Yfactor 1.0
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
-#define DO_DUMP true
+#define DO_DUMP false
 #define TIME_BTW_DUMP 50
 
 #define DIRECTORY_OUTPUT "TEST"
@@ -73,12 +72,14 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-
-  grid.setXrange(-4.0, 4.0);
-  grid.setYrange(-4.0, 4.0);
+  
+  grid.setXrange(-4.0*Xfactor, 4.0*Xfactor);
+  grid.setYrange(-4.0*Yfactor, 4.0*Yfactor);
   grid.setZrange(-0.5, +0.5);
 
-  grid.setNCells(1024, 1024, 100);
+  int Nxcell=(int)(Xfactor*1024);
+  int Nycell=(int)(Yfactor*1024);
+  grid.setNCells(Nxcell, Nycell, 100);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -92,7 +93,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
-  grid.setSimulationTime(100.05);
+  grid.setSimulationTime(5.5);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -160,7 +161,7 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  double startOutputA=5.0, freqOutputA=5.0;
+  double startOutputA=0.0, freqOutputA=5.0;
   double startOutputB=0.0, freqOutputB=1.0;
 
   manager.addDiagFrom(startOutputB, freqOutputB);
@@ -175,6 +176,7 @@ int main(int narg, char **args)
 
   manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
   manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
+
 
   manager.initialize(DIRECTORY_OUTPUT);
   //*******************************************END DIAG DEFINITION**************************************************
@@ -197,10 +199,8 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-    //manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    // grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    // manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

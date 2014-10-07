@@ -46,16 +46,18 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 #include "particle_species.h"
-//#include "diag_manager.h"
 #include "output_manager.h"
 #include "utilities.h"
 
 #define NPROC_ALONG_Y 16
 #define NPROC_ALONG_Z 8
+#define Xfactor 1.0
+#define Yfactor 1.0
+#define Zfactor 1.0
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
-#define DO_DUMP true
+#define DO_DUMP false
 #define TIME_BTW_DUMP 50
 
 #define DIRECTORY_OUTPUT "TEST"
@@ -75,11 +77,14 @@ int main(int narg, char **args)
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-  grid.setXrange(-2.0, 2.0);
-  grid.setYrange(-2.0, 2.0);
-  grid.setZrange(-0.5, +0.5);
+  grid.setXrange(-2.0*Xfactor, +2.0*Xfactor);
+  grid.setYrange(-2.0*Yfactor, +2.0*Yfactor);
+  grid.setZrange(-0.5*Zfactor, +0.5*Zfactor);
 
-  grid.setNCells(512, 512, 128);
+  int Nxcell=(int)(Xfactor*512);
+  int Nycell=(int)(Yfactor*512);
+  int Nzcell=(int)(Zfactor*128);
+  grid.setNCells(Nxcell, Nycell, Nzcell);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
@@ -150,7 +155,6 @@ int main(int narg, char **args)
   species.push_back(&electrons2);
 
 
-
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
 
@@ -203,10 +207,8 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
-    //manager.callDiags(grid.istep);  /// deve tornare all'inizo del ciclo
+    // grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    // manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();
