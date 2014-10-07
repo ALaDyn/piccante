@@ -21,4 +21,4 @@ module load scalasca/1.4.2
 
 make -f makefile.cineca.xl all
 
-mv piccante ${EXE_NAME}
+mv piccante piccante.${EXE_NAME}

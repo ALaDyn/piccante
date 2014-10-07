@@ -81,7 +81,6 @@ int main(int narg, char **args)
   int Nycell=(int)(Yfactor*1024);
   grid.setNCells(Nxcell, Nycell, 100);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
-  grid.setNProcsAlongZ(NPROC_ALONG_Z);
 
   //grid.enableStretchedGrid();
   grid.setXandNxLeftStretchedGrid(-20.0, 250);
