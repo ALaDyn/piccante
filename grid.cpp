@@ -463,7 +463,7 @@ void GRID::checkProcNumber(){
   rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
   if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
   {
-    printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocy=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
+    printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocz=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
     exit(18);
   }
   if (rnproc[0] < 1 || NGridNodes[0] < 1)
