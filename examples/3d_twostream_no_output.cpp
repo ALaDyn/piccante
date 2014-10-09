@@ -98,7 +98,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
-  grid.setSimulationTime(10.0);
+  grid.setSimulationTime(1.0);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -207,7 +207,7 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-    // grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
     // manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();

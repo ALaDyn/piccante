@@ -37,7 +37,7 @@ GRID::GRID()
   den_factor = (2 * M_PI)*(2 * M_PI);
   dumpPath = "./";
   GRID::initializeStretchParameters();
-
+  rnproc[1]=rnproc[2]=1;
 }
 
 GRID::~GRID(){

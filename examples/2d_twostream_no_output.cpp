@@ -198,7 +198,7 @@ int main(int narg, char **args)
   }
   while (grid.istep <= Nstep)
   {
-    // grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
     // manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
