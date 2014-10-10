@@ -62,6 +62,6 @@ output_manager.o:  output_manager.cpp
 utilities.o: utilities.cpp 
 	$(COMPILER) $(OPT) -c utilities.cpp
 clean :
-				rm $(OBJ)
+				rm -f $(OBJ)
 
 

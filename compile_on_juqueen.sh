@@ -20,3 +20,5 @@ make -f makefile.juqueen.xl all
 
 mv piccante piccante.${EXE_NAME}
 
+make clean
+
