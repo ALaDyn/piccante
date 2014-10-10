@@ -2,7 +2,7 @@
 
 if [ $# -lt 1 ]
 then
- echo "usage: ./compile_at_cineca.sh path_to_main.cpp"
+ echo "usage: ./compile_on_fermi.sh path_to_main.cpp"
  exit
 fi
 
