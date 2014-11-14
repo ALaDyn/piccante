@@ -23,7 +23,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include <mpi.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
