@@ -2,7 +2,7 @@
 
 if [ $# -lt 1 ]
 then
- echo "usage: ./compile_on_juqueen.sh path_to_main.cpp"
+ echo "usage: ./compile_at_cineca.sh path_to_main.cpp"
  exit
 fi
 
@@ -13,12 +13,9 @@ EXE_NAME=($(basename $1 .cpp))
 
 
 module purge
-module load gsl/1.15_O3g
-module load boost/1.47.0
+module load compilers/gcc-4.8.2
+module load compilers/openmpi-1.8.1_gcc-4.8.2
 
-make -f makefile.juqueen.xl all
+make all
 
 mv piccante piccante.${EXE_NAME}
-
-make clean
-
