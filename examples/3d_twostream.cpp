@@ -198,7 +198,7 @@ int main(int narg, char **args)
   int Nstep = grid.getTotalNumberOfTimesteps();
   int dumpID = 1, dumpEvery;
   if (DO_DUMP){
-    dumpEvery = (int)TIME_BTW_DUMP / grid.dt;
+    dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
   grid.istep = 0;
   if (_DO_RESTART){

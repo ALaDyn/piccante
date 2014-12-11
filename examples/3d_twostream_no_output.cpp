@@ -58,7 +58,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
 #define DO_DUMP false
-#define TIME_BTW_DUMP 50
+#define TIME_BTW_DUMP 0.1
 
 #define DIRECTORY_OUTPUT "TEST"
 #define DIRECTORY_DUMP "TEST"
@@ -98,7 +98,7 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
-  grid.setSimulationTime(1.0);
+  grid.setSimulationTime(0.15);
 
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
@@ -198,7 +198,7 @@ int main(int narg, char **args)
   int Nstep = grid.getTotalNumberOfTimesteps();
   int dumpID = 1, dumpEvery;
   if (DO_DUMP){
-    dumpEvery = (int)TIME_BTW_DUMP / grid.dt;
+    dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
   grid.istep = 0;
   if (_DO_RESTART){

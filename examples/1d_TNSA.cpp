@@ -246,7 +246,7 @@ int main(int narg, char **args)
   int dumpID = 1, dumpEvery = 40;
   grid.istep = 0;
   if (DO_DUMP){
-    dumpEvery = (int)TIME_BTW_DUMP / grid.dt;
+    dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
   if (_DO_RESTART){
     dumpID = _RESTART_FROM_DUMP;
