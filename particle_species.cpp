@@ -3222,6 +3222,13 @@ void SPECIE::dump(std::ofstream &ff){
     }
   }
 }
+void SPECIE::dumpBigBuffer(std::ofstream &ff){
+  ff.write((char*)&Np, sizeof(Np));
+  ff.write((char*)val, sizeof(double)*Np*Ncomp);
+}
+void SPECIE::debugDump(std::ofstream &ff){
+  ff << this->name << Np << std::endl;
+}
 
 void SPECIE::reloadDump(std::ifstream &ff){
   ff.read((char*)&Np, sizeof(Np));
@@ -3231,6 +3238,12 @@ void SPECIE::reloadDump(std::ifstream &ff){
       ff.read((char*)&ru(c, i), sizeof(double));
     }
   }
+}
+
+void SPECIE::reloadBigBufferDump(std::ifstream &ff){
+  ff.read((char*)&Np, sizeof(Np));
+  SPECIE::reallocate_species();
+  ff.read((char*)&val, sizeof(double)*Np*Ncomp);
 }
 
 bool SPECIE::areEnergyExtremesAvailable(){

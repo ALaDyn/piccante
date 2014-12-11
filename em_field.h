@@ -150,6 +150,7 @@ public:
 
   bool areEnergyExtremesAvailable();
   void dump(std::ofstream &ff);
+  void debugDump(std::ofstream &ff);
   void reloadDump(std::ifstream &ff);
   //PUBLIC INLINE FUNCTIONS
   inline double & E0(int i, int j, int k){

@@ -1327,6 +1327,37 @@ void GRID::dump(std::ofstream &ff){
   }
 }
 
+void GRID::debugDump(std::ofstream &ff){
+  ff << "istep " << istep << std::endl;
+  ff << "time " << time << std::endl;
+  ff << "mark_mw " << mark_mw<< std::endl;
+
+  if (!withMovingWindow)
+    return;
+  ff << "rmin[0] " << rmin[0] << std::endl;
+  ff << "rmax[0] " << rmax[0] << std::endl;
+  ff << "rminloc[0] " << rminloc[0] << std::endl;
+  ff << "rmaxloc[0] " << rmaxloc[0] << std::endl;
+
+  ff << "csimax[0] " << csimax[0] << std::endl;
+  ff << "csimin[0] " << csimin[0] << std::endl;
+  ff << "csiminloc[0] " << csiminloc[0] << std::endl;
+  ff << "csimaxloc[0] " << csimaxloc[0] << std::endl;
+
+  for (int pp = 0; pp < rnproc[0]; pp++){
+    ff << "rproc_rmin[0][" << pp << "] " << rproc_rmin[0][pp] << std::endl;
+    ff << "rproc_rmax[0][" << pp << "] " << rproc_rmax[0][pp] << std::endl;
+  }
+  for (int i = 0; i < NGridNodes[0]; i++){
+    ff << "cir[0][" << i<< "] " << cir[0][i] << std::endl;
+    ff << "chr[0][" << i<< "] " << chr[0][i] << std::endl;
+  }
+  for (int i = 0; i < Nloc[0]; i++){
+    ff << "cirloc[0][" << i<< "] " << cirloc[0][i] << std::endl;
+    ff << "chrloc[0][" << i<< "] " << chrloc[0][i] << std::endl;
+  }
+}
+
 void GRID::reloadDump(std::ifstream &ff){
   ff.read((char*)&istep, sizeof(int));
   ff.read((char*)&time, sizeof(double));

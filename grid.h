@@ -154,6 +154,7 @@ public:
   axisBoundaryConditions getZBoundaryConditions();
   double getTotalTime();
   void dump(std::ofstream &ff);
+  void debugDump(std::ofstream &ff);
   void reloadDump(std::ifstream &ff);
   double csimin[3], csimax[3];
   double csiminloc[3], csimaxloc[3];

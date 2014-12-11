@@ -83,3 +83,21 @@ void dumpFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vec
   }
 }
 
+void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species){
+  int dumpID = _dumpID[0];
+  std::ofstream dumpFile;
+  dumpFile.open(mygrid->composeDumpFileName(dumpID).c_str());
+  mygrid->debugDump(dumpFile);
+  //myfield->debugDump(dumpFile);
+  for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    (*spec_iterator)->debugDump(dumpFile);
+  }
+  dumpFile.close();
+  dumpID++;
+  _dumpID[0] = dumpID;
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (mygrid->myid == mygrid->master_proc){
+    printf("\t DUMP #%i done!\n", (dumpID - 1));
+  }
+}
+

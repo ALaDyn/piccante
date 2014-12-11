@@ -99,7 +99,10 @@ public:
   void outputSpectrum(std::ofstream &fspectrum);
 
   void dump(std::ofstream &f);
+  void dumpBigBuffer(std::ofstream &f);
+  void debugDump(std::ofstream &f);
   void reloadDump(std::ifstream &f);
+  void reloadBigBufferDump(std::ifstream &f);
 
   bool areEnergyExtremesAvailable();
 
