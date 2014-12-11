@@ -47,7 +47,7 @@ void restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<
     mygrid->reloadDump(dumpFile);
     myfield->reloadDump(dumpFile);
     for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->reloadDump(dumpFile);
+      (*spec_iterator)->reloadBigBufferDump(dumpFile);
     }
     dumpFile.close();
     dumpID++;
@@ -72,7 +72,7 @@ void dumpFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vec
   mygrid->dump(dumpFile);
   myfield->dump(dumpFile);
   for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-    (*spec_iterator)->dump(dumpFile);
+    (*spec_iterator)->dumpBigBuffer(dumpFile);
   }
   dumpFile.close();
   dumpID++;
