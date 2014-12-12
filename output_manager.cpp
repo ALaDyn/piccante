@@ -1398,6 +1398,74 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   delete[]todo;
 }
 
+void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec){
+  MPI_Status status;
+
+  float *buf;
+  int dimensione = 100000;
+  buf = new float[dimensione*spec->Ncomp];
+  int counter = 0;
+  double rr[3];
+  for (int p = 0; p < spec->Np; p++){
+    rr[0] = spec->r0(p);
+    rr[1] = spec->r1(p);
+    rr[2] = spec->r2(p);
+    if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
+      if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+          for (int c = 0; c < spec->Ncomp; c++){
+            buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
+          }
+          counter++;
+        }
+      }
+    }
+    if (counter == dimensione){
+      MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+      counter = 0;
+    }
+  }
+  if (counter > 0){
+    MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+  }
+  delete[]buf;
+
+}
+
+void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, double rmin[3], double rmax[3], SPECIE* spec){
+  std::ofstream thefile;
+  thefile.open(fileName.c_str(), std::ios::app);
+  float *buf;
+  int dimensione = 100000;
+  buf = new float[dimensione*spec->Ncomp];
+  int counter = 0;
+  double rr[3];
+  for (int p = 0; p < spec->Np; p++){
+    rr[0] = spec->r0(p);
+    rr[1] = spec->r1(p);
+    rr[2] = spec->r2(p);
+    if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
+      if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+          for (int c = 0; c < spec->Ncomp; c++){
+            buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
+          }
+          counter++;
+        }
+      }
+    }
+    if (counter == dimensione){
+      thefile.write((char*)buf, counter*spec->Ncomp*sizeof(float));
+      counter = 0;
+    }
+  }
+  if (counter > 0){
+    thefile.write((char*)buf, counter*spec->Ncomp*sizeof(float));
+  }
+  delete[]buf;
+thefile.close();
+}
+
 void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(std::string  fileName, int uniqueLocN[], int locimin[], int remains[], request req){
   std::ofstream thefile;
   thefile.open(fileName.c_str(), std::ios::app);
@@ -2368,6 +2436,11 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request req){
+  double rmin[3], rmax[3];
+  for (int c = 0; c < 3; c++){
+    rmin[c] = myDomains[req.domain]->rmin[c];
+    rmax[c] = myDomains[req.domain]->rmax[c];
+  }
 
   SPECIE* spec = myspecies[req.target];
   int shouldIWrite = false;
@@ -2396,45 +2469,17 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
   sprintf(nomefile, "%s", fileName.c_str());
 
   if (shouldIWrite){
+#ifndef NEW_OUTPUT
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-    float *buf;
-    int dimensione = 100000;
-    buf = new float[dimensione*spec->Ncomp];
-
-    double rr[3];
-    int counter = 0;
-    double rmin[3], rmax[3];
-    for (int c = 0; c < 3; c++){
-      rmin[c] = myDomains[req.domain]->rmin[c];
-      rmax[c] = myDomains[req.domain]->rmax[c];
-    }
-
-    for (int p = 0; p < spec->Np; p++){
-      rr[0] = spec->r0(p);
-      rr[1] = spec->r1(p);
-      rr[2] = spec->r2(p);
-      if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
-        if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
-          if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
-            for (int c = 0; c < spec->Ncomp; c++){
-              buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
-            }
-            counter++;
-          }
-        }
-      }
-      if (counter == dimensione){
-        MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
-        counter = 0;
-      }
-    }
-    if (counter > 0){
-      MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
-    }
+    writeCPUParticlesValues(thefile, rmin, rmax, spec);
     MPI_File_close(&thefile);
-    delete[]buf;
+#else
+    std::stringstream myFileName;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
+    writeCPUParticlesValuesSingleFile(myFileName.str(), rmin, rmax, spec);
+#endif
   }
   MPI_Comm_free(&outputCommunicator);
   delete[] NfloatLoc;

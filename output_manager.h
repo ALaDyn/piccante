@@ -272,6 +272,8 @@ private:
   void writeCurrent(std::string fileName, request req);
   void callCurrent(request req);
 
+  void writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec);
+  void writeCPUParticlesValuesSingleFile(std::string  fileName, double rmin[3], double rmax[3], SPECIE* spec);
   void writeSpecPhaseSpace(std::string fileName, request req);
   void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);
   void callSpecPhaseSpace(request req);
