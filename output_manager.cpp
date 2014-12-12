@@ -1497,7 +1497,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 #else
   if (shouldIWrite){
     std::stringstream myFileName;
-    myFileName << fileName << "." << setfill('0') << setw(5) << myOutputID;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
     if (myOutputID == 0){
       writeBigHeaderSingleFile(fileName, uniqueN, imin, slice_rNproc, Ncomp);
     }
