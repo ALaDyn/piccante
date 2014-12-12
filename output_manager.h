@@ -274,6 +274,10 @@ private:
 
   void writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec);
   void writeCPUParticlesValuesSingleFile(std::string  fileName, double rmin[3], double rmax[3], SPECIE* spec);
+  void writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, bool flagMarker);
+  void writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec, bool flagMarker);
+  void writeCPUParticlesValues(MPI_File thefile, SPECIE* spec);
+  void writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec);
   void writeSpecPhaseSpace(std::string fileName, request req);
   void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);
   void callSpecPhaseSpace(request req);

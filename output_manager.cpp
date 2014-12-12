@@ -2333,22 +2333,131 @@ void  OUTPUT_MANAGER::callCurrent(request req){
 
 }
 
+void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, bool flagMarker){
+
+    int outputNComp, NCompFloat;
+    if (flagMarker){
+      NCompFloat = spec->Ncomp - 1;
+      outputNComp = spec->Ncomp + 1;
+
+    }
+    else{
+      NCompFloat = spec->Ncomp;
+      outputNComp = spec->Ncomp;
+    }
+  MPI_Status status;
+  int dimensione, passaggi, resto;
+
+  float *buf;
+  dimensione = 100000;
+  buf = new float[dimensione*outputNComp];
+  passaggi = spec->Np / dimensione;
+  resto = spec->Np % dimensione;
+
+  for (int i = 0; i < passaggi; i++){
+    for (int p = 0; p < dimensione; p++){
+      int c;
+      for (c = 0; c < NCompFloat; c++){
+        buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*i);
+      }
+      if (flagMarker){
+        buf[c + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*i))));
+        buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*i))) + 1);
+      }
+    }
+    MPI_File_write(thefile, buf, dimensione*outputNComp, MPI_FLOAT, &status);
+  }
+  for (int p = 0; p < resto; p++){
+    int c;
+    for (c = 0; c < NCompFloat; c++){
+      buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*passaggi);
+    }
+    if (flagMarker){
+      buf[c + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))));
+      buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))) + 1);
+    }
+    MPI_File_write(thefile, buf, resto*outputNComp, MPI_FLOAT, &status);
+    delete[]buf;
+  }
+}
+
+void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec){
+
+  MPI_Status status;
+  int dimensione, passaggi, resto;
+int Ncomp=spec->Ncomp;
+  float *buf;
+  dimensione = 100000;
+  buf = new float[dimensione*Ncomp];
+  passaggi = spec->Np / dimensione;
+  resto = spec->Np % dimensione;
+
+  for (int i = 0; i < passaggi; i++){
+    for (int p = 0; p < dimensione; p++){
+      int c;
+      for (c = 0; c < Ncomp; c++){
+        buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*i);
+      }
+    }
+    MPI_File_write(thefile, buf, dimensione*Ncomp, MPI_FLOAT, &status);
+  }
+  for (int p = 0; p < resto; p++){
+    int c;
+    for (c = 0; c < Ncomp; c++){
+      buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
+    }
+    MPI_File_write(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
+  }
+  delete[]buf;
+}
+void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec){
+  std::ofstream thefile;
+  thefile.open(fileName.c_str(), std::ios::app);
+  int dimensione, passaggi, resto;
+int Ncomp=spec->Ncomp;
+  float *buf;
+  dimensione = 100000;
+  buf = new float[dimensione*Ncomp];
+  passaggi = spec->Np / dimensione;
+  resto = spec->Np % dimensione;
+
+  for (int i = 0; i < passaggi; i++){
+    for (int p = 0; p < dimensione; p++){
+      int c;
+      for (c = 0; c < Ncomp; c++){
+        buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*i);
+      }
+    }
+    thefile.write((char*)buf, dimensione*Ncomp*sizeof(float));
+  }
+  for (int p = 0; p < resto; p++){
+    int c;
+    for (c = 0; c < Ncomp; c++){
+      buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
+    }
+    thefile.write((char*)buf, resto*Ncomp*sizeof(float));
+  }
+  delete[]buf;
+  thefile.close();
+}
+
 void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
   SPECIE* spec = myspecies[req.target];
   int* NfloatLoc = new int[mygrid->nproc];
-  int outputNComp, NCompFloat;
-  bool flagMarker = spec->amIWithMarker();
-  if (flagMarker){
-    NCompFloat = spec->Ncomp - 1;
-    outputNComp = spec->Ncomp + 1;
-    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
-  }
-  else{
-    NCompFloat = spec->Ncomp;
-    outputNComp = spec->Ncomp;
-    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
-  }
+//  int outputNComp, NCompFloat;
+//  bool flagMarker = spec->amIWithMarker();
+//  if (flagMarker){
+//    NCompFloat = spec->Ncomp - 1;
+//    outputNComp = spec->Ncomp + 1;
+//    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+//  }
+//  else{
+//    NCompFloat = spec->Ncomp;
+//    outputNComp = spec->Ncomp;
+//    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+//  }
+  NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
 
   MPI_Offset disp = 0;
@@ -2363,49 +2472,22 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   nomefile[fileName.size()] = 0;
   sprintf(nomefile, "%s", fileName.c_str());
 
-  MPI_File_open(MPI_COMM_WORLD, nomefile,
-    MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+  {
+#ifndef NEW_OUTPUT
+    MPI_File_open(MPI_COMM_WORLD, nomefile,
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
-  MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-  float *buf;
-  MPI_Status status;
-  int dimensione, passaggi, resto;
+    writeCPUParticlesValues(thefile,  spec);
+    MPI_File_close(&thefile);
+#else
+    std::stringstream myFileName;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << mygrid->myid;
+    writeCPUParticlesValuesSingleFile(myFileName.str(),  spec);
 
-  dimensione = 100000;
-  buf = new float[dimensione*outputNComp];
-  passaggi = spec->Np / dimensione;
-  resto = spec->Np % dimensione;
-  //printf("writePHACESPACE NCompFloat = %i     outputNComp = %i\n", NCompFloat, outputNComp);
-
-  for (int i = 0; i < passaggi; i++){
-    for (int p = 0; p < dimensione; p++){
-      int c;
-      for (c = 0; c < NCompFloat; c++){
-        buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*i);
-      }
-      if (flagMarker){
-        buf[c + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*i))));
-        buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*i))) + 1);
-        //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
-      }
-    }
-    MPI_File_write(thefile, buf, dimensione*outputNComp, MPI_FLOAT, &status);
+#endif
   }
-  for (int p = 0; p < resto; p++){
-    int c;
-    for (c = 0; c < NCompFloat; c++){
-      buf[c + p*outputNComp] = (float)spec->ru(c, p + dimensione*passaggi);
-    }
-    if (flagMarker){
-      buf[c + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))));
-      buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))) + 1);
-      //*((double*)(&(buf[c + p*outputNComp]))) = spec->pettorale(p+ dimensione*i;
-    }
-  }
-  MPI_File_write(thefile, buf, resto*outputNComp, MPI_FLOAT, &status);
-  MPI_File_close(&thefile);
-  delete[]buf;
   delete[] NfloatLoc;
   delete[] nomefile;
 
