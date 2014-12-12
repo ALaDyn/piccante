@@ -1,5 +1,10 @@
 piccante
 ========
+
+[![Build Status Master](https://travis-ci.org/ALaDyn/piccante.png?branch=master)]
+(https://travis-ci.org/ALaDyn/piccante "master")
+
+
 ``piccante`` is a massively parallel fully-relativistic electromagnetic 3D particle-in-cell code, released by the authors to the whole laser-plasma community under a GPLv3 license.
 
 Its strengths are related to flexibility: the user is able to define an arbitrary number of particle species with arbitrary density functions and an arbitrary number of Gaussian laser pulses.
