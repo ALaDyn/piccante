@@ -1499,11 +1499,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
     if (myOutputID == 0){
-      writeBigHeaderSingleFile(fileName, uniqueN, imin, slice_rNproc, Ncomp);
+      writeBigHeaderSingleFile(myFileName.str().c_str(), uniqueN, imin, slice_rNproc, Ncomp);
     }
 
-    writeSmallHeaderSingleFile(thefile, uniqueLocN, imin, remains);
-    writeCPUFieldValuesSingleFile(thefile, uniqueLocN, locimin, remains, req);
+    writeSmallHeaderSingleFile(thefile.str().c_str(), uniqueLocN, imin, remains);
+    writeCPUFieldValuesSingleFile(thefile.str().c_str(), uniqueLocN, locimin, remains, req);
 
   }
 #endif
