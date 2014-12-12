@@ -1,7 +1,8 @@
 language: c++
 before_install:
-  - sudo apt-get install libopenmpi-dev openmpi-bin
+  - sudo apt-get install libopenmpi-dev 
   - sudo apt-get install libboost-system-dev libboost-filesystem-dev
+  - sudo apt-get install libgsl0-dev
 compiler:
   - gcc
 script:
