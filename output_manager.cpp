@@ -1286,7 +1286,7 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 }
 
-void OUTPUT_MANAGER::writeSmallHeaderSingleFile(std::string fileName, int uniqueLocN[], int imin[], int remains[]){
+void OUTPUT_MANAGER::writeSmallHeaderSingleFile(char* fileName, int uniqueLocN[], int imin[], int remains[]){
   int itodo[6];
   std::ofstream thefile;
   thefile.open(fileName, std::ios::app);
@@ -1398,7 +1398,7 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   delete[]todo;
 }
 
-void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(std::string fileName, int uniqueLocN[], int locimin[], int remains[], request req){
+void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(char* fileName, int uniqueLocN[], int locimin[], int remains[], request req){
   std::ofstream thefile;
   thefile.open(fileName, std::ios::app);
   int Ncomp = 3;
