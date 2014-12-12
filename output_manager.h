@@ -295,9 +295,9 @@ private:
   int findNcompForThisGridOutput(request req);
   void writeEBFieldDomain(std::string fileName, request req);
 
-  void writeBigHeaderSingleFile(char* fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp);
-  void writeSmallHeaderSingleFile(char* fileName, int uniqueLocN[3], int imin[3], int remains[3]);
-  void writeCPUFieldValuesSingleFile(char* fileName, int uniqueLocN[3], int locimin[3], int remains[3], request req);
+  void writeBigHeaderSingleFile(std::string  fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp);
+  void writeSmallHeaderSingleFile(std::string  fileName, int uniqueLocN[3], int imin[3], int remains[3]);
+  void writeCPUFieldValuesSingleFile(std::string  fileName, int uniqueLocN[3], int locimin[3], int remains[3], request req);
 
 };
 

@@ -1241,11 +1241,11 @@ void OUTPUT_MANAGER::writeBigHeader(MPI_File thefile, int uniqueN[3], int imin[3
   }
 
 }
-void OUTPUT_MANAGER::writeBigHeaderSingleFile(char* fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp){
+void OUTPUT_MANAGER::writeBigHeaderSingleFile(std::string fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp){
   int itodo[8];
   float *fcir[3];
   std::ofstream thefile;
-  thefile.open(fileName, std::ios::app);
+  thefile.open(fileName.c_str(), std::ios::app);
   for (int c = 0; c < 3; c++){
     fcir[c] = new float[uniqueN[c]];
   }
@@ -1286,10 +1286,10 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 }
 
-void OUTPUT_MANAGER::writeSmallHeaderSingleFile(char* fileName, int uniqueLocN[], int imin[], int remains[]){
+void OUTPUT_MANAGER::writeSmallHeaderSingleFile(std::string fileName, int uniqueLocN[], int imin[], int remains[]){
   int itodo[6];
   std::ofstream thefile;
-  thefile.open(fileName, std::ios::app);
+  thefile.open(fileName.c_str(), std::ios::app);
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
   thefile.write((char*)itodo, 6*sizeof(int));
   thefile.close();
@@ -1398,9 +1398,9 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   delete[]todo;
 }
 
-void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(char* fileName, int uniqueLocN[], int locimin[], int remains[], request req){
+void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(std::string  fileName, int uniqueLocN[], int locimin[], int remains[], request req){
   std::ofstream thefile;
-  thefile.open(fileName, std::ios::app);
+  thefile.open(fileName.c_str(), std::ios::app);
   int Ncomp = 3;
   if ((req.type == OUT_E_FIELD) || (req.type == OUT_B_FIELD))
     Ncomp = 3;
@@ -1476,7 +1476,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifndef NEW_OUTPUT
+#ifdef NEW_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
@@ -1499,11 +1499,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
     if (myOutputID == 0){
-      writeBigHeaderSingleFile(myFileName.str().c_str(), uniqueN, imin, slice_rNproc, Ncomp);
+      writeBigHeaderSingleFile(myFileName.str(), uniqueN, imin, slice_rNproc, Ncomp);
     }
 
-    writeSmallHeaderSingleFile(thefile.str().c_str(), uniqueLocN, imin, remains);
-    writeCPUFieldValuesSingleFile(thefile.str().c_str(), uniqueLocN, locimin, remains, req);
+    writeSmallHeaderSingleFile(myFileName.str(), uniqueLocN, imin, remains);
+    writeCPUFieldValuesSingleFile(myFileName.str(), uniqueLocN, locimin, remains, req);
 
   }
 #endif
