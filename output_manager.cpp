@@ -1241,7 +1241,27 @@ void OUTPUT_MANAGER::writeBigHeader(MPI_File thefile, int uniqueN[3], int imin[3
   }
 
 }
+void OUTPUT_MANAGER::writeBigHeaderSingleFile(char* fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp){
+  int itodo[8];
+  float *fcir[3];
+  std::ofstream thefile;
+  thefile.open(fileName, std::ios::app);
+  for (int c = 0; c < 3; c++){
+    fcir[c] = new float[uniqueN[c]];
+  }
+  prepareIntegerBigHeader(itodo, uniqueN, slice_rNproc, Ncomp);
+  prepareFloatCoordinatesHeader(fcir, uniqueN, imin);
 
+  thefile.write((char*)itodo, 8*sizeof(int));
+  for (int c = 0; c < 3; c++){
+    thefile.write((char*)fcir[c], uniqueN[c]*sizeof(float));
+  }
+
+  for (int c = 0; c < 3; c++){
+    delete[] fcir[c];
+  }
+  thefile.close();
+}
 
 void OUTPUT_MANAGER::prepareIntegerSmallHeader(int *itodo, int uniqueLocN[], int imin[3], int remains[3]){
   for (int c = 0; c<3; c++){
@@ -1265,6 +1285,16 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 }
+
+void OUTPUT_MANAGER::writeSmallHeaderSingleFile(std::string fileName, int uniqueLocN[], int imin[], int remains[]){
+  int itodo[6];
+  std::ofstream thefile;
+  thefile.open(fileName, std::ios::app);
+  prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
+  thefile.write((char*)itodo, 6*sizeof(int));
+  thefile.close();
+}
+
 void OUTPUT_MANAGER::prepareFloatField(float *todo, int NN[3], int origin[3], request req){
   int offset = 0, Ncomp = 3;
   if (req.type == OUT_E_FIELD)
@@ -1368,6 +1398,31 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   delete[]todo;
 }
 
+void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(std::string fileName, int uniqueLocN[], int locimin[], int remains[], request req){
+  std::ofstream thefile;
+  thefile.open(fileName, std::ios::app);
+  int Ncomp = 3;
+  if ((req.type == OUT_E_FIELD) || (req.type == OUT_B_FIELD))
+    Ncomp = 3;
+  else if (req.type == OUT_SPEC_DENSITY)
+    Ncomp = 1;
+  else if (req.type == OUT_CURRENT)
+    Ncomp = 3;
+
+  int origin[3];
+  int size = Ncomp*uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
+  float *todo;
+  todo = new float[size];
+  int ri[3], globalri[3];
+  nearestInt(myDomains[req.domain]->coordinates, ri, globalri);
+
+  setLocalOutputOffset(origin, locimin, ri, remains);
+  prepareFloatField(todo, uniqueLocN, origin, req);
+  thefile.write((char*)todo, size*sizeof(float));
+  delete[]todo;
+  thefile.close();
+}
+
 void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   int Ncomp = 3;
   if ((req.type == OUT_E_FIELD) || (req.type == OUT_B_FIELD))
@@ -1421,6 +1476,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
+#ifndef NEW_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
@@ -1438,6 +1494,19 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
     MPI_File_close(&thefile);
   }
+#else
+  if (shouldIWrite){
+    std::stringstream myFileName;
+    myFileName << fileName << "." << setfill('0') << setw(5) << myOutputID;
+    if (myOutputID == 0){
+      writeBigHeaderSingleFile(fileName, uniqueN, imin, slice_rNproc, Ncomp);
+    }
+
+    writeSmallHeaderSingleFile(thefile, uniqueLocN, imin, remains);
+    writeCPUFieldValuesSingleFile(thefile, uniqueLocN, locimin, remains, req);
+
+  }
+#endif
   MPI_Comm_free(&sliceCommunicator);
   MPI_Comm_free(&outputCommunicator);
   delete[] nomefile;
