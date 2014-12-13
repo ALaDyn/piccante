@@ -2406,8 +2406,8 @@ int Ncomp=spec->Ncomp;
     for (c = 0; c < Ncomp; c++){
       buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
     }
-    MPI_File_write(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
   }
+  MPI_File_write(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
   delete[]buf;
 }
 void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec){
@@ -2435,8 +2435,8 @@ int Ncomp=spec->Ncomp;
     for (c = 0; c < Ncomp; c++){
       buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
     }
-    thefile.write((char*)buf, resto*Ncomp*sizeof(float));
   }
+  thefile.write((char*)buf, resto*Ncomp*sizeof(float));
   delete[]buf;
   thefile.close();
 }
@@ -2478,7 +2478,6 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-
     writeCPUParticlesValues(thefile,  spec);
     MPI_File_close(&thefile);
 #else

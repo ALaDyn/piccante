@@ -93,7 +93,7 @@ int main(int narg, char **args)
   //grid.setXandNxRightStretchedGrid(20.0,1000);
   grid.setYandNyRightStretchedGrid(8.0, 21);
 
-  grid.setBoundaries(xPBC | yPBC | zPBC); //LUNGO Z c'è solo PBC al momento !
+  grid.setBoundaries( xOpen | yPBC | zPBC); //LUNGO Z c'è solo PBC al momento !
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.92);
 
@@ -102,7 +102,7 @@ int main(int narg, char **args)
   grid.with_particles = YES;//NO;
   grid.with_current = YES;//YES;
 
-  // grid.setStartMovingWindow(0);
+  grid.setStartMovingWindow(0);
   //grid.setBetaMovingWindow(1.0);
   //grid.setFrequencyMovingWindow(20);
 
@@ -125,7 +125,7 @@ int main(int narg, char **args)
   pulse1.setCos2PlaneWave();
   pulse1.setWaist(4.0);
   pulse1.setDurationFWHM(5.0);
-  pulse1.setNormalizedAmplitude(100.0);
+  pulse1.setNormalizedAmplitude(10.0);
   pulse1.setPPolarization();
   pulse1.setPulseInitialPosition(-5.0);
   pulse1.setFocusPosition(0.0);
@@ -150,7 +150,7 @@ int main(int narg, char **args)
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
   PLASMA plasma1;
   plasma1.density_function = box;
-  plasma1.setXRangeBox(-5.0, 5.0);
+  plasma1.setXRangeBox(0.0, 10.0);
   plasma1.setYRangeBox(-0.5, 0.5);
   plasma1.setZRangeBox(-0.5, 0.5);
   plasma1.setDensityCoefficient(20.0);
