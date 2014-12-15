@@ -59,6 +59,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define SPEC_DIAG_COMP 14
 #define FIELD_DIAG_COMP 14
 
+//#define DEBUG_NO_MPI_FILE_WRITE
+
 enum diagType{
   OUT_E_FIELD,
   OUT_B_FIELD,
