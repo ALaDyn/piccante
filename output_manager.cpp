@@ -18,7 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "output_manager.h"
-
+#define GROUP_SIZE 32
 int is_big_endian()
 {
   union {
@@ -1398,6 +1398,24 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   delete[]todo;
 }
 
+void OUTPUT_MANAGER::prepareCPUFieldValues(float *buffer, int uniqueLocN[], int imin[], int locimin[], int remains[3], request req){
+  int Ncomp = 3;
+  if ((req.type == OUT_E_FIELD) || (req.type == OUT_B_FIELD))
+    Ncomp = 3;
+  else if (req.type == OUT_SPEC_DENSITY)
+    Ncomp = 1;
+  else if (req.type == OUT_CURRENT)
+    Ncomp = 3;
+
+  int origin[3];
+  int ri[3], globalri[3];
+  nearestInt(myDomains[req.domain]->coordinates, ri, globalri);
+
+  setLocalOutputOffset(origin, locimin, ri, remains);
+  prepareIntegerSmallHeader((int*)buffer, uniqueLocN, imin, remains);
+  prepareFloatField(buffer+6, uniqueLocN, origin, req);
+}
+
 void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec){
   MPI_Status status;
 
@@ -1563,6 +1581,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     MPI_File_close(&thefile);
   }
 #else
+#ifdef MULTIFILE_OUTPUT
   if (shouldIWrite){
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
@@ -1574,6 +1593,98 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     writeCPUFieldValuesSingleFile(myFileName.str(), uniqueLocN, locimin, remains, req);
 
   }
+#else
+  if (shouldIWrite){
+    MPI_Comm groupCommunicator;
+    MPI_Comm MPIFileCommunicator;
+    MPI_Comm_split(outputCommunicator, (myOutputID/GROUP_SIZE), 0, &groupCommunicator);
+    MPI_Comm_split(outputCommunicator, (myOutputID%GROUP_SIZE), 0, &MPIFileCommunicator);
+
+    int myGroupId, groupNproc;
+    MPI_Comm_size(groupCommunicator, &groupNproc);
+    MPI_Comm_rank(groupCommunicator, &myGroupId);
+    int myMPIFileId, MPIFileNproc;
+    MPI_Comm_size(MPIFileCommunicator, &MPIFileNproc);
+    MPI_Comm_rank(MPIFileCommunicator, &myMPIFileId);
+//    std::cout << "hi! I'm proc #" << myOutputID << " => " << myGroupId << " / " << groupNproc << " GROUP\n";
+//    std::cout << "hi! I'm proc #" << myOutputID << " => " << myMPIFileId << " / " << MPIFileNproc << " FILE\n";
+//    std::cout.flush();
+
+    int *groupBufferSize = new int[groupNproc];
+    int maxBufferSize, myBufferSize = (totUniquePoints[myOutputID] * Ncomp + 6);
+    groupBufferSize[myGroupId] = myBufferSize;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupBufferSize, 1, MPI_INT, groupCommunicator);
+    MPI_Allreduce(&myBufferSize, &maxBufferSize, 1, MPI_INT, MPI_MAX, groupCommunicator);
+
+    float **databuf=new float*[2];
+    for(int i=0;i<2;i++){
+      databuf[i]=new float[maxBufferSize];
+    }
+
+    int tag[]={11,12};
+    if(myGroupId !=0){
+      MPI_Status status;
+      MPI_Request request[2];
+            prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
+          groupCommunicator, &request[myGroupId%2]);
+      MPI_Wait(&request[myGroupId%2], &status);
+    }
+    else{
+      MPI_Status status;
+      MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+
+      if (myOutputID == 0){
+        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        writeBigHeader(thefile, uniqueN, imin, slice_rNproc, Ncomp);
+      }
+      else{
+        findDispForSetView(&disp, myOutputID, totUniquePoints, bigHeaderSize, smallHeaderSize, Ncomp);
+        MPI_File_set_view(thefile, disp, MPI_DOUBLE, MPI_DOUBLE, (char *) "native", MPI_INFO_NULL);
+      }
+
+      //la mia roba: la preparo e la scrivo
+      prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      MPI_File_write(thefile, databuf[0], groupBufferSize[0], MPI_FLOAT, &status);
+
+      if(groupNproc==2){
+        MPI_Status status;
+        MPI_Request request[2];
+        int procID=1;
+        MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+        MPI_Wait(&request[procID%2], &status);
+        MPI_File_write(thefile, databuf[procID%2], groupBufferSize[procID], MPI_FLOAT, &status);
+      }
+      if(groupNproc>2){
+        int procID;
+        MPI_Status status;
+        MPI_Request request[2];
+        procID = 1;
+        MPI_Irecv(databuf[1], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+        procID++;
+        MPI_Irecv(databuf[0], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+
+        for (procID = 1; procID < (groupNproc-2); procID++){
+          MPI_Wait(&request[procID%2], &status);
+          MPI_File_write(thefile, databuf[procID%2], groupBufferSize[procID], MPI_FLOAT, &status);
+          MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
+        }
+
+        MPI_Wait(&request[procID%2], &status);
+        MPI_File_write(thefile, databuf[procID%2], groupBufferSize[procID], MPI_FLOAT, &status);
+        procID++;
+        MPI_Wait(&request[(procID)%2], &status);
+        MPI_File_write(thefile, databuf[(procID)%2], groupBufferSize[procID], MPI_FLOAT, &status);
+      }
+      MPI_File_close(&thefile);
+    }
+    delete[] databuf[0];
+    delete[] databuf[1];
+
+    MPI_Comm_free(&groupCommunicator);
+    MPI_Comm_free(&MPIFileCommunicator);
+  }
+#endif
 #endif
   MPI_Comm_free(&sliceCommunicator);
   MPI_Comm_free(&outputCommunicator);

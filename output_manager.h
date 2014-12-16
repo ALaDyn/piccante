@@ -294,6 +294,9 @@ private:
   void prepareIntegerSmallHeader(int *itodo, int uniqueLocN[3], int imin[3], int remains[3]);
   void writeSmallHeader(MPI_File thefile, int uniqueLocN[3], int imin[3], int remains[3]);
   void prepareFloatField(float *todo, int uniqueLocN[3], int origin[3], request req);
+
+  void prepareCPUFieldValues(float *buffer, int uniqueLocN[], int imin[], int locimin[], int remains[3], request req);
+
   void findDispForSetView(MPI_Offset *disp, int myOutputID, int *totUniquePoints, int big_header, int small_header, int Ncomp);
   void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
   void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
