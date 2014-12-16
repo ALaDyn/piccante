@@ -805,19 +805,28 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
   // in case it is not the #0. Doing a double MPI_File_set_view from the same task to the same file is not guaranteed to work.
   if (mygrid->myid == 0){
     MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, uniqueN, 3, MPI_INT, &status);
     MPI_File_write(thefile, mygrid->rnproc, 3, MPI_INT, &status);
     MPI_File_write(thefile, &Ncomp, 1, MPI_INT, &status);
+#endif
     for (int c = 0; c < Ncomp; c++){
       integer_or_halfinteger crd = myfield->getCompCoords(c);
       int tp[3] = { (int)crd.x, (int)crd.y, (int)crd.z };
       MPI_File_write(thefile, tp, 3, MPI_INT, &status);
     }
-    for (int c = 0; c < 3; c++)
+    for (int c = 0; c < 3; c++){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, mygrid->cir[c], uniqueN[c], MPI_DOUBLE, &status);
-    for (int c = 0; c < 3; c++)
+#endif
+    }
+    for (int c = 0; c < 3; c++){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, mygrid->chr[c], uniqueN[c], MPI_DOUBLE, &status);
+#endif
+    }
   }
+
   //*********** END HEADER *****************
 
   disp = big_header;
@@ -844,7 +853,9 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
       todo[3] = mygrid->uniquePointsloc[0];
       todo[4] = mygrid->uniquePointsloc[1];
       todo[5] = mygrid->uniquePointsloc[2];
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, todo, 6, MPI_INT, &status);
+#endif
     }
   //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
     {
@@ -860,7 +871,9 @@ void OUTPUT_MANAGER::writeEMFieldBinary(std::string fileName, request req){
           for (int i = 0; i < Nx; i++)
             for (int c = 0; c < Ncomp; c++)
               todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)myfield->VEB(c, i, j, k);
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
       delete[]todo;
     }
 
@@ -1113,8 +1126,9 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
       itodo[5] = slice_rNproc[1];
       itodo[6] = slice_rNproc[2];
       itodo[7] = Ncomp;
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
-
+#endif
       float *fcir[3];
       for (int c = 0; c < 3; c++){
         fcir[c] = new float[uniqueN[c]];
@@ -1123,10 +1137,18 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
         }
       }
       for (int c = 0; c < 3; c++){
-        if (remains[c])
-          MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-        else
-          MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+
+          if (remains[c]){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+              MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+#endif
+          }
+          else{
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+              MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+#endif
+          }
+
       }
       for (int c = 0; c < 3; c++){
         delete[] fcir[c];
@@ -1160,7 +1182,9 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
               itodo[c + 3] = 1;
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
         }
     //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
@@ -1193,7 +1217,9 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
               }
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
           delete[]todo;
         }
     MPI_File_close(&thefile);
@@ -1230,10 +1256,13 @@ void OUTPUT_MANAGER::writeBigHeader(MPI_File thefile, int uniqueN[3], int imin[3
   }
   prepareIntegerBigHeader(itodo, uniqueN, slice_rNproc, Ncomp);
   prepareFloatCoordinatesHeader(fcir, uniqueN, imin);
-
+#ifndef DEBUG_NO_MPI_FILE_WRITE
   MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+#endif
   for (int c = 0; c < 3; c++){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+#endif
   }
 
   for (int c = 0; c < 3; c++){
@@ -1283,7 +1312,9 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   MPI_Status status;
   int itodo[6];
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
+#ifndef DEBUG_NO_MPI_FILE_WRITE
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
 }
 
 void OUTPUT_MANAGER::writeSmallHeaderSingleFile(std::string fileName, int uniqueLocN[], int imin[], int remains[]){
@@ -1394,7 +1425,9 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
 
   setLocalOutputOffset(origin, locimin, ri, remains);
   prepareFloatField(todo, uniqueLocN, origin, req);
+#ifndef DEBUG_NO_MPI_FILE_WRITE
   MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
   delete[]todo;
 }
 
@@ -1439,12 +1472,16 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, double rmin[3], d
       }
     }
     if (counter == dimensione){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+#endif
       counter = 0;
     }
   }
   if (counter > 0){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, buf, counter*spec->Ncomp, MPI_FLOAT, &status);
+#endif
   }
   delete[]buf;
 
@@ -1967,8 +2004,9 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
       itodo[5] = slice_rNproc[1];
       itodo[6] = slice_rNproc[2];
       itodo[7] = Ncomp;
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
-
+#endif
       float *fcir[3];
       for (int c = 0; c < 3; c++){
         fcir[c] = new float[uniqueN[c]];
@@ -1978,7 +2016,9 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
       }
       for (int c = 0; c < 3; c++){
         //if(remains[c])
+#ifndef DEBUG_NO_MPI_FILE_WRITE
         MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+#endif
         //else
         //  MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
       }
@@ -2014,7 +2054,9 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
               itodo[c + 3] = 1;
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
         }
     //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
@@ -2047,7 +2089,9 @@ void OUTPUT_MANAGER::writeSpecDensity(std::string fileName, request req){
               }
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
           delete[]todo;
         }
     MPI_File_close(&thefile);
@@ -2151,7 +2195,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
       itodo[5] = slice_rNproc[1];
       itodo[6] = slice_rNproc[2];
       itodo[7] = Ncomp;
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+#endif
 
       float *fcir[3];
       for (int c = 0; c < 3; c++){
@@ -2161,7 +2207,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
         }
       }
       for (int c = 0; c < 3; c++){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
         MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+#endif
       }
       for (int c = 0; c < 3; c++){
         delete[] fcir[c];
@@ -2199,7 +2247,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
               itodo[c + 3] = 1;
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
         }
     //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
             {
@@ -2233,7 +2283,9 @@ void OUTPUT_MANAGER::writeSpecDensitySubDomain(std::string fileName, request req
                   }
                 }
               }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
               MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
               delete[]todo;
             }
     MPI_File_close(&thefile);
@@ -2345,7 +2397,9 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
       itodo[5] = slice_rNproc[1];
       itodo[6] = slice_rNproc[2];
       itodo[7] = Ncomp;
+#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, itodo, 8, MPI_INT, &status);
+#endif
 
       float *fcir[3];
       for (int c = 0; c < 3; c++){
@@ -2355,10 +2409,16 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
         }
       }
       for (int c = 0; c < 3; c++){
-        if (remains[c])
+        if (remains[c]){
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
-        else
+#endif
+        }
+        else{
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+#endif
+        }
       }
       for (int c = 0; c < 3; c++){
         delete[] fcir[c];
@@ -2392,7 +2452,9 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
               itodo[c + 3] = 1;
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
         }
     //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
@@ -2425,7 +2487,9 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
               }
             }
           }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
           MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
           delete[]todo;
         }
     MPI_File_close(&thefile);
@@ -2476,7 +2540,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, boo
         buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*i))) + 1);
       }
     }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, buf, dimensione*outputNComp, MPI_FLOAT, &status);
+#endif
   }
   for (int p = 0; p < resto; p++){
     int c;
@@ -2487,7 +2553,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, boo
       buf[c + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))));
       buf[c + 1 + p*outputNComp] = *((float*)(&(spec->marker(p + dimensione*passaggi))) + 1);
     }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, buf, resto*outputNComp, MPI_FLOAT, &status);
+#endif
     delete[]buf;
   }
 }
@@ -2510,7 +2578,9 @@ int Ncomp=spec->Ncomp;
         buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*i);
       }
     }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, buf, dimensione*Ncomp, MPI_FLOAT, &status);
+#endif
   }
   for (int p = 0; p < resto; p++){
     int c;
@@ -2518,7 +2588,9 @@ int Ncomp=spec->Ncomp;
       buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
     }
   }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
   MPI_File_write(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
+#endif
   delete[]buf;
 }
 void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec){
