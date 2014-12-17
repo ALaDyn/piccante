@@ -18,7 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "output_manager.h"
-#define GROUP_SIZE 32
+#define GROUP_SIZE 512
 int is_big_endian()
 {
   union {
@@ -1599,7 +1599,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifdef NEW_OUTPUT
+#ifndef NEW_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
