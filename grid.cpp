@@ -482,6 +482,23 @@ void GRID::checkProcNumber(){
     exit(18);
   }
 
+  if(rnproc[0]*6 > NGridNodes[0]){
+      std::cout << "Too many MPI tasks along x (" << rnproc[0] <<")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
+      exit(18);
+  }
+  if(accesso.dimensions >= 2){
+      if(rnproc[1]*6 > NGridNodes[1]){
+          std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
+          exit(18);
+      }
+  }
+  if(accesso.dimensions==3){
+      if(rnproc[2]*6 > NGridNodes[2]){
+          std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
+          exit(18);
+      }
+  }
+
 }
 void GRID::printGridProcessorInformation(){
 #ifdef _FLAG_DEBUG
