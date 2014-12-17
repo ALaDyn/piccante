@@ -1580,13 +1580,23 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
         MPI_Request request[2];
         procID = 1;
         MPI_Irecv(databuf[1], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
         procID++;
         MPI_Irecv(databuf[0], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
 
         for (procID = 1; procID < (groupNproc-2); procID++){
           MPI_Wait(&request[procID%2], &status);
           thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
           MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
+
         }
 
         MPI_Wait(&request[procID%2], &status);
