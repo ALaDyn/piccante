@@ -1525,7 +1525,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
   }
 #else
-#ifndef SINGLE_FILE
+#ifdef MULTI_FILE
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
     MPI_Comm_split(outputCommunicator, (myOutputID/GROUP_SIZE), 0, &groupCommunicator);
@@ -1680,13 +1680,22 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
         MPI_Request request[2];
         procID = 1;
         MPI_Irecv(databuf[1], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
         procID++;
         MPI_Irecv(databuf[0], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
 
         for (procID = 1; procID < (groupNproc-2); procID++){
           MPI_Wait(&request[procID%2], &status);
           MPI_File_write(thefile, databuf[procID%2], groupBufferSize[procID], MPI_FLOAT, &status);
           MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
+#ifndef _ASYNCHRONOUS
+        MPI_Wait(&request[procID%2], &status);
+#endif
         }
 
         MPI_Wait(&request[procID%2], &status);
