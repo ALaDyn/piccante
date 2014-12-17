@@ -1599,7 +1599,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifndef NEW_OUTPUT
+#ifdef NEW_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
@@ -1629,6 +1629,84 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     writeSmallHeaderSingleFile(myFileName.str(), uniqueLocN, imin, remains);
     writeCPUFieldValuesSingleFile(myFileName.str(), uniqueLocN, locimin, remains, req);
 
+  }
+#else
+#ifndef SINGLE_FILE
+  if (shouldIWrite){
+    MPI_Comm groupCommunicator;
+    MPI_Comm_split(outputCommunicator, (myOutputID/GROUP_SIZE), 0, &groupCommunicator);
+
+    int myGroupId, groupNproc;
+    MPI_Comm_size(groupCommunicator, &groupNproc);
+    MPI_Comm_rank(groupCommunicator, &myGroupId);
+
+    int *groupBufferSize = new int[groupNproc];
+    int maxBufferSize, myBufferSize = (totUniquePoints[myOutputID] * Ncomp + 6);
+    groupBufferSize[myGroupId] = myBufferSize;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupBufferSize, 1, MPI_INT, groupCommunicator);
+    MPI_Allreduce(&myBufferSize, &maxBufferSize, 1, MPI_INT, MPI_MAX, groupCommunicator);
+
+    float **databuf=new float*[2];
+    for(int i=0;i<2;i++){
+      databuf[i]=new float[maxBufferSize];
+    }
+
+    int tag[]={11,12};
+    if(myGroupId !=0){
+      MPI_Status status;
+      MPI_Request request[2];
+            prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
+          groupCommunicator, &request[myGroupId%2]);
+      MPI_Wait(&request[myGroupId%2], &status);
+    }
+    else{
+      std::stringstream myFileName;
+      myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
+      writeBigHeaderSingleFile(myFileName.str(), uniqueN, imin, slice_rNproc, Ncomp);
+
+      std::ofstream thefile;
+      thefile.open(myFileName.str().c_str(), std::ios::app);
+
+      prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      thefile.write((char*)databuf[0], groupBufferSize[0]*sizeof(float));
+
+      if(groupNproc==2){
+        MPI_Status status;
+        MPI_Request request[2];
+        int procID=1;
+        MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+        MPI_Wait(&request[procID%2], &status);
+        thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
+      }
+
+      if(groupNproc>2){
+        int procID;
+        MPI_Status status;
+        MPI_Request request[2];
+        procID = 1;
+        MPI_Irecv(databuf[1], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+        procID++;
+        MPI_Irecv(databuf[0], maxBufferSize, MPI_FLOAT, procID, tag[procID%2], groupCommunicator, &request[procID%2]);
+
+        for (procID = 1; procID < (groupNproc-2); procID++){
+          MPI_Wait(&request[procID%2], &status);
+          thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
+          MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
+        }
+
+        MPI_Wait(&request[procID%2], &status);
+        thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
+        procID++;
+        MPI_Wait(&request[(procID)%2], &status);
+        thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
+      }
+      thefile.close();
+    }
+    delete[] databuf[0];
+    delete[] databuf[1];
+
+    MPI_Comm_free(&groupCommunicator);
   }
 #else
   if (shouldIWrite){
@@ -1721,6 +1799,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     MPI_Comm_free(&groupCommunicator);
     MPI_Comm_free(&MPIFileCommunicator);
   }
+#endif
 #endif
 #endif
   MPI_Comm_free(&sliceCommunicator);
