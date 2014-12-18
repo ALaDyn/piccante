@@ -23,7 +23,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #define USE_MPI_FILE_WRITE_ALL
-#define GROUP_SIZE 512
+#define GROUP_SIZE 256 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
 
 

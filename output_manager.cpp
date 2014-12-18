@@ -1501,7 +1501,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifndef NEW_OUTPUT
+#ifdef MPI_FILE_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
