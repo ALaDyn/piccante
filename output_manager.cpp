@@ -1207,7 +1207,11 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   int itodo[6];
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
+  #if defined (USE_MPI_FILE_WRITE_ALL)
+  MPI_File_write_all(thefile, itodo, 6, MPI_INT, &status);
+#else
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
 #endif
 }
 
@@ -1320,7 +1324,11 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
   setLocalOutputOffset(origin, locimin, ri, remains);
   prepareFloatField(todo, uniqueLocN, origin, req);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
+#if defined (USE_MPI_FILE_WRITE_ALL)
+  MPI_File_write_all(thefile, todo, size, MPI_FLOAT, &status);
+#else
   MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
 #endif
   delete[]todo;
 }
