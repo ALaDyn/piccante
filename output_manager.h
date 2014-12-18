@@ -22,6 +22,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
+#define USE_MPI_FILE_WRITE_ALL
+#define GROUP_SIZE 512
+#define NPARTICLE_BUFFER_SIZE 1000000
 
 
 #include <mpi.h>
@@ -277,6 +280,7 @@ private:
   void writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, bool flagMarker);
   void writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec, bool flagMarker);
   void writeCPUParticlesValues(MPI_File thefile, SPECIE* spec);
+  void writeAllCPUParticlesValues(MPI_File thefile, SPECIE* spec, int maxNfloatLoc);
   void writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec);
   void writeCPUParticlesValuesWritingGroups(std::string fileName, SPECIE* spec);
   void writeSpecPhaseSpace(std::string fileName, request req);

@@ -92,11 +92,27 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 
 
 //*****USEFUL FUNCTIONS*****
-template <class T>const T& MIN(const T& a, const T& b){
+
+#if defined (_GCC)
+#define MAX(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define MIN(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+#else
+#define MAX(a,b) ((a > b)) ? (a) : (b)
+#define MIN(a,b) ((a < b)) ? (a) : (b)
+#endif
+
+template <class T>const T& TMIN(const T& a, const T& b){
   return (a < b) ? a : b;
 }
 
-template <class T>const T& MAX(const T& a, const T& b){
+template <class T>const T& TMAX(const T& a, const T& b){
   return (a > b) ? a : b;
 }
 

@@ -18,8 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "output_manager.h"
-#define GROUP_SIZE 512
-#define NPARTICLE_BUFFER_SIZE 1000000
+
 int is_big_endian()
 {
   union {
@@ -202,14 +201,14 @@ void OUTPUT_MANAGER::createDiagFile(){
 }
 
 void OUTPUT_MANAGER::createExtremaFiles(){
-//  if (checkGrid()){
-    if (mygrid->myid != mygrid->master_proc)
-      return;
+  //  if (checkGrid()){
+  if (mygrid->myid != mygrid->master_proc)
+    return;
   //}
   //else{
   //  if (mygrid->myid != 0)
   //    return;
- // }
+  // }
 
   if (checkEMField()){
     extremaFieldFileName = outputDir + "/EXTREMES_EMfield.dat";
@@ -885,12 +884,12 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
       for (int k = 0; k < Nz; k++)
         for (int j = 0; j < Ny; j++)
           for (int i = 0; i < Nx; i++){
-        Ex[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(0, i, j, k);
-        Ey[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(1, i, j, k);
-        Ez[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(2, i, j, k);
-        Bx[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(3, i, j, k);
-        By[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(4, i, j, k);
-        Bz[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(5, i, j, k);
+            Ex[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(0, i, j, k);
+            Ey[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(1, i, j, k);
+            Ez[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(2, i, j, k);
+            Bx[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(3, i, j, k);
+            By[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(4, i, j, k);
+            Bz[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(5, i, j, k);
           }
       /*
           * Create property list for collective dataset write.
@@ -919,15 +918,15 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
       delete[]Bz;
     }
 
-  for (int i = 0; i < 6; i++){
-    H5Dclose(dset_id[i]);
-    H5Sclose(filespace[i]);
-    H5Sclose(memspace[i]);
-  }
-  H5Pclose(plist_id);
-  H5Fclose(file_id);
-  delete[] nomefile;
-  //////////////////////////// END of collective binary file write
+    for (int i = 0; i < 6; i++){
+      H5Dclose(dset_id[i]);
+      H5Sclose(filespace[i]);
+      H5Sclose(memspace[i]);
+    }
+    H5Pclose(plist_id);
+    H5Fclose(file_id);
+    delete[] nomefile;
+    //////////////////////////// END of collective binary file write
 }
 #endif
 
@@ -1033,16 +1032,16 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
       }
       for (int c = 0; c < 3; c++){
 
-          if (remains[c]){
+        if (remains[c]){
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-              MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
+          MPI_File_write(thefile, fcir[c], uniqueN[c], MPI_FLOAT, &status);
 #endif
-          }
-          else{
+        }
+        else{
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-              MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
+          MPI_File_write(thefile, &fcir[c][globalri[c]], 1, MPI_FLOAT, &status);
 #endif
-          }
+        }
 
       }
       for (int c = 0; c < 3; c++){
@@ -1081,7 +1080,7 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 #endif
         }
-    //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
           float *todo;
           int NN[3], Nx, Ny, Nz, origin[3];
@@ -1117,9 +1116,9 @@ void OUTPUT_MANAGER::writeEBFieldDomain(std::string fileName, request req){
 #endif
           delete[]todo;
         }
-    MPI_File_close(&thefile);
-    delete[] nomefile;
-    delete[] totUniquePoints;
+        MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
   }
   MPI_Comm_free(&sliceCommunicator);
 }
@@ -1176,9 +1175,9 @@ void OUTPUT_MANAGER::writeBigHeaderSingleFile(std::string fileName, int uniqueN[
   prepareIntegerBigHeader(itodo, uniqueN, slice_rNproc, Ncomp);
   prepareFloatCoordinatesHeader(fcir, uniqueN, imin);
 
-  thefile.write((char*)itodo, 8*sizeof(int));
+  thefile.write((char*)itodo, 8 * sizeof(int));
   for (int c = 0; c < 3; c++){
-    thefile.write((char*)fcir[c], uniqueN[c]*sizeof(float));
+    thefile.write((char*)fcir[c], uniqueN[c] * sizeof(float));
   }
 
   for (int c = 0; c < 3; c++){
@@ -1217,7 +1216,7 @@ void OUTPUT_MANAGER::writeSmallHeaderSingleFile(std::string fileName, int unique
   std::ofstream thefile;
   thefile.open(fileName.c_str(), std::ios::app);
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
-  thefile.write((char*)itodo, 6*sizeof(int));
+  thefile.write((char*)itodo, 6 * sizeof(int));
   thefile.close();
 }
 
@@ -1341,7 +1340,7 @@ void OUTPUT_MANAGER::prepareCPUFieldValues(float *buffer, int uniqueLocN[], int 
 
   setLocalOutputOffset(origin, locimin, ri, remains);
   prepareIntegerSmallHeader((int*)buffer, uniqueLocN, imin, remains);
-  prepareFloatField(buffer+6, uniqueLocN, origin, req);
+  prepareFloatField(buffer + 6, uniqueLocN, origin, req);
 }
 
 void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec){
@@ -1413,7 +1412,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, do
     thefile.write((char*)buf, counter*spec->Ncomp*sizeof(float));
   }
   delete[]buf;
-thefile.close();
+  thefile.close();
 }
 
 void OUTPUT_MANAGER::writeCPUFieldValuesSingleFile(std::string  fileName, int uniqueLocN[], int locimin[], int remains[], request req){
@@ -1487,8 +1486,8 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
   MPI_Offset disp = 0;
-  const int smallHeaderSize = (3+3) * sizeof(int);
-  const int bigHeaderSize = (1+3+3+1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+  const int smallHeaderSize = (3 + 3) * sizeof(int);
+  const int bigHeaderSize = (1 + 3 + 3 + 1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
 
   MPI_File thefile;
   char* nomefile = new char[fileName.length() + 1];
@@ -1550,9 +1549,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     if(myGroupId !=0){
       MPI_Status status;
       MPI_Request request[2];
-            prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
       MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
-          groupCommunicator, &request[myGroupId%2]);
+        groupCommunicator, &request[myGroupId%2]);
       MPI_Wait(&request[myGroupId%2], &status);
     }
     else{
@@ -1595,7 +1594,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
           thefile.write((char*)databuf[procID%2], groupBufferSize[procID%2]*sizeof(float));
           MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
 #ifndef _ASYNCHRONOUS
-        MPI_Wait(&request[procID%2], &status);
+          MPI_Wait(&request[procID%2], &status);
 #endif
 
         }
@@ -1626,9 +1625,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     int myMPIFileId, MPIFileNproc;
     MPI_Comm_size(MPIFileCommunicator, &MPIFileNproc);
     MPI_Comm_rank(MPIFileCommunicator, &myMPIFileId);
-//    std::cout << "hi! I'm proc #" << myOutputID << " => " << myGroupId << " / " << groupNproc << " GROUP\n";
-//    std::cout << "hi! I'm proc #" << myOutputID << " => " << myMPIFileId << " / " << MPIFileNproc << " FILE\n";
-//    std::cout.flush();
+    //    std::cout << "hi! I'm proc #" << myOutputID << " => " << myGroupId << " / " << groupNproc << " GROUP\n";
+    //    std::cout << "hi! I'm proc #" << myOutputID << " => " << myMPIFileId << " / " << MPIFileNproc << " FILE\n";
+    //    std::cout.flush();
 
     int *groupBufferSize = new int[groupNproc];
     int maxBufferSize, myBufferSize = (totUniquePoints[myOutputID] * Ncomp + 6);
@@ -1645,9 +1644,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     if(myGroupId !=0){
       MPI_Status status;
       MPI_Request request[2];
-            prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
+      prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
       MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
-          groupCommunicator, &request[myGroupId%2]);
+        groupCommunicator, &request[myGroupId%2]);
       MPI_Wait(&request[myGroupId%2], &status);
     }
     else{
@@ -1695,7 +1694,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
           MPI_File_write(thefile, databuf[procID%2], groupBufferSize[procID], MPI_FLOAT, &status);
           MPI_Irecv(databuf[procID%2], maxBufferSize, MPI_FLOAT, procID+2, tag[procID%2], groupCommunicator, &request[procID%2]);
 #ifndef _ASYNCHRONOUS
-        MPI_Wait(&request[procID%2], &status);
+          MPI_Wait(&request[procID%2], &status);
 #endif
         }
 
@@ -1726,11 +1725,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 void OUTPUT_MANAGER::callEMFieldDomain(request req){
   if (req.type == OUT_E_FIELD){
     std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-      writeGridFieldSubDomain(nameBin, req);
+    writeGridFieldSubDomain(nameBin, req);
   }
   else if (req.type == OUT_B_FIELD){
     std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-      writeGridFieldSubDomain(nameBin, req);
+    writeGridFieldSubDomain(nameBin, req);
   }
 
 }
@@ -1905,7 +1904,7 @@ void OUTPUT_MANAGER::callSpecDensity(request req){
   mycurrent->pbc();
 
   std::string nameBin = composeOutputName(outputDir, "DENS", myspecies[req.target]->name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
-    writeGridFieldSubDomain(nameBin, req);
+  writeGridFieldSubDomain(nameBin, req);
 }
 
 void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
@@ -2051,7 +2050,7 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
           MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
 #endif
         }
-    //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
         {
           float *todo;
           int NN[3], Nx, Ny, Nz, origin[3];
@@ -2087,9 +2086,9 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
 #endif
           delete[]todo;
         }
-    MPI_File_close(&thefile);
-    delete[] nomefile;
-    delete[] totUniquePoints;
+        MPI_File_close(&thefile);
+        delete[] nomefile;
+        delete[] totUniquePoints;
   }
   MPI_Comm_free(&sliceCommunicator);
 }
@@ -2105,16 +2104,16 @@ void  OUTPUT_MANAGER::callCurrent(request req){
 
 void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec, bool flagMarker){
 
-    int outputNComp, NCompFloat;
-    if (flagMarker){
-      NCompFloat = spec->Ncomp - 1;
-      outputNComp = spec->Ncomp + 1;
+  int outputNComp, NCompFloat;
+  if (flagMarker){
+    NCompFloat = spec->Ncomp - 1;
+    outputNComp = spec->Ncomp + 1;
 
-    }
-    else{
-      NCompFloat = spec->Ncomp;
-      outputNComp = spec->Ncomp;
-    }
+  }
+  else{
+    NCompFloat = spec->Ncomp;
+    outputNComp = spec->Ncomp;
+  }
   MPI_Status status;
   int dimensione, passaggi, resto;
 
@@ -2159,9 +2158,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec){
 
   MPI_Status status;
   int dimensione, passaggi, resto;
-int Ncomp=spec->Ncomp;
+  int Ncomp = spec->Ncomp;
   float *buf;
-  dimensione = 100000;
+  dimensione = NPARTICLE_BUFFER_SIZE;
   buf = new float[dimensione*Ncomp];
   passaggi = spec->Np / dimensione;
   resto = spec->Np % dimensione;
@@ -2188,11 +2187,49 @@ int Ncomp=spec->Ncomp;
 #endif
   delete[]buf;
 }
+
+void OUTPUT_MANAGER::writeAllCPUParticlesValues(MPI_File thefile, SPECIE* spec, int maxNfloatLoc){
+  MPI_Status status;
+  int dimensione, passaggi, maxPassaggi, resto;
+  int Ncomp = spec->Ncomp;
+  float *buf;
+  dimensione = NPARTICLE_BUFFER_SIZE;
+  buf = new float[dimensione*Ncomp];
+  passaggi = spec->Np / dimensione;
+  maxPassaggi = (maxNfloatLoc / Ncomp) / dimensione;
+  resto = spec->Np % dimensione;
+
+  for (int i = 0; i < passaggi; i++){
+    for (int p = 0; p < dimensione; p++){
+      int c;
+      for (c = 0; c < Ncomp; c++){
+        buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*i);
+      }
+    }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+    MPI_File_write_all(thefile, buf, dimensione*Ncomp, MPI_FLOAT, &status);
+#endif
+  }
+  for (int p = 0; p < resto; p++){
+    int c;
+    for (c = 0; c < Ncomp; c++){
+      buf[c + p*Ncomp] = (float)spec->ru(c, p + dimensione*passaggi);
+    }
+  }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+  MPI_File_write_all(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
+#endif
+  for (int i = 0; i < (maxPassaggi - passaggi); i++){
+    MPI_File_write_all(thefile, buf, 0, MPI_FLOAT, &status);
+  }
+  delete[]buf;
+}
+
 void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec){
   std::ofstream thefile;
   thefile.open(fileName.c_str(), std::ios::app);
   int dimensione, passaggi, resto;
-int Ncomp=spec->Ncomp;
+  int Ncomp = spec->Ncomp;
   float *buf;
   dimensione = 100000;
   buf = new float[dimensione*Ncomp];
@@ -2221,136 +2258,141 @@ int Ncomp=spec->Ncomp;
 
 
 void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName, SPECIE* spec){
-    const int groupsize = GROUP_SIZE;
-    const int bufsize = NPARTICLE_BUFFER_SIZE*spec->Ncomp;
+  const int groupsize = GROUP_SIZE;
+  const int bufsize = NPARTICLE_BUFFER_SIZE*spec->Ncomp;
 
-    MPI_File thefile;
+  MPI_File thefile;
+  MPI_Status status;
+  char *nomefile = new char[fileName.size() + 1];
+  nomefile[fileName.size()] = 0;
+  sprintf(nomefile, "%s", fileName.c_str());
+
+  MPI_Comm groupCommunicator;
+  MPI_Comm MPIFileCommunicator;
+  MPI_Comm_split(MPI_COMM_WORLD, mygrid->myid / groupsize, 0, &groupCommunicator);
+  MPI_Comm_split(MPI_COMM_WORLD, mygrid->myid%groupsize, 0, &MPIFileCommunicator);
+  int groupMyid, groupNproc;
+  MPI_Comm_size(groupCommunicator, &groupNproc);
+  MPI_Comm_rank(groupCommunicator, &groupMyid);
+  int mpiFileMyid, mpiFileNproc;
+  MPI_Comm_size(MPIFileCommunicator, &mpiFileNproc);
+  MPI_Comm_rank(MPIFileCommunicator, &mpiFileMyid);
+
+  int Ncomp = spec->Ncomp;
+
+  int totalFloatNumber = spec->Np*Ncomp;
+  int* groupProcNumData = new int[groupNproc];
+  groupProcNumData[groupMyid] = totalFloatNumber;
+  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData, 1, MPI_INT, groupCommunicator);
+
+  MPI_Offset disp = 0;
+  long long int groupNumData = 0;
+  if (groupMyid == 0){
+    for (int i = 0; i < groupNproc; i++){
+      groupNumData += groupProcNumData[i];
+    }
+    long long int *allGroupNumData = new long long int[mpiFileNproc];
+    allGroupNumData[mpiFileMyid] = groupNumData;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_LONG_LONG_INT, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
+    for (int i = 0; i < mpiFileMyid; i++){
+      disp += allGroupNumData[i] * sizeof(float);
+    }
+    delete[] allGroupNumData;
+  }
+
+  float* data = new float[bufsize];
+
+  if (groupMyid != 0){
+    int numPackages = spec->Np / NPARTICLE_BUFFER_SIZE;
+    int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
+
+    for (int i = 0; i < numPackages; i++){
+      for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
+        int c;
+        for (c = 0; c < Ncomp; c++){
+          data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
+        }
+      }
+      MPI_Send(data, bufsize, MPI_FLOAT, 0, i, groupCommunicator);
+    }
+    for (int p = 0; p < resto; p++){
+      int c;
+      for (c = 0; c < Ncomp; c++){
+        data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
+      }
+    }
+    MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
+  }
+  else{
+    MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+
+    int numPackages = spec->Np / NPARTICLE_BUFFER_SIZE;
+    int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
+    for (int i = 0; i < numPackages; i++){
+      for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
+        int c;
+        for (c = 0; c < Ncomp; c++){
+          data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
+        }
+      }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+      MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
+#endif
+    }
+    for (int p = 0; p < resto; p++){
+      int c;
+      for (c = 0; c < Ncomp; c++){
+        data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
+      }
+    }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+    MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
+#endif
     MPI_Status status;
-    char *nomefile = new char[fileName.size() + 1];
-    nomefile[fileName.size()] = 0;
-    sprintf(nomefile, "%s", fileName.c_str());
-
-    MPI_Comm groupCommunicator;
-    MPI_Comm MPIFileCommunicator;
-    MPI_Comm_split(MPI_COMM_WORLD, mygrid->myid/groupsize, 0, &groupCommunicator);
-    MPI_Comm_split(MPI_COMM_WORLD, mygrid->myid%groupsize, 0, &MPIFileCommunicator);
-    int groupMyid, groupNproc;
-    MPI_Comm_size(groupCommunicator, &groupNproc);
-    MPI_Comm_rank(groupCommunicator, &groupMyid);
-    int mpiFileMyid, mpiFileNproc;
-    MPI_Comm_size(MPIFileCommunicator, &mpiFileNproc);
-    MPI_Comm_rank(MPIFileCommunicator, &mpiFileMyid);
-
-    int Ncomp = spec->Ncomp;
-
-    int totalFloatNumber = spec->Np*Ncomp;
-    int* groupProcNumData = new int[groupNproc];
-    groupProcNumData[groupMyid] = totalFloatNumber;
-    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData , 1, MPI_INT, groupCommunicator);
-
-    MPI_Offset disp = 0;
-    long long int groupNumData = 0;
-    if(groupMyid==0){
-        for(int i = 0; i < groupNproc; i++){
-            groupNumData += groupProcNumData[i];
-        }
-        long long int *allGroupNumData = new long long int[mpiFileNproc];
-        allGroupNumData[mpiFileMyid] = groupNumData;
-        MPI_Allgather(MPI_IN_PLACE, 1, MPI_LONG_LONG_INT, allGroupNumData , 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
-        for(int i = 0; i < mpiFileMyid; i++){
-            disp += allGroupNumData[i]*sizeof(float);
-        }
-        delete[] allGroupNumData;
+    int i;
+    for (i = 1; i < groupNproc; i++){
+      int p;
+      for (p = 0; p < groupProcNumData[i] / bufsize; p++){
+        MPI_Recv(data, bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
+        MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
+      }
+      MPI_Recv(data, groupProcNumData[i] % bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+      MPI_File_write(thefile, data, groupProcNumData[i] % bufsize, MPI_FLOAT, &status);
+#endif
     }
 
-    float* data = new float[bufsize];
+    MPI_File_close(&thefile);
+  }
 
-    if(groupMyid != 0){
-        int numPackages = spec->Np/NPARTICLE_BUFFER_SIZE;
-        int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
-
-        for (int i = 0; i < numPackages; i++){
-            for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
-                int c;
-                for (c = 0; c < Ncomp; c++){
-                    data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
-                }
-            }
-            MPI_Send(data, bufsize, MPI_FLOAT, 0, i, groupCommunicator);
-        }
-        for (int p = 0; p < resto; p++){
-            int c;
-            for (c = 0; c < Ncomp; c++){
-                data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
-            }
-        }
-        MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
-    }
-    else{
-        MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-        MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-
-        int numPackages = spec->Np/NPARTICLE_BUFFER_SIZE;
-        int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
-        for (int i = 0; i < numPackages; i++){
-            for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
-                int c;
-                for (c = 0; c < Ncomp; c++){
-                    data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
-                }
-            }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
-            MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
-#endif
-        }
-        for (int p = 0; p < resto; p++){
-            int c;
-            for (c = 0; c < Ncomp; c++){
-                data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
-            }
-        }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
-            MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
-#endif
-        MPI_Status status;
-        int i;
-        for (i = 1; i < groupNproc; i++){
-            int p;
-            for (p = 0; p < groupProcNumData[i]/bufsize; p++){
-                MPI_Recv(data, bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
-                MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
-            }
-            MPI_Recv(data, groupProcNumData[i]%bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
-#ifndef DEBUG_NO_MPI_FILE_WRITE
-            MPI_File_write(thefile, data, groupProcNumData[i]%bufsize, MPI_FLOAT, &status);
-#endif
-        }
-
-        MPI_File_close(&thefile);
-    }
-
-    delete[] data;
-    delete[] groupProcNumData;
+  delete[] data;
+  delete[] groupProcNumData;
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
   SPECIE* spec = myspecies[req.target];
   int* NfloatLoc = new int[mygrid->nproc];
-//  int outputNComp, NCompFloat;
-//  bool flagMarker = spec->amIWithMarker();
-//  if (flagMarker){
-//    NCompFloat = spec->Ncomp - 1;
-//    outputNComp = spec->Ncomp + 1;
-//    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
-//  }
-//  else{
-//    NCompFloat = spec->Ncomp;
-//    outputNComp = spec->Ncomp;
-//    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
-//  }
+  int maxNfloatLoc = 0;
+  //  int outputNComp, NCompFloat;
+  //  bool flagMarker = spec->amIWithMarker();
+  //  if (flagMarker){
+  //    NCompFloat = spec->Ncomp - 1;
+  //    outputNComp = spec->Ncomp + 1;
+  //    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+  //  }
+  //  else{
+  //    NCompFloat = spec->Ncomp;
+  //    outputNComp = spec->Ncomp;
+  //    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
+  //  }
   NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
+
+  for (int pp = 0; pp < mygrid->nproc; pp++) {
+    maxNfloatLoc = MAX(maxNfloatLoc, NfloatLoc[pp]);
+  }
 
   MPI_Offset disp = 0;
   for (int pp = 0; pp < mygrid->myid; pp++)
@@ -2364,10 +2406,14 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   {
 #ifndef NEW_OUTPUT
     MPI_File_open(MPI_COMM_WORLD, nomefile,
-                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+      MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-    writeCPUParticlesValues(thefile,  spec);
+#if defined (USE_MPI_FILE_WRITE_ALL)
+    writeAllCPUParticlesValues(thefile, spec, maxNfloatLoc);
+#else
+    writeCPUParticlesValues(thefile, spec);
+#endif
     MPI_File_close(&thefile);
 #else
 #ifdef MULTIFILE_OUTPUT
