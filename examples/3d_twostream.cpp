@@ -57,11 +57,11 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
-#define DO_DUMP true
+#define DO_DUMP false
 #define TIME_BTW_DUMP 50
 
 #define DIRECTORY_OUTPUT "TEST"
-#define DIRECTORY_DUMP "TEST"
+#define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -169,8 +169,8 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  double startOutputA=0.0, freqOutputA=5.0;
-  double startOutputB=0.0, freqOutputB=1.0;
+  double startOutputA=0.2, freqOutputA=1.0;
+  double startOutputB=0.2, freqOutputB=1.0;
 
   manager.addDiagFrom(startOutputB, freqOutputB);
 
