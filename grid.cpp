@@ -38,6 +38,7 @@ GRID::GRID()
   dumpPath = "./";
   GRID::initializeStretchParameters();
   rnproc[1]=rnproc[2]=1;
+  radiationFrictionFlag=false;
 }
 
 GRID::~GRID(){
@@ -342,6 +343,9 @@ void GRID::visualDiag(){
     printf("dz=%f\n", dr[2]);
     printf("Nstep=%i\n", Nstep);
     printf("Boundaries (X,Y,Z) : %s , %s , %s \n", s_x, s_y, s_z);
+    if (radiationFrictionFlag){
+      printf("RR enabled. Lambda0: %e \n", lambda0);
+    }
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
   }
 }
@@ -1453,3 +1457,23 @@ std::string GRID::composeDumpFileName(int dumpID){
   dumpName << std::setw(5) << std::setfill('0') << std::fixed << myid << ".bin";
   return dumpName.str();
 }
+void GRID::setLambda0(double lambda0){
+    this->lambda0 = lambda0;
+}
+
+double GRID::getLambda0(){
+    return lambda0;
+}
+
+void GRID::enableRadiationFriction(){
+    radiationFrictionFlag = true;
+}
+
+void GRID::disableRadiationFriction(){
+    radiationFrictionFlag = false;
+}
+
+bool GRID::isRadiationFrictionEnabled(){
+    return radiationFrictionFlag;
+}
+

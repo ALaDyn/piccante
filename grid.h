@@ -75,9 +75,7 @@ public:
   int uniquePoints[3];
   double rmin[3], rmax[3], dr[3], dri[3], *cir[3], *chr[3];        // [in micron]
   double rminloc[3], rmaxloc[3], *cirloc[3], *chrloc[3];
-  double time, dt;                   // [in micron]
-
-  double lambda0; //lunghezza fisica con cui sono normalizzate tutte le lunghezze
+  double time, dt;                   // [in micron]  
 
   bool shouldIMove;
   int imove_mw;
@@ -162,6 +160,12 @@ public:
   ACCESSO accesso;
   void setDumpPath(std::string _dumpDir);
   std::string composeDumpFileName(int dumpID);
+  void enableRadiationFriction();
+  void disableRadiationFriction();
+  bool isRadiationFrictionEnabled();
+  void setLambda0(double lambda0);
+  double getLambda0();
+
 private:
   int totalNumberOfTimesteps;
 
@@ -188,6 +192,9 @@ private:
 
   time_t unix_time_start;
   std::string dumpPath;
+
+  bool radiationFrictionFlag;
+  double lambda0; //lunghezza fisica con cui sono normalizzate tutte le lunghezze
 
   void setGridDeltar();
   void setGridDeltarNormal();
