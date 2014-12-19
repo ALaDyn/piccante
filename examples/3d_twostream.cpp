@@ -58,7 +58,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
 #define DO_DUMP true
-#define TIME_BTW_DUMP 1
+#define TIME_BTW_DUMP 50
 
 #define DIRECTORY_OUTPUT "TEST"
 #define DIRECTORY_DUMP "TEST"
