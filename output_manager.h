@@ -23,7 +23,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #define USE_MPI_FILE_WRITE_ALL
-#define GROUP_SIZE 256 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
+//#define USE_OUTPUT_WRITING_GROUPS
+//#define USE_MULTIFILE_OUTPUT
+#define GROUP_SIZE 8 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
 
 
@@ -42,6 +44,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
@@ -99,6 +102,12 @@ struct emProbe{
   void setName(std::string iname);
 };
 
+struct reqOutput{
+  int task;
+  int p;
+  int packageSize;
+} ;
+
 struct outDomain{
   double coordinates[3];
   bool remainingCoord[3], subselection;
@@ -119,6 +128,8 @@ struct outDomain{
 
 bool requestCompTime(const request &first, const request &second);
 bool requestCompUnique(const request &first, const request &second);
+bool compOutput(const reqOutput &first, const reqOutput &second);
+
 
 class OUTPUT_MANAGER
 {
@@ -282,6 +293,9 @@ private:
   void writeCPUParticlesValues(MPI_File thefile, SPECIE* spec);
   void writeAllCPUParticlesValues(MPI_File thefile, SPECIE* spec, int maxNfloatLoc);
   void writeCPUParticlesValuesSingleFile(std::string  fileName, SPECIE* spec);
+  int packageSize(int bufsize, int* groupProcNumData, int procID, int packageNumber);
+  int numPackages(int bufsize, int* groupProcNumData, int procID);
+  void fillRequestList(int bufsize, int* groupProcNumData, int groupNproc, std::vector<reqOutput> &reqList);
   void writeCPUParticlesValuesWritingGroups(std::string fileName, SPECIE* spec);
   void writeSpecPhaseSpace(std::string fileName, request req);
   void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);

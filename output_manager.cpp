@@ -142,6 +142,14 @@ bool requestCompUnique(const request &first, const request &second){
     (first.target == second.target) &&
     (first.domain == second.domain));
 }
+bool compOutput(const reqOutput &first, const reqOutput &second){
+    if (first.p != second.p)
+      return (first.p < second.p);
+    else if (first.task != second.task)
+      return (first.task < second.task);
+    else
+        return false;
+}
 
 
 OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies){
@@ -2264,6 +2272,36 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SP
   thefile.close();
 }
 
+int OUTPUT_MANAGER::packageSize(int bufsize, int* groupProcNumData, int procID, int packageNumber){
+    if (packageNumber < groupProcNumData[procID]/bufsize){
+        return bufsize;
+    }
+    else if (packageNumber == (groupProcNumData[procID]/bufsize)){
+        return groupProcNumData[procID]%bufsize;
+    }
+    else{
+        return 0;
+    }
+}
+
+int OUTPUT_MANAGER::numPackages(int bufsize, int* groupProcNumData, int procID){
+    return groupProcNumData[procID]/bufsize + 1;
+}
+
+void OUTPUT_MANAGER::fillRequestList(int bufsize, int* groupProcNumData, int groupNproc, std::vector<reqOutput> &reqList){
+    for(int i = 1; i < groupNproc; i++){
+        for(int p = 0; p < numPackages(bufsize, groupProcNumData,i);p++){
+            reqOutput newReq;
+            newReq.task = i;
+            newReq.p = p;
+            newReq.packageSize = packageSize(bufsize, groupProcNumData, i, p);
+            reqList.push_back(newReq);
+        }
+    }
+    std::sort(reqList.begin(),reqList.end(),compOutput);
+}
+
+
 
 void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName, SPECIE* spec){
   const int groupsize = GROUP_SIZE;
@@ -2311,7 +2349,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
   float* data = new float[bufsize];
 
   if (groupMyid != 0){
-    int numPackages = spec->Np / NPARTICLE_BUFFER_SIZE;
+    int numPackages = spec->Np/NPARTICLE_BUFFER_SIZE;
     int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
 
     for (int i = 0; i < numPackages; i++){
@@ -2331,7 +2369,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     }
     MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
   }
-  else{
+  else{      
     MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
@@ -2354,22 +2392,21 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
         data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
       }
     }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
+#ifndef DEBUG_NO_MPI_FILE_WRITE   
     MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
 #endif
     MPI_Status status;
-    int i;
-    for (i = 1; i < groupNproc; i++){
-      int p;
-      for (p = 0; p < groupProcNumData[i] / bufsize; p++){
-        MPI_Recv(data, bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
-        MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
-      }
-      MPI_Recv(data, groupProcNumData[i] % bufsize, MPI_FLOAT, i, p, groupCommunicator, &status);
+
+    std::vector<reqOutput> reqList;
+    fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
+
+    for (int i = 0; i < reqList.size(); i++){
+        MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-      MPI_File_write(thefile, data, groupProcNumData[i] % bufsize, MPI_FLOAT, &status);
+        MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
 #endif
     }
+
 
     MPI_File_close(&thefile);
   }
@@ -2412,26 +2449,34 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   sprintf(nomefile, "%s", fileName.c_str());
 
   {
-#ifndef NEW_OUTPUT
-    MPI_File_open(MPI_COMM_WORLD, nomefile,
-      MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+#if defined(USE_MPI_FILE_WRITE_ALL)
 
-    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
-#if defined (USE_MPI_FILE_WRITE_ALL)
+      MPI_File_open(MPI_COMM_WORLD, nomefile,
+                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+      MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     writeAllCPUParticlesValues(thefile, spec, maxNfloatLoc);
-#else
-    writeCPUParticlesValues(thefile, spec);
-#endif
-    MPI_File_close(&thefile);
-#else
-#ifdef MULTIFILE_OUTPUT
+     MPI_File_close(&thefile);
+
+#elif defined(USE_OUTPUT_WRITING_GROUPS)
+
+    writeCPUParticlesValuesWritingGroups(nomefile,spec);
+
+#elif defined(USE_MULTIFILE_OUTPUT)
+
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << mygrid->myid;
     writeCPUParticlesValuesSingleFile(myFileName.str(),  spec);
+
 #else
-    writeCPUParticlesValuesWritingGroups(nomefile,spec);
+      MPI_File_open(MPI_COMM_WORLD, nomefile,
+                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+      MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    writeCPUParticlesValues(thefile, spec);
+    MPI_File_close(&thefile);
+
 #endif
-#endif
+
+
   }
   delete[] NfloatLoc;
   delete[] nomefile;
