@@ -165,21 +165,22 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  double startOutputA=0.2, freqOutputA=1.0;
-  double startOutputB=0.2, freqOutputB=1.0;
+  double startOutputA=0.1, freqOutputA=1.0;
+  double startOutputB=0.3, freqOutputB=1.0;
+  double startOutputC=0.5, freqOutputC=1.0;
 
-  manager.addDiagFrom(startOutputB, freqOutputB);
+  manager.addDiagFrom(startOutputA, freqOutputA);
 
-  manager.addEFieldFrom(startOutputA, freqOutputA);
-  manager.addBFieldFrom(startOutputA, freqOutputA);
+  manager.addEFieldFrom(startOutputB, freqOutputB);
+  manager.addBFieldFrom(startOutputB, freqOutputB);
 
-  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
-  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
+  //manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
+  //manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
 
-  manager.addCurrentFrom(startOutputA, freqOutputA);
+  //manager.addCurrentFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
-  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
+  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputC, freqOutputC);
+  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputC, freqOutputC);
 
 
   manager.initialize(DIRECTORY_OUTPUT);
