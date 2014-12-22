@@ -172,6 +172,10 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   outDomain *domain1 = new outDomain;
   domain1->overrideFlag = true;
   myDomains.push_back(domain1);
+
+  fieldGroupSize = GROUP_SIZE;
+  particleGroupSize = GROUP_SIZE;
+  particleBufferSize = NPARTICLE_BUFFER_SIZE;
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
@@ -1544,7 +1548,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 #ifdef MULTI_FILE
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
-    MPI_Comm_split(outputCommunicator, (myOutputID/GROUP_SIZE), 0, &groupCommunicator);
+    MPI_Comm_split(outputCommunicator, (myOutputID/fieldGroupSize), 0, &groupCommunicator);
 
     int myGroupId, groupNproc;
     MPI_Comm_size(groupCommunicator, &groupNproc);
@@ -1632,8 +1636,8 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
     MPI_Comm MPIFileCommunicator;
-    MPI_Comm_split(outputCommunicator, (myOutputID/GROUP_SIZE), 0, &groupCommunicator);
-    MPI_Comm_split(outputCommunicator, (myOutputID%GROUP_SIZE), 0, &MPIFileCommunicator);
+    MPI_Comm_split(outputCommunicator, (myOutputID/fieldGroupSize), 0, &groupCommunicator);
+    MPI_Comm_split(outputCommunicator, (myOutputID%fieldGroupSize), 0, &MPIFileCommunicator);
 
     int myGroupId, groupNproc;
     MPI_Comm_size(groupCommunicator, &groupNproc);
@@ -2176,7 +2180,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, SPECIE* spec){
   int dimensione, passaggi, resto;
   int Ncomp = spec->Ncomp;
   float *buf;
-  dimensione = NPARTICLE_BUFFER_SIZE;
+  dimensione = particleBufferSize;
   buf = new float[dimensione*Ncomp];
   passaggi = spec->Np / dimensione;
   resto = spec->Np % dimensione;
@@ -2209,7 +2213,7 @@ void OUTPUT_MANAGER::writeAllCPUParticlesValues(MPI_File thefile, SPECIE* spec, 
   int dimensione, passaggi, maxPassaggi, resto;
   int Ncomp = spec->Ncomp;
   float *buf;
-  dimensione = NPARTICLE_BUFFER_SIZE;
+  dimensione = particleBufferSize;
   buf = new float[dimensione*Ncomp];
   passaggi = spec->Np / dimensione;
   maxPassaggi = (maxNfloatLoc / Ncomp) / dimensione;
@@ -2304,8 +2308,8 @@ void OUTPUT_MANAGER::fillRequestList(int bufsize, int* groupProcNumData, int gro
 
 
 void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName, SPECIE* spec){
-  const int groupsize = GROUP_SIZE;
-  const int bufsize = NPARTICLE_BUFFER_SIZE*spec->Ncomp;
+  const int groupsize = particleGroupSize;
+  const int bufsize = particleBufferSize*spec->Ncomp;
 
   MPI_File thefile;
   MPI_Status status;
@@ -2349,14 +2353,14 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
   float* data = new float[bufsize];
 
   if (groupMyid != 0){
-    int numPackages = spec->Np/NPARTICLE_BUFFER_SIZE;
-    int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
+    int numPackages = spec->Np/particleBufferSize;
+    int resto = spec->Np%particleBufferSize;
 
     for (int i = 0; i < numPackages; i++){
-      for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
+      for (int p = 0; p < particleBufferSize; p++){
         int c;
         for (c = 0; c < Ncomp; c++){
-          data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
+          data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
         }
       }
       MPI_Send(data, bufsize, MPI_FLOAT, 0, i, groupCommunicator);
@@ -2364,7 +2368,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     for (int p = 0; p < resto; p++){
       int c;
       for (c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
+        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
       }
     }
     MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
@@ -2373,13 +2377,13 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-    int numPackages = spec->Np / NPARTICLE_BUFFER_SIZE;
-    int resto = spec->Np%NPARTICLE_BUFFER_SIZE;
+    int numPackages = spec->Np / particleBufferSize;
+    int resto = spec->Np%particleBufferSize;
     for (int i = 0; i < numPackages; i++){
-      for (int p = 0; p < NPARTICLE_BUFFER_SIZE; p++){
+      for (int p = 0; p < particleBufferSize; p++){
         int c;
         for (c = 0; c < Ncomp; c++){
-          data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*i);
+          data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
         }
       }
 #ifndef DEBUG_NO_MPI_FILE_WRITE
@@ -2389,7 +2393,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     for (int p = 0; p < resto; p++){
       int c;
       for (c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + NPARTICLE_BUFFER_SIZE*numPackages);
+        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
       }
     }
 #ifndef DEBUG_NO_MPI_FILE_WRITE   
@@ -2835,3 +2839,27 @@ void OUTPUT_MANAGER::autoVisualDiag(){
   }
 }
 
+
+int OUTPUT_MANAGER::getFieldGroupSize(){
+    return fieldGroupSize;
+}
+
+int OUTPUT_MANAGER::getParticleGroupSize(){
+    return particleGroupSize;
+}
+
+int OUTPUT_MANAGER::getParticleBufferSize(){
+    return particleBufferSize;
+}
+
+void OUTPUT_MANAGER::setFieldGroupSize(int gsize){
+    fieldGroupSize = gsize;
+}
+
+void OUTPUT_MANAGER::setParticleGroupSize(int gsize){
+    particleGroupSize = gsize;
+}
+
+void OUTPUT_MANAGER::setParticleBufferSize(int bsize){
+    particleBufferSize = bsize;
+}

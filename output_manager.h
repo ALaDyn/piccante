@@ -202,6 +202,12 @@ public:
 
   void callDiags(int istep);
 
+  int getFieldGroupSize();
+  int getParticleGroupSize();
+  int getParticleBufferSize();
+  void setFieldGroupSize(int gsize);
+  void setParticleGroupSize(int gsize);
+  void setParticleBufferSize(int bsize);
 
 private:
   GRID* mygrid;
@@ -221,6 +227,10 @@ private:
 
   bool isThereDiag;
   bool isThereEMProbe;
+
+  int fieldGroupSize;
+  int particleGroupSize;
+  int particleBufferSize;
 
   bool checkGrid();
   bool checkEMField();
