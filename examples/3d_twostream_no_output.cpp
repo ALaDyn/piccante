@@ -36,10 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-
-#define DIMENSIONALITY 3
-
-#include "access.h"
 #include "commons.h"
 #include "grid.h"
 #include "structures.h"
@@ -49,6 +45,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_manager.h"
 #include "utilities.h"
 
+#define DIMENSIONALITY 3
 #define NPROC_ALONG_Y 16
 #define NPROC_ALONG_Z 8
 #define Xfactor 1.0

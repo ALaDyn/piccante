@@ -36,9 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-
-#define DIMENSIONALITY 2
-#include "access.h"
 #include "commons.h"
 #include "grid.h"
 #include "structures.h"
@@ -48,6 +45,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_manager.h"
 #include "utilities.h"
 
+#define DIMENSIONALITY 2
 #define NPROC_ALONG_Y 32
 #define Xfactor 1.0
 #define Yfactor 1.0
@@ -64,7 +62,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int narg, char **args)
 {
-  GRID grid;
+  GRID grid(DIMENSIONALITY);
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;

@@ -36,10 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 
-
-#define DIMENSIONALITY 3
-
-#include "access.h"
 #include "commons.h"
 #include "grid.h"
 #include "structures.h"
@@ -49,7 +45,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_manager.h"
 #include "utilities.h"
 
-TODO
+
+#define DIMENSIONALITY 3
+//TODO
 
 #define _RESTART_FROM_DUMP 1
 #define _DO_RESTART false
