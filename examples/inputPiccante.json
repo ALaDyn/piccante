@@ -2,7 +2,7 @@
     "hello": "world",
     "t": true ,
     "f": false,
-    "dimensions": 2.2,
+    "dimensions": 1,
     "nProcY": 1,
     "nProcZ": 1,
     "a": [1, 2, 3, 4]
