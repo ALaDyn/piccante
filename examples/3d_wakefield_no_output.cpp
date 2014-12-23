@@ -63,7 +63,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int narg, char **args)
 {
-  GRID grid;
+  GRID grid(DIMENSIONALITY);
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;
