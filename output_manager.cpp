@@ -1376,8 +1376,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValues(MPI_File thefile, double rmin[3], d
     rr[1] = spec->r1(p);
     rr[2] = spec->r2(p);
     if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
-      if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
-        if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+      if (mygrid->getDimensionality() < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->getDimensionality() < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
           for (int c = 0; c < spec->Ncomp; c++){
             buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
           }
@@ -1414,8 +1414,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, do
     rr[1] = spec->r1(p);
     rr[2] = spec->r2(p);
     if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
-      if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
-        if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+      if (mygrid->getDimensionality() < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->getDimensionality() < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
           for (int c = 0; c < spec->Ncomp; c++){
             buf[c + counter*spec->Ncomp] = (float)spec->ru(c, p);
           }
@@ -1767,7 +1767,7 @@ void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[
     hii[c] = wii[c] = 0;
   }
   if (mygrid->isStretched()){
-    for (int c = 0; c < mygrid->accesso.dimensions; c++){
+    for (int c = 0; c < mygrid->getDimensionality(); c++){
       mycsi[c] = mygrid->unStretchGrid(position[c], c);
       rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
 
@@ -1789,7 +1789,7 @@ void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[
     }
   }
   else{
-    for (int c = 0; c < mygrid->accesso.dimensions; c++){
+    for (int c = 0; c < mygrid->getDimensionality(); c++){
       rr = mygrid->dri[c] * (position[c] - mygrid->rminloc[c]);
       rh = rr - 0.5;
       wii[c] = (int)floor(rr + 0.5); //whole integer int
@@ -1811,7 +1811,7 @@ void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[
 
   E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-  switch (mygrid->accesso.dimensions)
+  switch (mygrid->getDimensionality())
   {
   case 3:
     for (int k = 0; k < 3; k++)
@@ -1903,8 +1903,8 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req){
   rr[2] = myEMProbes[req.domain]->coordinates[2];
 
   if (rr[0] >= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
-    if (mygrid->accesso.dimensions < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
-      if (mygrid->accesso.dimensions < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
+    if (mygrid->getDimensionality() < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
+      if (mygrid->getDimensionality() < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
         interpolateEBFieldsToPosition(rr, EE, BB);
         std::ofstream of0;
         of0.open(myEMProbes[req.domain]->fileName.c_str(), std::ios::app);
@@ -2501,8 +2501,8 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
     rr[2] = spec->r2(p);
 
     if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
-      if (mygrid->accesso.dimensions < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
-        if (mygrid->accesso.dimensions < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+      if (mygrid->getDimensionality() < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->getDimensionality() < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
           counter++;
         }
       }
@@ -2661,8 +2661,8 @@ void OUTPUT_MANAGER::callDiag(request req){
 
 bool OUTPUT_MANAGER::isThePointInMyDomain(double rr[3]){
   if (rr[0] >= mygrid->rminloc[0] && rr[0] < mygrid->rmaxloc[0]){
-    if (mygrid->accesso.dimensions < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
-      if (mygrid->accesso.dimensions < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
+    if (mygrid->getDimensionality() < 2 || (rr[1] >= mygrid->rminloc[1] && rr[1] < mygrid->rmaxloc[1])){
+      if (mygrid->getDimensionality() < 3 || (rr[2] >= mygrid->rminloc[2] && rr[2] < mygrid->rmaxloc[2])){
         return true;
       }
     }
@@ -2676,8 +2676,8 @@ bool OUTPUT_MANAGER::amIInTheSubDomain(request req){
     rmax[c] = myDomains[req.domain]->rmax[c];
   }
   if (rmax[0] >= mygrid->rminloc[0] && rmin[0] < mygrid->rmaxloc[0]){
-    if (mygrid->accesso.dimensions < 2 || (rmax[1] >= mygrid->rminloc[1] && rmin[1] < mygrid->rmaxloc[1])){
-      if (mygrid->accesso.dimensions < 3 || (rmax[2] >= mygrid->rminloc[2] && rmin[2] < mygrid->rmaxloc[2])){
+    if (mygrid->getDimensionality() < 2 || (rmax[1] >= mygrid->rminloc[1] && rmin[1] < mygrid->rmaxloc[1])){
+      if (mygrid->getDimensionality() < 3 || (rmax[2] >= mygrid->rminloc[2] && rmin[2] < mygrid->rmaxloc[2])){
         return true;
       }
     }
@@ -2689,7 +2689,7 @@ bool OUTPUT_MANAGER::amIInTheSubDomain(request req){
 void OUTPUT_MANAGER::nearestInt(double rr[], int *ri, int *globalri){
   int c;
   if (mygrid->isStretched()){
-    for (c = 0; c < mygrid->accesso.dimensions; c++){
+    for (c = 0; c < mygrid->getDimensionality(); c++){
       double mycsi = mygrid->unStretchGrid(rr[c], c);
       double xx = mygrid->dri[c] * (mycsi - mygrid->csiminloc[c]);
       ri[c] = (int)floor(xx + 0.5); //whole integer int
@@ -2702,7 +2702,7 @@ void OUTPUT_MANAGER::nearestInt(double rr[], int *ri, int *globalri){
     }
   }
   else{
-    for (c = 0; c < mygrid->accesso.dimensions; c++){
+    for (c = 0; c < mygrid->getDimensionality(); c++){
       double xx = mygrid->dri[c] * (rr[c] - mygrid->rminloc[c]);
       ri[c] = (int)floor(xx + 0.5); //whole integer int
       xx = mygrid->dri[c] * (rr[c] - mygrid->rmin[c]);
@@ -2739,7 +2739,7 @@ int OUTPUT_MANAGER::findRightNeightbourPoint(double val, double* coords, int num
 }
 void OUTPUT_MANAGER::setAndCheckRemains(int *remains, bool remainingCoord[3]){
   for (int c = 0; c < 3; c++){
-    if (c < mygrid->accesso.dimensions)
+    if (c < mygrid->getDimensionality())
       remains[c] = remainingCoord[c];
     else
       remains[c] = 0;

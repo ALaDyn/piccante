@@ -154,37 +154,37 @@ public:
   void reloadDump(std::ifstream &ff);
   //PUBLIC INLINE FUNCTIONS
   inline double & E0(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       0, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline double & E1(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       1, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline double & E2(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       2, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline double & B0(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       3, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline  double & B1(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       4, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline double & B2(int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       5, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
   inline double & VEB(int c, int i, int j, int k){
-    return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor,
+    return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       c, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
@@ -216,7 +216,6 @@ private:
   int N_grid[3], Ncomp;
   long int Ntot;
   int ZGrid_factor, YGrid_factor;
-  ACCESSO acc;    // object distinguishing 1-2-3 D
   double *val; //   THE BIG poiniter
   GRID *mygrid;         // pointer to the GIRD object 
   bool allocated;  //flag 1-0 allocaded-not alloc 

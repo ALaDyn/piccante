@@ -34,7 +34,7 @@ CURRENT::~CURRENT()
 void CURRENT::allocate(GRID *grid) //field allocation
 {
   mygrid = grid;
-  acc.alloc_number(N_grid, mygrid->Nloc);
+  mygrid->alloc_number(N_grid, mygrid->Nloc);
   Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
   if (N_grid[2] == 1)
     ZGrid_factor = 0;
@@ -52,7 +52,7 @@ void CURRENT::reallocate()
     printf("ERROR: reallocate\n");
     exit(17);
   }
-  acc.alloc_number(N_grid, mygrid->Nloc);
+  mygrid->alloc_number(N_grid, mygrid->Nloc);
   Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
   if (N_grid[2] == 1)
     ZGrid_factor = 0;
@@ -133,8 +133,8 @@ void CURRENT::pbc()
   int i, j, k, c;
   int Nx, Ny, Nz, Nc = Ncomp;
   int Ngx, Ngy, Ngz, sendcount;
-  int dimensions = acc.dimensions;
-  int edge = acc.edge;
+  int dimensions = mygrid->getDimensionality();
+  int edge = mygrid->getEdge();
   int Nxchng = 2 * edge + 1;//, istart=(Nxchng-1)/2;
   // number of points to exchange
   // (i.e. -2,-1,0,1,2 e.g istart, istart+1,istart+2,istart+3,istart+(Nxchng-1)    
@@ -312,11 +312,13 @@ void CURRENT::eraseDensity(){
   int Ngy = N_grid[1];
   int Ngz = N_grid[2];
 
+  int edge = mygrid->getEdge();
+
   for (k = 0; k < Ngz; k++)
     for (j = 0; j < Ngy; j++)
       for (i = 0; i < Ngx; i++)
       {
-    density(i - acc.edge, j - acc.edge, k - acc.edge) = 0.0;
+    density(i - edge, j - edge, k - edge) = 0.0;
       }
 }
 

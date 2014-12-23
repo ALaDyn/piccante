@@ -29,7 +29,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 //*****VERSION*****
-#define CURRENT_VERSION " version 1.2.5"
+#define CURRENT_VERSION " version 1.3.0"
 
 const std::string common_versionLine = "================  "CURRENT_VERSION"  ================";
 
@@ -115,17 +115,6 @@ template <class T>const T& TMIN(const T& a, const T& b){
 template <class T>const T& TMAX(const T& a, const T& b){
   return (a > b) ? a : b;
 }
-
-
-//*****ACCESS PROTOTYPE*****
-class ACCESSO{
-public:
-  ACCESSO();
-  static const int edge = 2;
-  void alloc_number(int *N_grid, int *N_loc);
-  int dimensions;
-  static const int Nexchange = 1;
-};
 
 //*****LOGOS******
 

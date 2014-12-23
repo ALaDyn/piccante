@@ -56,11 +56,11 @@ public:
   void eraseDensity();
 
   //PUBLIC INLINE FUNCTIONS
-  inline double & Jx(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & Jy(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & Jz(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & density(int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & JJ(int c, int i, int j, int k){ return val[my_indice(acc.edge, YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jx(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jy(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jz(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & density(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & JJ(int c, int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
 
 
 
@@ -68,7 +68,6 @@ private:
   int N_grid[3];
   long int Ntot;
   int ZGrid_factor, YGrid_factor;
-  ACCESSO acc;    // object distinguishing 1-2-3 D
   double *val; //   THE BIG poiniter
   GRID *mygrid;         // pointer to the GIRD object 
   int allocated;  //flag 1-0 allocaded-not alloc

@@ -19,46 +19,49 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include"grid.h"
 
-GRID::GRID()
+GRID::GRID(int dimensions)
 {
-  std::time(&unix_time_start);  // get current time
-  beta_mw = 0;
-  time = 0;
-  mark_mw = 0;
-  master_proc = 0;
-  istep = 0;
-  with_particles = YES;
-  with_current = YES;
-  withMovingWindow = false;
-  proc_totUniquePoints = NULL;
-  cyclic[0] = cyclic[1] = cyclic[2] = 1;
-  lambda0 = 1.0;   //set lenght of the normalization
-  ref_den = 1.0; //= critical density
-  den_factor = (2 * M_PI)*(2 * M_PI);
-  dumpPath = "./";
-  GRID::initializeStretchParameters();
-  rnproc[1]=rnproc[2]=1;
-  radiationFrictionFlag=false;
+    isDimensionalitySet=true;
+    this->dimensions = dimensions;
+    checkDimensionality();
+    std::time(&unix_time_start);  // get current time
+    beta_mw = 0;
+    time = 0;
+    mark_mw = 0;
+    master_proc = 0;
+    istep = 0;
+    with_particles = YES;
+    with_current = YES;
+    withMovingWindow = false;
+    proc_totUniquePoints = NULL;
+    cyclic[0] = cyclic[1] = cyclic[2] = 1;
+    lambda0 = 1.0;   //set lenght of the normalization
+    ref_den = 1.0; //= critical density
+    den_factor = (2 * M_PI)*(2 * M_PI);
+    dumpPath = "./";
+    GRID::initializeStretchParameters();
+    rnproc[1]=rnproc[2]=1;
+    radiationFrictionFlag=false;
 }
 
 GRID::~GRID(){
-  delete[] proc_totUniquePoints;
-  for (int c = 0; c < 3; c++){
-    free(iStretchingDerivativeCorrection[c]);
-    free(hStretchingDerivativeCorrection[c]);
-    free(rproc_rmin[c]);
-    free(rproc_rmax[c]);
-    free(rproc_csimin[c]);
-    free(rproc_csimax[c]);
-    free(rproc_imin[c]);
-    free(rproc_imax[c]);
-    free(rproc_Nloc[c]);
-    free(rproc_NuniquePointsloc[c]);
-    free(cir[c]);
-    free(chr[c]);
-    free(cirloc[c]);
-    free(chrloc[c]);
-  }
+    delete[] proc_totUniquePoints;
+    for (int c = 0; c < 3; c++){
+        free(iStretchingDerivativeCorrection[c]);
+        free(hStretchingDerivativeCorrection[c]);
+        free(rproc_rmin[c]);
+        free(rproc_rmax[c]);
+        free(rproc_csimin[c]);
+        free(rproc_csimax[c]);
+        free(rproc_imin[c]);
+        free(rproc_imax[c]);
+        free(rproc_Nloc[c]);
+        free(rproc_NuniquePointsloc[c]);
+        free(cir[c]);
+        free(chr[c]);
+        free(cirloc[c]);
+        free(chrloc[c]);
+    }
 }
 
 void GRID::initializeStretchParameters(){
@@ -79,7 +82,7 @@ void GRID::setXrange(double min, double max){
 void GRID::setYrange(double min, double max){
   rmin[1] = min;
   rmax[1] = max;
-  if (accesso.dimensions < 2){
+  if (dimensions < 2){
     rmin[1] = -1;
     rmax[1] = +1;
   }
@@ -87,7 +90,7 @@ void GRID::setYrange(double min, double max){
 void GRID::setZrange(double min, double max){
   rmin[2] = min;
   rmax[2] = max;
-  if (accesso.dimensions < 3){
+  if (dimensions < 3){
     rmin[2] = -1;
     rmax[2] = +1;
   }
@@ -101,17 +104,71 @@ void GRID::setNCells(int xcells, int ycells, int zcells){
 
 void GRID::setNProcsAlongY(int nprocy){
   rnproc[1] = nprocy;
-  if (accesso.dimensions < 2)
+  if (dimensions < 2)
     rnproc[1] = 1;
 }
 void GRID::setNProcsAlongZ(int nprocz){
   rnproc[2] = nprocz;
-  if (accesso.dimensions < 3)
+  if (dimensions < 3)
     rnproc[2] = 1;
 }
 
+void GRID::checkDimensionality(){
+    if ((dimensions >= 1) && (dimensions <= 3))
+        return;
+    else{
+        if (myid == master_proc){
+            std::cout << "ERROR: invalid dimensionality!" << std::endl;
+        }
+        exit(19);
+    }
+}
+
+int GRID::getDimensionality(){
+    if(isDimensionalitySet)
+        return dimensions;
+    else
+        return -1;
+}
+
+int GRID::getEdge(){
+    return edge;
+}
+
+int GRID::getNexchange(){
+    return Nexchange;
+}
+
+int GRID::alloc_number(int *N_grid, int *N_loc){
+    if(isDimensionalitySet){
+        switch(dimensions){
+        case 1:
+            N_grid[0] = N_loc[0] + 2 * edge;
+            N_grid[1] = N_loc[1];
+            N_grid[2] = N_loc[2];
+            break;
+        case 2:
+            N_grid[0] = N_loc[0] + 2 * edge;
+            N_grid[1] = N_loc[1] + 2 * edge;
+            N_grid[2] = N_loc[2];
+            break;
+        case 3:
+            N_grid[0] = N_loc[0] + 2 * edge;
+            N_grid[1] = N_loc[1] + 2 * edge;
+            N_grid[2] = N_loc[2] + 2 * edge;
+            break;
+        default:
+            return -1;
+            break;
+        }
+        return 0;
+    }
+    else
+        return -1;
+}
+
 void GRID::setCourantFactor(double courant_factor){
-  switch (accesso.dimensions){
+  switch (dimensions){
   case 1:
     dt = courant_factor*(1 / (sqrt(dri[0] * dri[0])));
     break;
@@ -359,7 +416,7 @@ void GRID::setGridDeltar(){
 }
 
 void GRID::setGridDeltarNormal(){
-  switch (accesso.dimensions)
+  switch (dimensions)
   {
     //ALERT GRIGLIA
   case 3:
@@ -398,7 +455,7 @@ void GRID::setGridDeltarNormal(){
   }
 }
 void GRID::setGridDeltarStretched(){
-  switch (accesso.dimensions)
+  switch (dimensions)
   {
   case 3:
     dr[0] = (rmaxUniformGrid[0] - rminUniformGrid[0]) / (NUniformGrid[0] - 1);
@@ -490,13 +547,13 @@ void GRID::checkProcNumber(){
       std::cout << "Too many MPI tasks along x (" << rnproc[0] <<")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
       exit(18);
   }
-  if(accesso.dimensions >= 2){
+  if(dimensions >= 2){
       if(rnproc[1]*6 > NGridNodes[1]){
           std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
           exit(18);
       }
   }
-  if(accesso.dimensions==3){
+  if(dimensions==3){
       if(rnproc[2]*6 > NGridNodes[2]){
           std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
           exit(18);
@@ -706,7 +763,7 @@ void GRID::setLocalExtrems(){
     Nloc[c] = rproc_Nloc[c][rmyid[c]];
     csiminloc[c] = rproc_csimin[c][rmyid[c]];
     csimaxloc[c] = rproc_csimax[c][rmyid[c]];
-    if (c >= accesso.dimensions)
+    if (c >= dimensions)
       uniquePointsloc[c] = Nloc[c];
     else
       uniquePointsloc[c] = Nloc[c] - 1;
@@ -720,7 +777,7 @@ void GRID::mpi_grid_initialize(int *narg, char **args)
 
   GRID::checkStretchedGridInitialization();
   if (flagStretched){
-    for (int c = 0; c < accesso.dimensions; c++){
+    for (int c = 0; c < dimensions; c++){
       GRID::checkStretchedGridNpointsAlong(c);
       GRID::computeNStretchedPointsAlong(c);
     }
@@ -728,7 +785,7 @@ void GRID::mpi_grid_initialize(int *narg, char **args)
   GRID::setGridDeltar();
 
   if (flagStretched){
-    for (int c = 0; c < accesso.dimensions; c++){
+    for (int c = 0; c < dimensions; c++){
       GRID::checkStretchedGridExtensionAlong(c);
       GRID::computeAlphaStretchAlong(c);
       GRID::computeExtremsStretchedGrid(c);
@@ -757,7 +814,7 @@ void GRID::mpi_grid_initialize(int *narg, char **args)
 void GRID::finalize()
 {
   int c;
-  for (c = 0; c < accesso.dimensions; c++)
+  for (c = 0; c < dimensions; c++)
   {
     cir[c] = (double*)malloc(NGridNodes[c] * sizeof(double));
     chr[c] = (double*)malloc(NGridNodes[c] * sizeof(double));
@@ -810,7 +867,7 @@ void GRID::computeTotUniquePoints()
     proc_totUniquePoints[rank] *= rproc_NuniquePointsloc[2][rid[2]];
   }
   int c;
-  for (c = 0; c < accesso.dimensions; c++)
+  for (c = 0; c < dimensions; c++)
     uniquePoints[c] = NGridNodes[c] - 1;
   for (; c < 3; c++)
     uniquePoints[c] = NGridNodes[c];
@@ -1275,11 +1332,11 @@ void GRID::setBoundaries(int flags){
   if (zBoundaryConditions == _notAssigned)
     zBoundaryConditions = _PBC;
 
-  if (accesso.dimensions == 1){
+  if (dimensions == 1){
     yBoundaryConditions = _PBC;
     zBoundaryConditions = _PBC;
   }
-  else if (accesso.dimensions == 2){
+  else if (dimensions == 2){
     zBoundaryConditions = _PBC;
   }
 

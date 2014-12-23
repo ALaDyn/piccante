@@ -644,7 +644,7 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 void SPECIE::setNumberOfParticlePerCell(){
   particlePerCell = 1;
   for (int c = 0; c < 3; c++){
-    if (c < accesso.dimensions){
+    if (c < mygrid->getDimensionality()){
       particlePerCell *= particlePerCellXYZ[c];   //number of particles per cell(npc) total = npcx*npcy*npcz
     }
     else{
@@ -654,7 +654,7 @@ void SPECIE::setNumberOfParticlePerCell(){
 }
 void SPECIE::setLocalPlasmaMinimaAndMaxima(double *plasmarmin, double *plasmarmax){
   for (int c = 0; c < 3; c++){
-    if (c < accesso.dimensions){
+    if (c < mygrid->getDimensionality()){
       plasmarmin[c] = MAX(plasma.params.rminbox[c], mygrid->rminloc[c]);
       plasmarmax[c] = MIN(plasma.params.rmaxbox[c], mygrid->rmaxloc[c]);
     }
@@ -938,7 +938,7 @@ void SPECIE::position_advance()
 
   dt = mygrid->dt;
 
-  switch (accesso.dimensions)
+  switch (mygrid->getDimensionality())
   {
   case 3:
     //#pragma omp parallel for
@@ -1029,7 +1029,7 @@ void SPECIE::position_parallel_pbc()
       */
 
 
-  for (int direction = 0; direction < accesso.dimensions; direction++)
+  for (int direction = 0; direction < mygrid->getDimensionality(); direction++)
   {
     nlost = 0;
     ninright = ninleft = nright = nleft = 0;
@@ -1168,7 +1168,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
   dt = mygrid->dt;
 
-  switch (accesso.dimensions)
+  switch (mygrid->getDimensionality())
   {
 
   case 3:
@@ -1460,7 +1460,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 
   double RRcoefficient = 4.0 / 3.0*M_PI*(CLASSICAL_ELECTRON_RADIUS / lambda);
 
-  switch (accesso.dimensions)
+  switch (mygrid->getDimensionality())
   {
 
   case 3:
@@ -1838,7 +1838,7 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
       hiw[c][1] = wiw[c][1] = 1;
       hii[c] = wii[c] = 0;
     }
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       mycsi[c] = mygrid->unStretchGrid(xx[c], c);
       rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
@@ -1861,7 +1861,7 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
     }
     E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-    switch (accesso.dimensions)
+    switch (mygrid->getDimensionality())
     {
     case 3:
       for (k = 0; k < 3; k++)
@@ -1995,7 +1995,7 @@ void SPECIE::current_deposition(CURRENT *current)
 
   dt = mygrid->dt;
 
-  if (accesso.dimensions == 3)
+  if (mygrid->getDimensionality() == 3)
     for (p = 0; p < Np; p++)
     {
     memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
@@ -2014,7 +2014,7 @@ void SPECIE::current_deposition(CURRENT *current)
     ru(2, p) += dt*gamma_i*u2(p);
     xx2[2] = ru(2, p);
 
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
       r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
@@ -2072,7 +2072,7 @@ void SPECIE::current_deposition(CURRENT *current)
       }
     }
     }
-  if (accesso.dimensions == 2)
+  if (mygrid->getDimensionality() == 2)
     for (p = 0; p < Np; p++)
     {
     memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
@@ -2089,7 +2089,7 @@ void SPECIE::current_deposition(CURRENT *current)
     ru(1, p) += dt*gamma_i*u1(p);
     xx2[1] = ru(1, p);
 
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
       r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
@@ -2150,7 +2150,7 @@ void SPECIE::current_deposition(CURRENT *current)
     }
 
     }
-  if (accesso.dimensions == 1)
+  if (mygrid->getDimensionality() == 1)
     for (p = 0; p < Np; p++)
     {
     memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
@@ -2160,13 +2160,13 @@ void SPECIE::current_deposition(CURRENT *current)
     vz = gamma_i*u2(p);
     //			ru(1, p) += dt*vy;
     //			ru(2, p) += dt*vz;
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       xx1[c] = ru(c, p);
       ru(c, p) += dt*gamma_i*u0(p);
       xx2[c] = ru(c, p);
     }
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
       r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
@@ -2546,7 +2546,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     {
       gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
-      for (c = 0; c < accesso.dimensions; c++)
+      for (c = 0; c < mygrid->getDimensionality(); c++)
       {
         vv[c] = gamma_i*ru(c + 3, p);
         ru(c, p) += dt*vv[c];
@@ -2555,7 +2555,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     return;
   }
 
-  switch (accesso.dimensions)
+  switch (mygrid->getDimensionality())
   {
   case 3:
     for (p = 0; p < Np; p++)
@@ -2810,7 +2810,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
         hiw[c][2] = wiw[c][2] = 0;
         hii[c] = wii[c] = 0;
       }
-      for (c = 0; c < accesso.dimensions; c++)
+      for (c = 0; c < mygrid->getDimensionality(); c++)
       {
         xx[c] = ru(c, p) + 0.5*dt*vv[c];
         ru(c, p) += dt*vv[c];
@@ -2835,7 +2835,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
         hiw[c][2] = 0.5*(0.25 + rh2 + rh);
         hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
       }
-      switch (accesso.dimensions)
+      switch (mygrid->getDimensionality())
       {
       case 3:
         myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
@@ -2913,7 +2913,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
     {
       gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
-      for (c = 0; c < accesso.dimensions; c++)
+      for (c = 0; c < mygrid->getDimensionality(); c++)
       {
         vv[c] = gamma_i*ru(c + 3, p);
         ru(c, p) += dt*vv[c];
@@ -2949,7 +2949,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
   for (p = 0; p < Np; p++)
   {
     //debug_warning_particle_outside_boundaries(r0(p), r1(p), r2(p), p);
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       xx[c] = ru(c, p);
 
@@ -2962,7 +2962,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
       wiw[c][2] = 0.5*(0.25 + rr2 + rr);
       wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
     }
-    switch (accesso.dimensions)
+    switch (mygrid->getDimensionality())
     {
     case 3:
       for (k = 0; k < 3; k++)
@@ -3028,7 +3028,7 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
   for (p = 0; p < Np; p++)
   {
     //debug_warning_particle_outside_boundaries(r0(p), r1(p), r2(p), p);
-    for (c = 0; c < accesso.dimensions; c++)
+    for (c = 0; c < mygrid->getDimensionality(); c++)
     {
       xx[c] = ru(c, p);
       mycsi[c] = mygrid->unStretchGrid(xx[c], c);
@@ -3043,7 +3043,7 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
       wiw[c][2] = 0.5*(0.25 + rr2 + rr);
       wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
     }
-    switch (accesso.dimensions)
+    switch (mygrid->getDimensionality())
     {
     case 3:
       myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);

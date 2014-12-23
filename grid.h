@@ -96,7 +96,7 @@ public:
   double *iStretchingDerivativeCorrection[3];
   double *hStretchingDerivativeCorrection[3];
 
-  GRID();
+  GRID(int dimensions);
   ~GRID();
 
   void setXrange(double min, double max);
@@ -105,6 +105,10 @@ public:
   void setNCells(int xcells, int ycells, int zcells);
   void setNProcsAlongY(int nproc);
   void setNProcsAlongZ(int nproc);
+  int getDimensionality();
+  int getEdge();
+  int getNexchange();
+  int alloc_number(int *N_grid, int *N_loc);
   void setCourantFactor(double courant_factor);
   void setSimulationTime(double tot_time);
   void setMovingWindow(double start, double beta, int frequency_mw);
@@ -157,7 +161,6 @@ public:
   double csimin[3], csimax[3];
   double csiminloc[3], csimaxloc[3];
   double getMarkMW();
-  ACCESSO accesso;
   void setDumpPath(std::string _dumpDir);
   std::string composeDumpFileName(int dumpID);
   void enableRadiationFriction();
@@ -167,6 +170,12 @@ public:
   double getLambda0();
 
 private:
+  int dimensions;
+  static const int edge = 2;
+  static const int Nexchange = 1;
+
+  bool isDimensionalitySet;
+
   int totalNumberOfTimesteps;
 
   double beta_mw, t_start_moving_mw, mark_mw;
@@ -196,6 +205,8 @@ private:
   bool radiationFrictionFlag;
   double lambda0; //lunghezza fisica con cui sono normalizzate tutte le lunghezze
 
+  bool isValidDimension();
+  void checkDimensionality();
   void setGridDeltar();
   void setGridDeltarNormal();
   void setGridDeltarStretched();

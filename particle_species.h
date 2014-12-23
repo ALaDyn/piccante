@@ -45,9 +45,7 @@ public:
   double minima[7], maxima[7];   //components minima and maxima
   double totalMomentum[3], totalEnergy;
   std::string name;
-  bool isTestSpecies;
-
-  ACCESSO accesso;
+  bool isTestSpecies;  
   PLASMA  plasma;
   //  double (*initial_profile)(double , double , double , PLASMA*);
   SPECIEspectrum spectrum;

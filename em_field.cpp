@@ -39,7 +39,7 @@ EM_FIELD::~EM_FIELD(){
 
 void EM_FIELD::allocate(GRID *grid){
   mygrid = grid;
-  acc.alloc_number(N_grid, mygrid->Nloc);
+  mygrid->alloc_number(N_grid, mygrid->Nloc);
   if (N_grid[2] == 1)
     ZGrid_factor = 0;
   if (N_grid[1] == 1)
@@ -58,7 +58,7 @@ void EM_FIELD::reallocate(){
     printf("ERROR: reallocate\n");
     exit(17);
   }
-  acc.alloc_number(N_grid, mygrid->Nloc);
+  mygrid->alloc_number(N_grid, mygrid->Nloc);
   if (N_grid[2] == 1)
     ZGrid_factor = 0;
   if (N_grid[1] == 1)
@@ -140,7 +140,7 @@ bool EM_FIELD::areEnergyExtremesAvailable(){
 }
 
 int EM_FIELD::pbc_compute_alloc_size(){
-  int dimensions = acc.dimensions;
+  int dimensions = mygrid->getDimensionality();
   int allocated_size;
   int Ngx, Ngy, Ngz, Nc = Ncomp;
 
@@ -149,16 +149,16 @@ int EM_FIELD::pbc_compute_alloc_size(){
   Ngz = N_grid[2];
 
   if (dimensions == 3){
-    allocated_size = Nc*Ngy*Ngz*acc.Nexchange;;
-    allocated_size = MAX(allocated_size, Nc*Ngx*Ngz*acc.Nexchange);
-    allocated_size = MAX(allocated_size, Nc*Ngx*Ngy*acc.Nexchange);
+    allocated_size = Nc*Ngy*Ngz*mygrid->getNexchange();
+    allocated_size = MAX(allocated_size, Nc*Ngx*Ngz*mygrid->getNexchange());
+    allocated_size = MAX(allocated_size, Nc*Ngx*Ngy*mygrid->getNexchange());
   }
   else if (dimensions == 2){
-    allocated_size = Nc*Ngy*acc.Nexchange;
-    allocated_size = MAX(allocated_size, Nc*Ngx*acc.Nexchange);
+    allocated_size = Nc*Ngy*mygrid->getNexchange();
+    allocated_size = MAX(allocated_size, Nc*Ngx*mygrid->getNexchange());
   }
   else{
-    allocated_size = Nc*acc.Nexchange;
+    allocated_size = Nc*mygrid->getNexchange();
   }
   return allocated_size;
 }
@@ -175,9 +175,9 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
   Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
 
-  int Nxchng = acc.Nexchange;
+  int Nxchng = mygrid->getNexchange();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
 
   MPI_Status status;
   int ileft, iright;
@@ -248,9 +248,9 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
   Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
 
-  int Nxchng = acc.Nexchange;
+  int Nxchng = mygrid->getNexchange();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
 
   MPI_Status status;
   int ileft, iright;
@@ -316,9 +316,9 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
   Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
 
-  int Nxchng = acc.Nexchange;
+  int Nxchng = mygrid->getNexchange();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
 
   MPI_Status status;
   int ileft, iright;
@@ -379,14 +379,14 @@ void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
   send_buffer = new double[allocated_size];
   recv_buffer = new double[allocated_size];
 
-  if (acc.dimensions == 3)
+  if (mygrid->getDimensionality() == 3)
   {
     // ======================================
     // ========== z direction 3D ===============
     // ======================================        
     pbcExchangeAlongZ(send_buffer, recv_buffer);
   }
-  if (acc.dimensions >= 2)
+  if (mygrid->getDimensionality() >= 2)
   {
     // ======================================
     // ========== y direction 3D ===============
@@ -394,7 +394,7 @@ void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
     pbcExchangeAlongY(send_buffer, recv_buffer);
 
   }
-  if (acc.dimensions >= 1)
+  if (mygrid->getDimensionality() >= 1)
   {
     // ======================================
     // ========== x direction 3D ===============
@@ -412,7 +412,7 @@ void EM_FIELD::openBoundariesE_1(){
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
   axisBoundaryConditions zBoundaryConditions = mygrid->getZBoundaryConditions();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
   if ((xBoundaryConditions == _Open) && (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)))
   {
     int jj, kk;
@@ -462,7 +462,7 @@ void EM_FIELD::openBoundariesE_2(){
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
   axisBoundaryConditions zBoundaryConditions = mygrid->getZBoundaryConditions();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
   if ((xBoundaryConditions == _Open) && (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)))
   {
     double alpha = (mygrid->dt / mygrid->dr[0])*mygrid->iStretchingDerivativeCorrection[0][0];
@@ -525,7 +525,7 @@ void EM_FIELD::openBoundariesB(){
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
   axisBoundaryConditions zBoundaryConditions = mygrid->getZBoundaryConditions();
 
-  int edge = acc.edge;
+  int edge = mygrid->getEdge();
   if ((xBoundaryConditions == _Open) && (mygrid->rmyid[0] == 0))
   {
 
@@ -594,7 +594,7 @@ void EM_FIELD::new_halfadvance_B()
   int i, j, k;
   int Nx, Ny, Nz;
   double dt, dxi, dyi, dzi;
-  int dimensions = acc.dimensions;
+  int dimensions = mygrid->getDimensionality();
 
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
@@ -646,7 +646,7 @@ void EM_FIELD::new_advance_B()
   int i, j, k;
   int Nx, Ny, Nz;
   double dt, dxi, dyi, dzi;
-  int dimensions = acc.dimensions;
+  int dimensions = mygrid->getDimensionality();
 
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
@@ -695,7 +695,7 @@ void EM_FIELD::new_advance_E()
   int i, j, k;
   int Nx, Ny, Nz;
   double dt, dxi, dyi, dzi;
-  int dimensions = acc.dimensions;
+  int dimensions = mygrid->getDimensionality();
 
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
@@ -752,7 +752,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
   int i, j, k;
   int Nx, Ny, Nz;
   double dt, dxi, dyi, dzi;
-  int dimensions = acc.dimensions;
+  int dimensions = mygrid->getDimensionality();
 
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
@@ -1280,10 +1280,10 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
   tc = -focus_position + laser_pulse_initial_position;
 
   tt = +tc;
-  if (acc.dimensions == 2){
+  if (mygrid->getDimensionality() == 2){
     dim_factorZ = 0;
   }
-  else if (acc.dimensions == 1){
+  else if (mygrid->getDimensionality() == 1){
     dim_factorY = dim_factorZ = 0;
   }
 
@@ -1300,28 +1300,28 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 
     auxiliary_rotation(xh, yy, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
     E0(i, j, k) += amplitude*(field[0] * mycos - field[1] * mysin);
     auxiliary_rotation(xx, yh, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
     E1(i, j, k) += amplitude*(field[1] * mycos + field[0] * mysin);
     auxiliary_rotation(xx, yy, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
     E2(i, j, k) += amplitude*field[2];
 
     auxiliary_rotation(xx, yh, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
     B0(i, j, k) += amplitude*(field[3] * mycos - field[4] * mysin);
     auxiliary_rotation(xh, yy, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zh, tt, lambda, fwhm, w0, field, polarization);
     B1(i, j, k) += amplitude*(field[4] * mycos + field[3] * mysin);
     auxiliary_rotation(xh, yh, xp, yp, xcenter, angle);
     xp += xc;
-    gaussian_pulse(acc.dimensions, xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
+    gaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization);
     B2(i, j, k) += amplitude*field[5];
 
 
@@ -1447,6 +1447,9 @@ void EM_FIELD::move_window()
   Ngy = N_grid[1];
   Ngz = N_grid[2];
 
+  int edge = mygrid->getEdge();
+  int Nexchange = mygrid->getNexchange();
+
   if (!mygrid->shouldIMove)
     return;
 
@@ -1465,7 +1468,7 @@ void EM_FIELD::move_window()
     for (int j = 0; j < Ngy; j++){
       for (int i = 0; i < (exchangeCellNumber); i++){
         for (int c = 0; c < Ncomp; c++){
-          send_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy] = VEB(c, i + 1, j - acc.edge, k - acc.edge);
+          send_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy] = VEB(c, i + 1, j - edge, k - edge);
         }
       }
     }
@@ -1487,15 +1490,15 @@ void EM_FIELD::move_window()
   for (int k = 0; k < Ngz; k++)
     for (int j = 0; j < Ngy; j++)
     {
-    for (int i = -acc.Nexchange; i < (Nx - shiftCellNumber); i++)
+    for (int i = -Nexchange; i < (Nx - shiftCellNumber); i++)
       for (int c = 0; c < Ncomp; c++)
       {
-      VEB(c, i, j - acc.edge, k - acc.edge) = VEB(c, i + shiftCellNumber, j - acc.edge, k - acc.edge);
+      VEB(c, i, j - edge, k - edge) = VEB(c, i + shiftCellNumber, j - edge, k - edge);
       }
     for (int i = 0; i < (shiftCellNumber + 1); i++){
       for (int c = 0; c < Ncomp; c++)
       {
-        VEB(c, i + (Nx - shiftCellNumber), j - acc.edge, k - acc.edge) = recv_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy];
+        VEB(c, i + (Nx - shiftCellNumber), j - edge, k - edge) = recv_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy];
       }
     }
     }
@@ -1838,9 +1841,9 @@ void EM_FIELD::filterCompAlongZ(int comp){
 void EM_FIELD::filterDirSelect(int comp, int dirflags){
   if (dirflags & dir_x)
     filterCompAlongX(comp);
-  if (dirflags & dir_y && acc.dimensions >= 2)
+  if (dirflags & dir_y && mygrid->getDimensionality() >= 2)
     filterCompAlongY(comp);
-  if (dirflags & dir_z && acc.dimensions == 3)
+  if (dirflags & dir_z && mygrid->getDimensionality() == 3)
     filterCompAlongZ(comp);
 }
 
