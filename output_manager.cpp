@@ -1743,12 +1743,16 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
 
 void OUTPUT_MANAGER::callEMFieldDomain(request req){
+  std::stringstream groupname;
+  groupname << "Group" << fieldGroupSize;
   if (req.type == OUT_E_FIELD){
-    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+//    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
   else if (req.type == OUT_B_FIELD){
-    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+//    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
 
