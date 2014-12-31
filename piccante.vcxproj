@@ -126,7 +126,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="access.h" />
     <ClInclude Include="commons.h" />
     <ClInclude Include="current.h" />
     <ClInclude Include="em_field.h" />
