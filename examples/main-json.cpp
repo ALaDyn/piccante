@@ -114,39 +114,25 @@ int main(int narg, char **args)
 
   //********************************************END GRID DEFINITION********************************************************
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
-
-  int myIntVariable=0;
+int myIntVariable=0;
   double myDoubleVariable=0;
   bool isThereSpecial=false;
   rapidjson::Value special;
   if(isThereSpecial=setValueFromJson(special,document,"special")){
-    std::cout << "---------- begin SPECIAL! ----------\n";
-    setIntFromJson(&myIntVariable,special,"variabile1");
-    std::cout << "variable1 = " << myIntVariable << " \n";
-    setDoubleFromJson(&myDoubleVariable,special,"variabile2");
-    std::cout << "variable2 = " << myDoubleVariable << " \n";
-    std::cout << "----------  end SPECIAL!  ----------\n";
-  }
-
-
-  //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
+    setIntFromJson( &myIntVariable, special, "variabile1");
+    setDoubleFromJson( &myDoubleVariable, special, "variabile2");
+   }
+//********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
 
   laserPulse pulse1;
   pulse1.type = COS2_PLANE_WAVE;
-  pulse1.polarization = P_POLARIZATION;
-  pulse1.t_FWHM = 5.0;
-  pulse1.laser_pulse_initial_position = -5.5;
-  pulse1.lambda0 = 1.0;
-  pulse1.normalized_amplitude = 8.0;
-
-  //pulse1.waist = 3.0;
-  //pulse1.focus_position = 0.0;
-  //pulse1.rotation = false;
-  //pulse1.angle = 2.0*M_PI*(-90.0 / 360.0);
-  //pulse1.rotation_center_along_x = 0.0;
+  pulse1.setPPolarization();
+  pulse1.setDurationFWHM(5.0);
+  pulse1.setPulseInitialPosition(-5.5);
+  pulse1.setNormalizedAmplitude(8.0);
 
   myfield.addPulse(&pulse1);
 

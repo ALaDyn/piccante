@@ -173,8 +173,8 @@ int getDimensionalityFromJson(rapidjson::Document &document, int defaultDimensio
   int dim = defaultDimensionality;
   const char* name="dimensions";
   if(document.HasMember(name)){
-    //if(document[name].IsInt())
-      //dim = document[name].GetInt();
+    if(document[name].IsInt())
+      dim = document[name].GetInt();
   }
 return dim;
 }
@@ -238,10 +238,6 @@ void setNprocsFromJson(rapidjson::Document &document,GRID *grid){
 void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid){
   double simulationTime;
   setDoubleFromJson(&simulationTime,document,"simulationTime");
-//  if(document.HasMember(name)){
-//    if(document[name].IsNumber())
-//      simulationTime = document[name].GetDouble();
-//  }
   grid->setSimulationTime(simulationTime);
 }
 
@@ -364,7 +360,6 @@ void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid){
     setDoubleFromJson( &start, movingWindow, name2.c_str() );
     grid->setStartMovingWindow(start);
 
-
     name2= "beta";
     double beta;
     if(setDoubleFromJson( &beta, movingWindow, name2.c_str() ) ){
@@ -375,7 +370,6 @@ void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid){
     if(setIntFromJson( &frequency, movingWindow, name2.c_str() ) ){
       grid->setFrequencyMovingWindow(frequency);
     }
-
   }
 
 

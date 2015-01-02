@@ -1,5 +1,5 @@
 {
-    "dimensions": 1,
+    "dimensions": 2,
     "nProcY": 1,
     "nProcZ": 1,
     "xRange": [-20, 20],
@@ -22,15 +22,15 @@
         "NO_frequency":20
     },
     "restart":{
-        "doRestart": true,
+        "doRestart": false,
         "restartFromDump": 1,
         "doDump": true,
         "dumpEvery": 2.0
     },
     "special":{"variabile1": 32,"variabile2": 32.5},
     "specie":[
-        {"nome": "ele1", "cognome": 13},
-        {"nome": "ele2", "cognome": 15}
+        {"name": "ele1", "cognome": 13},
+        {"name": "ele2", "cognome": 15}
     ]
 
 }
