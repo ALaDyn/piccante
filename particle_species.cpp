@@ -45,8 +45,9 @@ SPECIE::SPECIE(GRID *grid)
 }
 void SPECIE::allocate_species()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
+#ifndef NO_ALLOCATION
 #ifdef _ACC_SINGLE_POINTER
   val = (double*)malloc((Np*Ncomp)*sizeof(double));
 #else
@@ -55,8 +56,10 @@ void SPECIE::allocate_species()
     val[c] = (double*)malloc(Np*sizeof(double));
   }
 #endif
+
   valSize = Np;
   allocated = true;
+  #endif
 
 }
 SPECIE::~SPECIE(){
@@ -72,7 +75,7 @@ SPECIE::~SPECIE(){
 
 void SPECIE::erase()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (!allocated){
@@ -89,13 +92,17 @@ void SPECIE::erase()
 }
 void SPECIE::reallocate_species()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (!allocated)
   {
+#ifndef NO_ALLOCATION
     printf("\nERROR: species not allocated\n\n");
     exit(11);
+#else
+  return;
+#endif
   }
   if (Np > valSize){
     valSize = Np + allocsize;
@@ -117,9 +124,8 @@ void SPECIE::reallocate_species()
     }
 #endif
   }
-  else{
-    return;
-  }
+return;
+
 }
 
 SPECIE SPECIE::operator = (SPECIE &destro)
@@ -301,6 +307,11 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
   return counter;
 }
 void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+#ifdef NO_ALLOCATION
+if(!allocated){
+  return;
+}
+#endif
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
   int Nx = mygrid->Nloc[0];
@@ -353,6 +364,11 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
 }
 
 void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+#ifdef NO_ALLOCATION
+if(!allocated){
+  return;
+}
+#endif
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
   double myx, myy, myz;
@@ -681,7 +697,7 @@ long long SPECIE::getSumNewParticlesOfAllPreviousProcessors(int number){
 
 void SPECIE::creation()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (flagWithMarker){
@@ -709,7 +725,7 @@ void SPECIE::creation()
 void SPECIE::creationFromFile1D(std::string name){
   std::ifstream fileDensity(name.c_str(), std::ifstream::in);
 
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   int n_points;
@@ -763,7 +779,7 @@ void SPECIE::creationFromFile1D(std::string name){
 
 void SPECIE::move_window()
 {
-  if (!mygrid->with_particles)
+  if (!mygrid->withParticles)
     return;
   if (!mygrid->shouldIMove)
     return;
@@ -805,7 +821,7 @@ void SPECIE::move_window()
 //}
 void SPECIE::output(std::ofstream &ff)
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   for (int nn = 0; nn < Np; nn++)
@@ -817,7 +833,7 @@ void SPECIE::output(std::ofstream &ff)
 }
 
 void SPECIE::init_output_diag(std::ofstream &ff){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (mygrid->myid == mygrid->master_proc){
@@ -826,7 +842,7 @@ void SPECIE::init_output_diag(std::ofstream &ff){
   }
 }
 void SPECIE::output_diag(int istep, std::ofstream &ff){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   //double extrema[14];
@@ -840,7 +856,7 @@ void SPECIE::output_diag(int istep, std::ofstream &ff){
   }
 }
 void SPECIE::init_output_extrems(std::ofstream &ff){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (mygrid->myid == mygrid->master_proc){
@@ -855,7 +871,7 @@ void SPECIE::init_output_extrems(std::ofstream &ff){
   }
 }
 void SPECIE::output_extrems(int istep, std::ofstream &ff){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   //double extrema[14];
@@ -869,14 +885,14 @@ void SPECIE::output_extrems(int istep, std::ofstream &ff){
   }
 }
 void SPECIE::init_output_stat(std::ofstream &fdiag, std::ofstream &fextrem){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   init_output_extrems(fextrem);
   init_output_diag(fdiag);
 }
 void SPECIE::output_stat(int istep, std::ofstream &fdiag, std::ofstream &fextrem, std::ofstream &fspectrum){
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
 
@@ -930,7 +946,7 @@ void SPECIE::outputSpectrum(std::ofstream &fspectrum){
 
 void SPECIE::position_advance()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   double dt, gamma_i;
@@ -975,7 +991,7 @@ void SPECIE::position_advance()
 }
 void SPECIE::position_pbc()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   int p;
@@ -1009,7 +1025,7 @@ void SPECIE::position_pbc()
 }
 void SPECIE::position_parallel_pbc()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   int p, c;
@@ -1103,7 +1119,7 @@ void SPECIE::position_parallel_pbc()
 }
 void SPECIE::position_obc()
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   int p, c;
@@ -1149,7 +1165,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
   energyExtremesFlag = false;
 
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
   if (mygrid->isStretched()){
     SPECIE::momentaStretchedAdvance(ebfield);
@@ -1435,7 +1451,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 {
   energyExtremesFlag = false;
 
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
   if (mygrid->isStretched()){
     //SPECIE::momentaStretchedAdvance(ebfield);
@@ -1813,7 +1829,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 {
   energyExtremesFlag = false;
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   double dt, gamma_i;
@@ -1977,9 +1993,9 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 
 void SPECIE::current_deposition(CURRENT *current)
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
-  if (mygrid->with_current == NO)
+  if (mygrid->withCurrent == NO)
     return;
 
   double dt, gamma_i;
@@ -2444,11 +2460,13 @@ void SPECIE::callSpecial(gsl_rng* ext_rng, double Ta){
 
 void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   if (!allocated){
+    #ifndef NO_ALLOCATION
     std::cout << "Warning: species " << name << " is not allocated !" << std::endl;
+#endif
     return;
   }
 
@@ -2520,9 +2538,9 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 {
 
 
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
-  if (mygrid->with_current == NO)
+  if (mygrid->withCurrent == NO)
     return;
   if (mygrid->isStretched()){
     SPECIE::currentStretchedDepositionStandard(current);
@@ -2540,7 +2558,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
   dt = mygrid->dt;
 
-  if (!(mygrid->with_current == YES && (!isTestSpecies)))
+  if (!(mygrid->withCurrent == YES && (!isTestSpecies)))
   {
     for (p = 0; p < Np; p++)
     {
@@ -2778,7 +2796,7 @@ void SPECIE::debug_warning_particle_outside_boundaries(double x, double y, doubl
 void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 {
 
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   double dt, gamma_i;
@@ -2794,7 +2812,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 
   dt = mygrid->dt;
 
-  if (mygrid->with_current == YES && (!isTestSpecies))
+  if (mygrid->withCurrent == YES && (!isTestSpecies))
   {
     for (p = 0; p < Np; p++)
     {
@@ -2925,7 +2943,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 }
 void SPECIE::density_deposition_standard(CURRENT *current)
 {
-  if (mygrid->with_particles == NO){
+  if (mygrid->withParticles == NO){
     return;
   }
 
@@ -2943,7 +2961,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
   double rr, rr2;          // local coordinate to integer grid point,     local coordinate squared
   double dvol, xx[3];           // tensor_product,       absolute particle position
 
-  if (mygrid->with_particles != YES)
+  if (mygrid->withParticles != YES)
     return;
 
   for (p = 0; p < Np; p++)
@@ -3011,7 +3029,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
 }
 void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
 {
-  if (mygrid->with_particles == NO)
+  if (mygrid->withParticles == NO)
     return;
 
   int p, c;  // particle_int, component_int
@@ -3108,7 +3126,7 @@ void SPECIE::setName(std::string iname){
 }
 
 double SPECIE::getKineticEnergy(){
-  if (mygrid->with_particles == NO){
+  if (mygrid->withParticles == NO){
     return 0.0;
   }
 
@@ -3126,7 +3144,7 @@ double SPECIE::getKineticEnergy(){
 //xmin, ymin, zmin, pxmin,pymin,pzmin,emin, xmax,ymax,zmax, pxmax,pymax,pzmax,emax
 void SPECIE::computeKineticEnergyWExtrems(){
 
-  if (mygrid->with_particles == NO){
+  if (mygrid->withParticles == NO){
     return;
   }
   if (!allocated){
@@ -3241,9 +3259,16 @@ void SPECIE::reloadDump(std::ifstream &ff){
 }
 
 void SPECIE::reloadBigBufferDump(std::ifstream &ff){
+
   ff.read((char*)&Np, sizeof(Np));
   SPECIE::reallocate_species();
-  ff.read((char*)&val, sizeof(double)*Np*Ncomp);
+  int mysize=1000;
+  int cycles=Np/mysize;
+  int rest=Np%mysize;
+  //for (int i=0; i<)
+  ff.read((char*)&ru(0, 0), sizeof(double)*Np*Ncomp);
+
+
 }
 
 bool SPECIE::areEnergyExtremesAvailable(){

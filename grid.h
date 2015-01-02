@@ -44,6 +44,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include"commons.h"
+#include "structures.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
@@ -87,8 +88,8 @@ public:
   double ref_den;   // reference density
   double den_factor;
 
-
-  bool with_particles, with_current;
+  DUMP_CONTROL dumpControl;
+  bool withParticles, withCurrent;
   int *rproc_imin[3], *rproc_imax[3]; // rproc_imax[ c ][ rid[c] ]
   int *rproc_NuniquePointsloc[3];   // rproc_NuniquePointsloc[ c ][ rid[c] ]
   int *proc_totUniquePoints;
@@ -173,7 +174,7 @@ private:
   int dimensions;
   static const int edge = 2;
   static const int Nexchange = 1;
-
+double courantFactor;
   bool isDimensionalitySet;
 
   int totalNumberOfTimesteps;

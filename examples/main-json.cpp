@@ -44,73 +44,53 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
+#include "utilities.h"
 
-#define DIMENSIONALITY 1
-#define NPROC_ALONG_Y 1
-#define NPROC_ALONG_Z 1
 
-#define _RESTART_FROM_DUMP 1
-#define _DO_RESTART false
-#define DO_DUMP true
-#define TIME_BTW_DUMP 50
+#define DEFAULT_DIMENSIONALITY 1
+
+
 
 #define DIRECTORY_OUTPUT "TEST"
-#define DIRECTORY_DUMP "TEST"
+#define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 //#include "rapidjson/prettywriter.h" // for stringify JSON
 //#include "rapidjson/filestream.h"   // wrapper of C stream for prettywriter as output
 
+
+struct mySpecialParameters{
+  static const int Nint=3, Ndouble=3, Nbool=3;
+  int paramI[Nint];
+  double paramD[Ndouble];
+  bool paramB[Nbool];
+//const char* nam="cacca";
+//  static const char* namesI[]={"int1","int2","int3"};
+//  static const char* NamesD[]={"double1", "double2", "double3"};
+//  static const char* NamesB[]={"bool1","bool2", "bool3"};
+};
+
 int main(int narg, char **args)
 {
-
-  //*******************************************BEGIN GRID DEFINITION*******************************************************
-//  FILE * pFile = fopen ("inputPiccante.json" , "r");
-//  rapidjson::FileStream is(pFile);
-//  rapidjson::Document document;
-//  document.ParseStream<0>(is);
-//  fclose(pFile);
-
-//  FILE* fp = fopen("big.json", "rb"); // non-Windows use "r"
-//  char readBuffer[65536];
-//  FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-//  Document d;
-//  d.ParseStream(is);
-//  fclose(fp);
-
-
   rapidjson::Document document;
-  std::ifstream inputFile("inputPiccante.json");
-  std::stringstream buffer;
-  buffer << inputFile.rdbuf();
-  rapidjson::StringStream s(buffer.str().c_str());
-  document.ParseStream(s);
-  inputFile.close();
-
-  int dim = DIMENSIONALITY;
-  if(document.HasMember("dimensions")){
-    if(document["dimensions"].IsInt())
-      dim = document["dimensions"].GetInt()
-  }
-
-
-
+  parseJsonInputFile(document,"inputPiccante.json");
+  int dim = getDimensionalityFromJson(document, DEFAULT_DIMENSIONALITY);
   GRID grid(dim);
   EM_FIELD myfield;
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  int istep;
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
-  grid.setXrange(-50.0, 50.0);
-  grid.setYrange(-1.0, 1.0);
-  grid.setZrange(-1.0, +1.0);
+  //*******************************************BEGIN GRID DEFINITION*******************************************************
 
-  grid.setNCells(10000, 0, 0);
-  grid.setNProcsAlongY(NPROC_ALONG_Y);
-  grid.setNProcsAlongZ(NPROC_ALONG_Z);
+  setXrangeFromJson(document,&grid);
+  setYrangeFromJson(document,&grid);
+  setZrangeFromJson(document,&grid);
+
+  setNCellsFromJson(document,&grid);
+  setNprocsFromJson(document,&grid);
 
   //grid.enableStretchedGrid();
   //grid.setXandNxLeftStretchedGrid(-15.0,1000);
@@ -121,11 +101,12 @@ int main(int narg, char **args)
   grid.setBoundaries(xOpen | yOpen | zPBC);
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
+  setSimulationTimeFromJson(document,&grid);
 
-  grid.setSimulationTime(50.0);
+  //grid.setSimulationTime(50.0);
 
-  grid.with_particles = YES;
-  grid.with_current = YES;
+  grid.withParticles = YES;
+  grid.withCurrent = YES;
 
   //grid.setStartMovingWindow(0);
   grid.setBetaMovingWindow(1.0);
@@ -138,10 +119,39 @@ int main(int narg, char **args)
 
   grid.finalize();
 
+  //DUMP_CONTROL myDumpControl;
+  grid.dumpControl.doRestart=0;
+  grid.dumpControl.doDump=0;
+  grid.dumpControl.restartFromDump=0;
+  grid.dumpControl.dumpEvery=2;
+
+setDumpControlFromJson(document, &grid.dumpControl);
+  if(grid.myid==grid.master_proc){
+    std::cout << "doRestart = " << grid.dumpControl.doRestart << "\n";
+    std::cout << "doDump = " << grid.dumpControl.doDump << "\n";
+    std::cout << "restartFromDump = " << grid.dumpControl.restartFromDump << "\n";
+    std::cout << "dumpEvery = " << grid.dumpControl.dumpEvery << "\n";
+  }
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
+  //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
 
+  int myIntVariable=0;
+  double myDoubleVariable=0;
+  bool isThereSpecial=false;
+  rapidjson::Value special;
+  if(isThereSpecial=setValueFromJson(special,document,"special")){
+    std::cout << "---------- begin SPECIAL! ----------\n";
+    setIntFromJson(&myIntVariable,special,"variabile1");
+    std::cout << "variable1 = " << myIntVariable << " \n";
+    setDoubleFromJson(&myDoubleVariable,special,"variabile2");
+    std::cout << "variable2 = " << myDoubleVariable << " \n";
+    std::cout << "----------  end SPECIAL!  ----------\n";
+  }
+
+
+               //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
@@ -213,8 +223,8 @@ int main(int narg, char **args)
   electrons2.setParticlesPerCellXYZ(300, 1, 1);
   electrons2.setName("ELE2");
   electrons2.type = ELECTRON;
-  electrons2.creation();
-  species.push_back(&electrons2);
+  //electrons2.creation();
+  //species.push_back(&electrons2);
 
 
   SPECIE ions2(&grid);
@@ -224,8 +234,8 @@ int main(int narg, char **args)
   ions2.type = ION;
   ions2.Z = 1.0;
   ions2.A = 1.0;
-  ions2.creation();
-  species.push_back(&ions2);
+  //ions2.creation();
+  //species.push_back(&ions2);
 
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
@@ -265,7 +275,7 @@ int main(int narg, char **args)
   manager.initialize(DIRECTORY_OUTPUT);
 
   //*******************************************END DIAG DEFINITION**************************************************
-
+grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   if (grid.myid == grid.master_proc){
@@ -273,35 +283,25 @@ int main(int narg, char **args)
     fflush(stdout);
   }
 
-  int Nstep = grid.getTotalNumberOfTimesteps();
-  int dumpID = 1, dumpEvery = 40;
+  MPI_Finalize();
+  exit(0);
+  int dumpID = 1;
   grid.istep = 0;
-  if (DO_DUMP){
-    dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
+  if (grid.dumpControl.doRestart){
+    dumpID = grid.dumpControl.restartFromDump;
+    std::cout << "restartID = " << dumpID << "\n";
+    restartFromDump(&dumpID, &grid, &myfield, species);
   }
-  if (_DO_RESTART){
-    dumpID = _RESTART_FROM_DUMP;
-    std::ifstream dumpFile;
-    std::stringstream dumpName;
-    dumpName << DIRECTORY_DUMP << "/DUMP_";
-    dumpName << std::setw(2) << std::setfill('0') << std::fixed << dumpID << "_";
-    dumpName << std::setw(5) << std::setfill('0') << std::fixed << grid.myid << ".bin";
-    dumpFile.open(dumpName.str().c_str());
-
-    grid.reloadDump(dumpFile);
-    myfield.reloadDump(dumpFile);
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->reloadDump(dumpFile);
-    }
-    dumpFile.close();
-    dumpID++;
-    grid.istep++;
-  }
-  for (; grid.istep <= Nstep; grid.istep++)
+  int Nstep = grid.getTotalNumberOfTimesteps();
+  while (grid.istep <= Nstep)
   {
+#ifdef NO_ALLOCATION
+    manager.close();
+    MPI_Finalize();
+    exit(0);
+#endif
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-
 
     manager.callDiags(grid.istep);
 
@@ -310,11 +310,9 @@ int main(int narg, char **args)
     myfield.boundary_conditions();
 
     current.setAllValuesToZero();
-
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->current_deposition_standard(&current);
     }
-
     current.pbc();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -325,10 +323,8 @@ int main(int narg, char **args)
     myfield.new_advance_E(&current);
 
     myfield.boundary_conditions();
-
     myfield.openBoundariesE_2();
     myfield.new_halfadvance_B();
-
     myfield.boundary_conditions();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -337,34 +333,18 @@ int main(int narg, char **args)
 
     grid.time += grid.dt;
 
+    moveWindow(&grid, &myfield, species);
 
-    grid.move_window();
-    myfield.move_window();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->move_window();
-    }
-    if (DO_DUMP){
-      if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
-        std::ofstream dumpFile;
-        std::stringstream dumpName;
-        dumpName << DIRECTORY_OUTPUT << "/DUMP_";
-        dumpName << std::setw(2) << std::setfill('0') << std::fixed << dumpID << "_";
-        dumpName << std::setw(5) << std::setfill('0') << std::fixed << grid.myid << ".bin";
-        dumpFile.open(dumpName.str().c_str());
-
-        grid.dump(dumpFile);
-        myfield.dump(dumpFile);
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-          (*spec_iterator)->dump(dumpFile);
-        }
-        dumpFile.close();
-        dumpID++;
+    grid.istep++;
+    if (grid.dumpControl.doDump){
+      if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
+        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
     }
   }
 
   manager.close();
   MPI_Finalize();
-  exit(1);
+  exit(0);
 
 }

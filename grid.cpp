@@ -30,8 +30,8 @@ GRID::GRID(int dimensions)
     mark_mw = 0;
     master_proc = 0;
     istep = 0;
-    with_particles = YES;
-    with_current = YES;
+    withParticles = YES;
+    withCurrent = YES;
     withMovingWindow = false;
     proc_totUniquePoints = NULL;
     cyclic[0] = cyclic[1] = cyclic[2] = 1;
@@ -42,6 +42,10 @@ GRID::GRID(int dimensions)
     GRID::initializeStretchParameters();
     rnproc[1]=rnproc[2]=1;
     radiationFrictionFlag=false;
+    dumpControl.doDump=false;
+    dumpControl.doRestart=false;
+    dumpControl.dumpEvery=1000;
+    dumpControl.restartFromDump=1;
 }
 
 GRID::~GRID(){
@@ -168,6 +172,7 @@ int GRID::alloc_number(int *N_grid, int *N_loc){
 }
 
 void GRID::setCourantFactor(double courant_factor){
+  courantFactor = courant_factor;
   switch (dimensions){
   case 1:
     dt = courant_factor*(1 / (sqrt(dri[0] * dri[0])));
@@ -394,16 +399,25 @@ void GRID::visualDiag(){
     GRID::printProcInformations();
     GRID::printGridProcessorInformation();
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    printf("dt=%f\n", dt);
-    printf("dx=%f\n", dr[0]);
-    printf("dy=%f\n", dr[1]);
-    printf("dz=%f\n", dr[2]);
-    printf("Nstep=%i\n", Nstep);
+    printf("dt = %.3f\n", dt);
+    printf("dx = %.3f\n", dr[0]);
+    printf("dy = %.3f\n", dr[1]);
+    printf("dz = %.3f\n", dr[2]);
+    printf("courant factor = %.3f\n", courantFactor);
+    printf("SIMULATION TIME = %.3f\n", totalTime);
+    printf("Nstep = %i\n", Nstep);
     printf("Boundaries (X,Y,Z) : %s , %s , %s \n", s_x, s_y, s_z);
     if (radiationFrictionFlag){
       printf("RR enabled. Lambda0: %e \n", lambda0);
     }
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("============= Restart Settings ===============\n");
+    printf("Do Restart   = %i\n", dumpControl.doRestart);
+    printf("Do Dump      = %i\n", dumpControl.doDump);
+    printf("Restart From = %i\n", dumpControl.restartFromDump);
+    printf("Dump Every   = %i\n", dumpControl.dumpEvery);
+    printf("============= ---------------- ===============\n");
+
   }
 }
 void GRID::setGridDeltar(){
@@ -495,13 +509,14 @@ void GRID::setGridDeltarStretched(){
 void GRID::printLogo()
 {
   std::cout << common_logo;
-  std::cout << common_versionLine << std::endl;
+  printf("======================= %s =======================\n", CURRENT_VERSION);
   fflush(stdout);
 }
 void GRID::printProcInformations()
 {
-  printf("========== %19s ==========\n", "GRID_INITIALIZATION");
-  printf("master_proc=%i:\n", myid);
+  printf("==================== %19s ====================\n", "GRID INITIALIZATION");
+  printf("master_proc = %i:\n", myid);
+  printf("DIMENSIONALITY = %i\n", dimensions);
   double dtotcell = ((long int)uniquePoints[0])*((long int)uniquePoints[1])*uniquePoints[2];
   printf("Ncells   =%g :     ( %5i, %5i, %5i)\n", dtotcell, uniquePoints[0], uniquePoints[1], uniquePoints[2]);
   printf("Nprocs   =%6i :     ( %5i, %5i, %5i)\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
@@ -582,8 +597,9 @@ void GRID::printGridProcessorInformation(){
     printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
 #endif
-  printf("========== %20s ==========\n", "");
   if (flagStretched){
+    printf("==================== %19s ====================\n", "NO Sretched Grid");
+
     printf("Stretched GRID!!!\n");
     printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "Ximin", "Ximax");
     int c = 0;
@@ -628,6 +644,10 @@ void GRID::printGridProcessorInformation(){
       //				printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_csimin[c][pp], rproc_csimax[c][pp]);
 
     }
+
+  }
+  else{
+    printf("===================== %17s =====================\n", "NO Sretched Grid");
 
   }
 

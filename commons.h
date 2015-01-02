@@ -21,7 +21,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define __COMMONS_H__
 
 #define _ACC_SINGLE_POINTER
-
+//#define NO_ALLOCATION
 #define _USE_MATH_DEFINES
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
@@ -29,9 +29,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 //*****VERSION*****
-#define CURRENT_VERSION " version 1.3.0"
-
-const std::string common_versionLine = "================  "CURRENT_VERSION"  ================";
+#define CURRENT_VERSION "version 1.3.0"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2

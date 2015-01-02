@@ -46,6 +46,7 @@ void restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<
   if (dumpFile.good()){
     mygrid->reloadDump(dumpFile);
     myfield->reloadDump(dumpFile);
+
     for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->reloadBigBufferDump(dumpFile);
     }
@@ -101,3 +102,179 @@ void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std
   }
 }
 
+void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile){
+  //  FILE * pFile = fopen ("inputPiccante.json" , "r");
+  //  rapidjson::FileStream is(pFile);
+  //  rapidjson::Document document;
+  //  document.ParseStream<0>(is);
+  //  fclose(pFile);
+
+  //  FILE* fp = fopen("big.json", "rb"); // non-Windows use "r"
+  //  char readBuffer[65536];
+  //  FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+  //  Document d;
+  //  d.ParseStream(is);
+  //  fclose(fp);
+  //  std::ifstream inputFile("inputPiccante.json");
+  //  std::stringstream buffer;
+  //  buffer << inputFile.rdbuf();
+  //  rapidjson::StringStream s(buffer.str().c_str());
+  //  document.ParseStream(s);
+  //  inputFile.close();
+
+  //  int dim = DEFAULT_DIMENSIONALITY;
+  //  if(document.HasMember("dimensions")){
+  //    if(document["dimensions"].IsInt())
+  //      dim = document["dimensions"].GetInt()
+  //  }
+  std::ifstream inputFile(nomeFile.c_str());
+  std::stringstream buffer;
+  buffer << inputFile.rdbuf();
+  rapidjson::StringStream s(buffer.str().c_str());
+  document.ParseStream(s);
+  inputFile.close();
+}
+
+bool setIntFromJson(int *number, rapidjson::Value &document,const char* name){
+  bool outFlag;
+  if(outFlag=document.HasMember(name)){
+    if(outFlag=document[name].IsInt())
+      *number = document[name].GetInt();
+  }
+  return outFlag;
+}
+bool setDoubleFromJson(double *number, rapidjson::Value &document,const char* name){
+  bool outFlag;
+  if(outFlag=document.HasMember(name)){
+      if(outFlag=document[name].IsNumber())
+        *number = document[name].GetDouble();
+    }
+  return outFlag;
+}
+bool setBoolFromJson(bool * number, rapidjson::Value &document,const char* name){
+  bool outFlag;
+  if(outFlag=document.HasMember(name)){
+    if(outFlag=document[name].IsBool())
+      *number = document[name].GetBool();
+  }
+  return outFlag;
+}
+
+bool setValueFromJson(rapidjson::Value &jsonValue, rapidjson::Value &document, const char* name){
+  bool outFlag;
+  if(outFlag=document.HasMember(name)){
+    jsonValue=document[name];
+  }
+  return outFlag;
+}
+
+
+int getDimensionalityFromJson(rapidjson::Document &document, int defaultDimensionality){
+  int dim = defaultDimensionality;
+  const char* name="dimensions";
+  if(document.HasMember(name)){
+    //if(document[name].IsInt())
+      //dim = document[name].GetInt();
+  }
+return dim;
+}
+void setXrangeFromJson(rapidjson::Document &document,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="xRange";
+  if(document.HasMember(name)){
+    if(document[name].IsArray()){
+      min=document[name][0].GetDouble();
+      max=document[name][1].GetDouble();
+    }
+  }
+  grid->setXrange(min, max);
+}
+void setYrangeFromJson(rapidjson::Document &document,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="yRange";
+  if(document.HasMember(name)){
+    if(document[name].IsArray()){
+      min=document[name][0].GetDouble();
+      max=document[name][1].GetDouble();
+    }
+  }
+  grid->setYrange(min, max);
+}
+void setZrangeFromJson(rapidjson::Document &document,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="zRange";
+  if(document.HasMember(name)){
+    if(document[name].IsArray()){
+      min=document[name][0].GetDouble();
+      max=document[name][1].GetDouble();
+    }
+  }
+  grid->setZrange(min, max);
+}
+
+void setNCellsFromJson(rapidjson::Document &document,GRID *grid){
+  int Nx, Ny, Nz;
+  Nx=Ny=Nz=1;
+  const char* name="NCells";
+  if(document.HasMember(name)){
+    if(document[name].IsArray()){
+      Nx=document[name][0].GetInt();
+      Ny=document[name][1].GetInt();
+      Nz=document[name][2].GetInt();
+    }
+  }
+  grid->setNCells(Nx, Ny, Nz);
+
+}
+void setNprocsFromJson(rapidjson::Document &document,GRID *grid){
+  int nProcY=1, nProcZ=1;
+  setIntFromJson(&nProcY, document,"nProcY");
+  setIntFromJson(&nProcZ, document,"nProcZ");
+
+  grid->setNProcsAlongY(nProcY);
+  grid->setNProcsAlongZ(nProcZ);
+}
+
+void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid){
+  double simulationTime;
+  setDoubleFromJson(&simulationTime,document,"simulationTime");
+//  if(document.HasMember(name)){
+//    if(document[name].IsNumber())
+//      simulationTime = document[name].GetDouble();
+//  }
+  grid->setSimulationTime(simulationTime);
+}
+
+void setDumpControlFromJson(rapidjson::Document &document,DUMP_CONTROL *myDumpControl){
+  myDumpControl->doRestart = false;
+  myDumpControl->doDump = false;
+  std::string  name1="restart";
+  std::string  name2;
+  if(document.HasMember(name1.c_str())){
+    name2 = "doRestart";
+    if(document[name1.c_str()].HasMember(name2.c_str())){
+      if(document[name1.c_str()][name2.c_str()].IsBool()){
+      myDumpControl->doRestart = document[name1.c_str()][name2.c_str()].GetBool();
+      }
+    }
+    name2 = "dumpEvery";
+    if(document[name1.c_str()].HasMember(name2.c_str())){
+      if(document[name1.c_str()][name2.c_str()].IsNumber()){
+      myDumpControl->dumpEvery = document[name1.c_str()][name2.c_str()].GetDouble();
+      }
+    }
+    name2 = "doDump";
+    if(document[name1.c_str()].HasMember(name2.c_str())){
+      if(document[name1.c_str()][name2.c_str()].IsBool()){
+      myDumpControl->doDump = document[name1.c_str()][name2.c_str()].GetBool();
+      }
+    }
+    name2 = "restartFromDump";
+    if(document[name1.c_str()].HasMember(name2.c_str())){
+      if(document[name1.c_str()][name2.c_str()].IsInt()){
+      myDumpControl->restartFromDump = document[name1.c_str()][name2.c_str()].GetInt();
+      }
+    }
+  }
+
+}

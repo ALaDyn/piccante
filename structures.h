@@ -52,6 +52,12 @@ struct SPECIEspectrum{
   double *values;
 };
 
+struct DUMP_CONTROL{
+  bool doRestart, doDump;
+  int restartFromDump;
+  double dumpEvery;
+};
+
 typedef double(*distrib_function)(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 class PLASMA

@@ -43,18 +43,19 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
+#include "utilities.h"
 
 #define DIMENSIONALITY 1
 #define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 
 #define _RESTART_FROM_DUMP 1
-#define _DO_RESTART false
+#define _DO_RESTART true
 #define DO_DUMP true
-#define TIME_BTW_DUMP 50
+#define TIME_BTW_DUMP 2
 
 #define DIRECTORY_OUTPUT "TEST"
-#define DIRECTORY_DUMP "TEST"
+#define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 
@@ -88,10 +89,10 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
 
-  grid.setSimulationTime(50.0);
+  grid.setSimulationTime(4.0);
 
-  grid.with_particles = YES;
-  grid.with_current = YES;
+  grid.withParticles = YES;
+  grid.withCurrent = YES;
 
   //grid.setStartMovingWindow(0);
   grid.setBetaMovingWindow(1.0);
@@ -179,8 +180,8 @@ int main(int narg, char **args)
   electrons2.setParticlesPerCellXYZ(300, 1, 1);
   electrons2.setName("ELE2");
   electrons2.type = ELECTRON;
-  electrons2.creation();
-  species.push_back(&electrons2);
+  //electrons2.creation();
+  //species.push_back(&electrons2);
 
 
   SPECIE ions2(&grid);
@@ -190,8 +191,8 @@ int main(int narg, char **args)
   ions2.type = ION;
   ions2.Z = 1.0;
   ions2.A = 1.0;
-  ions2.creation();
-  species.push_back(&ions2);
+  //ions2.creation();
+  //species.push_back(&ions2);
 
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
@@ -240,30 +241,16 @@ int main(int narg, char **args)
   }
 
   int Nstep = grid.getTotalNumberOfTimesteps();
-  int dumpID = 1, dumpEvery = 40;
-  grid.istep = 0;
+  int dumpID = 1, dumpEvery;
   if (DO_DUMP){
     dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
+  grid.istep = 0;
   if (_DO_RESTART){
     dumpID = _RESTART_FROM_DUMP;
-    std::ifstream dumpFile;
-    std::stringstream dumpName;
-    dumpName << DIRECTORY_DUMP << "/DUMP_";
-    dumpName << std::setw(2) << std::setfill('0') << std::fixed << dumpID << "_";
-    dumpName << std::setw(5) << std::setfill('0') << std::fixed << grid.myid << ".bin";
-    dumpFile.open(dumpName.str().c_str());
-
-    grid.reloadDump(dumpFile);
-    myfield.reloadDump(dumpFile);
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->reloadDump(dumpFile);
-    }
-    dumpFile.close();
-    dumpID++;
-    grid.istep++;
+    restartFromDump(&dumpID, &grid, &myfield, species);
   }
-  for (; grid.istep <= Nstep; grid.istep++)
+  while (grid.istep <= Nstep)
   {
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
@@ -303,34 +290,18 @@ int main(int narg, char **args)
 
     grid.time += grid.dt;
 
+    moveWindow(&grid, &myfield, species);
 
-    grid.move_window();
-    myfield.move_window();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->move_window();
-    }
+    grid.istep++;
     if (DO_DUMP){
       if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
-        std::ofstream dumpFile;
-        std::stringstream dumpName;
-        dumpName << DIRECTORY_OUTPUT << "/DUMP_";
-        dumpName << std::setw(2) << std::setfill('0') << std::fixed << dumpID << "_";
-        dumpName << std::setw(5) << std::setfill('0') << std::fixed << grid.myid << ".bin";
-        dumpFile.open(dumpName.str().c_str());
-
-        grid.dump(dumpFile);
-        myfield.dump(dumpFile);
-        for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-          (*spec_iterator)->dump(dumpFile);
-        }
-        dumpFile.close();
-        dumpID++;
+        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
     }
   }
 
   manager.close();
   MPI_Finalize();
-  exit(1);
+  exit(0);
 
 }

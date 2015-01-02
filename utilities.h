@@ -41,13 +41,26 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "structures.h"
 #include "em_field.h"
 #include "particle_species.h"
+#include "rapidjson/document.h"     // rapidjson's DOM-style API
 
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
 void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile);
+int getDimensionalityFromJson(rapidjson::Document &document, int defaultDimensionality);
+void setXrangeFromJson(rapidjson::Document &document,GRID *grid);
+void setYrangeFromJson(rapidjson::Document &document,GRID *grid);
+void setZrangeFromJson(rapidjson::Document &document,GRID *grid);
 
-
+bool setIntFromJson(int *number, rapidjson::Value &document, const char* name);
+bool setDoubleFromJson(double *number, rapidjson::Value &document,const char* name);
+bool setBoolFromJson(bool *number, rapidjson::Value &document, const char* name);
+bool setValueFromJson(rapidjson::Value &jsonValue, rapidjson::Value &document, const char* name);
+void setNCellsFromJson(rapidjson::Document &document,GRID *grid);
+void setNprocsFromJson(rapidjson::Document &document,GRID *grid);
+void setDumpControlFromJson(rapidjson::Document &document, DUMP_CONTROL *myDumpControl);
+void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid);
 #endif // UTILITIES_H
 

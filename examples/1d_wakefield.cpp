@@ -91,8 +91,8 @@ int main(int narg, char **args)
 
   grid.setSimulationTime(60.0);
 
-  grid.with_particles = YES;
-  grid.with_current = YES;
+  grid.withParticles = YES;
+  grid.withCurrent = YES;
 
   grid.setStartMovingWindow(0);
   grid.setBetaMovingWindow(1.0);

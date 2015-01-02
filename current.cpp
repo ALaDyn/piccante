@@ -42,8 +42,10 @@ void CURRENT::allocate(GRID *grid) //field allocation
     YGrid_factor = 0;
 
   Ncomp = 4;
+#ifndef NO_ALLOCATION
   val = (double *)malloc(Ntot*Ncomp*sizeof(double));
   allocated = 1;
+#endif
 }
 //REALLOCATION only if load balancing is introduced
 void CURRENT::reallocate()
@@ -58,7 +60,9 @@ void CURRENT::reallocate()
     ZGrid_factor = 0;
   if (N_grid[1] == 1)
     YGrid_factor = 0;
+#ifndef NO_ALLOCATION
   val = (double *)realloc((void*)val, Ntot*Ncomp*sizeof(double));
+#endif
 }
 //set all values to zero!
 void CURRENT::setAllValuesToZero()  //set all the values to zero
@@ -67,8 +71,12 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
     memset((void*)val, 0, Ntot*Ncomp*sizeof(double));
   else
   {
-    printf("ERROR: current.setAllValuesToZero impossible");
+#ifndef NO_ALLOCATION
+    printf("ERROR: current.setAllValuesToZero impossible\n");
     exit(17);
+#else
+  return;
+#endif
   }
 }
 

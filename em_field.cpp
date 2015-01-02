@@ -47,9 +47,11 @@ void EM_FIELD::allocate(GRID *grid){
 
   Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
   Ncomp = 6;
+#ifndef NO_ALLOCATION
   val = (double *)malloc(Ntot*Ncomp*sizeof(double));
   allocated = true;
   EM_FIELD::setAllValuesToZero();
+#endif
   EBEnergyExtremesFlag = false;
 }
 
@@ -66,8 +68,10 @@ void EM_FIELD::reallocate(){
 
   Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
   Ncomp = 6;
+#ifndef NO_ALLOCATION
   val = (double *)realloc((void*)val, Ntot*Ncomp*sizeof(double));
   EBEnergyExtremesFlag = false;
+#endif
 }
 //set all values to zero!
 void EM_FIELD::setAllValuesToZero()  //set all the values to zero
@@ -75,8 +79,12 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
   if (allocated)
     memset((void*)val, 0, Ntot*Ncomp*sizeof(double));
   else		{
+    #ifndef NO_ALLOCATION
     printf("ERROR: erase_field\n");
     exit(17);
+#else
+    return;
+#endif
   }
   EBEnergyExtremesFlag = false;
 }
@@ -582,6 +590,9 @@ void EM_FIELD::openBoundariesB(){
 
 void EM_FIELD::boundary_conditions()  // set on the ghost cells the boundary values
 {
+  if(!allocated){
+    return;
+  }
   EBEnergyExtremesFlag = false;
   pbc_EB();
 
@@ -924,6 +935,9 @@ void EM_FIELD::smooth_filter(int filter_points){
 }
 
 void EM_FIELD::addPulse(laserPulse* pulse){
+  if(!allocated){
+    return;
+  }
   EBEnergyExtremesFlag = false;
   switch (pulse->type){
   case GAUSSIAN:
