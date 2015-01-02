@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="access.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="commons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
