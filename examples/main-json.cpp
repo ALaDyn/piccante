@@ -92,25 +92,15 @@ int main(int narg, char **args)
   setNCellsFromJson(document,&grid);
   setNprocsFromJson(document,&grid);
 
-  //grid.enableStretchedGrid();
-  //grid.setXandNxLeftStretchedGrid(-15.0,1000);
-  //grid.setYandNyLeftStretchedGrid(-5.0, 70);
-  //grid.setXandNxRightStretchedGrid(15.0,1000);
-  //grid.setYandNyRightStretchedGrid(5.0, 70);
+  setStretchedGridFromJson(document,&grid);
 
   grid.setBoundaries(xOpen | yOpen | zPBC);
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
   setSimulationTimeFromJson(document,&grid);
 
-  //grid.setSimulationTime(50.0);
+  setMovingWindowFromJson(document,&grid);
 
-  grid.withParticles = YES;
-  grid.withCurrent = YES;
-
-  //grid.setStartMovingWindow(0);
-  grid.setBetaMovingWindow(1.0);
-  //grid.setFrequencyMovingWindow(FREQUENCY);
 
   grid.setMasterProc(0);
 
@@ -119,19 +109,7 @@ int main(int narg, char **args)
 
   grid.finalize();
 
-  //DUMP_CONTROL myDumpControl;
-  grid.dumpControl.doRestart=0;
-  grid.dumpControl.doDump=0;
-  grid.dumpControl.restartFromDump=0;
-  grid.dumpControl.dumpEvery=2;
-
-setDumpControlFromJson(document, &grid.dumpControl);
-  if(grid.myid==grid.master_proc){
-    std::cout << "doRestart = " << grid.dumpControl.doRestart << "\n";
-    std::cout << "doDump = " << grid.dumpControl.doDump << "\n";
-    std::cout << "restartFromDump = " << grid.dumpControl.restartFromDump << "\n";
-    std::cout << "dumpEvery = " << grid.dumpControl.dumpEvery << "\n";
-  }
+  setDumpControlFromJson(document, &grid.dumpControl);
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
@@ -151,7 +129,7 @@ setDumpControlFromJson(document, &grid.dumpControl);
   }
 
 
-               //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
+  //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
@@ -218,32 +196,12 @@ setDumpControlFromJson(document, &grid.dumpControl);
   ions1.creation();
   species.push_back(&ions1);
 
-  SPECIE  electrons2(&grid);
-  electrons2.plasma = plasma2;
-  electrons2.setParticlesPerCellXYZ(300, 1, 1);
-  electrons2.setName("ELE2");
-  electrons2.type = ELECTRON;
-  //electrons2.creation();
-  //species.push_back(&electrons2);
-
-
-  SPECIE ions2(&grid);
-  ions2.plasma = plasma2;
-  ions2.setParticlesPerCellXYZ(100, 1, 1);
-  ions2.setName("ION2");
-  ions2.type = ION;
-  ions2.Z = 1.0;
-  ions2.A = 1.0;
-  //ions2.creation();
-  //species.push_back(&ions2);
 
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
 
   electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
   ions1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
-  electrons2.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
-  ions2.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();
@@ -260,15 +218,11 @@ setDumpControlFromJson(document, &grid.dumpControl);
 
   manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
   manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
-  manager.addSpeciesDensityFrom(electrons2.name, 0.0, 2.0);
-  manager.addSpeciesDensityFrom(ions2.name, 0.0, 2.0);
 
   manager.addCurrentFrom(0.0, 5.0);
 
   manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(electrons2.name, 0.0, 5.0);
   manager.addSpeciesPhaseSpaceFrom(ions1.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(ions2.name, 0.0, 5.0);
 
   manager.addDiagFrom(0.0, 1.0);
 
@@ -283,8 +237,6 @@ grid.setDumpPath(DIRECTORY_DUMP);
     fflush(stdout);
   }
 
-  MPI_Finalize();
-  exit(0);
   int dumpID = 1;
   grid.istep = 0;
   if (grid.dumpControl.doRestart){

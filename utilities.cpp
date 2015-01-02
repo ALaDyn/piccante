@@ -278,3 +278,105 @@ void setDumpControlFromJson(rapidjson::Document &document,DUMP_CONTROL *myDumpCo
   }
 
 }
+
+void setStretchedGridFromJson(rapidjson::Document &document,GRID *grid){
+  std::string  name1="StretchedGrid";
+  rapidjson::Value stretching;
+  if(setValueFromJson(stretching, document, name1.c_str() ) ) {
+    grid->enableStretchedGrid();
+    std::string  name2;
+    rapidjson::Value stretching1D;
+
+    name2="x";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      rapidjson::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setXandNxLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      rapidjson::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setXandNxRightStretchedGrid(limit,NCells);
+      }
+    }
+
+    name2="y";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      rapidjson::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setYandNyLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      rapidjson::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setYandNyRightStretchedGrid(limit,NCells);
+      }
+    }
+
+    name2="z";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      rapidjson::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setZandNzLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      rapidjson::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setZandNzRightStretchedGrid(limit,NCells);
+      }
+    }
+  }
+}
+void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid){
+  std::string  name1="MovingWindow";
+  rapidjson::Value movingWindow;
+  if(setValueFromJson( movingWindow, document, name1.c_str() ) ) {
+    std::string  name2;
+    double start=0;
+    name2= "start";
+    setDoubleFromJson( &start, movingWindow, name2.c_str() );
+    grid->setStartMovingWindow(start);
+
+
+    name2= "beta";
+    double beta;
+    if(setDoubleFromJson( &beta, movingWindow, name2.c_str() ) ){
+      grid->setBetaMovingWindow(beta);
+    }
+    name2= "frequency";
+    int frequency;
+    if(setIntFromJson( &frequency, movingWindow, name2.c_str() ) ){
+      grid->setFrequencyMovingWindow(frequency);
+    }
+
+  }
+
+
+}

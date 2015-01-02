@@ -7,18 +7,30 @@
     "zRange": [-20, 20],
     "NCells": [5000, 100, 20],
     "simulationTime": 15,
+
+    "NO_StretchedGrid":{
+        "x":{"left": { "limit": -10.0, "NCells": 1000 },
+            "right": { "limit":  10.0, "NCells": 1000 } },
+        "y":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } },
+        "z":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } }
+    },
+    "MovingWindow":{
+        "start": 0,
+        "NO_beta": 1,
+        "NO_frequency":20
+    },
     "restart":{
         "doRestart": true,
         "restartFromDump": 1,
         "doDump": true,
         "dumpEvery": 2.0
     },
-    "special":{
-        "variabile1": 32,
-        "variabile2": 32.5
-    },
+    "special":{"variabile1": 32,"variabile2": 32.5},
     "specie":[
         {"nome": "ele1", "cognome": 13},
         {"nome": "ele2", "cognome": 15}
     ]
+
 }

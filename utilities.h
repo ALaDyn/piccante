@@ -60,7 +60,10 @@ bool setBoolFromJson(bool *number, rapidjson::Value &document, const char* name)
 bool setValueFromJson(rapidjson::Value &jsonValue, rapidjson::Value &document, const char* name);
 void setNCellsFromJson(rapidjson::Document &document,GRID *grid);
 void setNprocsFromJson(rapidjson::Document &document,GRID *grid);
-void setDumpControlFromJson(rapidjson::Document &document, DUMP_CONTROL *myDumpControl);
 void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid);
+void setDumpControlFromJson(rapidjson::Document &document, DUMP_CONTROL *myDumpControl);
+void setStretchedGridFromJson(rapidjson::Document &document,GRID *grid);
+void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid);
+
 #endif // UTILITIES_H
 
