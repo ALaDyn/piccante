@@ -130,8 +130,8 @@ void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile){
   std::ifstream inputFile(nomeFile.c_str());
   std::stringstream buffer;
   buffer << inputFile.rdbuf();
-  rapidjson::StringStream s(buffer.str().c_str());
-  document.ParseStream(s);
+//  rapidjson::StringStream s(buffer.str().c_str());
+  document.Parse(buffer.str().c_str());
   inputFile.close();
 }
 
