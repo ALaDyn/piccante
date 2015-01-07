@@ -135,7 +135,7 @@ int main(int narg, char **args)
   current.setAllValuesToZero();
   //*******************************************END FIELD DEFINITION***********************************************************
 
-  //*******************************************BEGIN SPECIES DEFINITION*********************************************************
+  //*******************************************BEGIN SPECIES DEFINITION*******************************************************
   PLASMA plasma1;
   plasma1.density_function = left_soft_ramp;
   plasma1.setXRangeBox(0.0, 1.5);

@@ -934,16 +934,66 @@ void EM_FIELD::smooth_filter(int filter_points){
   delete[] zfilter;
 }
 
+void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
+  if(mygrid->myid==mygrid->master_proc){
+    std::string pulseType;
+    switch (pulse->type){
+    case GAUSSIAN:
+        pulseType = "GAUSSIAN PULSE";
+        break;
+    case PLANE_WAVE:
+        pulseType = "PLANE WAVE";
+        break;
+    case COS2_PLANE_WAVE:
+        pulseType = "COS2 PLANE WAVE";
+        break;
+   case COS2_PLATEAU_PLANE_WAVE:
+        pulseType = "COS2 PLATEAU PLANE WAVE";
+        break;
+      default:
+        pulseType = "";
+        break;
+    }
+    std::string pulsePolarization;
+    switch (pulse->polarization){
+    case P_POLARIZATION:
+        pulsePolarization = "P";
+        break;
+    case S_POLARIZATION:
+        pulsePolarization = "S";
+        break;
+    case CIRCULAR_POLARIZATION:
+        pulsePolarization = "Circular";
+        break;
+      default:
+        pulsePolarization = "";
+        break;
+    }
+
+    printf("==================== %19s ====================\n", pulseType.c_str());
+    printf("lambda             = %g\n", pulse->lambda0);
+    printf("a0                 = %g\n", pulse->normalized_amplitude);
+    printf("initial position   = %g\n", pulse->laser_pulse_initial_position);
+    printf("polarization       = %s\n", pulsePolarization.c_str());
+    printf("duration FWHM      = %g\n", pulse->t_FWHM);
+    printf("waist              = %g\n", pulse->waist);
+    printf("focus position     = %g\n", pulse->focus_position);
+    printf("rotation           = %i\n", pulse->rotation);
+    printf("rotation  angle    = %g\n", pulse->angle);
+    printf("rotation centre    = %i\n", pulse->rotation_center_along_x);
+  }
+}
+
 void EM_FIELD::addPulse(laserPulse* pulse){
   if(!allocated){
     return;
   }
   EBEnergyExtremesFlag = false;
+writeNewPulseInformation(pulse);
   switch (pulse->type){
   case GAUSSIAN:
   {
     if (pulse->rotation){
-      //DA IMPLEMENTARE !!
       initialize_gaussian_pulse_angle(pulse->lambda0,
         pulse->normalized_amplitude,
         pulse->laser_pulse_initial_position,

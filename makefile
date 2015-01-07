@@ -1,7 +1,7 @@
 COMPILER = mpic++
 EXE = piccante
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o
+OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o jsonparser.o
 
 OPT = -O3 
 
@@ -63,6 +63,8 @@ utilities.o: utilities.cpp
 		$(COMPILER) $(OPT) -c utilities.cpp
 jsoncpp.o: jsoncpp.cpp
 		$(COMPILER) $(OPT) -c jsoncpp.cpp
+jsonparser.o: jsonparser.cpp
+		$(COMPILER) $(OPT) -c jsonparser.cpp
 
 clean :
 				rm -f $(OBJ)

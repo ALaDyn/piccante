@@ -45,10 +45,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "particle_species.h"
 #include "output_manager.h"
 #include "utilities.h"
-
+#include "jsonparser.h"
 
 #define DEFAULT_DIMENSIONALITY 1
-
 
 
 #define DIRECTORY_OUTPUT "TEST"
@@ -125,6 +124,7 @@ int myIntVariable=0;
 
   myfield.addPulse(&pulse1);
 
+  setLaserPulsesFromJson(root, &myfield);
   myfield.boundary_conditions();
 
   current.allocate(&grid);
