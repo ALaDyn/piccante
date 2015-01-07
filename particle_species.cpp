@@ -353,7 +353,8 @@ if(!allocated){
           r2(counter) = zloc + dzp*(kp + 0.5);
           u0(counter) = u1(counter) = u2(counter) = 0;
           w(counter) = weight;
-          marker(counter) = (counter + disp);
+          if(flagWithMarker)
+            marker(counter) = (counter + disp);
           if (isTestSpecies)
             w(counter) = (double)(counter + disp);
           counter++;
