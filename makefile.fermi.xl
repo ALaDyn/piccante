@@ -55,7 +55,7 @@ output_manager.o:  output_manager.cpp
 utilities.o: utilities.cpp 
 	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c utilities.cpp
 jsoncpp.o: jsoncpp.cpp 
-	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c utilities.cpp
+	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c jsoncpp.cpp
 
 clean :
 				rm -f $(OBJ) *~

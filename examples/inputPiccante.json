@@ -1,5 +1,5 @@
 {
-    "dimensions": 1.1,
+    "dimensions": 2,
     "nProcY": 1,
     "nProcZ": 1,
     "xRange": [-20, 20],
@@ -28,9 +28,10 @@
         "dumpEvery": 2.0
     },
     "special":{"variabile1": 32,"variabile2": 32.5},
-    "specie":[
-        {"name": "ele1", "cognome": 13},
-        {"name": "ele2", "cognome": 15}
+    "plasma":[{"type": "box"},{"type": "box"}],
+    "species":[
+        {"name": "ele1", "plasma": 0},
+        {"name": "ele2", "plasma": 1}
     ]
 
 }

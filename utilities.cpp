@@ -119,14 +119,11 @@ void parseJsonInputFile(Json::Value &root, std::string nomeFile){
    bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
    if(not parsedSuccess){
-     // Report failures and their locations
-     // in the document.
      std::cout<<"Failed to parse JSON"<<std::endl
          <<reader.getFormatedErrorMessages()
          <<std::endl;
      exit(1);
    }
-   const Json::Value array = root["array"];
 }
 
 
@@ -177,7 +174,7 @@ return dim;
 void setXrangeFromJson(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
   const char* name="xRange";
-  if(parent[name].isObject()){
+  if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
       max=parent[name][1].asDouble();
@@ -188,7 +185,7 @@ void setXrangeFromJson(Json::Value &parent,GRID *grid){
 void setYrangeFromJson(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
   const char* name="yRange";
-  if(parent[name].isObject()){
+  if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
       max=parent[name][1].asDouble();
@@ -199,7 +196,7 @@ void setYrangeFromJson(Json::Value &parent,GRID *grid){
 void setZrangeFromJson(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
   const char* name="zRange";
-  if(parent[name].isObject()){
+  if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
       max=parent[name][1].asDouble();
@@ -212,7 +209,7 @@ void setNCellsFromJson(Json::Value &parent,GRID *grid){
   int Nx, Ny, Nz;
   Nx=Ny=Nz=1;
   const char* name="NCells";
-  if(parent[name].isObject()){
+  if(!parent[name].isNull()){
     if(parent[name].isArray()){
       Nx=parent[name][0].asInt();
       Ny=parent[name][1].asInt();

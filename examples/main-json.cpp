@@ -47,7 +47,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "utilities.h"
 
 
-#define DEFAULT_DIMENSIONALITY 21
+#define DEFAULT_DIMENSIONALITY 1
 
 
 
@@ -60,22 +60,11 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 //#include "rapidjson/filestream.h"   // wrapper of C stream for prettywriter as output
 
 
-struct mySpecialParameters{
-  static const int Nint=3, Ndouble=3, Nbool=3;
-  int paramI[Nint];
-  double paramD[Ndouble];
-  bool paramB[Nbool];
-//const char* nam="cacca";
-//  static const char* namesI[]={"int1","int2","int3"};
-//  static const char* NamesD[]={"double1", "double2", "double3"};
-//  static const char* NamesB[]={"bool1","bool2", "bool3"};
-};
-
 int main(int narg, char **args)
 {
   Json::Value root;
   parseJsonInputFile(root,"inputPiccante.json");
-  int dim = getDimensionalityFromJson2(root, DEFAULT_DIMENSIONALITY);
+  int dim = getDimensionalityFromJson(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
   EM_FIELD myfield;
