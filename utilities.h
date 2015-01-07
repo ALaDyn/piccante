@@ -68,11 +68,6 @@ void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
 void setStretchedGridFromJson(Json::Value &document, GRID *grid);
 void setMovingWindowFromJson(Json::Value &document, GRID *grid);
 
-bool setIntFromJson2(int *number, Json::Value &parent, const char* name);
-bool setDoubleFromJson2(double *number, Json::Value &parent,const char* name);
-
-bool setBoolFromJson2(bool *number, Json::Value &parent, const char* name);
-int getDimensionalityFromJson2(Json::Value &parent, int defaultDimensionality);
 
 #endif // UTILITIES_H
 

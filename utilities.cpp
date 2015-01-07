@@ -109,7 +109,7 @@ void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std
 
 
 
-void parseJsonInputFile2(Json::Value &root, std::string nomeFile){
+void parseJsonInputFile(Json::Value &root, std::string nomeFile){
 
   std::ifstream inputFile(nomeFile.c_str());
   std::stringstream buffer;
@@ -359,14 +359,3 @@ void setMovingWindowFromJson(Json::Value  &document,GRID *grid){
 
 }
 
-
-int getDimensionalityFromJson2(Json::Value &parent, int defaultDimensionality){
-  int dim = defaultDimensionality;
-  const char* name="dimensions";
-  if(( !parent[name].isNull() )){
-    if( parent[name].type() == Json::intValue){
-      dim = parent[name].asInt();
-    }
-  }
-  return dim;
-}
