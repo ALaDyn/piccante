@@ -294,7 +294,7 @@ int main(int narg, char **args)
 
     grid.moveWindow();
 
-    myfield.move_window();
+    myfield.moveWindow();
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->move_window();
     }

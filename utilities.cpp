@@ -22,7 +22,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies){
   _mygrid->moveWindow();
-  _myfield->move_window();
+  _myfield->moveWindow();
   for (std::vector<SPECIE*>::iterator spec_iterator = _myspecies.begin(); spec_iterator != _myspecies.end(); spec_iterator++){
     (*spec_iterator)->move_window();
   }
@@ -102,262 +102,11 @@ void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std
   }
 }
 
-void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile){
-//    FILE * pFile = fopen ("inputPiccante.json" , "r");
-//    rapidjson::FileStream is(pFile);
-//    //rapidjson::Document document;
-//    document.ParseStream<0>(is);
-//    fclose(pFile);
-
-  std::ifstream inputFile(nomeFile.c_str());
-  std::stringstream buffer;
-  buffer << inputFile.rdbuf();
-  rapidjson::StringStream s(buffer.str().c_str());
-  document.Parse(buffer.str().c_str());
-  inputFile.close();
-}
 
 
 
-bool setIntFromJson(int *number, rapidjson::Value &document,const char* name){
-  bool outFlag;
-  if(outFlag=document.HasMember(name)){
-    if(outFlag=document[name].IsInt())
-      *number = document[name].GetInt();
-  }
-  return outFlag;
-}
-bool setDoubleFromJson(double *number, rapidjson::Value &document,const char* name){
-  bool outFlag;
-  if(outFlag=document.HasMember(name)){
-      if(outFlag=document[name].IsNumber())
-        *number = document[name].GetDouble();
-    }
-  return outFlag;
-}
-bool setBoolFromJson(bool * number, rapidjson::Value &document,const char* name){
-  bool outFlag;
-  if(outFlag=document.HasMember(name)){
-    if(outFlag=document[name].IsBool())
-      *number = document[name].GetBool();
-  }
-  return outFlag;
-}
-
-bool setValueFromJson(rapidjson::Value &jsonValue, rapidjson::Value &document, const char* name){
-  bool outFlag;
-  if(outFlag=document.HasMember(name)){
-    jsonValue=document[name];
-  }
-  return outFlag;
-}
 
 
-int getDimensionalityFromJson(rapidjson::Document &document, int defaultDimensionality){
-  int dim = defaultDimensionality;
-  const char* name="dimensions";
-  if(document.HasMember(name)){
-    if(document[name].IsInt())
-      dim = document[name].GetInt();
-  }
-return dim;
-}
-void setXrangeFromJson(rapidjson::Document &document,GRID *grid){
-  double min=-1.0, max=1.0;
-  const char* name="xRange";
-  if(document.HasMember(name)){
-    if(document[name].IsArray()){
-      min=document[name][0].GetDouble();
-      max=document[name][1].GetDouble();
-    }
-  }
-  grid->setXrange(min, max);
-}
-void setYrangeFromJson(rapidjson::Document &document,GRID *grid){
-  double min=-1.0, max=1.0;
-  const char* name="yRange";
-  if(document.HasMember(name)){
-    if(document[name].IsArray()){
-      min=document[name][0].GetDouble();
-      max=document[name][1].GetDouble();
-    }
-  }
-  grid->setYrange(min, max);
-}
-void setZrangeFromJson(rapidjson::Document &document,GRID *grid){
-  double min=-1.0, max=1.0;
-  const char* name="zRange";
-  if(document.HasMember(name)){
-    if(document[name].IsArray()){
-      min=document[name][0].GetDouble();
-      max=document[name][1].GetDouble();
-    }
-  }
-  grid->setZrange(min, max);
-}
-
-void setNCellsFromJson(rapidjson::Document &document,GRID *grid){
-  int Nx, Ny, Nz;
-  Nx=Ny=Nz=1;
-  const char* name="NCells";
-  if(document.HasMember(name)){
-    if(document[name].IsArray()){
-      Nx=document[name][0].GetInt();
-      Ny=document[name][1].GetInt();
-      Nz=document[name][2].GetInt();
-    }
-  }
-  grid->setNCells(Nx, Ny, Nz);
-
-}
-void setNprocsFromJson(rapidjson::Document &document,GRID *grid){
-  int nProcY=1, nProcZ=1;
-  setIntFromJson(&nProcY, document,"nProcY");
-  setIntFromJson(&nProcZ, document,"nProcZ");
-
-  grid->setNProcsAlongY(nProcY);
-  grid->setNProcsAlongZ(nProcZ);
-}
-
-void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid){
-  double simulationTime;
-  setDoubleFromJson(&simulationTime,document,"simulationTime");
-  grid->setSimulationTime(simulationTime);
-}
-
-void setDumpControlFromJson(rapidjson::Document &document,DUMP_CONTROL *myDumpControl){
-  myDumpControl->doRestart = false;
-  myDumpControl->doDump = false;
-  std::string  name1="restart";
-  std::string  name2;
-  if(document.HasMember(name1.c_str())){
-    name2 = "doRestart";
-    if(document[name1.c_str()].HasMember(name2.c_str())){
-      if(document[name1.c_str()][name2.c_str()].IsBool()){
-      myDumpControl->doRestart = document[name1.c_str()][name2.c_str()].GetBool();
-      }
-    }
-    name2 = "dumpEvery";
-    if(document[name1.c_str()].HasMember(name2.c_str())){
-      if(document[name1.c_str()][name2.c_str()].IsNumber()){
-      myDumpControl->dumpEvery = document[name1.c_str()][name2.c_str()].GetDouble();
-      }
-    }
-    name2 = "doDump";
-    if(document[name1.c_str()].HasMember(name2.c_str())){
-      if(document[name1.c_str()][name2.c_str()].IsBool()){
-      myDumpControl->doDump = document[name1.c_str()][name2.c_str()].GetBool();
-      }
-    }
-    name2 = "restartFromDump";
-    if(document[name1.c_str()].HasMember(name2.c_str())){
-      if(document[name1.c_str()][name2.c_str()].IsInt()){
-      myDumpControl->restartFromDump = document[name1.c_str()][name2.c_str()].GetInt();
-      }
-    }
-  }
-
-}
-
-void setStretchedGridFromJson(rapidjson::Document &document,GRID *grid){
-  std::string  name1="StretchedGrid";
-  rapidjson::Value stretching;
-  if(setValueFromJson(stretching, document, name1.c_str() ) ) {
-    grid->enableStretchedGrid();
-    std::string  name2;
-    rapidjson::Value stretching1D;
-
-    name2="x";
-    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3="left";
-      rapidjson::Value stretchingLeft;
-      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingLeft,"NCells");
-        setDoubleFromJson(&limit, stretchingLeft, "limit");
-        grid->setXandNxLeftStretchedGrid(limit,NCells);
-      }
-      name3="right";
-      rapidjson::Value stretchingRight;
-      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingRight,"NCells");
-        setDoubleFromJson(&limit, stretchingRight, "limit");
-        grid->setXandNxRightStretchedGrid(limit,NCells);
-      }
-    }
-
-    name2="y";
-    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3="left";
-      rapidjson::Value stretchingLeft;
-      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingLeft,"NCells");
-        setDoubleFromJson(&limit, stretchingLeft, "limit");
-        grid->setYandNyLeftStretchedGrid(limit,NCells);
-      }
-      name3="right";
-      rapidjson::Value stretchingRight;
-      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingRight,"NCells");
-        setDoubleFromJson(&limit, stretchingRight, "limit");
-        grid->setYandNyRightStretchedGrid(limit,NCells);
-      }
-    }
-
-    name2="z";
-    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3="left";
-      rapidjson::Value stretchingLeft;
-      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingLeft,"NCells");
-        setDoubleFromJson(&limit, stretchingLeft, "limit");
-        grid->setZandNzLeftStretchedGrid(limit,NCells);
-      }
-      name3="right";
-      rapidjson::Value stretchingRight;
-      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
-        double limit;
-        int NCells;
-        setIntFromJson(&NCells,stretchingRight,"NCells");
-        setDoubleFromJson(&limit, stretchingRight, "limit");
-        grid->setZandNzRightStretchedGrid(limit,NCells);
-      }
-    }
-  }
-}
-void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid){
-  std::string  name1="MovingWindow";
-  rapidjson::Value movingWindow;
-  if(setValueFromJson( movingWindow, document, name1.c_str() ) ) {
-    std::string  name2;
-    double start=0;
-    name2= "start";
-    setDoubleFromJson( &start, movingWindow, name2.c_str() );
-    grid->setStartMovingWindow(start);
-
-    name2= "beta";
-    double beta;
-    if(setDoubleFromJson( &beta, movingWindow, name2.c_str() ) ){
-      grid->setBetaMovingWindow(beta);
-    }
-    name2= "frequency";
-    int frequency;
-    if(setIntFromJson( &frequency, movingWindow, name2.c_str() ) ){
-      grid->setFrequencyMovingWindow(frequency);
-    }
-  }
-
-
-}
 
 
 void parseJsonInputFile2(Json::Value &root, std::string nomeFile){
@@ -380,14 +129,236 @@ void parseJsonInputFile2(Json::Value &root, std::string nomeFile){
    const Json::Value array = root["array"];
 }
 
-bool setIntFromJson2(int *number, Json::Value &parent, const char* name){
+
+bool setIntFromJson(int *number, Json::Value &parent, const char* name){
   bool outFlag;
   if(outFlag = ( !parent[name].isNull() ) ){
-    //if(outFlag=parent[name].IsInt())
+    if( parent[name].isInt())
       *number = parent[name].asInt();
   }
   return outFlag;
 }
+
+
+bool setDoubleFromJson(double *number, Json::Value  &parent,const char* name){
+  bool outFlag;
+  if(outFlag = ( !parent[name].isNull() ) ){
+    if( parent[name].isDouble())
+      *number = parent[name].asDouble();
+  }
+  return outFlag;
+}
+bool setBoolFromJson(bool * number, Json::Value  &parent,const char* name){
+  bool outFlag;
+  if(outFlag = ( !parent[name].isNull() ) ){
+    if( parent[name].isBool())
+      *number = parent[name].asBool();
+  }
+  return outFlag;
+}
+
+
+bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name){
+  bool outFlag;
+  if(outFlag = ( !parent[name].isNull() ) ){
+    child=parent[name];
+  }
+  return outFlag;
+}
+
+
+int getDimensionalityFromJson(Json::Value &document, int defaultDimensionality){
+  int dim = defaultDimensionality;
+  const char* name="dimensions";
+  if(setIntFromJson(&dim, document, name))
+  std::cout << "dimensions not set in JSON input file!\n";
+return dim;
+}
+void setXrangeFromJson(Json::Value &parent,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="xRange";
+  if(parent[name].isObject()){
+    if(parent[name].isArray()){
+      min=parent[name][0].asDouble();
+      max=parent[name][1].asDouble();
+    }
+  }
+  grid->setXrange(min, max);
+}
+void setYrangeFromJson(Json::Value &parent,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="yRange";
+  if(parent[name].isObject()){
+    if(parent[name].isArray()){
+      min=parent[name][0].asDouble();
+      max=parent[name][1].asDouble();
+    }
+  }
+  grid->setYrange(min, max);
+}
+void setZrangeFromJson(Json::Value &parent,GRID *grid){
+  double min=-1.0, max=1.0;
+  const char* name="zRange";
+  if(parent[name].isObject()){
+    if(parent[name].isArray()){
+      min=parent[name][0].asDouble();
+      max=parent[name][1].asDouble();
+    }
+  }
+  grid->setZrange(min, max);
+}
+
+void setNCellsFromJson(Json::Value &parent,GRID *grid){
+  int Nx, Ny, Nz;
+  Nx=Ny=Nz=1;
+  const char* name="NCells";
+  if(parent[name].isObject()){
+    if(parent[name].isArray()){
+      Nx=parent[name][0].asInt();
+      Ny=parent[name][1].asInt();
+      Nz=parent[name][2].asInt();
+    }
+  }
+  grid->setNCells(Nx, Ny, Nz);
+
+}
+void setNprocsFromJson(Json::Value &document,GRID *grid){
+  int nProcY=1, nProcZ=1;
+  setIntFromJson(&nProcY, document,"nProcY");
+  setIntFromJson(&nProcZ, document,"nProcZ");
+
+  grid->setNProcsAlongY(nProcY);
+  grid->setNProcsAlongZ(nProcZ);
+}
+
+void setSimulationTimeFromJson(Json::Value &document,GRID *grid){
+  double simulationTime;
+  setDoubleFromJson(&simulationTime,document,"simulationTime");
+  grid->setSimulationTime(simulationTime);
+}
+
+void setDumpControlFromJson(Json::Value &parent, DUMP_CONTROL *myDumpControl){
+  myDumpControl->doRestart = false;
+  myDumpControl->doDump = false;
+  std::string  name1="restart";
+  std::string  name2;
+  Json::Value restartObject;
+  if(setValueFromJson(restartObject,parent,name1.c_str())){
+
+    name2 = "doRestart";
+    setBoolFromJson(&myDumpControl->doRestart,restartObject,name2.c_str());
+
+    name2 = "dumpEvery";
+    setDoubleFromJson(&myDumpControl->dumpEvery,restartObject,name2.c_str());
+
+    name2 = "doDump";
+    setBoolFromJson(&myDumpControl->doDump,restartObject,name2.c_str());
+
+    name2 = "restartFromDump";
+    setIntFromJson(&myDumpControl->restartFromDump,restartObject,name2.c_str());
+
+  }
+}
+
+void setStretchedGridFromJson(Json::Value &document,GRID *grid){
+  std::string  name1="StretchedGrid";
+  Json::Value  stretching;
+  if(setValueFromJson(stretching, document, name1.c_str() ) ) {
+    grid->enableStretchedGrid();
+    std::string  name2;
+    Json::Value stretching1D;
+
+    name2="x";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      Json::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setXandNxLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      Json::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setXandNxRightStretchedGrid(limit,NCells);
+      }
+    }
+
+    name2="y";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      Json::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setYandNyLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      Json::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setYandNyRightStretchedGrid(limit,NCells);
+      }
+    }
+
+    name2="z";
+    if(setValueFromJson(stretching1D, stretching,name2.c_str() ) ){
+      std::string  name3="left";
+      Json::Value stretchingLeft;
+      if(setValueFromJson(stretchingLeft, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingLeft,"NCells");
+        setDoubleFromJson(&limit, stretchingLeft, "limit");
+        grid->setZandNzLeftStretchedGrid(limit,NCells);
+      }
+      name3="right";
+      Json::Value stretchingRight;
+      if(setValueFromJson(stretchingRight, stretching1D,name3.c_str() ) ){
+        double limit;
+        int NCells;
+        setIntFromJson(&NCells,stretchingRight,"NCells");
+        setDoubleFromJson(&limit, stretchingRight, "limit");
+        grid->setZandNzRightStretchedGrid(limit,NCells);
+      }
+    }
+  }
+}
+void setMovingWindowFromJson(Json::Value  &document,GRID *grid){
+  std::string  name1="MovingWindow";
+  Json::Value movingWindow;
+  if(setValueFromJson( movingWindow, document, name1.c_str() ) ) {
+    std::string  name2;
+    double start=0;
+    name2= "start";
+    setDoubleFromJson( &start, movingWindow, name2.c_str() );
+    grid->setStartMovingWindow(start);
+
+    name2= "beta";
+    double beta;
+    if(setDoubleFromJson( &beta, movingWindow, name2.c_str() ) ){
+      grid->setBetaMovingWindow(beta);
+    }
+    name2= "frequency";
+    int frequency;
+    if(setIntFromJson( &frequency, movingWindow, name2.c_str() ) ){
+      grid->setFrequencyMovingWindow(frequency);
+    }
+  }
+
+}
+
 
 int getDimensionalityFromJson2(Json::Value &parent, int defaultDimensionality){
   int dim = defaultDimensionality;

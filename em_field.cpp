@@ -1454,7 +1454,7 @@ void EM_FIELD::addFieldsFromFile(std::string name){
   free(myx);
 }
 
-void EM_FIELD::move_window()
+void EM_FIELD::moveWindow()
 {
   int Nx, Ngy, Ngz;
   Nx = mygrid->Nloc[0];

@@ -73,14 +73,10 @@ struct mySpecialParameters{
 
 int main(int narg, char **args)
 {
-  rapidjson::Document document;
   Json::Value root;
-  parseJsonInputFile(document,"inputPiccante.json");
-  parseJsonInputFile2(root,"inputPiccante.json");
+  parseJsonInputFile(root,"inputPiccante.json");
+  int dim = getDimensionalityFromJson2(root, DEFAULT_DIMENSIONALITY);
 
-  int dim = getDimensionalityFromJson(document, DEFAULT_DIMENSIONALITY);
-  int dim2 = getDimensionalityFromJson2(root, DEFAULT_DIMENSIONALITY);
-  std::cout << "dim = " << dim << "   dim2 = " << dim2 << "\n";
   GRID grid(dim);
   EM_FIELD myfield;
   CURRENT current;
@@ -89,22 +85,21 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
+  setXrangeFromJson(root,&grid);
+  setYrangeFromJson(root,&grid);
+  setZrangeFromJson(root,&grid);
 
-  setXrangeFromJson(document,&grid);
-  setYrangeFromJson(document,&grid);
-  setZrangeFromJson(document,&grid);
+  setNCellsFromJson(root,&grid);
+  setNprocsFromJson(root,&grid);
 
-  setNCellsFromJson(document,&grid);
-  setNprocsFromJson(document,&grid);
-
-  setStretchedGridFromJson(document,&grid);
+  setStretchedGridFromJson(root,&grid);
 
   grid.setBoundaries(xOpen | yOpen | zPBC);
   grid.mpi_grid_initialize(&narg, args);
   grid.setCourantFactor(0.98);
-  setSimulationTimeFromJson(document,&grid);
+  setSimulationTimeFromJson(root,&grid);
 
-  setMovingWindowFromJson(document,&grid);
+  setMovingWindowFromJson(root,&grid);
 
 
   grid.setMasterProc(0);
@@ -114,7 +109,7 @@ int main(int narg, char **args)
 
   grid.finalize();
 
-  setDumpControlFromJson(document, &grid.dumpControl);
+  setDumpControlFromJson(root, &grid.dumpControl);
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
@@ -122,8 +117,8 @@ int main(int narg, char **args)
 int myIntVariable=0;
   double myDoubleVariable=0;
   bool isThereSpecial=false;
-  rapidjson::Value special;
-  if(isThereSpecial=setValueFromJson(special,document,"special")){
+  Json::Value special;
+  if(isThereSpecial=setValueFromJson(special,root,"special")){
     setIntFromJson( &myIntVariable, special, "variabile1");
     setDoubleFromJson( &myDoubleVariable, special, "variabile2");
    }

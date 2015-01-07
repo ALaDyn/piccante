@@ -137,7 +137,7 @@ public:
   void addPulse(laserPulse* pulse);
   void addFieldsFromFile(std::string name);
 
-  void move_window();
+  void moveWindow();
 
   double getEBenergy(double* EEnergy, double* BEnergy);
   void computeEnergyAndExtremes();

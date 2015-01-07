@@ -41,8 +41,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "structures.h"
 #include "em_field.h"
 #include "particle_species.h"
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
-#include "rapidjson/filestream.h"   // wrapper of C stream for prettywriter as output
+//#include "rapidjson/document.h"     // rapidjson's DOM-style API
+//#include "rapidjson/filestream.h"   // wrapper of C stream for prettywriter as output
 #include "json/json.h"
 
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
@@ -51,29 +51,27 @@ void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector
 void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
-void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile);
-int getDimensionalityFromJson(rapidjson::Document &document, int defaultDimensionality);
-void setXrangeFromJson(rapidjson::Document &document,GRID *grid);
-void setYrangeFromJson(rapidjson::Document &document,GRID *grid);
-void setZrangeFromJson(rapidjson::Document &document,GRID *grid);
+void parseJsonInputFile(Json::Value &root, std::string nomeFile);
+int getDimensionalityFromJson(Json::Value &document, int defaultDimensionality);
+void setXrangeFromJson(Json::Value &parent, GRID *grid);
+void setYrangeFromJson(Json::Value &parent,GRID *grid);
+void setZrangeFromJson(Json::Value &parent,GRID *grid);
 
-bool setIntFromJson(int *number, rapidjson::Value &document, const char* name);
-bool setDoubleFromJson(double *number, rapidjson::Value &document,const char* name);
-bool setBoolFromJson(bool *number, rapidjson::Value &document, const char* name);
-bool setValueFromJson(rapidjson::Value &jsonValue, rapidjson::Value &document, const char* name);
-void setNCellsFromJson(rapidjson::Document &document,GRID *grid);
-void setNprocsFromJson(rapidjson::Document &document,GRID *grid);
-void setSimulationTimeFromJson(rapidjson::Document &document,GRID *grid);
-void setDumpControlFromJson(rapidjson::Document &document, DUMP_CONTROL *myDumpControl);
-void setStretchedGridFromJson(rapidjson::Document &document,GRID *grid);
-void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid);
+bool setIntFromJson(int *number, Json::Value &parent, const char* name);
+bool setDoubleFromJson(double *number, Json::Value &parent,const char* name);
+bool setBoolFromJson(bool *number, Json::Value &parent, const char* name);
+bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name);
+void setNCellsFromJson(Json::Value &parent, GRID *grid);
+void setNprocsFromJson(Json::Value &document, GRID *grid);
+void setSimulationTimeFromJson(Json::Value  &document,GRID *grid);
+void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
+void setStretchedGridFromJson(Json::Value &document, GRID *grid);
+void setMovingWindowFromJson(Json::Value &document, GRID *grid);
 
-void parseJsonInputFile2(Json::Value &root, std::string nomeFile);
 bool setIntFromJson2(int *number, Json::Value &parent, const char* name);
 bool setDoubleFromJson2(double *number, Json::Value &parent,const char* name);
 
 bool setBoolFromJson2(bool *number, Json::Value &parent, const char* name);
-bool setValueFromJson2(Json::Value &child, Json::Value &parent, const char* name);
 int getDimensionalityFromJson2(Json::Value &parent, int defaultDimensionality);
 
 #endif // UTILITIES_H
