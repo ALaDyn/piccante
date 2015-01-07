@@ -115,14 +115,6 @@ int myIntVariable=0;
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
 
-  laserPulse pulse1;
-  pulse1.type = COS2_PLANE_WAVE;
-  pulse1.setPPolarization();
-  pulse1.setDurationFWHM(5.0);
-  pulse1.setPulseInitialPosition(-5.5);
-  pulse1.setNormalizedAmplitude(8.0);
-
-  myfield.addPulse(&pulse1);
 
   setLaserPulsesFromJson(root, &myfield);
   myfield.boundary_conditions();
@@ -219,8 +211,8 @@ grid.setDumpPath(DIRECTORY_DUMP);
     std::cout << "restartID = " << dumpID << "\n";
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
-  int Nstep = grid.getTotalNumberOfTimesteps();
-  while (grid.istep <= Nstep)
+
+  while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
 #ifdef NO_ALLOCATION
     manager.close();

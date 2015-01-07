@@ -277,10 +277,11 @@ void setMovingWindowFromJson(Json::Value  &document,GRID *grid){
 
 }
 
-void setLaserType(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc, int index){
+bool setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="type";
   std::string type;
-  if(setStringFromJson(&type,mylaser,name2.c_str())){
+  bool flag=false;
+  if(flag=setStringFromJson(&type,mylaser,name2.c_str())){
     if(type=="COS2_PLANE_WAVE"){
         pulse1->type = COS2_PLANE_WAVE;
     }
@@ -293,20 +294,17 @@ void setLaserType(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc,
     else if (type=="COS2_PLATEAU_PLANE_WAVE"){
       pulse1->type = COS2_PLATEAU_PLANE_WAVE;
     }
-    else if(amIMasterProc){
-          std::cout << "WARNING: badly defined laser type for pulse #" << index << std::endl;
-    }
+    else
+      flag=false;
   }
-  else{
-    if(amIMasterProc)
-      std::cout << "WARNING: badly defined laser type for pulse #" << index << std::endl;
-  }
+  return flag;
 }
 
-void setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc, int index){
+bool setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="polarization";
   std::string polarization;
-  if(setStringFromJson(&polarization,mylaser,name2.c_str())){
+  bool flag=false;
+  if(flag=setStringFromJson(&polarization,mylaser,name2.c_str())){
     if(polarization=="P"){
         pulse1->setPPolarization();
       }
@@ -316,52 +314,135 @@ void setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser, bool amIMas
     else if(polarization=="C"){
         pulse1->setCircularPolarization();
      }
-    else if(amIMasterProc){
-          std::cout << "WARNING: badly defined laser polarization for pulse #" << index << std::endl;
-    }
+    else
+      flag=false;
   }
-  else{
-    if(amIMasterProc)
-      std::cout << "laser polarization not defined for pulse #" << index << std::endl;
-  }
-
+  return flag;
 }
 
-void setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc, int index){
+bool setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="durationFWHM";
   double durationFWHM;
-  if(setDoubleFromJson(&durationFWHM,mylaser,name2.c_str())){
+  bool flag=false;
+  if(flag=setDoubleFromJson(&durationFWHM,mylaser,name2.c_str())){
   pulse1->setDurationFWHM(durationFWHM);
   }
-  else{
-    if(amIMasterProc)
-      std::cout << "WARNING: badly defined laser duration for pulse #" << index << std::endl;
-  }
-
+  return flag;
 }
 
-void setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc, int index){
+bool setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="initialPosition";
   double initialPosition;
-  if(setDoubleFromJson(&initialPosition,mylaser,name2.c_str())){
+  bool flag=false;
+  if(flag=setDoubleFromJson(&initialPosition,mylaser,name2.c_str())){
   pulse1->setPulseInitialPosition(initialPosition);
   }
-  else{
-    if(amIMasterProc)
-      std::cout << "WARNING: badly defined laser initialPosition for pulse #" << index << std::endl;
-  }
+  return flag;
 }
 
-void setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser, bool amIMasterProc, int index){
+bool setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="a";
   double amplitude;
-  if(setDoubleFromJson(&amplitude,mylaser,name2.c_str())){
+  bool flag=false;
+  if(flag=setDoubleFromJson(&amplitude,mylaser,name2.c_str())){
   pulse1->setNormalizedAmplitude(amplitude);
   }
-  else{
-    if(amIMasterProc)
-      std::cout << "WARNING: badly defined laser NormalizedAmplitude for pulse #" << index << std::endl;
+return flag;
+}
+
+bool setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
+  std::string name2="waist";
+  double waist;
+  bool flag=false;
+  if(flag=setDoubleFromJson(&waist,mylaser,name2.c_str())){
+  pulse1->setWaist(waist);
   }
+return flag;
+}
+bool setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser){
+  std::string name2="focusPosition";
+  double focusPosition;
+  bool flag=false;
+  if(flag=setDoubleFromJson(&focusPosition,mylaser,name2.c_str())){
+  pulse1->setFocusPosition(focusPosition);
+  }
+return flag;
+}
+bool setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
+  std::string name2="lambda";
+  double lambda;
+  bool flag=false;
+  if(flag=setDoubleFromJson(&lambda,mylaser,name2.c_str())){
+  pulse1->setLambda(lambda);
+  }
+return flag;
+}
+
+bool setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
+  std::string name2="rotation";
+  bool rotation;
+  bool flag=false;
+  if(flag=setBoolFromJson(&rotation,mylaser,name2.c_str())){
+
+  double angle=0, center=0;
+  name2="angle";
+  setDoubleFromJson(&angle,mylaser,name2.c_str());
+
+  name2="center";
+  setDoubleFromJson(&center,mylaser,name2.c_str());
+
+  pulse1->setRotationAngleAndCenter(2.0*M_PI*(angle / 360.0), center);
+  }
+return flag;
+}
+
+bool setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser){
+  std::string name2="riseTime";
+  double riseTime;
+  bool flag=false;
+  if(flag=setDoubleFromJson(&riseTime,mylaser,name2.c_str())){
+  pulse1->setRiseTime(riseTime);
+  }
+return flag;
+}
+
+struct laserPulseBoolFlags{
+
+  bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
+  laserPulseBoolFlags(){
+    type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime =false;
+  }
+};
+
+bool checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *pulse){
+  if(!flags.type){
+    return false;
+    }
+  switch (pulse->type){
+  case GAUSSIAN:
+      if(!(flags.a && flags.waist && flags.duration) ){
+        return false;
+      }
+      break;
+  case PLANE_WAVE:
+      if(!(flags.a) ){
+        return false;
+      }
+      break;
+  case COS2_PLANE_WAVE:
+      if(!(flags.a && flags.duration) ){
+        return false;
+      }
+      break;
+ case COS2_PLATEAU_PLANE_WAVE:
+      if(!(flags.a && flags.duration) ){
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
+  return true;
 }
 
 void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield){
@@ -369,7 +450,6 @@ void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield){
   Json::Value lasers;
   int myid;
   MPI_Comm_rank(MPI_COMM_WORLD,&myid);
-
   bool amIMasterProc = (myid==0);
 
   if(setValueFromJson( lasers, document, name1.c_str() ) ) {
@@ -377,24 +457,36 @@ void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield){
       std::string  name2;
 
       for(unsigned int index=0; index<lasers.size(); index++){
-        name2="enabled";
-        bool enabled=false;
         Json::Value myLaser = lasers[index];
 
+        name2="enabled";
+        bool enabled=false;
         setBoolFromJson(&enabled, myLaser, name2.c_str());
         if(enabled){
           laserPulse *pulse1=new(laserPulse);
 
-          setLaserType(pulse1, myLaser, amIMasterProc, index);
-          setLaserPolarization(pulse1, myLaser, amIMasterProc, index);
-          setLaserDurationFWHM(pulse1, myLaser, amIMasterProc, index);
-          setLaserInitialPosition(pulse1, myLaser, amIMasterProc, index);
-          setLaserAmplitude(pulse1, myLaser, amIMasterProc, index);
+          laserPulseBoolFlags flags;
 
-          emfield->addPulse(pulse1);
+          flags.type = setLaserType(pulse1, myLaser);
+          flags.pol = setLaserPolarization(pulse1, myLaser);
+          flags.duration = setLaserDurationFWHM(pulse1, myLaser);
+          flags.initialPosition = setLaserInitialPosition(pulse1, myLaser);
+          flags.a = setLaserAmplitude(pulse1, myLaser);
+          flags.waist = setLaserWaist(pulse1, myLaser);
+          flags.focusPosition = setLaserFocusPosition(pulse1, myLaser);
+          flags.rotation = setLaserRotation(pulse1, myLaser);
+          flags.lambda = setLaserLambda(pulse1, myLaser);
+          flags.riseTime = setLaserRiseTime(pulse1, myLaser);
+
+          if(checkLaserBoolFlags(flags, pulse1)){
+            emfield->addPulse(pulse1);
+          }
+          else if(amIMasterProc){
+            std::cout << "warning: laser #" << index << " is incorrectly defined\n";
+          }
+
+          delete pulse1;
         }
-
-
       }
     }
   }

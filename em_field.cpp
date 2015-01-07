@@ -980,7 +980,7 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
     printf("focus position     = %g\n", pulse->focus_position);
     printf("rotation           = %i\n", pulse->rotation);
     printf("rotation  angle    = %g\n", pulse->angle);
-    printf("rotation centre    = %i\n", pulse->rotation_center_along_x);
+    printf("rotation centre    = %g\n", pulse->rotation_center_along_x);
   }
 }
 

@@ -46,14 +46,15 @@
             "lambda": 1.0,
             "rotation": false,
             "angle": 10.0,
-            "center": 0
+            "center": 0,
+            "riseTime": 2
         },
         {
-            "enabled": false,
-            "type": "COS2_PLANE_WAVE",
+            "enabled": true,
+            "type": "COSS2_PLANE_WAVE",
             "polarization": "P",
             "durationFWHM": 5.0,
-            "initialPosition": -5.5,
+            "initialPosition": 5.5,
             "a": 8.0
         }
     ]
