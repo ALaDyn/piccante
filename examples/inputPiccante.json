@@ -1,5 +1,5 @@
 {
-    "dimensions": 2,
+    "dimensions": 1.1,
     "nProcY": 1,
     "nProcZ": 1,
     "xRange": [-20, 20],

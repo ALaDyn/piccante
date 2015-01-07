@@ -118,7 +118,7 @@ public:
   void setFrequencyMovingWindow(int frequency_mw);
   void setMasterProc(int idMasterProc);
   int getTotalNumberOfTimesteps();
-  void move_window();
+  void moveWindow();
   void printTStepEvery(int every);
   void initRNG(gsl_rng* rng, unsigned long int auxiliary_seed);
   void visualDiag();
@@ -215,6 +215,7 @@ double courantFactor;
   void printProcInformations();
   void checkProcNumber();
   void printGridProcessorInformation();
+  void printParametersInformations();
   void allocateRProcQuantities();
   void computeRProcNloc();
   void computeRProcNuniquePointsLoc();

@@ -47,7 +47,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "utilities.h"
 
 
-#define DEFAULT_DIMENSIONALITY 1
+#define DEFAULT_DIMENSIONALITY 21
 
 
 
@@ -74,8 +74,13 @@ struct mySpecialParameters{
 int main(int narg, char **args)
 {
   rapidjson::Document document;
+  Json::Value root;
   parseJsonInputFile(document,"inputPiccante.json");
+  parseJsonInputFile2(root,"inputPiccante.json");
+
   int dim = getDimensionalityFromJson(document, DEFAULT_DIMENSIONALITY);
+  int dim2 = getDimensionalityFromJson2(root, DEFAULT_DIMENSIONALITY);
+  std::cout << "dim = " << dim << "   dim2 = " << dim2 << "\n";
   GRID grid(dim);
   EM_FIELD myfield;
   CURRENT current;

@@ -21,7 +21,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "utilities.h"
 
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies){
-  _mygrid->move_window();
+  _mygrid->moveWindow();
   _myfield->move_window();
   for (std::vector<SPECIE*>::iterator spec_iterator = _myspecies.begin(); spec_iterator != _myspecies.end(); spec_iterator++){
     (*spec_iterator)->move_window();
@@ -103,37 +103,21 @@ void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std
 }
 
 void parseJsonInputFile(rapidjson::Document &document, std::string nomeFile){
-  //  FILE * pFile = fopen ("inputPiccante.json" , "r");
-  //  rapidjson::FileStream is(pFile);
-  //  rapidjson::Document document;
-  //  document.ParseStream<0>(is);
-  //  fclose(pFile);
+//    FILE * pFile = fopen ("inputPiccante.json" , "r");
+//    rapidjson::FileStream is(pFile);
+//    //rapidjson::Document document;
+//    document.ParseStream<0>(is);
+//    fclose(pFile);
 
-  //  FILE* fp = fopen("big.json", "rb"); // non-Windows use "r"
-  //  char readBuffer[65536];
-  //  FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-  //  Document d;
-  //  d.ParseStream(is);
-  //  fclose(fp);
-  //  std::ifstream inputFile("inputPiccante.json");
-  //  std::stringstream buffer;
-  //  buffer << inputFile.rdbuf();
-  //  rapidjson::StringStream s(buffer.str().c_str());
-  //  document.ParseStream(s);
-  //  inputFile.close();
-
-  //  int dim = DEFAULT_DIMENSIONALITY;
-  //  if(document.HasMember("dimensions")){
-  //    if(document["dimensions"].IsInt())
-  //      dim = document["dimensions"].GetInt()
-  //  }
   std::ifstream inputFile(nomeFile.c_str());
   std::stringstream buffer;
   buffer << inputFile.rdbuf();
   rapidjson::StringStream s(buffer.str().c_str());
-  document.ParseStream(s);
+  document.Parse(buffer.str().c_str());
   inputFile.close();
 }
+
+
 
 bool setIntFromJson(int *number, rapidjson::Value &document,const char* name){
   bool outFlag;
@@ -373,4 +357,45 @@ void setMovingWindowFromJson(rapidjson::Document &document,GRID *grid){
   }
 
 
+}
+
+
+void parseJsonInputFile2(Json::Value &root, std::string nomeFile){
+
+  std::ifstream inputFile(nomeFile.c_str());
+  std::stringstream buffer;
+  buffer << inputFile.rdbuf();
+  inputFile.close();
+   Json::Reader reader;
+   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
+
+   if(not parsedSuccess){
+     // Report failures and their locations
+     // in the document.
+     std::cout<<"Failed to parse JSON"<<std::endl
+         <<reader.getFormatedErrorMessages()
+         <<std::endl;
+     exit(1);
+   }
+   const Json::Value array = root["array"];
+}
+
+bool setIntFromJson2(int *number, Json::Value &parent, const char* name){
+  bool outFlag;
+  if(outFlag = ( !parent[name].isNull() ) ){
+    //if(outFlag=parent[name].IsInt())
+      *number = parent[name].asInt();
+  }
+  return outFlag;
+}
+
+int getDimensionalityFromJson2(Json::Value &parent, int defaultDimensionality){
+  int dim = defaultDimensionality;
+  const char* name="dimensions";
+  if(( !parent[name].isNull() )){
+    if( parent[name].type() == Json::intValue){
+      dim = parent[name].asInt();
+    }
+  }
+  return dim;
 }

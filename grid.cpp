@@ -230,7 +230,7 @@ void GRID::setFrequencyMovingWindow(int frequency_mw){
 int GRID::getTotalNumberOfTimesteps(){
   return totalNumberOfTimesteps;
 }
-void GRID::move_window(){
+void GRID::moveWindow(){
   int cell_num;
   double buff, move;
 
@@ -332,101 +332,6 @@ void GRID::initRNG(gsl_rng* rng, unsigned long int auxiliary_seed){
   delete[] seeds;
 }
 
-void GRID::visualDiag(){
-  int Nstep = totalNumberOfTimesteps;
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  const char* s_pbc = "PBC";
-  const char* s_open = "OPEN";
-  const char* s_pml = "PML";
-  const char* s_err = "ERRORE !";
-
-  const char* s_x, *s_y, *s_z;
-
-  switch (xBoundaryConditions){
-  case _PBC:
-    s_x = s_pbc;
-    break;
-
-  case _Open:
-    s_x = s_open;
-    break;
-
-  case _PML:
-    s_x = s_pml;
-    break;
-
-  default:
-    s_x = s_err;
-  }
-
-  switch (yBoundaryConditions){
-  case _PBC:
-    s_y = s_pbc;
-    break;
-
-  case _Open:
-    s_y = s_open;
-    break;
-
-  case _PML:
-    s_y = s_pml;
-    break;
-
-  default:
-    s_y = s_err;
-  }
-
-  switch (zBoundaryConditions){
-  case _PBC:
-    s_z = s_pbc;
-    break;
-
-  case _Open:
-    s_z = s_open;
-    break;
-
-  case _PML:
-    s_z = s_pml;
-    break;
-
-  default:
-    s_z = s_err;
-  }
-
-  if (myid == master_proc){
-    GRID::printLogo();
-    GRID::printProcInformations();
-    GRID::printGridProcessorInformation();
-    printf("==================== %19s ====================\n", "     PARAMETERS    ");
-    printf("dt               = %g\n", dt);
-    printf("dx               = %g\n", dr[0]);
-    printf("dy               = %g\n", dr[1]);
-    printf("dz               = %g\n", dr[2]);
-    printf("courant factor   = %g\n", courantFactor);
-    printf("SIMULATION TIME  = %g\n", totalTime);
-    printf("Nstep            = %i\n", Nstep);
-    printf("Boundaries       = ( %s , %s , %s )\n", s_x, s_y, s_z);
-    if (radiationFrictionFlag){
-      printf("RR enabled. Lambda0: %e \n", lambda0);
-    }
-    printf("==================== %19s ====================\n", " Restart  Settings ");
-    printf("Do Restart       = %i\n", dumpControl.doRestart);
-    printf("Do Dump          = %i\n", dumpControl.doDump);
-    printf("Restart From     = %i\n", dumpControl.restartFromDump);
-    printf("Dump Every       = %g\n", dumpControl.dumpEvery);
-    if(withMovingWindow){
-      printf("==================== %19s ====================\n", "   Moving Window   ");
-      printf("start            = %g\n", t_start_moving_mw);
-      printf("beta             = %g\n", beta_mw);
-      printf("frequency shifts = %i\n", frequency_mw_shifts);
-       }
-    else
-      printf("==================== %19s ====================\n", " NO Moving Window ");
-
-    printf("============= ---------------- ===============\n");
-  }
-}
 void GRID::setGridDeltar(){
   if (flagStretched){
     GRID::setGridDeltarStretched();
@@ -513,6 +418,102 @@ void GRID::setGridDeltarStretched(){
     break;
   }
 }
+
+void GRID::visualDiag(){
+  int Nstep = totalNumberOfTimesteps;
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  const char* s_pbc = "PBC";
+  const char* s_open = "OPEN";
+  const char* s_pml = "PML";
+  const char* s_err = "ERRORE !";
+
+  const char* s_x, *s_y, *s_z;
+
+  switch (xBoundaryConditions){
+  case _PBC:
+    s_x = s_pbc;
+    break;
+
+  case _Open:
+    s_x = s_open;
+    break;
+
+  case _PML:
+    s_x = s_pml;
+    break;
+
+  default:
+    s_x = s_err;
+  }
+
+  switch (yBoundaryConditions){
+  case _PBC:
+    s_y = s_pbc;
+    break;
+
+  case _Open:
+    s_y = s_open;
+    break;
+
+  case _PML:
+    s_y = s_pml;
+    break;
+
+  default:
+    s_y = s_err;
+  }
+
+  switch (zBoundaryConditions){
+  case _PBC:
+    s_z = s_pbc;
+    break;
+
+  case _Open:
+    s_z = s_open;
+    break;
+
+  case _PML:
+    s_z = s_pml;
+    break;
+
+  default:
+    s_z = s_err;
+  }
+
+  if (myid == master_proc){
+    GRID::printLogo();
+    GRID::printProcInformations();
+    GRID::printGridProcessorInformation();
+    printf("==================== %19s ====================\n", "     PARAMETERS    ");
+    printf("dt               = %g\n", dt);
+    printf("dx               = %g\n", dr[0]);
+    printf("dy               = %g\n", dr[1]);
+    printf("dz               = %g\n", dr[2]);
+    printf("courant factor   = %g\n", courantFactor);
+    printf("SIMULATION TIME  = %g\n", totalTime);
+    printf("Nstep            = %i\n", totalNumberOfTimesteps);
+    printf("Boundaries       = ( %s , %s , %s )\n", s_x, s_y, s_z);
+    if (radiationFrictionFlag){
+      printf("RR enabled. Lambda0: %e \n", lambda0);
+    }
+    printf("==================== %19s ====================\n", " Restart  Settings ");
+    printf("Do Restart       = %i\n", dumpControl.doRestart);
+    printf("Do Dump          = %i\n", dumpControl.doDump);
+    printf("Restart From     = %i\n", dumpControl.restartFromDump);
+    printf("Dump Every       = %g\n", dumpControl.dumpEvery);
+    if(withMovingWindow){
+      printf("==================== %19s ====================\n", "   Moving Window   ");
+      printf("start            = %g\n", t_start_moving_mw);
+      printf("beta             = %g\n", beta_mw);
+      printf("frequency shifts = %i\n", frequency_mw_shifts);
+       }
+    else
+      printf("==================== %19s ====================\n", " NO Moving Window ");
+
+    printf("============= ---------------- ===============\n");
+  }
+}
 void GRID::printLogo()
 {
   std::cout << common_logo;
@@ -542,47 +543,7 @@ void GRID::printProcInformations()
   }
 #endif
 }
-void GRID::checkProcNumber(){
-  rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
-  if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
-  {
-    printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocz=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
-    exit(18);
-  }
-  if (rnproc[0] < 1 || NGridNodes[0] < 1)
-  {
-    printf("BADLY defined rnprocx=%i  or  Nx=%i   !!!\n", rnproc[0], NGridNodes[0]);
-    exit(18);
-  }
-  if (rnproc[1] < 1)
-  {
-    printf("BADLY defined rnprocy=%i  or  Ny=%i   !!!\n", rnproc[1], NGridNodes[1]);
-    exit(18);
-  }
-  if (rnproc[2] < 1)
-  {
-    printf("BADLY defined rnprocz=%i  or  Nz=%i   !!!\n", rnproc[2], NGridNodes[2]);
-    exit(18);
-  }
 
-  if(rnproc[0]*6 > NGridNodes[0]){
-      std::cout << "Too many MPI tasks along x (" << rnproc[0] <<")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
-      exit(18);
-  }
-  if(dimensions >= 2){
-      if(rnproc[1]*6 > NGridNodes[1]){
-          std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
-          exit(18);
-      }
-  }
-  if(dimensions==3){
-      if(rnproc[2]*6 > NGridNodes[2]){
-          std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
-          exit(18);
-      }
-  }
-
-}
 void GRID::printGridProcessorInformation(){
 #ifdef _FLAG_DEBUG
   printf("==========         grid         ==========\n");
@@ -656,6 +617,47 @@ void GRID::printGridProcessorInformation(){
   else{
     printf("===================== %17s =====================\n", "NO Sretched Grid");
 
+  }
+
+}
+void GRID::checkProcNumber(){
+  rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
+  if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
+  {
+    printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocz=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
+    exit(18);
+  }
+  if (rnproc[0] < 1 || NGridNodes[0] < 1)
+  {
+    printf("BADLY defined rnprocx=%i  or  Nx=%i   !!!\n", rnproc[0], NGridNodes[0]);
+    exit(18);
+  }
+  if (rnproc[1] < 1)
+  {
+    printf("BADLY defined rnprocy=%i  or  Ny=%i   !!!\n", rnproc[1], NGridNodes[1]);
+    exit(18);
+  }
+  if (rnproc[2] < 1)
+  {
+    printf("BADLY defined rnprocz=%i  or  Nz=%i   !!!\n", rnproc[2], NGridNodes[2]);
+    exit(18);
+  }
+
+  if(rnproc[0]*6 > NGridNodes[0]){
+      std::cout << "Too many MPI tasks along x (" << rnproc[0] <<")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
+      exit(18);
+  }
+  if(dimensions >= 2){
+      if(rnproc[1]*6 > NGridNodes[1]){
+          std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
+          exit(18);
+      }
+  }
+  if(dimensions==3){
+      if(rnproc[2]*6 > NGridNodes[2]){
+          std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
+          exit(18);
+      }
   }
 
 }
