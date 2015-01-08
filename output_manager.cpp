@@ -173,8 +173,8 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   domain1->overrideFlag = true;
   myDomains.push_back(domain1);
 
-  fieldGroupSize = GROUP_SIZE;
-  particleGroupSize = GROUP_SIZE;
+  fieldGroupSize = FIELDS_GROUP_SIZE;
+  particleGroupSize = PHASE_SPACE_GROUP_SIZE;
   particleBufferSize = NPARTICLE_BUFFER_SIZE;
 }
 
@@ -1513,7 +1513,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifdef MPI_FILE_OUTPUT
+#ifdef FIELDS_USE_MPI_FILE_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
@@ -1532,7 +1532,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     MPI_File_close(&thefile);
   }
 #else
-#ifdef MULTIFILE_OUTPUT
+#ifdef FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
   if (shouldIWrite){
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
@@ -1545,7 +1545,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
   }
 #else
-#ifdef MULTI_FILE
+#ifdef FIELDS_USE_MULTI_FILE
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
     MPI_Comm_split(outputCommunicator, (myOutputID/fieldGroupSize), 0, &groupCommunicator);
@@ -2457,7 +2457,7 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   sprintf(nomefile, "%s", fileName.c_str());
 
   {
-#if defined(USE_MPI_FILE_WRITE_ALL)
+#if defined(PHASE_SPACE_USE_MPI_FILE_WRITE_ALL)
 
       MPI_File_open(MPI_COMM_WORLD, nomefile,
                    MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
@@ -2465,11 +2465,11 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     writeAllCPUParticlesValues(thefile, spec, maxNfloatLoc);
      MPI_File_close(&thefile);
 
-#elif defined(USE_OUTPUT_WRITING_GROUPS)
+#elif defined(PHASE_SPACE_USE_OUTPUT_WRITING_GROUPS)
 
     writeCPUParticlesValuesWritingGroups(nomefile,spec);
 
-#elif defined(USE_MULTIFILE_OUTPUT)
+#elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
 
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << mygrid->myid;
