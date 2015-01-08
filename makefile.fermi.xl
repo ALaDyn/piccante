@@ -1,7 +1,7 @@
 COMPILER = mpixlcxx
 EXE = piccante
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o  utilities.o  jsoncpp.o
+OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o  utilities.o  jsoncpp.o jsonparser.o
 
 OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
@@ -57,6 +57,8 @@ utilities.o: utilities.cpp
 jsoncpp.o: jsoncpp.cpp 
 	$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC)   $(OPT) -c jsoncpp.cpp
 
+jsonparser.o: jsonparser.cpp
+		$(COMPILER) $(OPT) -c jsonparser.cpp
 clean :
 				rm -f $(OBJ) *~
 
