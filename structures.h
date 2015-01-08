@@ -62,6 +62,7 @@ typedef double(*distrib_function)(double x, double y, double z, PLASMAparams pli
 
 class PLASMA
 {
+
 public:
   PLASMAparams params;
   distrib_function density_function;
@@ -87,7 +88,15 @@ public:
   void setYRangeBox(double ymin, double ymax);
   void setZRangeBox(double zmin, double zmax);
   ~PLASMA();
+
+  static const int maxdF = 15;
+  static const std::string dFNames[];
+  static const distrib_function dFPoint[];
+
+  static bool isGrating(int dfIndex);
+
 };
+
 
 //Pre-defined density functions
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A);
@@ -114,6 +123,7 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
 
 double square_func(double x);
 double left_square_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
 
 
 //************** LASER PULSE TYPES *******

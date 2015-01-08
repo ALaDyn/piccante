@@ -168,6 +168,7 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   amIInit = false;
 
   isThereDiag = false;
+  isThereEMProbe =false;
 
   outDomain *domain1 = new outDomain;
   domain1->overrideFlag = true;

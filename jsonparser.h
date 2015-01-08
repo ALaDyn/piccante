@@ -33,6 +33,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
 #include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
@@ -62,4 +63,5 @@ void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
 void setStretchedGridFromJson(Json::Value &document, GRID *grid);
 void setMovingWindowFromJson(Json::Value &document, GRID *grid);
 void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield);
+void setPlasmasFromJson(Json::Value &document, std::map<std::string, PLASMA*> &map);
 #endif // JSONPARSER_H

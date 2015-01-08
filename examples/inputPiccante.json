@@ -28,7 +28,50 @@
         "dumpEvery": 2.0
     },
     "special":{"variabile1": 32,"variabile2": 32.5},
-    "plasma":[{"type": "box"},{"type": "box"}],
+    "Plasma":[
+        {
+            "name": "bulk",
+            "densityFunction": "box",
+            "XRangeBox" : [-10, 10],
+            "YRangeBox" : [-10, 10],
+            "ZRangeBox" : [-10, 10],
+            "DensityCoefficient" : 1.0,
+            "DensityLambda" : 1.0,
+            "RampLength" : 0.2,
+            "RampMinDensity" : 0.001,
+            "LeftRampLength" : 0.0,
+            "RightRampLength" : 0.0,
+            "ScaleLength" : 0.0,
+            "LeftScaleLength" : 0.0,
+            "RightScaleLength" : 0.0,
+            "LeftRampMinDensity" : 0.0,
+            "RightRampMinDensity" : 0.0,
+            "GratingDepth" : 0.0,
+            "GratingPeriod" : 0.0,
+            "GratingPhase" : 0.0
+        },
+        {
+            "name": "grat",
+            "densityFunction": "left_grating",
+            "XRangeBox" : [-10, 10],
+            "YRangeBox" : [-10, 10],
+            "ZRangeBox" : [-10, 10],
+            "DensityCoefficient" : 1.0,
+            "DensityLambda" : 1.0,
+            "RampLength" : 0.2,
+            "RampMinDensity" : 0.001,
+            "LeftRampLength" : 0.0,
+            "RightRampLength" : 0.0,
+            "ScaleLength" : 0.0,
+            "LeftScaleLength" : 0.0,
+            "RightScaleLength" : 0.0,
+            "LeftRampMinDensity" : 0.0,
+            "RightRampMinDensity" : 0.0,
+            "GratingDepth" : 1.0,
+            "GratingPeriod" : 1.0,
+            "GratingPhase" : 0.732
+        }
+    ],
     "species":[
         {"name": "ele1", "plasma": 0},
         {"name": "ele2", "plasma": 1}

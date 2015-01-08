@@ -35,6 +35,49 @@ DA FARE:
 
 
 //*************************PLASMA******************************
+
+const std::string PLASMA::dFNames[] = {
+    "box",
+    "left_linear_ramp",
+    "right_linear_ramp",
+    "left_right_linear_ramp",
+    "left_fixed_exp_ramp",
+    "right_fixed_exp_ramp",
+    "left_right_fixed_exp_ramp",
+    "left_free_exp_ramp",
+    "right_free_exp_ramp",
+    "left_right_free_exp_ramp",
+    "left soft ramp",
+    "rough_box",
+    "box_minus_box",
+    "left_grating",
+    "left_square_grating"
+};
+const distrib_function PLASMA::dFPoint[]= {
+    box,
+    left_linear_ramp,
+    right_linear_ramp,
+    left_right_linear_ramp,
+    left_fixed_exp_ramp,
+    right_fixed_exp_ramp,
+    left_right_fixed_exp_ramp,
+    left_free_exp_ramp,
+    right_free_exp_ramp,
+    left_right_free_exp_ramp,
+    left_soft_ramp,
+    rough_box,
+    box_minus_box,
+    left_grating,
+    left_square_grating
+};
+
+bool PLASMA::isGrating(int dfIndex){
+    if(dfIndex==13 || dfIndex==14)
+        return true;
+    else
+        return false;
+}
+
 PLASMA::PLASMA(){
   params.rminbox[0] = params.rminbox[1] = params.rminbox[2] = 0.0;
   params.rmaxbox[0] = params.rmaxbox[1] = params.rmaxbox[2] = 0.0;

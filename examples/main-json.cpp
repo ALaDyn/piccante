@@ -36,6 +36,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include <cstdarg>
 #include <vector>
+#include <map>
 
 #include "commons.h"
 #include "grid.h"
@@ -122,6 +123,12 @@ int myIntVariable=0;
   //*******************************************END FIELD DEFINITION***********************************************************
 
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
+
+  std::map<std::string, PLASMA*> plasmas;
+  setPlasmasFromJson(root, plasmas);
+
+  std::cout <<((double*)plasmas["grat"]->params.additional_params)[1] << std::endl;
+
   PLASMA plasma1;
   plasma1.density_function = box;
   plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
