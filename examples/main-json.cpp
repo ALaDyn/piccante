@@ -55,8 +55,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
-//#include "rapidjson/prettywriter.h" // for stringify JSON
-//#include "rapidjson/filestream.h"   // wrapper of C stream for prettywriter as output
 
 
 int main(int narg, char **args)
@@ -125,77 +123,64 @@ int myIntVariable=0;
 
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
   PLASMA plasma1;
-  plasma1.density_function = left_soft_ramp;
-  plasma1.setXRangeBox(0.0, 1.5);
-  plasma1.setYRangeBox(grid.rmin[1], grid.rmax[1]);
-  plasma1.setZRangeBox(grid.rmin[2], grid.rmax[2]);
-  plasma1.setRampLength(0.5);
-  plasma1.setDensityCoefficient(80);
-  plasma1.setRampMinDensity(0.0);
-
-
-  PLASMA plasma2;
-  plasma2.density_function = box;
-  plasma2.setXRangeBox(1.5, 1.505);
-  plasma2.setYRangeBox(grid.rmin[1], grid.rmax[1]);
-  plasma2.setZRangeBox(grid.rmin[2], grid.rmax[2]);
-  plasma2.setRampLength(0.5);
-  plasma2.setDensityCoefficient(10);
-  plasma2.setRampMinDensity(0.0);
-
+  plasma1.density_function = box;
+  plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
+  plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);
+  plasma1.setRampLength(0.2);
+  plasma1.setDensityCoefficient(1.0);
+  plasma1.setRampMinDensity(0.001);
 
   SPECIE  electrons1(&grid);
   electrons1.plasma = plasma1;
-  electrons1.setParticlesPerCellXYZ(300, 1, 1);
+  electrons1.setParticlesPerCellXYZ(3, 3, 3);
   electrons1.setName("ELE1");
   electrons1.type = ELECTRON;
   electrons1.creation();
   species.push_back(&electrons1);
 
 
-  SPECIE ions1(&grid);
-  ions1.plasma = plasma1;
-  ions1.setParticlesPerCellXYZ(100, 1, 1);
-  ions1.setName("ION1");
-  ions1.type = ION;
-  ions1.Z = 6.0;
-  ions1.A = 12.0;
-  ions1.creation();
-  species.push_back(&ions1);
+  SPECIE electrons2(&grid);
+  electrons2.plasma = plasma1;
+  electrons2.setParticlesPerCellXYZ(3, 3, 3);
+  electrons2.setName("ELE2");
+  electrons2.type = ELECTRON;
+  electrons2.creation();
+  species.push_back(&electrons2);
 
 
   tempDistrib distribution;
   distribution.setMaxwell(1.0e-5);
 
-  electrons1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
-  ions1.add_momenta(rng, 0.0, 0.0, 0.0, distribution);
+  electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
+  electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();
   }
-
   //*******************************************END SPECIES DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
-
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  manager.addEFieldFrom(0.0, 2.0);
-  manager.addBFieldFrom(0.0, 2.0);
+  double startOutputA=0.2, freqOutputA=1.0;
+  double startOutputB=0.2, freqOutputB=1.0;
 
-  manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
-  manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
+  manager.addDiagFrom(startOutputB, freqOutputB);
 
-  manager.addCurrentFrom(0.0, 5.0);
+  manager.addEFieldFrom(startOutputA, freqOutputA);
+  manager.addBFieldFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-  manager.addSpeciesPhaseSpaceFrom(ions1.name, 0.0, 5.0);
+  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
 
-  manager.addDiagFrom(0.0, 1.0);
+  manager.addCurrentFrom(startOutputA, freqOutputA);
+
+  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
+  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
+
 
   manager.initialize(DIRECTORY_OUTPUT);
-
-  //*******************************************END DIAG DEFINITION**************************************************
+//*******************************************END DIAG DEFINITION**************************************************
 grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
