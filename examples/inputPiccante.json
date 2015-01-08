@@ -7,7 +7,7 @@
     "zRange": [-20, 20],
     "NCells": [5000, 100, 20],
     "simulationTime": 15,
-
+    "boundaries": ["periodic", "periodic","periodic"],
     "NO_StretchedGrid":{
         "x":{"left": { "limit": -10.0, "NCells": 1000 },
             "right": { "limit":  10.0, "NCells": 1000 } },

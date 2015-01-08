@@ -75,20 +75,16 @@ int main(int narg, char **args)
   setXrangeFromJson(root,&grid);
   setYrangeFromJson(root,&grid);
   setZrangeFromJson(root,&grid);
-
   setNCellsFromJson(root,&grid);
   setNprocsFromJson(root,&grid);
-
   setStretchedGridFromJson(root,&grid);
+  setBoundaryConditionsFromJson(root, &grid);
 
-  grid.setBoundaries(xOpen | yOpen | zPBC);
   grid.mpi_grid_initialize(&narg, args);
+
   grid.setCourantFactor(0.98);
   setSimulationTimeFromJson(root,&grid);
-
   setMovingWindowFromJson(root,&grid);
-
-
   grid.setMasterProc(0);
 
   srand(time(NULL));

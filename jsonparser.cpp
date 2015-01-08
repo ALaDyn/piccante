@@ -27,15 +27,15 @@ void parseJsonInputFile(Json::Value &root, std::string nomeFile){
   std::stringstream buffer;
   buffer << inputFile.rdbuf();
   inputFile.close();
-   Json::Reader reader;
-   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
+  Json::Reader reader;
+  bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
-   if(not parsedSuccess){
-     std::cout<<"Failed to parse JSON"<<std::endl
-         <<reader.getFormatedErrorMessages()
-         <<std::endl;
-     exit(1);
-   }
+  if(not parsedSuccess){
+    std::cout<<"Failed to parse JSON"<<std::endl
+            <<reader.getFormatedErrorMessages()
+           <<std::endl;
+    exit(1);
+  }
 }
 
 
@@ -88,9 +88,9 @@ bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name)
 int getDimensionalityFromJson(Json::Value &document, int defaultDimensionality){
   int dim = defaultDimensionality;
   const char* name="dimensions";
-  if(setIntFromJson(&dim, document, name))
-  std::cout << "dimensions not set in JSON input file!\n";
-return dim;
+  if(!setIntFromJson(&dim, document, name))
+    std::cout << "dimensions not set in JSON input file!\n";
+  return dim;
 }
 void setXrangeFromJson(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
@@ -153,6 +153,48 @@ void setSimulationTimeFromJson(Json::Value &document,GRID *grid){
   double simulationTime;
   setDoubleFromJson(&simulationTime,document,"simulationTime");
   grid->setSimulationTime(simulationTime);
+}
+
+void setBoundaryConditionsFromJson(Json::Value &parent,GRID *grid){
+  std::string  name1="restart";
+  std::string  xCondition, yCondition, zCondition;
+  int xFlag, yFlag, zFlag;
+  xFlag = xPBC;
+  yFlag = yPBC;
+  zFlag = zPBC;
+
+  Json::Value boundaries;
+  int boundariesFlag;
+  if(setValueFromJson(boundaries,parent,name1.c_str())){
+    if(boundaries.size()==3){
+      xCondition = boundaries[0].asString();
+      yCondition = boundaries[1].asString();
+      zCondition = boundaries[2].asString();
+      if(! xCondition.compare("periodic"))
+        xFlag = xPBC;
+      else if(! xCondition.compare("open"))
+        xFlag = xOpen;
+      else if(! xCondition.compare("pml"))
+        xFlag = xPML;
+
+      if(! yCondition.compare("periodic"))
+        yFlag = yPBC;
+      else if(! yCondition.compare("open"))
+        yFlag = yOpen;
+      else if(! yCondition.compare("pml"))
+        yFlag = yPML;
+
+      if(! zCondition.compare("periodic"))
+        zFlag = zPBC;
+      else if(! zCondition.compare("open"))
+        zFlag = zOpen;
+      else if(! zCondition.compare("pml"))
+        zFlag = zPML;
+
+    }
+  }
+  boundariesFlag = xFlag | yFlag | zFlag;
+  grid->setBoundaries(boundariesFlag);
 }
 
 void setDumpControlFromJson(Json::Value &parent, DUMP_CONTROL *myDumpControl){
@@ -283,13 +325,13 @@ bool setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
   bool flag=false;
   if(flag=setStringFromJson(&type,mylaser,name2.c_str())){
     if(type=="COS2_PLANE_WAVE"){
-        pulse1->type = COS2_PLANE_WAVE;
+      pulse1->type = COS2_PLANE_WAVE;
     }
     else if (type=="GAUSSIAN"){
-        pulse1->type = GAUSSIAN;
+      pulse1->type = GAUSSIAN;
     }
     else if (type=="PLANE_WAVE"){
-        pulse1->type = PLANE_WAVE;
+      pulse1->type = PLANE_WAVE;
     }
     else if (type=="COS2_PLATEAU_PLANE_WAVE"){
       pulse1->type = COS2_PLATEAU_PLANE_WAVE;
@@ -306,14 +348,14 @@ bool setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser){
   bool flag=false;
   if(flag=setStringFromJson(&polarization,mylaser,name2.c_str())){
     if(polarization=="P"){
-        pulse1->setPPolarization();
-      }
+      pulse1->setPPolarization();
+    }
     else if( polarization=="S"){
-        pulse1->setSPolarization();
+      pulse1->setSPolarization();
     }
     else if(polarization=="C"){
-        pulse1->setCircularPolarization();
-     }
+      pulse1->setCircularPolarization();
+    }
     else
       flag=false;
   }
@@ -325,7 +367,7 @@ bool setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser){
   double durationFWHM;
   bool flag=false;
   if(flag=setDoubleFromJson(&durationFWHM,mylaser,name2.c_str())){
-  pulse1->setDurationFWHM(durationFWHM);
+    pulse1->setDurationFWHM(durationFWHM);
   }
   return flag;
 }
@@ -335,7 +377,7 @@ bool setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser){
   double initialPosition;
   bool flag=false;
   if(flag=setDoubleFromJson(&initialPosition,mylaser,name2.c_str())){
-  pulse1->setPulseInitialPosition(initialPosition);
+    pulse1->setPulseInitialPosition(initialPosition);
   }
   return flag;
 }
@@ -345,9 +387,9 @@ bool setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
   double amplitude;
   bool flag=false;
   if(flag=setDoubleFromJson(&amplitude,mylaser,name2.c_str())){
-  pulse1->setNormalizedAmplitude(amplitude);
+    pulse1->setNormalizedAmplitude(amplitude);
   }
-return flag;
+  return flag;
 }
 
 bool setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
@@ -355,27 +397,27 @@ bool setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
   double waist;
   bool flag=false;
   if(flag=setDoubleFromJson(&waist,mylaser,name2.c_str())){
-  pulse1->setWaist(waist);
+    pulse1->setWaist(waist);
   }
-return flag;
+  return flag;
 }
 bool setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="focusPosition";
   double focusPosition;
   bool flag=false;
   if(flag=setDoubleFromJson(&focusPosition,mylaser,name2.c_str())){
-  pulse1->setFocusPosition(focusPosition);
+    pulse1->setFocusPosition(focusPosition);
   }
-return flag;
+  return flag;
 }
 bool setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
   std::string name2="lambda";
   double lambda;
   bool flag=false;
   if(flag=setDoubleFromJson(&lambda,mylaser,name2.c_str())){
-  pulse1->setLambda(lambda);
+    pulse1->setLambda(lambda);
   }
-return flag;
+  return flag;
 }
 
 bool setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
@@ -384,16 +426,16 @@ bool setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
   bool flag=false;
   if(flag=setBoolFromJson(&rotation,mylaser,name2.c_str())){
 
-  double angle=0, center=0;
-  name2="angle";
-  setDoubleFromJson(&angle,mylaser,name2.c_str());
+    double angle=0, center=0;
+    name2="angle";
+    setDoubleFromJson(&angle,mylaser,name2.c_str());
 
-  name2="center";
-  setDoubleFromJson(&center,mylaser,name2.c_str());
+    name2="center";
+    setDoubleFromJson(&center,mylaser,name2.c_str());
 
-  pulse1->setRotationAngleAndCenter(2.0*M_PI*(angle / 360.0), center);
+    pulse1->setRotationAngleAndCenter(2.0*M_PI*(angle / 360.0), center);
   }
-return flag;
+  return flag;
 }
 
 bool setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser){
@@ -401,9 +443,9 @@ bool setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser){
   double riseTime;
   bool flag=false;
   if(flag=setDoubleFromJson(&riseTime,mylaser,name2.c_str())){
-  pulse1->setRiseTime(riseTime);
+    pulse1->setRiseTime(riseTime);
   }
-return flag;
+  return flag;
 }
 
 struct laserPulseBoolFlags{
@@ -417,24 +459,24 @@ struct laserPulseBoolFlags{
 bool checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *pulse){
   if(!flags.type){
     return false;
-    }
+  }
   switch (pulse->type){
-  case GAUSSIAN:
+    case GAUSSIAN:
       if(!(flags.a && flags.waist && flags.duration) ){
         return false;
       }
       break;
-  case PLANE_WAVE:
+    case PLANE_WAVE:
       if(!(flags.a) ){
         return false;
       }
       break;
-  case COS2_PLANE_WAVE:
+    case COS2_PLANE_WAVE:
       if(!(flags.a && flags.duration) ){
         return false;
       }
       break;
- case COS2_PLATEAU_PLANE_WAVE:
+    case COS2_PLATEAU_PLANE_WAVE:
       if(!(flags.a && flags.duration) ){
         return false;
       }
@@ -493,142 +535,121 @@ void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield){
 }
 
 int findPlasmaFunction(std::string plasmaFunction){
-    for (int i = 0; i < PLASMA::maxdF; i++){
-        if (!plasmaFunction.compare(PLASMA::dFNames[i]))
-            return i;
-    }
-    return -1;
+  for (int i = 0; i < PLASMA::maxdF; i++){
+    if (!plasmaFunction.compare(PLASMA::dFNames[i]))
+      return i;
+  }
+  return -1;
 }
 
 void setPlasmasFromJson(Json::Value &document, std::map<std::string, PLASMA*> &map){
-    std::string  name1="Plasma";
-    Json::Value plasmas;
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD,&myid);
-    bool amIMasterProc = (myid==0);
+  std::string  name1="Plasma";
+  Json::Value plasmas;
+  int myid;
+  MPI_Comm_rank(MPI_COMM_WORLD,&myid);
+  bool amIMasterProc = (myid==0);
 
 
-    if(setValueFromJson( plasmas, document, name1.c_str() ) && plasmas.isArray()){
-        for(unsigned int index=0; index<plasmas.size(); index++){
-            Json::Value myPlasma = plasmas[index];
+  if(setValueFromJson( plasmas, document, name1.c_str() ) && plasmas.isArray()){
+    for(unsigned int index=0; index<plasmas.size(); index++){
+      Json::Value myPlasma = plasmas[index];
 
-            std::string plasmaName;
-            setStringFromJson(&plasmaName,myPlasma,"name");
+      std::string plasmaName;
+      setStringFromJson(&plasmaName,myPlasma,"name");
 
-            if(map.find(plasmaName)!=map.end()&&amIMasterProc){
-                std::cout << "Warning! Plasma " << plasmaName << " is defined multiple times!" << std::endl;
-            }
-
-
-
-            std::string plasmaFunction;
-            bool isPlasmaFunctionSet=false;
-
-            int plasmaFunctionIndex;
-            if(setStringFromJson(&plasmaFunction, myPlasma, "densityFunction")){
-                plasmaFunctionIndex = findPlasmaFunction(plasmaFunction);
-                std::cout << plasmaFunctionIndex << " " << plasmaFunction <<std::endl;
-                if(plasmaFunctionIndex >= 0)
-                   isPlasmaFunctionSet=true;
-            }
-            if(isPlasmaFunctionSet){
-                map[plasmaName] = new PLASMA();
-                map[plasmaName]->density_function = PLASMA::dFPoint[plasmaFunctionIndex];
-
-                double tdouble, t2double;
-                Json::Value range;
-
-                if(setValueFromJson(range, myPlasma, "XRangeBox") && (range.size() == 2)){
-                    map[plasmaName]->setXRangeBox(range[0].asDouble(), range[1].asDouble());
-                }
-
-                if(setValueFromJson(range, myPlasma, "YRangeBox") && (range.size() == 2)){
-                    map[plasmaName]->setYRangeBox(range[0].asDouble(), range[1].asDouble());
-                }
-
-                if(setValueFromJson(range, myPlasma, "ZRangeBox") && (range.size() == 2)){
-                    map[plasmaName]->setZRangeBox(range[0].asDouble(), range[1].asDouble());
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "DensityLambda")){
-                    if(setDoubleFromJson(&t2double, myPlasma, "DensityCoefficient")){
-                        map[plasmaName]->setDensityCoefficient(t2double,tdouble);
-                    }
-                }
-                else{
-
-                    if(setDoubleFromJson(&tdouble, myPlasma, "DensityCoefficient")){
-                        map[plasmaName]->setDensityCoefficient(tdouble);
-                    }
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "RampLength")){
-                    map[plasmaName]->setRampLength(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "RampMinDensity")){
-                    map[plasmaName]->setRampMinDensity(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "LeftRampLength")){
-                    map[plasmaName]->setLeftRampLength(tdouble);
-                }
+      if(map.find(plasmaName)!=map.end()&&amIMasterProc){
+        std::cout << "Warning! Plasma " << plasmaName << " is defined multiple times!" << std::endl;
+      }
 
 
-                if(setDoubleFromJson(&tdouble, myPlasma, "RightRampLength")){
-                    map[plasmaName]->setRightRampLength(tdouble);
-                }
+
+      std::string plasmaFunction;
+      bool isPlasmaFunctionSet=false;
+
+      int plasmaFunctionIndex;
+      if(setStringFromJson(&plasmaFunction, myPlasma, "densityFunction")){
+        plasmaFunctionIndex = findPlasmaFunction(plasmaFunction);
+        std::cout << plasmaFunctionIndex << " " << plasmaFunction <<std::endl;
+        if(plasmaFunctionIndex >= 0)
+          isPlasmaFunctionSet=true;
+      }
+      if(isPlasmaFunctionSet){
+        map[plasmaName] = new PLASMA();
+        map[plasmaName]->density_function = PLASMA::dFPoint[plasmaFunctionIndex];
+
+        double tdouble, t2double;
+        Json::Value range;
+
+        if(setValueFromJson(range, myPlasma, "XRangeBox") && (range.size() == 2))
+          map[plasmaName]->setXRangeBox(range[0].asDouble(), range[1].asDouble());
+
+        if(setValueFromJson(range, myPlasma, "YRangeBox") && (range.size() == 2))
+          map[plasmaName]->setYRangeBox(range[0].asDouble(), range[1].asDouble());
+
+        if(setValueFromJson(range, myPlasma, "ZRangeBox") && (range.size() == 2))
+          map[plasmaName]->setZRangeBox(range[0].asDouble(), range[1].asDouble());
 
 
-                if(setDoubleFromJson(&tdouble, myPlasma, "ScaleLength")){
-                    map[plasmaName]->setScaleLength(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "LeftScaleLength")){
-                    map[plasmaName]->setLeftScaleLength(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "RightScaleLength")){
-                    map[plasmaName]->setRightScaleLength(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "LeftRampMinDensity")){
-                    map[plasmaName]->setLeftRampMinDensity(tdouble);
-                }
-
-                if(setDoubleFromJson(&tdouble, myPlasma, "RightRampMinDensity")){
-                    map[plasmaName]->setRightRampMinDensity(tdouble);
-                }
-
-
-                if(PLASMA::isGrating(plasmaFunctionIndex)){
-                    double g_depth = 0;
-                    double g_period = 1.0;
-                    double g_phase = 0.0;
-
-                    double* additionalParams = new double[3];
-
-                    setDoubleFromJson(&g_depth, myPlasma, "GratingDepth");
-                    setDoubleFromJson(&g_period, myPlasma, "GratingPeriod");
-                    setDoubleFromJson(&g_phase, myPlasma, "GratingPhase");
-
-                    additionalParams[0] = g_depth;
-                    additionalParams[1] = g_period;
-                    additionalParams[2] = g_phase;
-
-
-                     map[plasmaName]->setAdditionalParams(additionalParams);
-                }
-
-
-            }
-            else{
-                if(amIMasterProc)
-                     std::cout << "Warning! Plasma " << plasmaName <<
-                                  " has no valid density function. It will be ignored." << std::endl;
-            }
-
+        if(setDoubleFromJson(&tdouble, myPlasma, "DensityLambda")){
+          if(setDoubleFromJson(&t2double, myPlasma, "DensityCoefficient"))
+            map[plasmaName]->setDensityCoefficient(t2double,tdouble);
         }
+        else{
+          if(setDoubleFromJson(&tdouble, myPlasma, "DensityCoefficient"))
+            map[plasmaName]->setDensityCoefficient(tdouble);
+        }
+        if(setDoubleFromJson(&tdouble, myPlasma, "RampLength"))
+          map[plasmaName]->setRampLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "RampMinDensity"))
+          map[plasmaName]->setRampMinDensity(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "LeftRampLength"))
+          map[plasmaName]->setLeftRampLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "RightRampLength"))
+          map[plasmaName]->setRightRampLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "ScaleLength"))
+          map[plasmaName]->setScaleLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "LeftScaleLength"))
+          map[plasmaName]->setLeftScaleLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "RightScaleLength"))
+          map[plasmaName]->setRightScaleLength(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "LeftRampMinDensity"))
+          map[plasmaName]->setLeftRampMinDensity(tdouble);
+
+        if(setDoubleFromJson(&tdouble, myPlasma, "RightRampMinDensity"))
+          map[plasmaName]->setRightRampMinDensity(tdouble);
+
+        if(PLASMA::isGrating(plasmaFunctionIndex)){
+          double g_depth = 0;
+          double g_period = 1.0;
+          double g_phase = 0.0;
+
+          double* additionalParams = new double[3];
+
+          setDoubleFromJson(&g_depth, myPlasma, "GratingDepth");
+          setDoubleFromJson(&g_period, myPlasma, "GratingPeriod");
+          setDoubleFromJson(&g_phase, myPlasma, "GratingPhase");
+
+          additionalParams[0] = g_depth;
+          additionalParams[1] = g_period;
+          additionalParams[2] = g_phase;
+
+          map[plasmaName]->setAdditionalParams(additionalParams);
+        }
+      }
+      else{
+        if(amIMasterProc)
+          std::cout << "Warning! Plasma " << plasmaName <<
+                       " has no valid density function. It will be ignored." << std::endl;
+      }
+
     }
+  }
 }
 

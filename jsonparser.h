@@ -59,6 +59,7 @@ bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name)
 void setNCellsFromJson(Json::Value &parent, GRID *grid);
 void setNprocsFromJson(Json::Value &document, GRID *grid);
 void setSimulationTimeFromJson(Json::Value  &document,GRID *grid);
+void setBoundaryConditionsFromJson(Json::Value &parent,GRID *grid);
 void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
 void setStretchedGridFromJson(Json::Value &document, GRID *grid);
 void setMovingWindowFromJson(Json::Value &document, GRID *grid);
