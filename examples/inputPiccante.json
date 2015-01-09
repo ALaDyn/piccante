@@ -1,4 +1,5 @@
 {
+    "VERSION": 1,
     "dimensions": 2,
     "nProcY": 1,
     "nProcZ": 1,
@@ -34,47 +35,50 @@
             "densityFunction": "box",
             "XRangeBox" : [-10, 10],
             "YRangeBox" : [-10, 10],
-            "ZRangeBox" : [-10, 10],
+            "ZRangeBox" : [-100, 100],
             "DensityCoefficient" : 1.0,
             "DensityLambda" : 1.0,
-            "RampLength" : 0.2,
-            "RampMinDensity" : 0.001,
-            "LeftRampLength" : 0.0,
-            "RightRampLength" : 0.0,
-            "ScaleLength" : 0.0,
-            "LeftScaleLength" : 0.0,
-            "RightScaleLength" : 0.0,
-            "LeftRampMinDensity" : 0.0,
-            "RightRampMinDensity" : 0.0,
-            "GratingDepth" : 0.0,
-            "GratingPeriod" : 0.0,
-            "GratingPhase" : 0.0
-        },
-        {
-            "name": "grat",
-            "densityFunction": "left_grating",
-            "XRangeBox" : [-10, 10],
-            "YRangeBox" : [-10, 10],
-            "ZRangeBox" : [-10, 10],
-            "DensityCoefficient" : 1.0,
-            "DensityLambda" : 1.0,
-            "RampLength" : 0.2,
-            "RampMinDensity" : 0.001,
-            "LeftRampLength" : 0.0,
-            "RightRampLength" : 0.0,
-            "ScaleLength" : 0.0,
-            "LeftScaleLength" : 0.0,
-            "RightScaleLength" : 0.0,
-            "LeftRampMinDensity" : 0.0,
-            "RightRampMinDensity" : 0.0,
-            "GratingDepth" : 1.0,
-            "GratingPeriod" : 1.0,
-            "GratingPhase" : 0.732
+            "NORampLength" : 0.2,
+            "NORampMinDensity" : 0.001,
+            "NOLeftRampLength" : 0.0,
+            "NORightRampLength" : 0.0,
+            "NOScaleLength" : 0.0,
+            "NOLeftScaleLength" : 0.0,
+            "NORightScaleLength" : 0.0,
+            "NOLeftRampMinDensity" : 0.0,
+            "NORightRampMinDensity" : 0.0,
+            "NOGratingDepth" : 0.0,
+            "NOGratingPeriod" : 0.0,
+            "NOGratingPhase" : 0.0
         }
     ],
-    "species":[
-        {"name": "ele1", "plasma": 0},
-        {"name": "ele2", "plasma": 1}
+    "Species":[
+        {
+            "name": "ELE1",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "NOZ": 1.0,
+            "NOA": 1.0,
+            "isMarker": 0,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,-1.0]
+        },
+        {
+            "name": "ELE2",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "NOZ": 1.0,
+            "NOA": 1.0,
+            "isMarker": 0,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,-1.0]
+        }
+
+
     ],
     "Laser":[
         {

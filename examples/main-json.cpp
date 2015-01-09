@@ -60,9 +60,11 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int narg, char **args)
 {
+    const int masterProc=0;
+
   Json::Value root;
-  parseJsonInputFile(root,"inputPiccante.json");
-  int dim = getDimensionalityFromJson(root, DEFAULT_DIMENSIONALITY);
+  jsonParser::parseJsonInputFile(root,"inputPiccante.json");
+  int dim = jsonParser::getDimensionalityFromJson(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
   EM_FIELD myfield;
@@ -72,27 +74,32 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  setXrangeFromJson(root,&grid);
-  setYrangeFromJson(root,&grid);
-  setZrangeFromJson(root,&grid);
-  setNCellsFromJson(root,&grid);
-  setNprocsFromJson(root,&grid);
-  setStretchedGridFromJson(root,&grid);
-  setBoundaryConditionsFromJson(root, &grid);
+  jsonParser::setXrangeFromJson(root,&grid);
+  jsonParser::setYrangeFromJson(root,&grid);
+  jsonParser::setZrangeFromJson(root,&grid);
+  jsonParser::setNCellsFromJson(root,&grid);
+  jsonParser::setNprocsFromJson(root,&grid);
+  jsonParser::setStretchedGridFromJson(root,&grid);
+  jsonParser::setBoundaryConditionsFromJson(root, &grid);
 
   grid.mpi_grid_initialize(&narg, args);
+  if(grid.myid==masterProc)
+      jsonParser::isThisJsonMaster=true;
+  else
+      jsonParser::isThisJsonMaster=false;
 
   grid.setCourantFactor(0.98);
-  setSimulationTimeFromJson(root,&grid);
-  setMovingWindowFromJson(root,&grid);
-  grid.setMasterProc(0);
+  jsonParser::setSimulationTimeFromJson(root,&grid);
+  jsonParser::setMovingWindowFromJson(root,&grid);
+
+  grid.setMasterProc(masterProc);
 
   srand(time(NULL));
   grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.finalize();
 
-  setDumpControlFromJson(root, &grid.dumpControl);
+  jsonParser::setDumpControlFromJson(root, &grid.dumpControl);
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
@@ -101,9 +108,9 @@ int myIntVariable=0;
   double myDoubleVariable=0;
   bool isThereSpecial=false;
   Json::Value special;
-  if(isThereSpecial=setValueFromJson(special,root,"special")){
-    setIntFromJson( &myIntVariable, special, "variabile1");
-    setDoubleFromJson( &myDoubleVariable, special, "variabile2");
+  if(isThereSpecial=jsonParser::setValueFromJson(special,root,"special")){
+    jsonParser::setIntFromJson( &myIntVariable, special, "variabile1");
+    jsonParser::setDoubleFromJson( &myDoubleVariable, special, "variabile2");
    }
 //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
@@ -111,7 +118,7 @@ int myIntVariable=0;
   myfield.setAllValuesToZero();
 
 
-  setLaserPulsesFromJson(root, &myfield);
+  jsonParser::setLaserPulsesFromJson(root, &myfield);
   myfield.boundary_conditions();
 
   current.allocate(&grid);
@@ -121,41 +128,41 @@ int myIntVariable=0;
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
 
   std::map<std::string, PLASMA*> plasmas;
-  setPlasmasFromJson(root, plasmas);
+  jsonParser::setPlasmasFromJson(root, plasmas);
 
-  std::cout <<((double*)plasmas["grat"]->params.additional_params)[1] << std::endl;
+  jsonParser::setSpeciesFromJson(root, species, plasmas, &grid, rng);
 
-  PLASMA plasma1;
-  plasma1.density_function = box;
-  plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
-  plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);
-  plasma1.setRampLength(0.2);
-  plasma1.setDensityCoefficient(1.0);
-  plasma1.setRampMinDensity(0.001);
+//  PLASMA plasma1;
+//  plasma1.density_function = box;
+//  plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
+//  plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);
+//  plasma1.setRampLength(0.2);
+//  plasma1.setDensityCoefficient(1.0);
+//  plasma1.setRampMinDensity(0.001);
 
-  SPECIE  electrons1(&grid);
-  electrons1.plasma = plasma1;
-  electrons1.setParticlesPerCellXYZ(3, 3, 3);
-  electrons1.setName("ELE1");
-  electrons1.type = ELECTRON;
-  electrons1.creation();
-  species.push_back(&electrons1);
-
-
-  SPECIE electrons2(&grid);
-  electrons2.plasma = plasma1;
-  electrons2.setParticlesPerCellXYZ(3, 3, 3);
-  electrons2.setName("ELE2");
-  electrons2.type = ELECTRON;
-  electrons2.creation();
-  species.push_back(&electrons2);
+//  SPECIE  electrons1(&grid);
+//  electrons1.plasma = plasma1;
+//  electrons1.setParticlesPerCellXYZ(3, 3, 3);
+//  electrons1.setName("ELE1");
+//  electrons1.type = ELECTRON;
+//  electrons1.creation();
+//  species.push_back(&electrons1);
 
 
-  tempDistrib distribution;
-  distribution.setMaxwell(1.0e-5);
+//  SPECIE electrons2(&grid);
+//  electrons2.plasma = plasma1;
+//  electrons2.setParticlesPerCellXYZ(3, 3, 3);
+//  electrons2.setName("ELE2");
+//  electrons2.type = ELECTRON;
+//  electrons2.creation();
+//  species.push_back(&electrons2);
 
-  electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
-  electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
+
+//  tempDistrib distribution;
+//  distribution.setMaxwell(1.0e-5);
+
+//  electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
+//  electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();

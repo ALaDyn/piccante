@@ -44,25 +44,57 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "particle_species.h"
 #include "json/json.h"
 
-void parseJsonInputFile(Json::Value &root, std::string nomeFile);
-int getDimensionalityFromJson(Json::Value &document, int defaultDimensionality);
-void setXrangeFromJson(Json::Value &parent, GRID *grid);
-void setYrangeFromJson(Json::Value &parent,GRID *grid);
-void setZrangeFromJson(Json::Value &parent,GRID *grid);
+namespace jsonParser{
+    extern bool isThisJsonMaster;
 
-bool setIntFromJson(int *number, Json::Value &parent, const char* name);
-bool setDoubleFromJson(double *number, Json::Value &parent,const char* name);
-bool setBoolFromJson(bool *number, Json::Value &parent, const char* name);
-bool setStringFromJson(std::string * number, Json::Value  &parent,const char* name);
+    struct laserPulseBoolFlags{
 
-bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name);
-void setNCellsFromJson(Json::Value &parent, GRID *grid);
-void setNprocsFromJson(Json::Value &document, GRID *grid);
-void setSimulationTimeFromJson(Json::Value  &document,GRID *grid);
-void setBoundaryConditionsFromJson(Json::Value &parent,GRID *grid);
-void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
-void setStretchedGridFromJson(Json::Value &document, GRID *grid);
-void setMovingWindowFromJson(Json::Value &document, GRID *grid);
-void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield);
-void setPlasmasFromJson(Json::Value &document, std::map<std::string, PLASMA*> &map);
+        bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
+        laserPulseBoolFlags(){
+            type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime =false;
+        }
+    };
+
+    bool checkVersion(Json::Value &document, int &version);
+    void parseJsonInputFile(Json::Value &root, std::string nomeFile);
+    int getDimensionalityFromJson(Json::Value &document, int defaultDimensionality);
+    void setXrangeFromJson(Json::Value &parent, GRID *grid);
+    void setYrangeFromJson(Json::Value &parent,GRID *grid);
+    void setZrangeFromJson(Json::Value &parent,GRID *grid);
+
+    bool setIntFromJson(int *number, Json::Value &parent, const char* name);
+    bool setDoubleFromJson(double *number, Json::Value &parent,const char* name);
+    bool setBoolFromJson(bool *number, Json::Value &parent, const char* name);
+    bool setStringFromJson(std::string * number, Json::Value  &parent,const char* name);
+
+    bool setValueFromJson(Json::Value &child, Json::Value &parent, const char* name);
+    void setNCellsFromJson(Json::Value &parent, GRID *grid);
+    void setNprocsFromJson(Json::Value &document, GRID *grid);
+    void setSimulationTimeFromJson(Json::Value  &document,GRID *grid);
+    void setBoundaryConditionsFromJson(Json::Value &parent,GRID *grid);
+    void setDumpControlFromJson(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
+    void setStretchedGridFromJson(Json::Value &document, GRID *grid);
+    void setMovingWindowFromJson(Json::Value &document, GRID *grid);
+    void setLaserPulsesFromJson(Json::Value &document, EM_FIELD *emfield);
+    void setPlasmasFromJson(Json::Value &document, std::map<std::string, PLASMA*> &map);
+    bool checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas);
+    bool addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec);
+    void setSpeciesFromJson(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, gsl_rng* ext_rng);
+
+
+    bool setLaserType(laserPulse*, Json::Value&);
+    bool setLaserPolarization(laserPulse*, Json::Value&);
+    bool setLaserDurationFWHM(laserPulse*, Json::Value&);
+    bool setLaserInitialPosition(laserPulse*, Json::Value&);
+    bool setLaserAmplitude(laserPulse*, Json::Value&);
+    bool setLaserWaist(laserPulse*, Json::Value&);
+    bool setLaserFocusPosition(laserPulse*, Json::Value&);
+    bool setLaserLambda(laserPulse*, Json::Value&);
+    bool setLaserRotation(laserPulse*, Json::Value&);
+    bool setLaserRiseTime(laserPulse*, Json::Value&);
+    bool checkLaserBoolFlags(laserPulseBoolFlags, laserPulse*);
+    int findPlasmaFunction(std::string);
+
+
+}
 #endif // JSONPARSER_H
