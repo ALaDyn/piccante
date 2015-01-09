@@ -24,8 +24,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _CRT_SECURE_NO_WARNINGS
 
 //#define PHASE_SPACE_USE_MPI_FILE_WRITE_ALL
+#define PHASE_SPACE_USE_SEPARATE_FILES_MPI_FILE_WRITE_ALL
 //#define PHASE_SPACE_USE_OUTPUT_WRITING_GROUPS
-#define PHASE_SPACE_USE_HYBRID_OUTPUT
+//#define PHASE_SPACE_USE_HYBRID_OUTPUT
 //#define PHASE_SPACE_USE_MULTIFILE_OUTPUT
 #define PHASE_SPACE_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
@@ -316,6 +317,7 @@ private:
   int packageSize(int bufsize, int* groupProcNumData, int procID, int packageNumber);
   int numPackages(int bufsize, int* groupProcNumData, int procID);
   void fillRequestList(int bufsize, int* groupProcNumData, int groupNproc, std::vector<reqOutput> &reqList);
+  void writeAllSeparateFilesParticlesValues(std::string fileName, SPECIE* spec);
   void writeCPUParticlesValuesWritingGroups(std::string fileName, SPECIE* spec);
   void writeCPUParticlesValuesFewFilesWritingGroups(std::string fileName, SPECIE* spec);
   void writeSpecPhaseSpace(std::string fileName, request req);
@@ -342,7 +344,6 @@ private:
   void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
   int findNumberOfParticlesInSubdomain(request req);
   int findNcompForThisGridOutput(request req);
-  void writeEBFieldDomain(std::string fileName, request req);
 
   void writeBigHeaderSingleFile(std::string  fileName, int uniqueN[3], int imin[3], int slice_rNproc[3], int Ncomp);
   void writeSmallHeaderSingleFile(std::string  fileName, int uniqueLocN[3], int imin[3], int remains[3]);
