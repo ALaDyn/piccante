@@ -2129,12 +2129,12 @@ void OUTPUT_MANAGER::writeAllSeparateFilesParticlesValues(std::string fileName, 
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, FileCommunicator);
 
   int maxNfloatLoc = 0;
-  for (int pp = 0; pp < mygrid->nproc; pp++) {
+  for (int pp = 0; pp < fileNproc; pp++) {
     maxNfloatLoc = MAX(maxNfloatLoc, NfloatLoc[pp]);
   }
 
   MPI_Offset disp = 0;
-  for (int pp = 0; pp < mygrid->myid; pp++)
+  for (int pp = 0; pp < fileMyid; pp++)
     disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
 
   MPI_File_open(FileCommunicator, nomefile,

@@ -37,7 +37,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 //#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
 #define FIELDS_USE_MULTI_FILE
 #define FIELDS_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
-#define MACRO_CPUGROUP_FOR_MULTIFILE 1024
+#define MACRO_CPUGROUP_FOR_MULTIFILE 2
 
 #include <mpi.h>
 #include <iomanip>
