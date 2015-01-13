@@ -452,7 +452,8 @@ bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
     std::string name2="rotation";
     bool rotation;
     bool flag=false;
-    if(flag=setBool(&rotation,mylaser,name2.c_str())){
+    flag=setBool(&rotation,mylaser,name2.c_str());
+    if(rotation){
 
         double angle=0, center=0;
         name2="angle";
