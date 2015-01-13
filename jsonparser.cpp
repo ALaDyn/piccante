@@ -109,6 +109,17 @@ int jsonParser::getDimensionality(Json::Value &document, int defaultDimensionali
         std::cout << "dimensions not set in JSON input file!\n";
     return dim;
 }
+
+bool jsonParser::getRadiationFriction(Json::Value &document){
+  bool isFriction=false;
+  setBool(&isFriction, document, "radiationFriction");
+  return isFriction;
+}
+
+bool jsonParser::getLambda0(Json::Value &document, double& lambda0){
+  return setDouble(&lambda0, document, "lambda0");
+}
+
 void jsonParser::setXrange(Json::Value &parent,GRID *grid){
     double min=-1.0, max=1.0;
     const char* name="xRange";

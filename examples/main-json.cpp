@@ -51,7 +51,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define DEFAULT_DIMENSIONALITY 1
 
 
-#define DIRECTORY_OUTPUT "TEST"
+#define DIRECTORY_OUTPUT "OUTPUT"
 #define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
@@ -81,6 +81,13 @@ int main(int narg, char **args)
   jsonParser::setNprocs(root,&grid);
   jsonParser::setStretchedGrid(root,&grid);
   jsonParser::setBoundaryConditions(root, &grid);
+
+  if(jsonParser::getRadiationFriction(root))
+    grid.enableRadiationFriction();
+
+  double lamda0fromJson = 0.0;
+  if(jsonParser::getLambda0(root, lamda0fromJson))
+    grid.setLambda0(lamda0fromJson);
 
   grid.mpi_grid_initialize(&narg, args);
   if(grid.myid==masterProc)
@@ -143,23 +150,6 @@ int myIntVariable=0;
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
 
-//  double startOutputA=0.2, freqOutputA=1.0;
-//  double startOutputB=0.2, freqOutputB=1.0;
-
-//  manager.addDiagFrom(startOutputB, freqOutputB);
-
-//  manager.addEFieldFrom(startOutputA, freqOutputA);
-//  manager.addBFieldFrom(startOutputA, freqOutputA);
-
-//  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
-//  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
-
-//  manager.addCurrentFrom(startOutputA, freqOutputA);
-
-//  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
-//  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
-
-
   manager.initialize(DIRECTORY_OUTPUT);
 //*******************************************END DIAG DEFINITION**************************************************
 grid.setDumpPath(DIRECTORY_DUMP);
@@ -213,7 +203,12 @@ grid.setDumpPath(DIRECTORY_DUMP);
     myfield.boundary_conditions();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      (*spec_iterator)->momenta_advance(&myfield);
+      if(grid.isRadiationFrictionEnabled()){
+        (*spec_iterator)->momenta_advance_with_friction(&myfield, grid.getLambda0());
+      }
+      else{
+        (*spec_iterator)->momenta_advance(&myfield);
+      }
     }
 
     grid.time += grid.dt;

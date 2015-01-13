@@ -1,6 +1,8 @@
 {
     "VERSION": 1,
     "dimensions": 2,
+    "lambda0": 1.0,
+    "radiationFriction": true,
     "nProcY": 1,
     "nProcZ": 1,
     "xRange": [-20, 20],
