@@ -2400,7 +2400,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
       ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
       phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);      
       cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-      sin_theta = sin(theta);
+      sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = uxin + ptot*sin_theta*cos(phi);
       u1(p) = uyin + ptot*sin_theta*sin(phi);
       u2(p) = uzin + ptot*cos_theta;
@@ -2417,7 +2417,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
       ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
       phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);      
       cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-      sin_theta = sin(theta);
+      sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = ptot*sin_theta*cos(phi);
       u1(p) = ptot*sin_theta*sin(phi);
       u2(p) = ptot*cos_theta;
