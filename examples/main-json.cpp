@@ -64,7 +64,7 @@ int main(int narg, char **args)
 
   Json::Value root;
   jsonParser::parseJsonInputFile(root,"inputPiccante.json");
-  int dim = jsonParser::getDimensionalityFromJson(root, DEFAULT_DIMENSIONALITY);
+  int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
   EM_FIELD myfield;
@@ -74,13 +74,13 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  jsonParser::setXrangeFromJson(root,&grid);
-  jsonParser::setYrangeFromJson(root,&grid);
-  jsonParser::setZrangeFromJson(root,&grid);
-  jsonParser::setNCellsFromJson(root,&grid);
-  jsonParser::setNprocsFromJson(root,&grid);
-  jsonParser::setStretchedGridFromJson(root,&grid);
-  jsonParser::setBoundaryConditionsFromJson(root, &grid);
+  jsonParser::setXrange(root,&grid);
+  jsonParser::setYrange(root,&grid);
+  jsonParser::setZrange(root,&grid);
+  jsonParser::setNCells(root,&grid);
+  jsonParser::setNprocs(root,&grid);
+  jsonParser::setStretchedGrid(root,&grid);
+  jsonParser::setBoundaryConditions(root, &grid);
 
   grid.mpi_grid_initialize(&narg, args);
   if(grid.myid==masterProc)
@@ -89,8 +89,8 @@ int main(int narg, char **args)
       jsonParser::isThisJsonMaster=false;
 
   grid.setCourantFactor(0.98);
-  jsonParser::setSimulationTimeFromJson(root,&grid);
-  jsonParser::setMovingWindowFromJson(root,&grid);
+  jsonParser::setSimulationTime(root,&grid);
+  jsonParser::setMovingWindow(root,&grid);
 
   grid.setMasterProc(masterProc);
 
@@ -99,7 +99,7 @@ int main(int narg, char **args)
 
   grid.finalize();
 
-  jsonParser::setDumpControlFromJson(root, &grid.dumpControl);
+  jsonParser::setDumpControl(root, &grid.dumpControl);
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
@@ -108,9 +108,9 @@ int myIntVariable=0;
   double myDoubleVariable=0;
   bool isThereSpecial=false;
   Json::Value special;
-  if(isThereSpecial=jsonParser::setValueFromJson(special,root,"special")){
-    jsonParser::setIntFromJson( &myIntVariable, special, "variabile1");
-    jsonParser::setDoubleFromJson( &myDoubleVariable, special, "variabile2");
+  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
+    jsonParser::setInt( &myIntVariable, special, "variabile1");
+    jsonParser::setDouble( &myDoubleVariable, special, "variabile2");
    }
 //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
@@ -118,7 +118,7 @@ int myIntVariable=0;
   myfield.setAllValuesToZero();
 
 
-  jsonParser::setLaserPulsesFromJson(root, &myfield);
+  jsonParser::setLaserPulses(root, &myfield);
   myfield.boundary_conditions();
 
   current.allocate(&grid);
@@ -128,41 +128,9 @@ int myIntVariable=0;
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
 
   std::map<std::string, PLASMA*> plasmas;
-  jsonParser::setPlasmasFromJson(root, plasmas);
+  jsonParser::setPlasmas(root, plasmas);
 
-  jsonParser::setSpeciesFromJson(root, species, plasmas, &grid, rng);
-
-//  PLASMA plasma1;
-//  plasma1.density_function = box;
-//  plasma1.setMinBox(-10.0, -10.0, grid.rmin[2]);
-//  plasma1.setMaxBox(10.0, 10.0, grid.rmax[2]);
-//  plasma1.setRampLength(0.2);
-//  plasma1.setDensityCoefficient(1.0);
-//  plasma1.setRampMinDensity(0.001);
-
-//  SPECIE  electrons1(&grid);
-//  electrons1.plasma = plasma1;
-//  electrons1.setParticlesPerCellXYZ(3, 3, 3);
-//  electrons1.setName("ELE1");
-//  electrons1.type = ELECTRON;
-//  electrons1.creation();
-//  species.push_back(&electrons1);
-
-
-//  SPECIE electrons2(&grid);
-//  electrons2.plasma = plasma1;
-//  electrons2.setParticlesPerCellXYZ(3, 3, 3);
-//  electrons2.setName("ELE2");
-//  electrons2.type = ELECTRON;
-//  electrons2.creation();
-//  species.push_back(&electrons2);
-
-
-//  tempDistrib distribution;
-//  distribution.setMaxwell(1.0e-5);
-
-//  electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
-//  electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
+  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();
@@ -170,23 +138,26 @@ int myIntVariable=0;
   //*******************************************END SPECIES DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
+  std::map<std::string, outDomain*> outDomains;
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
+  jsonParser::setDomains(root, outDomains);
+  jsonParser::setOutputRequests(root, manager, outDomains, species);
 
-  double startOutputA=0.2, freqOutputA=1.0;
-  double startOutputB=0.2, freqOutputB=1.0;
+//  double startOutputA=0.2, freqOutputA=1.0;
+//  double startOutputB=0.2, freqOutputB=1.0;
 
-  manager.addDiagFrom(startOutputB, freqOutputB);
+//  manager.addDiagFrom(startOutputB, freqOutputB);
 
-  manager.addEFieldFrom(startOutputA, freqOutputA);
-  manager.addBFieldFrom(startOutputA, freqOutputA);
+//  manager.addEFieldFrom(startOutputA, freqOutputA);
+//  manager.addBFieldFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
-  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
+//  manager.addSpeciesDensityFrom("ELE1", startOutputA, freqOutputA);
+//  manager.addSpeciesDensityFrom("ELE2", startOutputA, freqOutputA);
 
-  manager.addCurrentFrom(startOutputA, freqOutputA);
+//  manager.addCurrentFrom(startOutputA, freqOutputA);
 
-  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
-  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
+//  manager.addSpeciesPhaseSpaceFrom("ELE1", startOutputA, freqOutputA);
+//  manager.addSpeciesPhaseSpaceFrom("ELE2", startOutputA, freqOutputA);
 
 
   manager.initialize(DIRECTORY_OUTPUT);

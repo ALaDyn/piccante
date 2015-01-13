@@ -104,6 +104,34 @@
             "initialPosition": 5.5,
             "a": 8.0
         }
+    ],
+    "Domains":[
+        {
+            "name": "subd1",
+            "freeDim": [1,1,1],
+            "pointCoord": [0.0,0.0,0.0],
+            "xRange": [-10, 10],
+            "yRange": [-10, 10],
+            "zRange": [-10, 10]
+        },
+        {
+            "name": "subd2",
+            "freeDim": [1,0,0],
+            "pointCoord": [0.0,0.0756,0.0],
+            "xRange": [-10, 10],
+            "yRange": [-11, 11],
+            "zRange": [-12, 12]
+        }
+
+    ]
+    ,
+    "Output":[
+       {"type": "E", "from":0.0, "to": 10.0, "every": 1.0, "in":"subd1"},
+        {"type": "Density", "spec": "ELE1", "at": 5.0, "every":0.5},
+        {"type": "Current", "every": 0.5},
+        {"type": "B", "from": 0.5, "every": 1.0, "in":"subd2"},
+        {"type": "PhSp", "spec": "ELE2", "every": 2.0},
+        {"type": "Diag", "every": 0.5, "at": 13.75}
     ]
 
 }
