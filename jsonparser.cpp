@@ -19,7 +19,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "jsonparser.h"
-
+#include "jsonnames.h"
 using namespace jsonParser;
 
 bool jsonParser::isThisJsonMaster=true;
@@ -104,7 +104,7 @@ bool jsonParser::setValue(Json::Value &child, Json::Value &parent, const char* n
 
 int jsonParser::getDimensionality(Json::Value &document, int defaultDimensionality){
     int dim = defaultDimensionality;
-    const char* name="dimensions";
+    const char* name= INT_DIMENSIONS;
     if((!setInt(&dim, document, name))&&isThisJsonMaster)
         std::cout << "dimensions not set in JSON input file!\n";
     return dim;
@@ -122,7 +122,7 @@ bool jsonParser::getLambda0(Json::Value &document, double& lambda0){
 
 void jsonParser::setXrange(Json::Value &parent,GRID *grid){
     double min=-1.0, max=1.0;
-    const char* name="xRange";
+    const char* name = DOUBLEARRAY_X_RANGE;
     if(!parent[name].isNull()){
         if(parent[name].isArray()){
             min=parent[name][0].asDouble();
@@ -133,7 +133,7 @@ void jsonParser::setXrange(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setYrange(Json::Value &parent,GRID *grid){
     double min=-1.0, max=1.0;
-    const char* name="yRange";
+    const char* name = DOUBLEARRAY_Y_RANGE;
     if(!parent[name].isNull()){
         if(parent[name].isArray()){
             min=parent[name][0].asDouble();
@@ -144,7 +144,7 @@ void jsonParser::setYrange(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setZrange(Json::Value &parent,GRID *grid){
     double min=-1.0, max=1.0;
-    const char* name="zRange";
+    const char* name = DOUBLEARRAY_Z_RANGE;
     if(!parent[name].isNull()){
         if(parent[name].isArray()){
             min=parent[name][0].asDouble();
@@ -157,7 +157,7 @@ void jsonParser::setZrange(Json::Value &parent,GRID *grid){
 void jsonParser::setNCells(Json::Value &parent,GRID *grid){
     int Nx, Ny, Nz;
     Nx=Ny=Nz=1;
-    const char* name="NCells";
+    const char* name = _INT_N_CELLS_;
     if(!parent[name].isNull()){
         if(parent[name].isArray()){
             Nx=parent[name][0].asInt();
@@ -170,8 +170,8 @@ void jsonParser::setNCells(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setNprocs(Json::Value &document,GRID *grid){
     int nProcY=1, nProcZ=1;
-    setInt(&nProcY, document,"nProcY");
-    setInt(&nProcZ, document,"nProcZ");
+    setInt(&nProcY, document,_INT_N_PROC_Y_);
+    setInt(&nProcZ, document,_INT_N_PROC_Z_);
 
     grid->setNProcsAlongY(nProcY);
     grid->setNProcsAlongZ(nProcZ);
@@ -179,12 +179,12 @@ void jsonParser::setNprocs(Json::Value &document,GRID *grid){
 
 void jsonParser::setSimulationTime(Json::Value &document,GRID *grid){
     double simulationTime;
-    setDouble(&simulationTime,document,"simulationTime");
+    setDouble(&simulationTime,document, _DOUBLE_SIMULATION_TIME_);
     grid->setSimulationTime(simulationTime);
 }
 
 void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
-    std::string  name1="boundaries";
+    std::string  name1= _OBJ_BOUNDARIES_;
     std::string  xCondition, yCondition, zCondition;
     int xFlag, yFlag, zFlag;
     xFlag = xPBC;
@@ -198,25 +198,25 @@ void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
             xCondition = boundaries[0].asString();
             yCondition = boundaries[1].asString();
             zCondition = boundaries[2].asString();
-            if(! xCondition.compare("periodic"))
+            if(! xCondition.compare(_TAG_PERIODIC_BC_))
                 xFlag = xPBC;
-            else if(! xCondition.compare("open"))
+            else if(! xCondition.compare(_TAG_OPEN_BC_))
                 xFlag = xOpen;
-            else if(! xCondition.compare("pml"))
+            else if(! xCondition.compare(_TAG_PML_))
                 xFlag = xPML;
 
-            if(! yCondition.compare("periodic"))
+            if(! yCondition.compare(_TAG_PERIODIC_BC_))
                 yFlag = yPBC;
-            else if(! yCondition.compare("open"))
+            else if(! yCondition.compare(_TAG_OPEN_BC_))
                 yFlag = yOpen;
-            else if(! yCondition.compare("pml"))
+            else if(! yCondition.compare(_TAG_PML_))
                 yFlag = yPML;
 
-            if(! zCondition.compare("periodic"))
+            if(! zCondition.compare(_TAG_PERIODIC_BC_))
                 zFlag = zPBC;
-            else if(! zCondition.compare("open"))
+            else if(! zCondition.compare(_TAG_OPEN_BC_))
                 zFlag = zOpen;
-            else if(! zCondition.compare("pml"))
+            else if(! zCondition.compare(_TAG_PML_))
                 zFlag = zPML;
 
         }
@@ -228,117 +228,117 @@ void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
 void jsonParser::setDumpControl(Json::Value &parent, DUMP_CONTROL *myDumpControl){
     myDumpControl->doRestart = false;
     myDumpControl->doDump = false;
-    std::string  name1="restart";
+    std::string  name1= _OBJ_RESTART_;
     std::string  name2;
     Json::Value restartObject;
     if(setValue(restartObject,parent,name1.c_str())){
 
-        name2 = "doRestart";
+        name2 = _BOOL_RESTART_;
         setBool(&myDumpControl->doRestart,restartObject,name2.c_str());
 
-        name2 = "dumpEvery";
+        name2 = _DOUBLE_DUMPEVERY_;
         setDouble(&myDumpControl->dumpEvery,restartObject,name2.c_str());
 
-        name2 = "doDump";
+        name2 = _BOOL_DODUMP_;
         setBool(&myDumpControl->doDump,restartObject,name2.c_str());
 
-        name2 = "restartFromDump";
+        name2 = _INT_RESTART_FROM_DUMP_;
         setInt(&myDumpControl->restartFromDump,restartObject,name2.c_str());
 
     }
 }
 
 void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
-    std::string  name1="StretchedGrid";
+    std::string  name1 = _OBJ_STRETCHED_GRID_;
     Json::Value  stretching;
     if(setValue(stretching, document, name1.c_str() ) ) {
         grid->enableStretchedGrid();
         std::string  name2;
         Json::Value stretching1D;
 
-        name2="x";
+        name2= _OBJ_X_STTETCHING_;
         if(setValue(stretching1D, stretching,name2.c_str() ) ){
-            std::string  name3="left";
+            std::string  name3 = _OBJ_LEFT_STRETCHING_;
             Json::Value stretchingLeft;
             if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingLeft,"NCells");
-                setDouble(&limit, stretchingLeft, "limit");
+                setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
                 grid->setXandNxLeftStretchedGrid(limit,NCells);
             }
-            name3="right";
+            name3=_OBJ_RIGHT_STRETCHING_;
             Json::Value stretchingRight;
             if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingRight,"NCells");
-                setDouble(&limit, stretchingRight, "limit");
+                setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
                 grid->setXandNxRightStretchedGrid(limit,NCells);
             }
         }
 
-        name2="y";
+        name2= _OBJ_Y_STTETCHING_;
         if(setValue(stretching1D, stretching,name2.c_str() ) ){
-            std::string  name3="left";
+            std::string  name3 = _OBJ_LEFT_STRETCHING_;
             Json::Value stretchingLeft;
             if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingLeft,"NCells");
-                setDouble(&limit, stretchingLeft, "limit");
+                setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
                 grid->setYandNyLeftStretchedGrid(limit,NCells);
             }
-            name3="right";
+            name3=_OBJ_RIGHT_STRETCHING_;
             Json::Value stretchingRight;
             if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingRight,"NCells");
-                setDouble(&limit, stretchingRight, "limit");
+                setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
                 grid->setYandNyRightStretchedGrid(limit,NCells);
             }
         }
 
-        name2="z";
+        name2= _OBJ_Z_STTETCHING_;
         if(setValue(stretching1D, stretching,name2.c_str() ) ){
-            std::string  name3="left";
+            std::string  name3 = _OBJ_LEFT_STRETCHING_;
             Json::Value stretchingLeft;
             if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingLeft,"NCells");
-                setDouble(&limit, stretchingLeft, "limit");
+                setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
                 grid->setZandNzLeftStretchedGrid(limit,NCells);
             }
-            name3="right";
+            name3=_OBJ_RIGHT_STRETCHING_;
             Json::Value stretchingRight;
             if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
                 double limit;
                 int NCells;
-                setInt(&NCells,stretchingRight,"NCells");
-                setDouble(&limit, stretchingRight, "limit");
+                setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
+                setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
                 grid->setZandNzRightStretchedGrid(limit,NCells);
             }
         }
     }
 }
 void jsonParser::setMovingWindow(Json::Value  &document,GRID *grid){
-    std::string  name1="MovingWindow";
+    std::string  name1 = _OBJ_MOVING_WINDOW_;
     Json::Value movingWindow;
     if(setValue( movingWindow, document, name1.c_str() ) ) {
         std::string  name2;
         double start=0;
-        name2= "start";
+        name2= _DOUBLE_START_MW_;
         setDouble( &start, movingWindow, name2.c_str() );
         grid->setStartMovingWindow(start);
 
-        name2= "beta";
+        name2= _DOUBLE_BETA_MW_;
         double beta;
         if(setDouble( &beta, movingWindow, name2.c_str() ) ){
             grid->setBetaMovingWindow(beta);
         }
-        name2= "frequency";
+        name2= _DOUBLE_FREQUENCY_MW_;
         int frequency;
         if(setInt( &frequency, movingWindow, name2.c_str() ) ){
             grid->setFrequencyMovingWindow(frequency);
@@ -348,20 +348,20 @@ void jsonParser::setMovingWindow(Json::Value  &document,GRID *grid){
 }
 
 bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="type";
+    std::string name2= _STRING_TYPE_;
     std::string type;
     bool flag=false;
     if(flag=setString(&type,mylaser,name2.c_str())){
-        if(type=="COS2_PLANE_WAVE"){
+        if(type== _LASERTYPEVALUE_COS_PLANE_WAVE_){
             pulse1->type = COS2_PLANE_WAVE;
         }
-        else if (type=="GAUSSIAN"){
+        else if (type== _LASERTYPEVALUE_GAUSSIAN_){
             pulse1->type = GAUSSIAN;
         }
-        else if (type=="PLANE_WAVE"){
+        else if (type== _LASERTYPEVALUE_PLANE_WAVE_){
             pulse1->type = PLANE_WAVE;
         }
-        else if (type=="COS2_PLATEAU_PLANE_WAVE"){
+        else if (type== _LASERTYPEVALUE_COS2_PLATEAU_PLANE_WAVE_){
             pulse1->type = COS2_PLATEAU_PLANE_WAVE;
         }
         else
@@ -371,17 +371,17 @@ bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="polarization";
+    std::string name2= _STRING_POLARIZATION_;
     std::string polarization;
     bool flag=false;
     if(flag=setString(&polarization,mylaser,name2.c_str())){
-        if(polarization=="P"){
+        if(polarization== _LASERPOLARIZATIONVALUE_P_){
             pulse1->setPPolarization();
         }
-        else if( polarization=="S"){
+        else if( polarization== _LASERPOLARIZATIONVALUE_S_){
             pulse1->setSPolarization();
         }
-        else if(polarization=="C"){
+        else if(polarization== _LASERPOLARIZATIONVALUE_C_){
             pulse1->setCircularPolarization();
         }
         else
@@ -391,7 +391,7 @@ bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser)
 }
 
 bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="durationFWHM";
+    std::string name2= _DOUBLE_LASER_DURATION_FWHM_;
     double durationFWHM;
     bool flag=false;
     if(flag=setDouble(&durationFWHM,mylaser,name2.c_str())){
@@ -401,7 +401,7 @@ bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser)
 }
 
 bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="initialPosition";
+    std::string name2= _DOUBLE_LASER_INITIAL_POSITION_;
     double initialPosition;
     bool flag=false;
     if(flag=setDouble(&initialPosition,mylaser,name2.c_str())){
@@ -411,7 +411,7 @@ bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylas
 }
 
 bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="a";
+    std::string name2= _DOUBLE_LASER_A_;
     double amplitude;
     bool flag=false;
     if(flag=setDouble(&amplitude,mylaser,name2.c_str())){
@@ -421,7 +421,7 @@ bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="waist";
+    std::string name2= _DOUBLE_LASER_WAIST_;
     double waist;
     bool flag=false;
     if(flag=setDouble(&waist,mylaser,name2.c_str())){
@@ -430,7 +430,7 @@ bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
     return flag;
 }
 bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="focusPosition";
+    std::string name2= _DOUBLE_LASER_FOCUS_POSITION_;
     double focusPosition;
     bool flag=false;
     if(flag=setDouble(&focusPosition,mylaser,name2.c_str())){
@@ -439,7 +439,7 @@ bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser
     return flag;
 }
 bool jsonParser::setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="lambda";
+    std::string name2= _DOUBLE_LASER_LAMBDA_;
     double lambda;
     bool flag=false;
     if(flag=setDouble(&lambda,mylaser,name2.c_str())){
@@ -449,16 +449,16 @@ bool jsonParser::setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="rotation";
+    std::string name2= _BOOL_LASER_ROTATION_;
     bool rotation;
     bool flag=false;
     if(flag=setBool(&rotation,mylaser,name2.c_str())){
 
         double angle=0, center=0;
-        name2="angle";
+        name2= _DOUBLE_ROTATION_ANGLE_;
         setDouble(&angle,mylaser,name2.c_str());
 
-        name2="center";
+        name2= _DOUBLE_ROTATION_CENTER_;
         setDouble(&center,mylaser,name2.c_str());
 
         pulse1->setRotationAngleAndCenter(2.0*M_PI*(angle / 360.0), center);
@@ -467,7 +467,7 @@ bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser){
-    std::string name2="riseTime";
+    std::string name2= _DOUBLE_LASER_RISE_TIME_;
     double riseTime;
     bool flag=false;
     if(flag=setDouble(&riseTime,mylaser,name2.c_str())){
@@ -508,7 +508,7 @@ bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *puls
 }
 
 void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
-    std::string  name1="Laser";
+    std::string  name1= _OBJ_ARRAY_LASER_;
     Json::Value lasers;
 
     if(setValue( lasers, document, name1.c_str() ) ) {
@@ -518,7 +518,7 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
             for(unsigned int index=0; index<lasers.size(); index++){
                 Json::Value myLaser = lasers[index];
 
-                name2="enabled";
+                name2= _ENABLED_LASER_;
                 bool enabled=false;
                 setBool(&enabled, myLaser, name2.c_str());
                 if(enabled){
@@ -560,7 +560,7 @@ int jsonParser::findPlasmaFunction(std::string plasmaFunction){
 }
 
 void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*> &map){
-    std::string  name1="Plasma";
+    std::string  name1= _JSON_OBJARRAY_PLASMA_;
     Json::Value plasmas;
 
     if(setValue( plasmas, document, name1.c_str() ) && plasmas.isArray()){
@@ -568,7 +568,7 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
             Json::Value myPlasma = plasmas[index];
 
             std::string plasmaName;
-            setString(&plasmaName,myPlasma,"name");
+            setString(&plasmaName,myPlasma, _JSON_STRING_PLASMA_NAME);
 
             if(map.find(plasmaName)!=map.end()&&isThisJsonMaster){
                 std::cout << "Warning! Plasma " << plasmaName << " is defined multiple times!" << std::endl;
@@ -578,7 +578,7 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
             bool isPlasmaFunctionSet=false;
 
             int plasmaFunctionIndex;
-            if(setString(&plasmaFunction, myPlasma, "densityFunction")){
+            if(setString(&plasmaFunction, myPlasma, _JSON_STRING_PLASMA_DENSITYFUNCTION)){
                 plasmaFunctionIndex = findPlasmaFunction(plasmaFunction);
                 if(plasmaFunctionIndex >= 0)
                     isPlasmaFunctionSet=true;
@@ -590,49 +590,49 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
                 double tdouble, t2double;
                 Json::Value range;
 
-                if(setValue(range, myPlasma, "XRangeBox") && (range.size() == 2))
+                if(setValue(range, myPlasma, _JSON_DOUBLEARRAY_PLASMA_X_RANGEBOX) && (range.size() == 2))
                     map[plasmaName]->setXRangeBox(range[0].asDouble(), range[1].asDouble());
 
-                if(setValue(range, myPlasma, "YRangeBox") && (range.size() == 2))
+                if(setValue(range, myPlasma, _JSON_DOUBLEARRAY_PLASMA_Y_RANGEBOX) && (range.size() == 2))
                     map[plasmaName]->setYRangeBox(range[0].asDouble(), range[1].asDouble());
 
-                if(setValue(range, myPlasma, "ZRangeBox") && (range.size() == 2))
+                if(setValue(range, myPlasma, _JSON_DOUBLEARRAY_PLASMA_Z_RANGEBOX) && (range.size() == 2))
                     map[plasmaName]->setZRangeBox(range[0].asDouble(), range[1].asDouble());
 
 
-                if(setDouble(&tdouble, myPlasma, "DensityLambda")){
-                    if(setDouble(&t2double, myPlasma, "DensityCoefficient"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_DENSITY_LAMBDA)){
+                    if(setDouble(&t2double, myPlasma, _JSON_DOUBLE_PLASMA_DENSITY))
                         map[plasmaName]->setDensityCoefficient(t2double,tdouble);
                 }
                 else{
-                    if(setDouble(&tdouble, myPlasma, "DensityCoefficient"))
+                    if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_DENSITY))
                         map[plasmaName]->setDensityCoefficient(tdouble);
                 }
-                if(setDouble(&tdouble, myPlasma, "RampLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_RAMP_LENGTH ))
                     map[plasmaName]->setRampLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "RampMinDensity"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_RAMP_MIN_DENSITY))
                     map[plasmaName]->setRampMinDensity(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "LeftRampLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_LEFT_RAMP_LENGTH))
                     map[plasmaName]->setLeftRampLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "RightRampLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_RIGHT_RAMP_LENGTH))
                     map[plasmaName]->setRightRampLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "ScaleLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_SCALE_LENGTH))
                     map[plasmaName]->setScaleLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "LeftScaleLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_LEFT_SCALE_LENGTH))
                     map[plasmaName]->setLeftScaleLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "RightScaleLength"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_RIGHT_SCALE_LENGTH))
                     map[plasmaName]->setRightScaleLength(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "LeftRampMinDensity"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_LEFT_RAMP_MIN_DENSITY))
                     map[plasmaName]->setLeftRampMinDensity(tdouble);
 
-                if(setDouble(&tdouble, myPlasma, "RightRampMinDensity"))
+                if(setDouble(&tdouble, myPlasma, _JSON_DOUBLE_PLASMA_RIGHT_RAMP_MIN_DENSITY))
                     map[plasmaName]->setRightRampMinDensity(tdouble);
 
                 if(PLASMA::isGrating(plasmaFunctionIndex)){
@@ -642,9 +642,9 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
                     double* additionalParams = new double[3];
 
-                    setDouble(&g_depth, myPlasma, "GratingDepth");
-                    setDouble(&g_period, myPlasma, "GratingPeriod");
-                    setDouble(&g_phase, myPlasma, "GratingPhase");
+                    setDouble(&g_depth, myPlasma, _JSON_DOUBLE_PLASMA_GRATING_DEPTH);
+                    setDouble(&g_period, myPlasma, _JSON_DOUBLE_PLASMA_GRATING_PERIOD);
+                    setDouble(&g_phase, myPlasma, _JSON_DOUBLE_PLASMA_GRATING_PHASE);
 
                     additionalParams[0] = g_depth;
                     additionalParams[1] = g_period;
@@ -671,25 +671,25 @@ bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, P
 
     std::string dummy;
 
-    isThereName=setString(&dummy,child,"name");
+    isThereName=setString(&dummy,child, _JSON_STRING_SPECIE_NAME);
 
-    if(setString(&dummy,child,"plasma")){
+    if(setString(&dummy,child, _JSON_STRING_SPECIE_PLASMANAME)){
         if(plasmas.find(dummy)!=plasmas.end())
             isTherePlasma=true;
     }
 
     Json::Value ppc;
 
-    if(setValue(ppc, child, "ParticlesPerCell")){
+    if(setValue(ppc, child, _JSON_INTARRAY3_PARTICLES_PER_CELL )){
       if (ppc.isArray()&&(ppc.size()==3))
         if(ppc[0].asInt() >= 0 && ppc[1].asInt() >= 0 && ppc[2].asInt() >= 0)
             isTherePPC=true;
     }
 
-    if(setString(&dummy, child, "type")){
-        if(dummy.compare("ELECTRON") ||
-                dummy.compare("POSITRON")||
-                dummy.compare("ION"))
+    if(setString(&dummy, child, _JSON_STRING_SPEIES_TYPE)){
+        if(dummy.compare(SPECIES_TYPEVALUE_ELECTRON) ||
+                dummy.compare(SPECIES_TYPEVALUE_POSITRON)||
+                dummy.compare(SPECIES_TYPEVALUE_ION))
             isThereType=true;
     }
 
@@ -703,48 +703,48 @@ bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_r
   tempDistrib dist;
 
   Json::Value momentum;
-  if(setValue(momentum, child, "distributionAddMomentum")&&momentum.isArray()&&(momentum.size()==3))
+  if(setValue(momentum, child, _JSON_DOUBLEARRAY_ADD_MOMENTUM)&&momentum.isArray()&&(momentum.size()==3))
     isThereMomentum=true;
 
   Json::Value params;
-  if(!distName.compare("Maxwell")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=1)){
+  if(!distName.compare(DISTRIBUTIONVALUE_MAXWELL)){
+    if(setValue(params, child,  _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS)&&params.isArray()&&(params.size()>=1)){
       dist.setMaxwell(params[0].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("Juttner")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=1)){
+  else if(!distName.compare( DISTRIBUTIONVALUE_JUTTNER )){
+    if(setValue(params, child,  _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS)&&params.isArray()&&(params.size()>=1)){
       dist.setJuttner(params[0].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("Waterbag")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=1)){
+  else if(!distName.compare( DISTRIBUTIONVALUE_WATERBAG )){
+    if(setValue(params, child, _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS )&&params.isArray()&&(params.size()>=1)){
       dist.setWaterbag(params[0].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("Waterbag3Temp")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=3)){
+  else if(!distName.compare( DISTRIBUTIONVALUE_WATERBAG3TEMP )){
+    if(setValue(params, child, _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS )&&params.isArray()&&(params.size()>=3)){
       dist.setWaterbag3Temp(params[0].asDouble(),params[1].asDouble(),params[2].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("UnifSphere")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=1)){
+  else if(!distName.compare( DISTRIBUTIONVALUE_UNFORM_SPHERE )){
+    if(setValue(params, child, _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS )&&params.isArray()&&(params.size()>=1)){
       dist.setUnifSphere(params[0].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("Supergaussian")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=2)){
+  else if(!distName.compare( DISTRIBUTIONVALUE_SUPERGAUSSIAN )){
+    if(setValue(params, child, _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS )&&params.isArray()&&(params.size()>=2)){
       dist.setSupergaussian(params[0].asDouble(),params[1].asDouble());
       isDistOk=true;
     }
   }
-  else if(!distName.compare("Special")){
-    if(setValue(params, child, "distributionParams")&&params.isArray()&&(params.size()>=1)){
+  else if(!distName.compare(DISTRIBUTIONVALUE_SPECIAL)){
+    if(setValue(params, child, _JSON_DOUBLEARRAY_DISTRIBUTION_PARAMS )&&params.isArray()&&(params.size()>=1)){
       dist.setSpecial(params[0].asDouble());
       isDistOk=true;
     }
@@ -764,7 +764,7 @@ bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_r
 }
 
 void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species,  std::map<std::string, PLASMA*> plasmas, GRID* myGrid, gsl_rng* ext_rng){
-  std::string  name1="Species";
+  std::string  name1= _JSON_OBJARRAY_SPECIES;
   Json::Value specList;
   if(setValue(specList, document, name1.c_str() ) && specList.isArray()){
     for(unsigned int index=0; index<specList.size(); index++){
@@ -775,40 +775,40 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
         std::string dummy;
         Json::Value ppc;
 
-        setString(&dummy, mySpecies, "plasma");
+        setString(&dummy, mySpecies, _JSON_STRING_SPECIE_PLASMANAME);
 
         newSpec->plasma = *plasmas[dummy];
 
-        setString(&dummy,mySpecies,"type");
-        if(!dummy.compare("ION"))
+        setString(&dummy,mySpecies,_JSON_STRING_SPEIES_TYPE);
+        if(!dummy.compare(SPECIES_TYPEVALUE_ION))
            newSpec->type=ION;
-        else if(!dummy.compare("POSITRON"))
+        else if(!dummy.compare(SPECIES_TYPEVALUE_POSITRON))
           newSpec->type=POSITRON;
         else
           newSpec->type=ELECTRON;
 
-        setString(&dummy,mySpecies,"name");
+        setString(&dummy,mySpecies,_JSON_STRING_SPECIE_NAME);
         newSpec->setName(dummy);
 
-        setValue(ppc, mySpecies, "ParticlesPerCell");
+        setValue(ppc, mySpecies, _JSON_INTARRAY3_PARTICLES_PER_CELL);
         newSpec->setParticlesPerCellXYZ(ppc[0].asInt(), ppc[1].asInt(), ppc[2].asInt());
 
         if(newSpec->type==ION){
           double A,Z;
-          if(setDouble(&A, mySpecies, "A"))
+          if(setDouble(&A, mySpecies, _JSON_DOUBLE_IONS_A))
             newSpec->A = A;
-          if(setDouble(&Z, mySpecies, "Z"))
+          if(setDouble(&Z, mySpecies, _JSON_DOUBLE_IONS_Z))
             newSpec->Z = Z;
         }
 
-        int isMarker = 0;
-        setInt(&isMarker, mySpecies, "isMarker");
-        if(isMarker>0)
+        bool isMarker = false;
+        setBool(&isMarker, mySpecies, _JSON_BOOL_IS_MARKER );
+        if(isMarker)
           newSpec->addMarker();
 
         newSpec->creation();
 
-        if(setString(&dummy, mySpecies, "distribution")){
+        if(setString(&dummy, mySpecies, _JSON_STRING_DISTRIBUTION)){
           if ((!addDistribution(dummy, mySpecies, ext_rng, newSpec)) && isThisJsonMaster){
             std::cout << "Warning: temperature distribution for species "<< index
                       << " is incorrectly defined" << std::endl;
@@ -827,40 +827,40 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
 }
 
 void jsonParser::setDomains(Json::Value &document, std::map<std::string, outDomain*> &domains){
-  std::string  name1="Domains";
+  std::string  name1=_JSON_OBJECTARRAY_DOMAINS;
   Json::Value domainList;
   if(setValue(domainList, document, name1.c_str() ) && domainList.isArray()){
     for(unsigned int index=0; index<domainList.size(); index++){
       Json::Value domain = domainList[index];
 
       std::string name;
-      if(setString(&name, domain, "name")&&(domains.find(name) == domains.end())){
+      if(setString(&name, domain, _JSON_STRING_DOMAIN_NAME)&&(domains.find(name) == domains.end())){
         outDomain* newDomain = new outDomain();
         newDomain->setName(name);
 
         Json::Value freeDims;
-        if(setValue(freeDims, domain, "freeDim")&&freeDims.isArray()&&(freeDims.size()==3)){
+        if(setValue(freeDims, domain, _JSON_INTARRAY3_FREE_DIM )&&freeDims.isArray()&&(freeDims.size()==3)){
           newDomain->setFreeDimensions(freeDims[0].asBool(), freeDims[1].asBool(), freeDims[2].asBool());
         }
 
         Json::Value pointCoord;
-        if(setValue(pointCoord, domain, "pointCoord")&&pointCoord.isArray()&&(pointCoord.size()==3)){
+        if(setValue(pointCoord, domain, _JSON_DOUBLEARRAY3_POINT_COORDINATE )&&pointCoord.isArray()&&(pointCoord.size()==3)){
           newDomain->setPointCoordinate(pointCoord[0].asDouble(), pointCoord[1].asDouble(),  pointCoord[2].asDouble());
 
         }
 
         Json::Value xRange;
-        if(setValue(xRange, domain, "xRange")&&xRange.isArray()&&(xRange.size()==2)){
+        if(setValue(xRange, domain, _JSON_INTARRAY2_DOMAIN_X_RANGE )&&xRange.isArray()&&(xRange.size()==2)){
           newDomain->setXRange(xRange[0].asDouble(), xRange[1].asDouble());
         }
 
         Json::Value yRange;
-        if(setValue(yRange, domain, "yRange")&&yRange.isArray()&&(yRange.size()==2)){
+        if(setValue(yRange, domain, _JSON_INTARRAY2_DOMAIN_Y_RANGE )&&yRange.isArray()&&(yRange.size()==2)){
           newDomain->setYRange(yRange[0].asDouble(), yRange[1].asDouble());
         }
 
         Json::Value zRange;
-        if(setValue(zRange, domain, "zRange")&&zRange.isArray()&&(zRange.size()==2)){
+        if(setValue(zRange, domain, _JSON_INTARRAY2_DOMAIN_Z_RANGE )&&zRange.isArray()&&(zRange.size()==2)){
           newDomain->setZRange(zRange[0].asDouble(), zRange[1].asDouble());
         }
 
@@ -874,8 +874,8 @@ void jsonParser::setDomains(Json::Value &document, std::map<std::string, outDoma
 }
 
 bool jsonParser::isOutTypeOk(std::string type){
-  bool answ = (!type.compare("E")) || (!type.compare("B")) || (!type.compare("EB")) ||
-      (!type.compare("Density")) || (!type.compare("Current")) || (!type.compare("PhSp")) ||( !type.compare("Diag"));
+  bool answ = (!type.compare(OUTPUTTYPEVALUE_E)) || (!type.compare(OUTPUTTYPEVALUE_B)) || (!type.compare(OUTPUTTYPEVALUE_EB)) ||
+      (!type.compare(OUTPUTTYPEVALUE_DENSITY)) || (!type.compare(OUTPUTTYPEVALUE_CURRENT)) || (!type.compare(OUTPUTTYPEVALUE_PHASESPACE)) ||( !type.compare(OUTPUTTYPEVALUE_DIAG));
   return answ;
 }
 
@@ -890,25 +890,25 @@ bool jsonParser::isSpecNameOk(std::string specName, std::vector<SPECIE*> &specie
 bool jsonParser::addOutReq(std::string type,OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, jsonParser::outRequest outRequestVals){
   if(outRequestVals.isDomainName){
     if(outRequestVals.isAt){
-      if(!type.compare("E")){
+      if(!type.compare(OUTPUTTYPEVALUE_E)){
          manager.addEFieldAt(domains[outRequestVals.domainName],outRequestVals.at);
       }
-      else if(!type.compare("B")){
+      else if(!type.compare(OUTPUTTYPEVALUE_B)){
         manager.addBFieldAt(domains[outRequestVals.domainName],outRequestVals.at);
       }
-      else if(!type.compare("EB")){
+      else if(!type.compare(OUTPUTTYPEVALUE_EB)){
         manager.addEBFieldAt(domains[outRequestVals.domainName],outRequestVals.at);
       }
-      else if(!type.compare("Density")){
+      else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
         manager.addSpeciesDensityAt(domains[outRequestVals.domainName],outRequestVals.specName,outRequestVals.at);
       }
-      else if(!type.compare("Current")){
+      else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
         manager.addCurrentAt(domains[outRequestVals.domainName],outRequestVals.at);
       }
-      else if(!type.compare("PhSp")){
+      else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
         manager.addSpeciesPhaseSpaceAt(domains[outRequestVals.domainName],outRequestVals.specName,outRequestVals.at);
       }
-      else if(!type.compare("Diag")){
+      else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
         manager.addDiagAt(outRequestVals.at);
       }
 
@@ -923,49 +923,49 @@ bool jsonParser::addOutReq(std::string type,OUTPUT_MANAGER &manager, std::map<st
         from = 0.0;
 
       if(outRequestVals.isTo){
-        if(!type.compare("E")){
+        if(!type.compare(OUTPUTTYPEVALUE_E)){
           manager.addEFieldFromTo(domains[outRequestVals.domainName], from, every, outRequestVals.to);
         }
-        else if(!type.compare("B")){
+        else if(!type.compare(OUTPUTTYPEVALUE_B)){
           manager.addBFieldFromTo(domains[outRequestVals.domainName], from, every, outRequestVals.to);
         }
-        else if(!type.compare("EB")){
+        else if(!type.compare(OUTPUTTYPEVALUE_EB)){
           manager.addEBFieldFromTo(domains[outRequestVals.domainName], from, every, outRequestVals.to);
         }
-        else if(!type.compare("Density")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
           manager.addSpeciesDensityFromTo(domains[outRequestVals.domainName], outRequestVals.specName, from, every, outRequestVals.to);
         }
-        else if(!type.compare("Current")){
+        else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
           manager.addCurrentFromTo(domains[outRequestVals.domainName], from, every, outRequestVals.to);
         }
-        else if(!type.compare("PhSp")){
+        else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
           manager.addSpeciesPhaseSpaceFromTo(domains[outRequestVals.domainName], outRequestVals.specName, from, every, outRequestVals.to);
         }
-        else if(!type.compare("Diag")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
           manager.addDiagFromTo(from, every, outRequestVals.to);
         }
 
       }
       else{
-        if(!type.compare("E")){
+        if(!type.compare(OUTPUTTYPEVALUE_E)){
           manager.addEFieldFrom(domains[outRequestVals.domainName], from, every);
         }
-        else if(!type.compare("B")){
+        else if(!type.compare(OUTPUTTYPEVALUE_B)){
           manager.addBFieldFrom(domains[outRequestVals.domainName], from, every);
         }
-        else if(!type.compare("EB")){
+        else if(!type.compare(OUTPUTTYPEVALUE_EB)){
           manager.addEBFieldFrom(domains[outRequestVals.domainName], from, every);
         }
-        else if(!type.compare("Density")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
           manager.addSpeciesDensityFrom(domains[outRequestVals.domainName], outRequestVals.specName, from, every);
         }
-        else if(!type.compare("Current")){
+        else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
           manager.addCurrentFrom(domains[outRequestVals.domainName], from, every);
         }
-        else if(!type.compare("PhSp")){
+        else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
           manager.addSpeciesPhaseSpaceFrom(domains[outRequestVals.domainName], outRequestVals.specName, from, every);
         }
-        else if(!type.compare("Diag")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
           manager.addDiagFrom(from, every);
         }
 
@@ -974,25 +974,25 @@ bool jsonParser::addOutReq(std::string type,OUTPUT_MANAGER &manager, std::map<st
   }
   else{
     if(outRequestVals.isAt){
-      if(!type.compare("E")){
+      if(!type.compare(OUTPUTTYPEVALUE_E)){
          manager.addEFieldAt(outRequestVals.at);
       }
-      else if(!type.compare("B")){
+      else if(!type.compare(OUTPUTTYPEVALUE_B)){
         manager.addBFieldAt(outRequestVals.at);
       }
-      else if(!type.compare("EB")){
+      else if(!type.compare(OUTPUTTYPEVALUE_EB)){
         manager.addEBFieldAt(outRequestVals.at);
       }
-      else if(!type.compare("Density")){
+      else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
         manager.addSpeciesDensityAt(outRequestVals.specName,outRequestVals.at);
       }
-      else if(!type.compare("Current")){
+      else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
         manager.addCurrentAt(outRequestVals.at);
       }
-      else if(!type.compare("PhSp")){
+      else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
         manager.addSpeciesPhaseSpaceAt(outRequestVals.specName,outRequestVals.at);
       }
-      else if(!type.compare("Diag")){
+      else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
         manager.addDiagAt(outRequestVals.at);
       }
 
@@ -1006,49 +1006,49 @@ bool jsonParser::addOutReq(std::string type,OUTPUT_MANAGER &manager, std::map<st
         from = 0.0;
 
       if(outRequestVals.isTo){
-        if(!type.compare("E")){
+        if(!type.compare(OUTPUTTYPEVALUE_E)){
           manager.addEFieldFromTo(from, every, outRequestVals.to);
         }
-        else if(!type.compare("B")){
+        else if(!type.compare(OUTPUTTYPEVALUE_B)){
           manager.addBFieldFromTo(from, every, outRequestVals.to);
         }
-        else if(!type.compare("EB")){
+        else if(!type.compare(OUTPUTTYPEVALUE_EB)){
           manager.addEBFieldFromTo(from, every, outRequestVals.to);
         }
-        else if(!type.compare("Density")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
           manager.addSpeciesDensityFromTo(outRequestVals.specName, from, every, outRequestVals.to);
         }
-        else if(!type.compare("Current")){
+        else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
           manager.addCurrentFromTo(from, every, outRequestVals.to);
         }
-        else if(!type.compare("PhSp")){
+        else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
           manager.addSpeciesPhaseSpaceFromTo(outRequestVals.specName, from, every, outRequestVals.to);
         }
-        else if(!type.compare("Diag")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
           manager.addDiagFromTo(from, every, outRequestVals.to);
         }
 
       }
       else{
-        if(!type.compare("E")){
+        if(!type.compare(OUTPUTTYPEVALUE_E)){
           manager.addEFieldFrom(from, every);
         }
-        else if(!type.compare("B")){
+        else if(!type.compare(OUTPUTTYPEVALUE_B)){
           manager.addBFieldFrom(from, every);
         }
-        else if(!type.compare("EB")){
+        else if(!type.compare(OUTPUTTYPEVALUE_EB)){
           manager.addEBFieldFrom(from, every);
         }
-        else if(!type.compare("Density")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DENSITY)){
           manager.addSpeciesDensityFrom(outRequestVals.specName, from, every);
         }
-        else if(!type.compare("Current")){
+        else if(!type.compare(OUTPUTTYPEVALUE_CURRENT)){
           manager.addCurrentFrom(from, every);
         }
-        else if(!type.compare("PhSp")){
+        else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE)){
           manager.addSpeciesPhaseSpaceFrom(outRequestVals.specName, from, every);
         }
-        else if(!type.compare("Diag")){
+        else if(!type.compare(OUTPUTTYPEVALUE_DIAG)){
           manager.addDiagFrom(from, every);
         }
 
@@ -1062,7 +1062,7 @@ bool jsonParser::addOutReq(std::string type,OUTPUT_MANAGER &manager, std::map<st
 
 
 void jsonParser::setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, std::vector<SPECIE*> &species){
-  std::string  name1="Output";
+  std::string  name1= _JSON_OBJARRAY_OUTPUT;
   Json::Value outputList;
   if(setValue(outputList, document, name1.c_str() ) && outputList.isArray()){
     for(unsigned int index=0; index<outputList.size(); index++){
@@ -1071,22 +1071,22 @@ void jsonParser::setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manage
       std::string type;
 
       bool correct = false;
-      if(setString(&type, outReq, "type")&&isOutTypeOk(type)){
+      if(setString(&type, outReq, _JSON_STRING_OUTPUT_TYPE)&&isOutTypeOk(type)){
 
         jsonParser::outRequest outRequestVals;
 
-        outRequestVals.isFrom = setDouble(&outRequestVals.from, outReq, "from");
-        outRequestVals.isTo = setDouble(&outRequestVals.to, outReq, "to");
-        outRequestVals.isEvery = setDouble(&outRequestVals.every, outReq, "every");
-        outRequestVals.isAt = setDouble(&outRequestVals.at, outReq, "at");
+        outRequestVals.isFrom = setDouble(&outRequestVals.from, outReq, _JSON_DOUBLE_OUTPUT_FROM);
+        outRequestVals.isTo = setDouble(&outRequestVals.to, outReq, _JSON_DOUBLE_OUTPUT_TO);
+        outRequestVals.isEvery = setDouble(&outRequestVals.every, outReq, _JSON_DOUBLE_OUTPUT_EVERY);
+        outRequestVals.isAt = setDouble(&outRequestVals.at, outReq, _JSON_DOUBLE_OUTPUT_AT);
 
-        outRequestVals.isSpecName = setString(&outRequestVals.specName, outReq, "spec");
-        outRequestVals.isDomainName =setString(&outRequestVals.domainName, outReq, "in");
+        outRequestVals.isSpecName = setString(&outRequestVals.specName, outReq, _JSON_STRING_OUTPUT_SPECIES_NAME);
+        outRequestVals.isDomainName =setString(&outRequestVals.domainName, outReq, _JSON_STRING_IN_OUTPUT_DOMAIN_NAME);
 
         bool isSpecRequired=false;
-        if(!type.compare("density"))
+        if(!type.compare(OUTPUTTYPEVALUE_DENSITY))
           isSpecRequired=true;
-        else if(!type.compare("PhSp"))
+        else if(!type.compare(OUTPUTTYPEVALUE_PHASESPACE))
           isSpecRequired=true;
 
         bool isSpecValid = !isSpecRequired || (!outRequestVals.isSpecName) || isSpecNameOk(outRequestVals.specName, species);
