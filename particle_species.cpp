@@ -59,7 +59,7 @@ void SPECIE::allocate_species()
 
   valSize = Np;
   allocated = true;
-  #endif
+#endif
 
 }
 SPECIE::~SPECIE(){
@@ -101,7 +101,7 @@ void SPECIE::reallocate_species()
     printf("\nERROR: species not allocated\n\n");
     exit(11);
 #else
-  return;
+    return;
 #endif
   }
   if (Np > valSize){
@@ -124,7 +124,7 @@ void SPECIE::reallocate_species()
     }
 #endif
   }
-return;
+  return;
 
 }
 
@@ -220,16 +220,16 @@ int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3
     for (int j = 0; j < Ny; j++)
       for (int i = 0; i < Nx; i++)
       {
-    xloc = mygrid->chrloc[0][i];
-    yloc = mygrid->chrloc[1][j];
-    zloc = mygrid->chrloc[2][k];
+        xloc = mygrid->chrloc[0][i];
+        yloc = mygrid->chrloc[1][j];
+        zloc = mygrid->chrloc[2][k];
 
-    if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
-      if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
-        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
-      if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0)
-        counter += particlePerCell;
-        }
+        if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+          if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+            if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
+              if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0)
+                counter += particlePerCell;
+            }
       }
   return counter;
 }
@@ -279,24 +279,24 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
     for (int j = 0; j < Ny; j++)
       for (int i = 0; i < Nx; i++)
       {
-    xloc = mygrid->chrloc[0][i];
-    yloc = mygrid->chrloc[1][j];
-    zloc = mygrid->chrloc[2][k];
-    ih = (int)((xloc - xmin) / dx_in);
-    axh = (xloc - xmin) / dx_in - ih;
-    wh[0] = 1 - axh;
-    wh[1] = axh;
-    ihleft = (ih + Nx_in - 1) % (Nx_in - 1);
-    ihright = (ih + 1) % (Nx_in - 1);
+        xloc = mygrid->chrloc[0][i];
+        yloc = mygrid->chrloc[1][j];
+        zloc = mygrid->chrloc[2][k];
+        ih = (int)((xloc - xmin) / dx_in);
+        axh = (xloc - xmin) / dx_in - ih;
+        wh[0] = 1 - axh;
+        wh[1] = axh;
+        ihleft = (ih + Nx_in - 1) % (Nx_in - 1);
+        ihright = (ih + 1) % (Nx_in - 1);
 
-    if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
-      if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
-        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
-      value = wh[0] * density[ihleft] + wh[1] * density[ihright];
+        if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+          if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+            if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2]){
+              value = wh[0] * density[ihleft] + wh[1] * density[ihright];
 
-      if (value > 0)
-        counter += particlePerCell;
-        }
+              if (value > 0)
+                counter += particlePerCell;
+            }
       }
 
   free(density);
@@ -308,9 +308,9 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
 }
 void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
 #ifdef NO_ALLOCATION
-if(!allocated){
-  return;
-}
+  if(!allocated){
+    return;
+  }
 #endif
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
@@ -329,46 +329,46 @@ if(!allocated){
     for (int j = 0; j < Ny; j++)
       for (int i = 0; i < Nx; i++)
       {
-    xloc = mygrid->chrloc[0][i];
-    yloc = mygrid->chrloc[1][j];
-    zloc = mygrid->chrloc[2][k];
+        xloc = mygrid->chrloc[0][i];
+        yloc = mygrid->chrloc[1][j];
+        zloc = mygrid->chrloc[2][k];
 
-    if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
-      if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
-        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
-        {
-      if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0)
-      {
-        weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / particlePerCell;
-
-        xloc -= 0.5*dx;
-        yloc -= 0.5*dy;
-        zloc -= 0.5*dz;
-        for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
-          for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
-            for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
+        if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+          if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+            if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
             {
-          r0(counter) = xloc + dxp*(ip + 0.5);
-          r1(counter) = yloc + dyp*(jp + 0.5);
-          r2(counter) = zloc + dzp*(kp + 0.5);
-          u0(counter) = u1(counter) = u2(counter) = 0;
-          w(counter) = weight;
-          if(flagWithMarker)
-            marker(counter) = (counter + disp);
-          if (isTestSpecies)
-            w(counter) = (double)(counter + disp);
-          counter++;
+              if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0)
+              {
+                weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / particlePerCell;
+
+                xloc -= 0.5*dx;
+                yloc -= 0.5*dy;
+                zloc -= 0.5*dz;
+                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                    for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
+                    {
+                      r0(counter) = xloc + dxp*(ip + 0.5);
+                      r1(counter) = yloc + dyp*(jp + 0.5);
+                      r2(counter) = zloc + dzp*(kp + 0.5);
+                      u0(counter) = u1(counter) = u2(counter) = 0;
+                      w(counter) = weight;
+                      if(flagWithMarker)
+                        marker(counter) = (counter + disp);
+                      if (isTestSpecies)
+                        w(counter) = (double)(counter + disp);
+                      counter++;
+                    }
+              }
             }
-      }
-        }
       }
 }
 
 void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
 #ifdef NO_ALLOCATION
-if(!allocated){
-  return;
-}
+  if(!allocated){
+    return;
+  }
 #endif
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
@@ -424,7 +424,8 @@ if(!allocated){
                       r2(counter) = myz;
                       u0(counter) = u1(counter) = u2(counter) = 0;
                       w(counter) = weight*mydx*mydy*mydz;
-                      marker(counter) = (counter + disp);
+                      if(flagWithMarker)
+                        marker(counter) = (counter + disp);
                       if (isTestSpecies)
                         w(counter) = (double)(counter + disp);
                       counter++;
@@ -488,49 +489,49 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
     for (int j = 0; j < Ny; j++)
       for (int i = 0; i < Nx; i++)
       {
-    xloc = mygrid->chrloc[0][i];
-    yloc = mygrid->chrloc[1][j];
-    zloc = mygrid->chrloc[2][k];
+        xloc = mygrid->chrloc[0][i];
+        yloc = mygrid->chrloc[1][j];
+        zloc = mygrid->chrloc[2][k];
 
-    ih = (int)((xloc - xmin) / dx_in);
-    axh = (xloc - xmin) / dx_in - ih;
-    wh[0] = 1 - axh;
-    wh[1] = axh;
-    ihleft = (ih + Nx_in - 1) % (Nx_in - 1);
-    ihright = (ih + 1) % (Nx_in - 1);
+        ih = (int)((xloc - xmin) / dx_in);
+        axh = (xloc - xmin) / dx_in - ih;
+        wh[0] = 1 - axh;
+        wh[1] = axh;
+        ihleft = (ih + Nx_in - 1) % (Nx_in - 1);
+        ihright = (ih + 1) % (Nx_in - 1);
 
-    if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
-      if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
-        if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
-        {
-      denValue = wh[0] * density[ihleft] + wh[1] * density[ihright];
-      if (denValue > 0)
-      {
-        velValue = wh[0] * velocity[ihleft] + wh[1] * velocity[ihright];
-        weight = denValue / particlePerCell;
-        xloc -= 0.5*dx;
-        yloc -= 0.5*dy;
-        zloc -= 0.5*dz;
-        myuy = wh[0] * uy[ihleft] + wh[1] * uy[ihright];
-        myuz = wh[0] * uz[ihleft] + wh[1] * uz[ihright];
-        for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
-          for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
-            for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
+        if (xloc >= plasmarmin[0] && xloc <= plasmarmax[0])
+          if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
+            if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
             {
-          r0(counter) = xloc + dxp*(ip + 0.5);
-          r1(counter) = yloc + dyp*(jp + 0.5);
-          r2(counter) = zloc + dzp*(kp + 0.5);
-          u0(counter) = 0;//velValue/(sqrt(1-velValue*velValue));
-          u1(counter) = myuy;
-          u2(counter) = myuz;
-          w(counter) = weight;
-          marker(counter) = (counter + disp);
-          if (isTestSpecies)
-            w(counter) = (double)(counter + disp);
-          counter++;
+              denValue = wh[0] * density[ihleft] + wh[1] * density[ihright];
+              if (denValue > 0)
+              {
+                velValue = wh[0] * velocity[ihleft] + wh[1] * velocity[ihright];
+                weight = denValue / particlePerCell;
+                xloc -= 0.5*dx;
+                yloc -= 0.5*dy;
+                zloc -= 0.5*dz;
+                myuy = wh[0] * uy[ihleft] + wh[1] * uy[ihright];
+                myuz = wh[0] * uz[ihleft] + wh[1] * uz[ihright];
+                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                    for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
+                    {
+                      r0(counter) = xloc + dxp*(ip + 0.5);
+                      r1(counter) = yloc + dyp*(jp + 0.5);
+                      r2(counter) = zloc + dzp*(kp + 0.5);
+                      u0(counter) = 0;//velValue/(sqrt(1-velValue*velValue));
+                      u1(counter) = myuy;
+                      u2(counter) = myuz;
+                      w(counter) = weight;
+                      marker(counter) = (counter + disp);
+                      if (isTestSpecies)
+                        w(counter) = (double)(counter + disp);
+                      counter++;
+                    }
+              }
             }
-      }
-        }
       }
   free(density);
   free(velocity);
@@ -862,13 +863,13 @@ void SPECIE::init_output_extrems(std::ofstream &ff){
 
   if (mygrid->myid == mygrid->master_proc){
     ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time"
-      << " " << std::setw(myWidth) << "xmin" << " " << std::setw(myWidth) << "xmax"
-      << " " << std::setw(myWidth) << "ymin" << " " << std::setw(myWidth) << "ymax"
-      << " " << std::setw(myWidth) << "zmin" << " " << std::setw(myWidth) << "zmax"
-      << " " << std::setw(myWidth) << "pxmin" << " " << std::setw(myWidth) << "pxmax"
-      << " " << std::setw(myWidth) << "pymin" << " " << std::setw(myWidth) << "pymax"
-      << " " << std::setw(myWidth) << "pzmin" << " " << std::setw(myWidth) << "pzmax"
-      << " " << std::setw(myWidth) << "gammamin" << " " << std::setw(myWidth) << "gammamax" << std::endl;
+       << " " << std::setw(myWidth) << "xmin" << " " << std::setw(myWidth) << "xmax"
+       << " " << std::setw(myWidth) << "ymin" << " " << std::setw(myWidth) << "ymax"
+       << " " << std::setw(myWidth) << "zmin" << " " << std::setw(myWidth) << "zmax"
+       << " " << std::setw(myWidth) << "pxmin" << " " << std::setw(myWidth) << "pxmax"
+       << " " << std::setw(myWidth) << "pymin" << " " << std::setw(myWidth) << "pymax"
+       << " " << std::setw(myWidth) << "pzmin" << " " << std::setw(myWidth) << "pzmax"
+       << " " << std::setw(myWidth) << "gammamin" << " " << std::setw(myWidth) << "gammamax" << std::endl;
   }
 }
 void SPECIE::output_extrems(int istep, std::ofstream &ff){
@@ -957,36 +958,36 @@ void SPECIE::position_advance()
 
   switch (mygrid->getDimensionality())
   {
-  case 3:
-    //#pragma omp parallel for
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-      r0(p) += dt*gamma_i*u0(p);
-      r1(p) += dt*gamma_i*u1(p);
-      r2(p) += dt*gamma_i*u2(p);
+    case 3:
+      //#pragma omp parallel for
+      for (p = 0; p < Np; p++)
+      {
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        r0(p) += dt*gamma_i*u0(p);
+        r1(p) += dt*gamma_i*u1(p);
+        r2(p) += dt*gamma_i*u2(p);
 
-    }
-    break;
-  case 2:
+      }
+      break;
+    case 2:
 
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-      r0(p) += dt*gamma_i*u0(p);
-      r1(p) += dt*gamma_i*u1(p);
+      for (p = 0; p < Np; p++)
+      {
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        r0(p) += dt*gamma_i*u0(p);
+        r1(p) += dt*gamma_i*u1(p);
 
-    }
-    break;
-  case 1:
+      }
+      break;
+    case 1:
 
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-      r0(p) += dt*gamma_i*u0(p);
+      for (p = 0; p < Np; p++)
+      {
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        r0(p) += dt*gamma_i*u0(p);
 
-    }
-    break;
+      }
+      break;
 
   }
 }
@@ -1080,27 +1081,27 @@ void SPECIE::position_parallel_pbc()
       }
     }
     MPI_Cart_shift(mygrid->cart_comm, direction, 1, &ileft, &iright);
-    // ====== send right receive from left						
+    // ====== send right receive from left
     ninleft = 0;
     MPI_Sendrecv(&nright, 1, MPI_INT, iright, 13,
-      &ninleft, 1, MPI_INT, ileft, 13,
-      MPI_COMM_WORLD, &status);
+                 &ninleft, 1, MPI_INT, ileft, 13,
+                 MPI_COMM_WORLD, &status);
     nnew = ninleft;
 
     // ====== send left receive from right
     ninright = 0;
     MPI_Sendrecv(&nleft, 1, MPI_INT, ileft, 13,
-      &ninright, 1, MPI_INT, iright, 13,
-      MPI_COMM_WORLD, &status);
+                 &ninright, 1, MPI_INT, iright, 13,
+                 MPI_COMM_WORLD, &status);
     nnew += ninright;
     recv_buffer = (double*)realloc(recv_buffer, nnew*Ncomp*sizeof(double));
-    // ====== send right receive from left				
+    // ====== send right receive from left
     MPI_Sendrecv(sendr_buffer, nright*Ncomp, MPI_DOUBLE, iright, 13,
-      recv_buffer, ninleft*Ncomp, MPI_DOUBLE, ileft, 13,
-      MPI_COMM_WORLD, &status);
+                 recv_buffer, ninleft*Ncomp, MPI_DOUBLE, ileft, 13,
+                 MPI_COMM_WORLD, &status);
     MPI_Sendrecv(sendl_buffer, nleft*Ncomp, MPI_DOUBLE, ileft, 13,
-      (recv_buffer + ninleft*Ncomp), ninright*Ncomp, MPI_DOUBLE, iright, 13,
-      MPI_COMM_WORLD, &status);
+                 (recv_buffer + ninleft*Ncomp), ninright*Ncomp, MPI_DOUBLE, iright, 13,
+                 MPI_COMM_WORLD, &status);
     nold = Np;
     Np = Np - nlost + nnew;
 
@@ -1188,41 +1189,128 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
   switch (mygrid->getDimensionality())
   {
 
-  case 3:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
+    case 3:
+      for (p = 0; p < Np; p++)
       {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 3; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
+
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+              i2 = i + hii[0] - 1;
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            }
+          }
+        }
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
-      for (c = 0; c < 3; c++)
+      break;
+
+    case 2:
+      for (p = 0; p < Np; p++)
       {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 2; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
-        k2 = k + hii[2] - 1;
+        k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -1231,219 +1319,132 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j],
+                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j],
+                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j],
+                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j],
+                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j],
+                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j],
+                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
           }
         }
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
+      break;
 
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-    }
-    break;
-
-  case 2:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
+    case 1:
+      for (p = 0; p < Np; p++)
       {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 2; c++)
-      {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 1; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-      k1 = k2 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
-        j2 = j + hii[1] - 1;
+        k1 = k2 = j1 = j2 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i] * wiw[1][j],
-            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i] * hiw[1][j],
-            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i] * wiw[1][j],
-            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i] * hiw[1][j],
-            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i] * wiw[1][j],
-            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i] * hiw[1][j],
-            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
         }
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
-
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-    }
-    break;
-
-  case 1:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
-      {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 1; c++)
-      {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
-
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
-
-      k1 = k2 = j1 = j2 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        i2 = i + hii[0] - 1;
-        dvol = hiw[0][i],
-          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-        dvol = wiw[0][i],
-          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-        dvol = wiw[0][i],
-          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
-
-        dvol = wiw[0][i],
-          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-        dvol = hiw[0][i],
-          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-        dvol = hiw[0][i],
-          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
-      }
-
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-    }
-    break;
+      break;
   }
 }
 
@@ -1480,41 +1481,157 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
   switch (mygrid->getDimensionality())
   {
 
-  case 3:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
+    case 3:
+      for (p = 0; p < Np; p++)
       {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 3; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
+
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+              i2 = i + hii[0] - 1;
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            }
+          }
+        }
+
+        oldP[0] = ru(3, p);
+        oldP[1] = ru(4, p);
+        oldP[2] = ru(5, p);
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+        pn[0] = 0.5*(oldP[0] + ru(3, p));
+        pn[1] = 0.5*(oldP[1] + ru(4, p));
+        pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+        vn[0] = pn[0] / gamman;
+        vn[1] = pn[1] / gamman;
+        vn[2] = pn[2] / gamman;
+
+        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+        vdotE2 = vdotE2*vdotE2;
+
+        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
+
       }
-      for (c = 0; c < 3; c++)
+      break;
+
+    case 2:
+      for (p = 0; p < Np; p++)
       {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 2; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
-        k2 = k + hii[2] - 1;
+        k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -1523,304 +1640,188 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j],
+                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j],
+                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j],
+                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j],
+                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j],
+                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j],
+                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
           }
         }
+
+        oldP[0] = ru(3, p);
+        oldP[1] = ru(4, p);
+        oldP[2] = ru(5, p);
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+        pn[0] = 0.5*(oldP[0] + ru(3, p));
+        pn[1] = 0.5*(oldP[1] + ru(4, p));
+        pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+        vn[0] = pn[0] / gamman;
+        vn[1] = pn[1] / gamman;
+        vn[2] = pn[2] / gamman;
+
+        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+        vdotE2 = vdotE2*vdotE2;
+
+        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
       }
+      break;
 
-      oldP[0] = ru(3, p);
-      oldP[1] = ru(4, p);
-      oldP[2] = ru(5, p);
-
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-      pn[0] = 0.5*(oldP[0] + ru(3, p));
-      pn[1] = 0.5*(oldP[1] + ru(4, p));
-      pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-      vn[0] = pn[0] / gamman;
-      vn[1] = pn[1] / gamman;
-      vn[2] = pn[2] / gamman;
-
-      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-      vdotE2 = vdotE2*vdotE2;
-
-      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
-
-    }
-    break;
-
-  case 2:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
+    case 1:
+      for (p = 0; p < Np; p++)
       {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 2; c++)
-      {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 1; c++)
+        {
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-      k1 = k2 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
-        j2 = j + hii[1] - 1;
+        k1 = k2 = j1 = j2 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i] * wiw[1][j],
-            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i] * hiw[1][j],
-            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i] * wiw[1][j],
-            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i] * hiw[1][j],
-            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i] * wiw[1][j],
-            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i] * hiw[1][j],
-            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
         }
+
+        oldP[0] = ru(3, p);
+        oldP[1] = ru(4, p);
+        oldP[2] = ru(5, p);
+
+        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+        ess[0] = 2 * dummy*tee[0];
+        ess[1] = 2 * dummy*tee[1];
+        ess[2] = 2 * dummy*tee[2];
+
+        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+        pn[0] = 0.5*(oldP[0] + ru(3, p));
+        pn[1] = 0.5*(oldP[1] + ru(4, p));
+        pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+        vn[0] = pn[0] / gamman;
+        vn[1] = pn[1] / gamman;
+        vn[2] = pn[2] / gamman;
+
+        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+        vdotE2 = vdotE2*vdotE2;
+
+        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
       }
-
-      oldP[0] = ru(3, p);
-      oldP[1] = ru(4, p);
-      oldP[2] = ru(5, p);
-
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-      pn[0] = 0.5*(oldP[0] + ru(3, p));
-      pn[1] = 0.5*(oldP[1] + ru(4, p));
-      pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-      vn[0] = pn[0] / gamman;
-      vn[1] = pn[1] / gamman;
-      vn[2] = pn[2] / gamman;
-
-      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-      vdotE2 = vdotE2*vdotE2;
-
-      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
-    }
-    break;
-
-  case 1:
-    for (p = 0; p < Np; p++)
-    {
-      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-      for (c = 0; c < 3; c++)
-      {
-        xx[c] = ru(c, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 1; c++)
-      {
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
-
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
-
-      k1 = k2 = j1 = j2 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        i2 = i + hii[0] - 1;
-        dvol = hiw[0][i],
-          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-        dvol = wiw[0][i],
-          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-        dvol = wiw[0][i],
-          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
-
-        dvol = wiw[0][i],
-          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-        dvol = hiw[0][i],
-          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-        dvol = hiw[0][i],
-          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
-      }
-
-      oldP[0] = ru(3, p);
-      oldP[1] = ru(4, p);
-      oldP[2] = ru(5, p);
-
-      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-      ess[0] = 2 * dummy*tee[0];
-      ess[1] = 2 * dummy*tee[1];
-      ess[2] = 2 * dummy*tee[2];
-
-      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-      pn[0] = 0.5*(oldP[0] + ru(3, p));
-      pn[1] = 0.5*(oldP[1] + ru(4, p));
-      pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-      vn[0] = pn[0] / gamman;
-      vn[1] = pn[1] / gamman;
-      vn[2] = pn[2] / gamman;
-
-      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-      vdotE2 = vdotE2*vdotE2;
-
-      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
-    }
-    break;
+      break;
   }
 }
 
@@ -1880,11 +1881,39 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 
     switch (mygrid->getDimensionality())
     {
-    case 3:
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
-        k2 = k + hii[2] - 1;
+      case 3:
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+              i2 = i + hii[0] - 1;
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            }
+          }
+        }
+        break;
+
+      case 2:
+        k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -1893,72 +1922,44 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j],
+                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j],
+                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j],
+                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j],
+                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j],
+                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j],
+                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
           }
         }
-      }
-      break;
+        break;
 
-    case 2:
-      k1 = k2 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
-        j2 = j + hii[1] - 1;
+      case 1:
+        k1 = k2 = j1 = j2 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i] * wiw[1][j],
-            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i] * hiw[1][j],
-            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i] * wiw[1][j],
-            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i] * hiw[1][j],
-            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i] * wiw[1][j],
-            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i] * hiw[1][j],
-            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
         }
-      }
-      break;
-
-    case 1:
-      k1 = k2 = j1 = j2 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        i2 = i + hii[0] - 1;
-        dvol = hiw[0][i],
-          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-        dvol = wiw[0][i],
-          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-        dvol = wiw[0][i],
-          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
-
-        dvol = wiw[0][i],
-          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-        dvol = hiw[0][i],
-          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-        dvol = hiw[0][i],
-          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
-      }
-      break;
+        break;
     }
 
     u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
@@ -2015,51 +2016,129 @@ void SPECIE::current_deposition(CURRENT *current)
   if (mygrid->getDimensionality() == 3)
     for (p = 0; p < Np; p++)
     {
-    memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
-    xx1[0] = ru(0, p);
-    ru(0, p) += dt*gamma_i*u0(p);
-    xx2[0] = ru(0, p);
+      xx1[0] = ru(0, p);
+      ru(0, p) += dt*gamma_i*u0(p);
+      xx2[0] = ru(0, p);
 
-    xx1[1] = ru(1, p);
-    ru(1, p) += dt*gamma_i*u1(p);
-    xx2[1] = ru(1, p);
+      xx1[1] = ru(1, p);
+      ru(1, p) += dt*gamma_i*u1(p);
+      xx2[1] = ru(1, p);
 
-    xx1[2] = ru(2, p);
-    ru(2, p) += dt*gamma_i*u2(p);
-    xx2[2] = ru(2, p);
+      xx1[2] = ru(2, p);
+      ru(2, p) += dt*gamma_i*u2(p);
+      xx2[2] = ru(2, p);
 
-    for (c = 0; c < mygrid->getDimensionality(); c++)
-    {
-      r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
-      r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
-      ii1[c] = (int)floor(r1 + 0.5);
-      ii2[c] = (int)floor(r2 + 0.5);
-      r1 -= ii1[c];
-      r2 -= ii2[c];
-      r12 = r1*r1;
-      r22 = r2*r2;
-      di = ii2[c] - ii1[c];
+      for (c = 0; c < mygrid->getDimensionality(); c++)
+      {
+        r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
+        r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
+        ii1[c] = (int)floor(r1 + 0.5);
+        ii2[c] = (int)floor(r2 + 0.5);
+        r1 -= ii1[c];
+        r2 -= ii2[c];
+        r12 = r1*r1;
+        r22 = r2*r2;
+        di = ii2[c] - ii1[c];
 
-      w1[c][4] = 0;
-      w1[c][3] = 0.5*(0.25 + r12 + r1);
-      w1[c][2] = 0.75 - r12;
-      w1[c][1] = 1. - w1[c][3] - w1[c][2];
-      w1[c][0] = 0;
+        w1[c][4] = 0;
+        w1[c][3] = 0.5*(0.25 + r12 + r1);
+        w1[c][2] = 0.75 - r12;
+        w1[c][1] = 1. - w1[c][3] - w1[c][2];
+        w1[c][0] = 0;
 
-      w2[c][(4 + di) % 5] = 0.;
-      w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
-      w2[c][2 + di] = 0.75 - r22;
-      w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
-      w2[c][(0 + di) % 5] = 0;
+        w2[c][(4 + di) % 5] = 0.;
+        w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
+        w2[c][2 + di] = 0.75 - r22;
+        w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
+        w2[c][(0 + di) % 5] = 0;
 
+      }
+      norm = 1.;
+      for (tk = 0; tk < 5; tk++)
+      {
+        k2 = tk + ii1[2] - 2;
+        for (tj = 0; tj < 5; tj++)
+        {
+          j2 = tj + ii1[1] - 2;
+          for (ti = 0; ti < 5; ti++)
+          {
+            i2 = ti + ii1[0] - 2;
+
+            s0x = w1[0][ti];
+            s0y = w1[1][tj];
+            s0z = w1[2][tk];
+            dsx = -w1[0][ti] + w2[0][ti];
+            dsy = -w1[1][tj] + w2[1][tj];
+            dsz = -w1[2][tk] + w2[2][tk];
+
+            W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + UN_TERZO*dsy*dsz) / dt;
+            W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + UN_TERZO*dsz*dsx) / dt;
+            W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy) / dt;
+
+            J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
+            J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
+            J[2][ti][tj][tk] = -mygrid->dr[2] * W[2][ti][tj][0];
+            current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
+            current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
+            current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
+
+          }
+        }
+      }
     }
-    norm = 1.;
-    for (tk = 0; tk < 5; tk++)
+  if (mygrid->getDimensionality() == 2)
+    for (p = 0; p < Np; p++)
     {
-      k2 = tk + ii1[2] - 2;
+      memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      vz = gamma_i*u2(p);
+      //ru(2, p) += dt*vz;
+
+      xx1[0] = ru(0, p);
+      ru(0, p) += dt*gamma_i*u0(p);
+      xx2[0] = ru(0, p);
+
+      xx1[1] = ru(1, p);
+      ru(1, p) += dt*gamma_i*u1(p);
+      xx2[1] = ru(1, p);
+
+      for (c = 0; c < mygrid->getDimensionality(); c++)
+      {
+        r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
+        r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
+        ii1[c] = (int)floor(r1 + 0.5);
+        ii2[c] = (int)floor(r2 + 0.5);
+        //ii1[c]=rint(r1);
+        //ii2[c]=rint(r2);
+        //ii1[c]=(int)(r1+0.5);
+        //ii2[c]=(int)(r2+0.5);
+        r1 -= ii1[c];
+        r2 -= ii2[c];
+        r12 = r1*r1;
+        r22 = r2*r2;
+        di = ii2[c] - ii1[c];
+
+        w1[c][4] = 0;
+        w1[c][3] = 0.5*(0.25 + r12 + r1);
+        w1[c][2] = 0.75 - r12;
+        w1[c][1] = 1. - w1[c][3] - w1[c][2];
+        w1[c][0] = 0;
+
+        w2[c][(4 + di) % 5] = 0.;
+        w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
+        w2[c][2 + di] = 0.75 - r22;
+        w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
+        w2[c][(0 + di) % 5] = 0;
+
+      }
+      norm = 1.;
+
+      tk = k2 = 0;//tk+ii1[2]-2;
       for (tj = 0; tj < 5; tj++)
       {
         j2 = tj + ii1[1] - 2;
@@ -2069,169 +2148,91 @@ void SPECIE::current_deposition(CURRENT *current)
 
           s0x = w1[0][ti];
           s0y = w1[1][tj];
-          s0z = w1[2][tk];
+
           dsx = -w1[0][ti] + w2[0][ti];
           dsy = -w1[1][tj] + w2[1][tj];
-          dsz = -w1[2][tk] + w2[2][tk];
 
-          W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + UN_TERZO*dsy*dsz) / dt;
-          W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + UN_TERZO*dsz*dsx) / dt;
-          W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy) / dt;
+
+          W[0][0][tj][tk] += norm*dsx*(s0y + 0.5*dsy) / dt;
+          W[1][ti][0][tk] += norm*dsy*(s0x + 0.5*dsx) / dt;
+          W[2][ti][tj][0] = norm*vz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy);
 
           J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
           J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
-          J[2][ti][tj][tk] = -mygrid->dr[2] * W[2][ti][tj][0];
+          J[2][ti][tj][tk] = W[2][ti][tj][0];
           current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
           current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
           current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
 
         }
       }
+
     }
-    }
-  if (mygrid->getDimensionality() == 2)
+  if (mygrid->getDimensionality() == 1)
     for (p = 0; p < Np; p++)
     {
-    memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-    vz = gamma_i*u2(p);
-    //ru(2, p) += dt*vz;
+      memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
+      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      vy = gamma_i*u1(p);
+      vz = gamma_i*u2(p);
+      //			ru(1, p) += dt*vy;
+      //			ru(2, p) += dt*vz;
+      for (c = 0; c < mygrid->getDimensionality(); c++)
+      {
+        xx1[c] = ru(c, p);
+        ru(c, p) += dt*gamma_i*u0(p);
+        xx2[c] = ru(c, p);
+      }
+      for (c = 0; c < mygrid->getDimensionality(); c++)
+      {
+        r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
+        r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
+        ii1[c] = (int)floor(r1 + 0.5);
+        ii2[c] = (int)floor(r2 + 0.5);
+        r1 -= ii1[c];
+        r2 -= ii2[c];
+        r12 = r1*r1;
+        r22 = r2*r2;
+        di = ii2[c] - ii1[c];
 
-    xx1[0] = ru(0, p);
-    ru(0, p) += dt*gamma_i*u0(p);
-    xx2[0] = ru(0, p);
+        w1[c][4] = 0;
+        w1[c][3] = 0.5*(0.25 + r12 + r1);
+        w1[c][2] = 0.75 - r12;
+        w1[c][1] = 1. - w1[c][3] - w1[c][2];
+        w1[c][0] = 0;
 
-    xx1[1] = ru(1, p);
-    ru(1, p) += dt*gamma_i*u1(p);
-    xx2[1] = ru(1, p);
+        w2[c][(4 + di) % 5] = 0.;
+        w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
+        w2[c][2 + di] = 0.75 - r22;
+        w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
+        w2[c][(0 + di) % 5] = 0;
 
-    for (c = 0; c < mygrid->getDimensionality(); c++)
-    {
-      r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
-      r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
-      ii1[c] = (int)floor(r1 + 0.5);
-      ii2[c] = (int)floor(r2 + 0.5);
-      //ii1[c]=rint(r1); 
-      //ii2[c]=rint(r2); 
-      //ii1[c]=(int)(r1+0.5); 
-      //ii2[c]=(int)(r2+0.5); 
-      r1 -= ii1[c];
-      r2 -= ii2[c];
-      r12 = r1*r1;
-      r22 = r2*r2;
-      di = ii2[c] - ii1[c];
+      }
+      norm = 1.;
 
-      w1[c][4] = 0;
-      w1[c][3] = 0.5*(0.25 + r12 + r1);
-      w1[c][2] = 0.75 - r12;
-      w1[c][1] = 1. - w1[c][3] - w1[c][2];
-      w1[c][0] = 0;
+      tj = j2 = 0;//tk+ii1[2]-2;
+      tk = k2 = 0;//tk+ii1[2]-2;
 
-      w2[c][(4 + di) % 5] = 0.;
-      w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
-      w2[c][2 + di] = 0.75 - r22;
-      w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
-      w2[c][(0 + di) % 5] = 0;
-
-    }
-    norm = 1.;
-
-    tk = k2 = 0;//tk+ii1[2]-2;
-    for (tj = 0; tj < 5; tj++)
-    {
-      j2 = tj + ii1[1] - 2;
       for (ti = 0; ti < 5; ti++)
       {
         i2 = ti + ii1[0] - 2;
 
         s0x = w1[0][ti];
-        s0y = w1[1][tj];
+        dsx = w2[0][ti] - w1[0][ti];
 
-        dsx = -w1[0][ti] + w2[0][ti];
-        dsy = -w1[1][tj] + w2[1][tj];
-
-
-        W[0][0][tj][tk] += norm*dsx*(s0y + 0.5*dsy) / dt;
-        W[1][ti][0][tk] += norm*dsy*(s0x + 0.5*dsx) / dt;
-        W[2][ti][tj][0] = norm*vz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy);
+        W[0][0][tj][tk] += norm*dsx / mygrid->dt;
+        W[1][ti][0][tk] = norm*vy*(s0x + 0.5*dsx);
+        W[2][ti][tj][0] = norm*vz*(s0x + 0.5*dsx);
 
         J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
-        J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
+        J[1][ti][tj][tk] = W[1][ti][0][tk];
         J[2][ti][tj][tk] = W[2][ti][tj][0];
         current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
         current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
         current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
 
       }
-    }
-
-    }
-  if (mygrid->getDimensionality() == 1)
-    for (p = 0; p < Np; p++)
-    {
-    memset((void*)J, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    memset((void*)W, 0, 3 * 5 * 5 * 5 * sizeof(double));
-    gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-    vy = gamma_i*u1(p);
-    vz = gamma_i*u2(p);
-    //			ru(1, p) += dt*vy;
-    //			ru(2, p) += dt*vz;
-    for (c = 0; c < mygrid->getDimensionality(); c++)
-    {
-      xx1[c] = ru(c, p);
-      ru(c, p) += dt*gamma_i*u0(p);
-      xx2[c] = ru(c, p);
-    }
-    for (c = 0; c < mygrid->getDimensionality(); c++)
-    {
-      r1 = mygrid->dri[c] * (xx1[c] - mygrid->rminloc[c]);
-      r2 = mygrid->dri[c] * (xx2[c] - mygrid->rminloc[c]);
-      ii1[c] = (int)floor(r1 + 0.5);
-      ii2[c] = (int)floor(r2 + 0.5);
-      r1 -= ii1[c];
-      r2 -= ii2[c];
-      r12 = r1*r1;
-      r22 = r2*r2;
-      di = ii2[c] - ii1[c];
-
-      w1[c][4] = 0;
-      w1[c][3] = 0.5*(0.25 + r12 + r1);
-      w1[c][2] = 0.75 - r12;
-      w1[c][1] = 1. - w1[c][3] - w1[c][2];
-      w1[c][0] = 0;
-
-      w2[c][(4 + di) % 5] = 0.;
-      w2[c][3 + di] = 0.5*(0.25 + r22 + r2);
-      w2[c][2 + di] = 0.75 - r22;
-      w2[c][1 + di] = 1. - w2[c][2 + di] - w2[c][3 + di];
-      w2[c][(0 + di) % 5] = 0;
-
-    }
-    norm = 1.;
-
-    tj = j2 = 0;//tk+ii1[2]-2;
-    tk = k2 = 0;//tk+ii1[2]-2;
-
-    for (ti = 0; ti < 5; ti++)
-    {
-      i2 = ti + ii1[0] - 2;
-
-      s0x = w1[0][ti];
-      dsx = w2[0][ti] - w1[0][ti];
-
-      W[0][0][tj][tk] += norm*dsx / mygrid->dt;
-      W[1][ti][0][tk] = norm*vy*(s0x + 0.5*dsx);
-      W[2][ti][tj][0] = norm*vz*(s0x + 0.5*dsx);
-
-      J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
-      J[1][ti][tj][tk] = W[1][ti][0][tk];
-      J[2][ti][tj][tk] = W[2][ti][tj][0];
-      current->Jx(i2, j2, k2) += chargeSign*w(p)*J[0][ti][tj][tk];
-      current->Jy(i2, j2, k2) += chargeSign*w(p)*J[1][ti][tj][tk];
-      current->Jz(i2, j2, k2) += chargeSign*w(p)*J[2][ti][tj][tk];
-
-    }
 
 
     }
@@ -2398,7 +2399,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
 
       temp = gsl_ran_exponential(ext_rng, Ta);
       ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);      
+      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
       cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
       sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = uxin + ptot*sin_theta*cos(phi);
@@ -2415,7 +2416,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
 
       temp = gsl_ran_exponential(ext_rng, Ta);
       ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);      
+      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
       cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
       sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = ptot*sin_theta*cos(phi);
@@ -2463,7 +2464,7 @@ void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin
     return;
 
   if (!allocated){
-    #ifndef NO_ALLOCATION
+#ifndef NO_ALLOCATION
     std::cout << "Warning: species " << name << " is not allocated !" << std::endl;
 #endif
     return;
@@ -2477,55 +2478,55 @@ void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin
   switch (distribution.type)
   {
     //TRASFORMARE LE ISTRUZIONI NEI DIVERSI CASI IN CHIAMATE A FUNZIONI PRIVATE
-  case WATERBAG:
-    callWaterbag(ext_rng,
-      distribution.p0,
-      distribution.p0,
-      distribution.p0,
-      uxin, uyin, uzin);
-    break;
+    case WATERBAG:
+      callWaterbag(ext_rng,
+                   distribution.p0,
+                   distribution.p0,
+                   distribution.p0,
+                   uxin, uyin, uzin);
+      break;
 
-  case WATERBAG_3TEMP:
+    case WATERBAG_3TEMP:
 
-    callWaterbag(ext_rng,
-      distribution.p0_x,
-      distribution.p0_y,
-      distribution.p0_z,
-      uxin, uyin, uzin);
-    break;
+      callWaterbag(ext_rng,
+                   distribution.p0_x,
+                   distribution.p0_y,
+                   distribution.p0_z,
+                   uxin, uyin, uzin);
+      break;
 
-  case UNIF_SPHERE:
-    callUnifSphere(ext_rng,
-      distribution.p0,
-      uxin, uyin, uzin);
-    break;
+    case UNIF_SPHERE:
+      callUnifSphere(ext_rng,
+                     distribution.p0,
+                     uxin, uyin, uzin);
+      break;
 
-  case SUPERGAUSSIAN:
-    callSupergaussian(ext_rng,
-      distribution.p0,
-      distribution.alpha,
-      uxin, uyin, uzin);
-    break;
+    case SUPERGAUSSIAN:
+      callSupergaussian(ext_rng,
+                        distribution.p0,
+                        distribution.alpha,
+                        uxin, uyin, uzin);
+      break;
 
-  case MAXWELL:
-    callMaxwell(ext_rng,
-      distribution.temp,
-      uxin, uyin, uzin);
-    break;
+    case MAXWELL:
+      callMaxwell(ext_rng,
+                  distribution.temp,
+                  uxin, uyin, uzin);
+      break;
 
-  case JUTTNER:
-    callJuttner(ext_rng,
-      distribution.a,
-      uxin, uyin, uzin);
-    break;
+    case JUTTNER:
+      callJuttner(ext_rng,
+                  distribution.a,
+                  uxin, uyin, uzin);
+      break;
 
-  case SPECIAL:
-    callSpecial(ext_rng,
-      distribution.a);
-    break;
+    case SPECIAL:
+      callSpecial(ext_rng,
+                  distribution.a);
+      break;
 
-  default:
-    break;
+    default:
+      break;
 
 
   }
@@ -2574,49 +2575,111 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
   switch (mygrid->getDimensionality())
   {
-  case 3:
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-
-      for (c = 0; c < 3; c++)
+    case 3:
+      for (p = 0; p < Np; p++)
       {
-        vv[c] = gamma_i*ru(c + 3, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hiw[c][0] = wiw[c][0] = 0;
-        hiw[c][2] = wiw[c][2] = 0;
-        hii[c] = wii[c] = 0;
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+        for (c = 0; c < 3; c++)
+        {
+          vv[c] = gamma_i*ru(c + 3, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hiw[c][0] = wiw[c][0] = 0;
+          hiw[c][2] = wiw[c][2] = 0;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = ru(c, p) + 0.5*dt*vv[c];
+          ru(c, p) += dt*vv[c];
+
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          //wii[c]=(int)(rr+0.5); //whole integer int
+          //hii[c]=(int)(rr);     //half integer int
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
+
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+
+
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+              i2 = i + hii[0] - 1;
+
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                  current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                  current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                  current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+
+            }
+          }
+        }
       }
-      for (c = 0; c < 3; c++)
+      break;
+
+    case 2:
+      for (p = 0; p < Np; p++)
       {
-        xx[c] = ru(c, p) + 0.5*dt*vv[c];
-        ru(c, p) += dt*vv[c];
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        //wii[c]=(int)(rr+0.5); //whole integer int
-        //hii[c]=(int)(rr);     //half integer int
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        for (c = 0; c < 3; c++)
+        {
+          vv[c] = gamma_i*ru(c + 3, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hiw[c][0] = wiw[c][0] = 0;
+          hiw[c][2] = wiw[c][2] = 0;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 2; c++)
+        {
+          xx[c] = ru(c, p) + 0.5*dt*vv[c];
+          ru(c, p) += dt*vv[c];
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          //wii[c]=(int)(rr+0.5); //whole integer int
+          //hii[c]=(int)(rr);     //half integer int
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
 
 
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
-        k2 = k + hii[2] - 1;
+        k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -2625,133 +2688,71 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-
-            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-              current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-              current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-              current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
-
+            dvol = hiw[0][i] * wiw[1][j],
+                current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i] * hiw[1][j],
+                current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i] * wiw[1][j],
+                current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
           }
         }
       }
-    }
-    break;
+      break;
 
-  case 2:
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-
-      for (c = 0; c < 3; c++)
+    case 1:
+      for (p = 0; p < Np; p++)
       {
-        vv[c] = gamma_i*ru(c + 3, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hiw[c][0] = wiw[c][0] = 0;
-        hiw[c][2] = wiw[c][2] = 0;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 2; c++)
-      {
-        xx[c] = ru(c, p) + 0.5*dt*vv[c];
-        ru(c, p) += dt*vv[c];
+        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        //wii[c]=(int)(rr+0.5); //whole integer int
-        //hii[c]=(int)(rr);     //half integer int
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
+        for (c = 0; c < 3; c++)
+        {
+          vv[c] = gamma_i*ru(c + 3, p);
+          hiw[c][1] = wiw[c][1] = 1;
+          hiw[c][0] = wiw[c][0] = 0;
+          hiw[c][2] = wiw[c][2] = 0;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 1; c++)
+        {
+          xx[c] = ru(c, p) + 0.5*dt*vv[c];
+          ru(c, p) += dt*vv[c];
 
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+          //wii[c]=(int)(rr+0.5); //whole integer int
+          //hii[c]=(int)(rr);     //half integer int
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
 
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
 
 
-      k1 = k2 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
-        j2 = j + hii[1] - 1;
+        k1 = k2 = j1 = j2 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i] * wiw[1][j],
-            current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-          dvol = wiw[0][i] * hiw[1][j],
-            current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-          dvol = wiw[0][i] * wiw[1][j],
-            current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+          dvol = hiw[0][i],
+              current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i],
+              current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i],
+              current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+
         }
       }
-    }
-    break;
-
-  case 1:
-    for (p = 0; p < Np; p++)
-    {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-
-      for (c = 0; c < 3; c++)
-      {
-        vv[c] = gamma_i*ru(c + 3, p);
-        hiw[c][1] = wiw[c][1] = 1;
-        hiw[c][0] = wiw[c][0] = 0;
-        hiw[c][2] = wiw[c][2] = 0;
-        hii[c] = wii[c] = 0;
-      }
-      for (c = 0; c < 1; c++)
-      {
-        xx[c] = ru(c, p) + 0.5*dt*vv[c];
-        ru(c, p) += dt*vv[c];
-
-        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-        rh = rr - 0.5;
-        //wii[c]=(int)(rr+0.5); //whole integer int
-        //hii[c]=(int)(rr);     //half integer int
-        wii[c] = (int)floor(rr + 0.5); //whole integer int
-        hii[c] = (int)floor(rr);     //half integer int
-        rr -= wii[c];
-        rh -= hii[c];
-        rr2 = rr*rr;
-        rh2 = rh*rh;
-
-        wiw[c][1] = 0.75 - rr2;
-        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-        hiw[c][1] = 0.75 - rh2;
-        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-      }
-
-
-      k1 = k2 = j1 = j2 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        i2 = i + hii[0] - 1;
-        dvol = hiw[0][i],
-          current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-        dvol = wiw[0][i],
-          current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-        dvol = wiw[0][i],
-          current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
-
-      }
-    }
-    break;
+      break;
   }
 }
 
@@ -2854,13 +2855,37 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
       }
       switch (mygrid->getDimensionality())
       {
-      case 3:
-        myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
+        case 3:
+          myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
 
-        for (k = 0; k < 3; k++)
-        {
-          k1 = k + wii[2] - 1;
-          k2 = k + hii[2] - 1;
+          for (k = 0; k < 3; k++)
+          {
+            k1 = k + wii[2] - 1;
+            k2 = k + hii[2] - 1;
+            for (j = 0; j < 3; j++)
+            {
+              j1 = j + wii[1] - 1;
+              j2 = j + hii[1] - 1;
+              for (i = 0; i < 3; i++)
+              {
+                i1 = i + wii[0] - 1;
+                i2 = i + hii[0] - 1;
+                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                    current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                    current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                    current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+
+              }
+            }
+          }
+          break;
+
+        case 2:
+          myweight = w(p) / (mydr[0] * mydr[1]);
+
+          k1 = k2 = 0;
           for (j = 0; j < 3; j++)
           {
             j1 = j + wii[1] - 1;
@@ -2869,57 +2894,33 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
-
+              dvol = hiw[0][i] * wiw[1][j],
+                  current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j],
+                  current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j],
+                  current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
             }
           }
-        }
-        break;
+          break;
 
-      case 2:
-        myweight = w(p) / (mydr[0] * mydr[1]);
+        case 1:
+          myweight = w(p) / mydr[0];
 
-        k1 = k2 = 0;
-        for (j = 0; j < 3; j++)
-        {
-          j1 = j + wii[1] - 1;
-          j2 = j + hii[1] - 1;
+          k1 = k2 = j1 = j2 = 0;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j],
-              current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i] * hiw[1][j],
-              current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i] * wiw[1][j],
-              current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+            dvol = hiw[0][i],
+                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i],
+                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i],
+                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+
           }
-        }
-        break;
-
-      case 1:
-        myweight = w(p) / mydr[0];
-
-        k1 = k2 = j1 = j2 = 0;
-        for (i = 0; i < 3; i++)
-        {
-          i1 = i + wii[0] - 1;
-          i2 = i + hii[0] - 1;
-          dvol = hiw[0][i],
-            current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-          dvol = wiw[0][i],
-            current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-          dvol = wiw[0][i],
-            current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
-
-        }
-        break;
+          break;
       }
 
     }
@@ -2981,47 +2982,47 @@ void SPECIE::density_deposition_standard(CURRENT *current)
     }
     switch (mygrid->getDimensionality())
     {
-    case 3:
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
+      case 3:
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+
+              dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
+                  current->density(i1, j1, k1) += w(p)*dvol;
+            }
+          }
+        }
+        break;
+
+      case 2:
+        k1 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
-
-            dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-              current->density(i1, j1, k1) += w(p)*dvol;
+            dvol = wiw[0][i] * wiw[1][j],
+                current->density(i1, j1, k1) += w(p)*dvol;
           }
         }
-      }
-      break;
+        break;
 
-    case 2:
-      k1 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
+      case 1:
+        k1 = j1 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
-          dvol = wiw[0][i] * wiw[1][j],
-            current->density(i1, j1, k1) += w(p)*dvol;
+          dvol = wiw[0][i],
+              current->density(i1, j1, k1) += w(p)*dvol;
         }
-      }
-      break;
-
-    case 1:
-      k1 = j1 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        dvol = wiw[0][i],
-          current->density(i1, j1, k1) += w(p)*dvol;
-      }
-      break;
+        break;
     }
 
   }
@@ -3062,50 +3063,50 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
     }
     switch (mygrid->getDimensionality())
     {
-    case 3:
-      myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
-      for (k = 0; k < 3; k++)
-      {
-        k1 = k + wii[2] - 1;
+      case 3:
+        myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+
+              dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
+                  current->density(i1, j1, k1) += myweight*dvol;
+            }
+          }
+        }
+        break;
+
+      case 2:
+        myweight = w(p) / (mydr[0] * mydr[1]);
+        k1 = 0;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
-
-            dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-              current->density(i1, j1, k1) += myweight*dvol;
+            dvol = wiw[0][i] * wiw[1][j],
+                current->density(i1, j1, k1) += myweight*dvol;
           }
         }
-      }
-      break;
+        break;
 
-    case 2:
-      myweight = w(p) / (mydr[0] * mydr[1]);
-      k1 = 0;
-      for (j = 0; j < 3; j++)
-      {
-        j1 = j + wii[1] - 1;
+      case 1:
+        myweight = w(p) / mydr[0];
+        k1 = j1 = 0;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
-          dvol = wiw[0][i] * wiw[1][j],
-            current->density(i1, j1, k1) += myweight*dvol;
+          dvol = wiw[0][i],
+              current->density(i1, j1, k1) += myweight*dvol;
         }
-      }
-      break;
-
-    case 1:
-      myweight = w(p) / mydr[0];
-      k1 = j1 = 0;
-      for (i = 0; i < 3; i++)
-      {
-        i1 = i + wii[0] - 1;
-        dvol = wiw[0][i],
-          current->density(i1, j1, k1) += myweight*dvol;
-      }
-      break;
+        break;
     }
 
   }

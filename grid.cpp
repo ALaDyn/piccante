@@ -315,20 +315,16 @@ void GRID::initRNG(gsl_rng* rng, unsigned long int auxiliary_seed){
   rng_aux = gsl_rng_alloc(gsl_rng_mt19937);
 
   gsl_rng_set(rng_aux, auxiliary_seed);
-  int myrank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-  seeds = new unsigned long int[myrank + 1];
+  seeds = new unsigned long int[myid + 1];
 
-  for (int i = 0; i <= myrank; i++){
+  for (int i = 0; i <= myid; i++){
     seeds[i] = gsl_rng_get(rng_aux);
     //Questo controllo potrebbe essere superfluo...
     for (int j = 0; j < i; j++){
       if (seeds[j] == seeds[i]){ i--; break; }
     }
-
   }
-  gsl_rng_set(rng, seeds[myrank]);
-
+  gsl_rng_set(rng, seeds[myid]);
   delete[] seeds;
 }
 

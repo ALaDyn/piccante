@@ -35,9 +35,9 @@ emProbe::emProbe(){
 }
 bool emProbe::compareProbes(emProbe *rhs){
   return (coordinates[0] == rhs->coordinates[0] &&
-    coordinates[1] == rhs->coordinates[1] &&
-    coordinates[2] == rhs->coordinates[2] &&
-    name.c_str() == rhs->name.c_str());
+      coordinates[1] == rhs->coordinates[1] &&
+      coordinates[2] == rhs->coordinates[2] &&
+      name.c_str() == rhs->name.c_str());
 
 }
 void emProbe::setPointCoordinate(double X, double Y, double Z){
@@ -69,23 +69,23 @@ void outDomain::followMovingWindow(){
 
 bool outDomain::compareDomains(outDomain *rhs){
   if (coordinates[0] == rhs->coordinates[0] &&
-    coordinates[1] == rhs->coordinates[1] &&
-    coordinates[2] == rhs->coordinates[2] &&
-    remainingCoord[0] == rhs->remainingCoord[0] &&
-    remainingCoord[1] == rhs->remainingCoord[1] &&
-    remainingCoord[2] == rhs->remainingCoord[2] &&
-    name.c_str() == rhs->name.c_str() &&
-    subselection == rhs->subselection&&
-    followMovingWindowFlag == rhs->followMovingWindowFlag&&
-    overrideFlag == rhs->overrideFlag){
+      coordinates[1] == rhs->coordinates[1] &&
+      coordinates[2] == rhs->coordinates[2] &&
+      remainingCoord[0] == rhs->remainingCoord[0] &&
+      remainingCoord[1] == rhs->remainingCoord[1] &&
+      remainingCoord[2] == rhs->remainingCoord[2] &&
+      name.c_str() == rhs->name.c_str() &&
+      subselection == rhs->subselection&&
+      followMovingWindowFlag == rhs->followMovingWindowFlag&&
+      overrideFlag == rhs->overrideFlag){
     if (!subselection)
       return true;
     else if (rmin[0] == rhs->rmin[0] &&
-      rmin[1] == rhs->rmin[1] &&
-      rmin[2] == rhs->rmin[2] &&
-      rmax[0] == rhs->rmax[0] &&
-      rmax[1] == rhs->rmax[1] &&
-      rmax[2] == rhs->rmax[2]){
+             rmin[1] == rhs->rmin[1] &&
+             rmin[2] == rhs->rmin[2] &&
+             rmax[0] == rhs->rmax[0] &&
+             rmax[1] == rhs->rmax[1] &&
+             rmax[2] == rhs->rmax[2]){
       return true;
     }
   }
@@ -138,17 +138,17 @@ bool requestCompTime(const request &first, const request &second){
 
 bool requestCompUnique(const request &first, const request &second){
   return ((first.itime == second.itime) &&
-    (first.type == second.type) &&
-    (first.target == second.target) &&
-    (first.domain == second.domain));
+          (first.type == second.type) &&
+          (first.target == second.target) &&
+          (first.domain == second.domain));
 }
 bool compOutput(const reqOutput &first, const reqOutput &second){
-    if (first.p != second.p)
-      return (first.p < second.p);
-    else if (first.task != second.task)
-      return (first.task < second.task);
-    else
-        return false;
+  if (first.p != second.p)
+    return (first.p < second.p);
+  else if (first.task != second.task)
+    return (first.task < second.task);
+  else
+    return false;
 }
 
 
@@ -321,9 +321,7 @@ bool OUTPUT_MANAGER::checkGrid(){
 
 bool OUTPUT_MANAGER::checkEMField(){
   if (!isThereField){
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == mygrid->master_proc){
+    if (mygrid->myid == mygrid->master_proc){
       std::cout << "WARNING! No valid FIELD pointer provided. Output request will be ignored." << std::endl;
     }
   }
@@ -332,9 +330,7 @@ bool OUTPUT_MANAGER::checkEMField(){
 
 bool OUTPUT_MANAGER::checkCurrent(){
   if (!isThereCurrent){
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == mygrid->master_proc){
+    if (mygrid->myid  == mygrid->master_proc){
       std::cout << "WARNING! No valid CURRENT pointer provided. Output request will be ignored." << std::endl;
     }
   }
@@ -343,9 +339,7 @@ bool OUTPUT_MANAGER::checkCurrent(){
 
 bool OUTPUT_MANAGER::checkSpecies(){
   if (!isThereSpecList){
-    int myid;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-    if (myid == mygrid->master_proc){
+    if (mygrid->myid == mygrid->master_proc){
       std::cout << "WARNING! Empty SPECIES list provided. Output request will be ignored." << std::endl;
     }
   }
@@ -709,35 +703,35 @@ void OUTPUT_MANAGER::prepareOutputMap(){
 void OUTPUT_MANAGER::processOutputEntry(request req){
   switch (req.type){
 
-  case OUT_E_FIELD:
-    callEMFieldDomain(req);
-    break;
-  case OUT_B_FIELD:
-    callEMFieldDomain(req);
-    break;
+    case OUT_E_FIELD:
+      callEMFieldDomain(req);
+      break;
+    case OUT_B_FIELD:
+      callEMFieldDomain(req);
+      break;
 
-  case OUT_EB_PROBE:
-    callEMFieldProbe(req);
-    break;
+    case OUT_EB_PROBE:
+      callEMFieldProbe(req);
+      break;
 
-  case OUT_SPEC_DENSITY:
-    callSpecDensity(req);
-    break;
+    case OUT_SPEC_DENSITY:
+      callSpecDensity(req);
+      break;
 
-  case OUT_CURRENT:
-    callCurrent(req);
-    break;
+    case OUT_CURRENT:
+      callCurrent(req);
+      break;
 
-  case OUT_SPEC_PHASE_SPACE:
-    callSpecPhaseSpace(req);
-    break;
+    case OUT_SPEC_PHASE_SPACE:
+      callSpecPhaseSpace(req);
+      break;
 
-  case OUT_DIAG:
-    callDiag(req);
-    break;
+    case OUT_DIAG:
+      callDiag(req);
+      break;
 
-  default:
-    break;
+    default:
+      break;
   }
 }
 
@@ -758,7 +752,7 @@ void OUTPUT_MANAGER::callDiags(int istep){
 std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext){
   std::stringstream ss;
   ss << dir << "/"
-    << out << "_";
+     << out << "_";
   if (opt != "")
     ss << opt << "_";
   ss << std::setw(OUTPUT_SIZE_TIME_DIAG) << std::setfill('0') << std::fixed << std::setprecision(3) << time;
@@ -769,7 +763,7 @@ std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, 
 std::string OUTPUT_MANAGER::composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext){
   std::stringstream ss;
   ss << dir << "/"
-    << out << "_";
+     << out << "_";
   if (opt1 != "")
     ss << opt1 << "_";
   if (opt2 != "")
@@ -838,7 +832,7 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
        */
   for (int i = 0; i < 6; i++){
     dset_id[i] = H5Dcreate1(file_id, nomi[i], H5T_NATIVE_FLOAT, filespace[i],
-      H5P_DEFAULT);
+                            H5P_DEFAULT);
     H5Sclose(filespace[i]);
   }
   /*
@@ -872,65 +866,65 @@ void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
     H5Sselect_hyperslab(filespace[i], H5S_SELECT_SET, offset, NULL, count, NULL);
   }
   //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
-    {
-      float *Ex, *Ey, *Ez, *Bx, *By, *Bz;
-      int Nx, Ny, Nz;
-      Nx = mygrid->uniquePointsloc[0];
-      Ny = mygrid->uniquePointsloc[1];
-      Nz = mygrid->uniquePointsloc[2];
-      int size = Nx*Ny*Nz;
-      Ex = new float[size];
-      Ey = new float[size];
-      Ez = new float[size];
-      Bx = new float[size];
-      By = new float[size];
-      Bz = new float[size];
-      for (int k = 0; k < Nz; k++)
-        for (int j = 0; j < Ny; j++)
-          for (int i = 0; i < Nx; i++){
-            Ex[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(0, i, j, k);
-            Ey[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(1, i, j, k);
-            Ez[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(2, i, j, k);
-            Bx[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(3, i, j, k);
-            By[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(4, i, j, k);
-            Bz[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(5, i, j, k);
-          }
-      /*
+  {
+    float *Ex, *Ey, *Ez, *Bx, *By, *Bz;
+    int Nx, Ny, Nz;
+    Nx = mygrid->uniquePointsloc[0];
+    Ny = mygrid->uniquePointsloc[1];
+    Nz = mygrid->uniquePointsloc[2];
+    int size = Nx*Ny*Nz;
+    Ex = new float[size];
+    Ey = new float[size];
+    Ez = new float[size];
+    Bx = new float[size];
+    By = new float[size];
+    Bz = new float[size];
+    for (int k = 0; k < Nz; k++)
+      for (int j = 0; j < Ny; j++)
+        for (int i = 0; i < Nx; i++){
+          Ex[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(0, i, j, k);
+          Ey[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(1, i, j, k);
+          Ez[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(2, i, j, k);
+          Bx[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(3, i, j, k);
+          By[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(4, i, j, k);
+          Bz[i + j*Nx + k*Ny*Nx] = (float)myfield->VEB(5, i, j, k);
+        }
+    /*
           * Create property list for collective dataset write.
           */
-      plist_id = H5Pcreate(H5P_DATASET_XFER);
-      H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
 
-      status = H5Dwrite(dset_id[0], H5T_NATIVE_FLOAT, memspace[0], filespace[0],
+    status = H5Dwrite(dset_id[0], H5T_NATIVE_FLOAT, memspace[0], filespace[0],
         plist_id, Ex);
-      status = H5Dwrite(dset_id[1], H5T_NATIVE_FLOAT, memspace[1], filespace[1],
+    status = H5Dwrite(dset_id[1], H5T_NATIVE_FLOAT, memspace[1], filespace[1],
         plist_id, Ey);
-      status = H5Dwrite(dset_id[2], H5T_NATIVE_FLOAT, memspace[2], filespace[2],
+    status = H5Dwrite(dset_id[2], H5T_NATIVE_FLOAT, memspace[2], filespace[2],
         plist_id, Ez);
-      status = H5Dwrite(dset_id[3], H5T_NATIVE_FLOAT, memspace[3], filespace[3],
+    status = H5Dwrite(dset_id[3], H5T_NATIVE_FLOAT, memspace[3], filespace[3],
         plist_id, Bx);
-      status = H5Dwrite(dset_id[4], H5T_NATIVE_FLOAT, memspace[4], filespace[4],
+    status = H5Dwrite(dset_id[4], H5T_NATIVE_FLOAT, memspace[4], filespace[4],
         plist_id, By);
-      status = H5Dwrite(dset_id[5], H5T_NATIVE_FLOAT, memspace[5], filespace[5],
+    status = H5Dwrite(dset_id[5], H5T_NATIVE_FLOAT, memspace[5], filespace[5],
         plist_id, Bz);
 
-      delete[]Ex;
-      delete[]Ey;
-      delete[]Ez;
-      delete[]Bx;
-      delete[]By;
-      delete[]Bz;
-    }
+    delete[]Ex;
+    delete[]Ey;
+    delete[]Ez;
+    delete[]Bx;
+    delete[]By;
+    delete[]Bz;
+  }
 
-    for (int i = 0; i < 6; i++){
-      H5Dclose(dset_id[i]);
-      H5Sclose(filespace[i]);
-      H5Sclose(memspace[i]);
-    }
-    H5Pclose(plist_id);
-    H5Fclose(file_id);
-    delete[] nomefile;
-    //////////////////////////// END of collective binary file write
+  for (int i = 0; i < 6; i++){
+    H5Dclose(dset_id[i]);
+    H5Sclose(filespace[i]);
+    H5Sclose(memspace[i]);
+  }
+  H5Pclose(plist_id);
+  H5Fclose(file_id);
+  delete[] nomefile;
+  //////////////////////////// END of collective binary file write
 }
 #endif
 
@@ -1018,7 +1012,7 @@ void OUTPUT_MANAGER::writeSmallHeader(MPI_File thefile, int uniqueLocN[], int im
   int itodo[6];
   prepareIntegerSmallHeader(itodo, uniqueLocN, imin, remains);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-  #if defined (USE_MPI_FILE_WRITE_ALL)
+#if defined (USE_MPI_FILE_WRITE_ALL)
   MPI_File_write_all(thefile, itodo, 6, MPI_INT, &status);
 #else
   MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
@@ -1284,18 +1278,31 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
   isInMyHyperplane = isThePointInMyDomain(myDomains[req.domain]->coordinates);
 
-  MPI_Comm sliceCommunicator;
-  int mySliceID, sliceNProc;
-  MPI_Cart_sub(mygrid->cart_comm, remains, &sliceCommunicator);
-  MPI_Comm_rank(sliceCommunicator, &mySliceID);
-  MPI_Comm_size(sliceCommunicator, &sliceNProc);
-  MPI_Allreduce(MPI_IN_PLACE, &isInMyHyperplane, 1, MPI_INT, MPI_LOR, sliceCommunicator);
-
-  if (isInMyHyperplane)
-    shouldIWrite = amIInTheSubDomain(req);
-
   MPI_Comm outputCommunicator;
-  MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+  bool shouldICreateAnHyperplane=false;
+
+  for(int c=0;c<mygrid->getDimensionality();c++)
+    shouldICreateAnHyperplane |= (remains[c]==0);
+
+  if(shouldICreateAnHyperplane)
+  {
+    MPI_Comm sliceCommunicator;
+    int mySliceID, sliceNProc;
+    MPI_Cart_sub(mygrid->cart_comm, remains, &sliceCommunicator);
+    MPI_Comm_rank(sliceCommunicator, &mySliceID);
+    MPI_Comm_size(sliceCommunicator, &sliceNProc);
+    MPI_Allreduce(MPI_IN_PLACE, &isInMyHyperplane, 1, MPI_INT, MPI_LOR, sliceCommunicator);
+
+    if (isInMyHyperplane)
+      shouldIWrite = amIInTheSubDomain(req);
+
+    MPI_Comm_free(&sliceCommunicator);
+    MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+  }
+  else{
+    shouldIWrite = amIInTheSubDomain(req);
+    MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+  }
   int myOutputID, outputNProc;
   MPI_Comm_rank(outputCommunicator, &myOutputID);
   MPI_Comm_size(outputCommunicator, &outputNProc);
@@ -1370,7 +1377,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       MPI_Request request[2];
       prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
       MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
-        groupCommunicator, &request[myGroupId%2]);
+          groupCommunicator, &request[myGroupId%2]);
       MPI_Wait(&request[myGroupId%2], &status);
     }
     else{
@@ -1444,9 +1451,6 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     int myMPIFileId, MPIFileNproc;
     MPI_Comm_size(MPIFileCommunicator, &MPIFileNproc);
     MPI_Comm_rank(MPIFileCommunicator, &myMPIFileId);
-    //    std::cout << "hi! I'm proc #" << myOutputID << " => " << myGroupId << " / " << groupNproc << " GROUP\n";
-    //    std::cout << "hi! I'm proc #" << myOutputID << " => " << myMPIFileId << " / " << MPIFileNproc << " FILE\n";
-    //    std::cout.flush();
 
     int *groupBufferSize = new int[groupNproc];
     int maxBufferSize, myBufferSize = (totUniquePoints[myOutputID] * Ncomp + 6);
@@ -1465,7 +1469,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       MPI_Request request[2];
       prepareCPUFieldValues(databuf[0], uniqueLocN, imin, locimin, remains, req);
       MPI_Isend(databuf[0], maxBufferSize, MPI_FLOAT, 0, tag[myGroupId%2],
-        groupCommunicator, &request[myGroupId%2]);
+          groupCommunicator, &request[myGroupId%2]);
       MPI_Wait(&request[myGroupId%2], &status);
     }
     else{
@@ -1534,7 +1538,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 #endif
 #endif
 #endif
-  MPI_Comm_free(&sliceCommunicator);
+
   MPI_Comm_free(&outputCommunicator);
   delete[] nomefile;
   delete[] totUniquePoints;
@@ -1545,12 +1549,12 @@ void OUTPUT_MANAGER::callEMFieldDomain(request req){
   std::stringstream groupname;
   groupname << "Group" << fieldGroupSize;
   if (req.type == OUT_E_FIELD){
-//    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    //    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
     std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
   else if (req.type == OUT_B_FIELD){
-//    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    //    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
     std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
@@ -1616,11 +1620,39 @@ void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[
 
   switch (mygrid->getDimensionality())
   {
-  case 3:
-    for (int k = 0; k < 3; k++)
-    {
-      k1 = k + wii[2] - 1;
-      k2 = k + hii[2] - 1;
+    case 3:
+      for (int k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
+        for (int j = 0; j < 3; j++)
+        {
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
+          for (int i = 0; i < 3; i++)
+          {
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+          }
+        }
+      }
+      break;
+
+    case 2:
+      k1 = k2 = 0;
       for (int j = 0; j < 3; j++)
       {
         j1 = j + wii[1] - 1;
@@ -1629,72 +1661,44 @@ void OUTPUT_MANAGER::interpolateEBFieldsToPosition(double position[3], double E[
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-            E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-            E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-            E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i] * wiw[1][j],
+              E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j],
+              E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j],
+              E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-            B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-            B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-            B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i] * hiw[1][j],
+              B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j],
+              B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j],
+              B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
         }
       }
-    }
-    break;
+      break;
 
-  case 2:
-    k1 = k2 = 0;
-    for (int j = 0; j < 3; j++)
-    {
-      j1 = j + wii[1] - 1;
-      j2 = j + hii[1] - 1;
+    case 1:
+      k1 = k2 = j1 = j2 = 0;
       for (int i = 0; i < 3; i++)
       {
         i1 = i + wii[0] - 1;
         i2 = i + hii[0] - 1;
-        dvol = hiw[0][i] * wiw[1][j],
-          E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
-        dvol = wiw[0][i] * hiw[1][j],
-          E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
-        dvol = wiw[0][i] * wiw[1][j],
-          E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
+        dvol = hiw[0][i],
+            E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
+        dvol = wiw[0][i],
+            E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
+        dvol = wiw[0][i],
+            E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
 
-        dvol = wiw[0][i] * hiw[1][j],
-          B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
-        dvol = hiw[0][i] * wiw[1][j],
-          B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
-        dvol = hiw[0][i] * hiw[1][j],
-          B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
+        dvol = wiw[0][i],
+            B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
+        dvol = hiw[0][i],
+            B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
+        dvol = hiw[0][i],
+            B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
       }
-    }
-    break;
-
-  case 1:
-    k1 = k2 = j1 = j2 = 0;
-    for (int i = 0; i < 3; i++)
-    {
-      i1 = i + wii[0] - 1;
-      i2 = i + hii[0] - 1;
-      dvol = hiw[0][i],
-        E[0] += myfield->E0(i2, j1, k1)*dvol;  //Ex
-      dvol = wiw[0][i],
-        E[1] += myfield->E1(i1, j2, k1)*dvol;  //Ey
-      dvol = wiw[0][i],
-        E[2] += myfield->E2(i1, j1, k2)*dvol;  //Ez
-
-      dvol = wiw[0][i],
-        B[0] += myfield->B0(i1, j2, k2)*dvol;  //Bx
-      dvol = hiw[0][i],
-        B[1] += myfield->B1(i2, j1, k2)*dvol;  //By
-      dvol = hiw[0][i],
-        B[2] += myfield->B2(i2, j2, k1)*dvol;  //Bz
-    }
-    break;
+      break;
   }
 
 }
@@ -1788,7 +1792,7 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
   MPI_Offset disp = 0;
   int small_header = 6 * sizeof(int);
   int big_header = (1 + 3 + 3 + 1)*sizeof(int)
-    + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+      + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
 
   MPI_File thefile;
   MPI_Status status;
@@ -1857,61 +1861,61 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
     }
 
     //+++++++++++ Start CPU HEADER  +++++++++++++++++++++
-        {
-          int itodo[6];
-          for (int c = 0; c < 3; c++){
-            if (remains[c]){
-              itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
-              itodo[c + 3] = mygrid->uniquePointsloc[c];
-            }
-            else{
-              itodo[c] = 0;
-              itodo[c + 3] = 1;
-            }
-          }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
-          MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
-#endif
+    {
+      int itodo[6];
+      for (int c = 0; c < 3; c++){
+        if (remains[c]){
+          itodo[c] = mygrid->rproc_imin[c][mygrid->rmyid[c]];
+          itodo[c + 3] = mygrid->uniquePointsloc[c];
         }
-        //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
-        {
-          float *todo;
-          int NN[3], Nx, Ny, Nz, origin[3];
-          for (int c = 0; c < 3; c++){
-            if (remains[c]){
-              NN[c] = mygrid->uniquePointsloc[c];
-              origin[c] = 0;
-            }
-            else{
-              NN[c] = 1;
-              origin[c] = ri[c];
-            }
-          }
-          Nx = NN[0];
-          Ny = NN[1];
-          Nz = NN[2];
-          int size = Ncomp*NN[0] * NN[1] * NN[2];
-          todo = new float[size];
-          int ii, jj, kk;
-          for (int k = 0; k < Nz; k++){
-            kk = k + origin[2];
-            for (int j = 0; j < Ny; j++){
-              jj = j + origin[1];
-              for (int i = 0; i < Nx; i++){
-                ii = i + origin[0];
-                for (int c = 0; c < Ncomp; c++)
-                  todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)mycurrent->JJ(c, i, j, k);
-              }
-            }
-          }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
-          MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
-#endif
-          delete[]todo;
+        else{
+          itodo[c] = 0;
+          itodo[c + 3] = 1;
         }
-        MPI_File_close(&thefile);
-        delete[] nomefile;
-        delete[] totUniquePoints;
+      }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+      MPI_File_write(thefile, itodo, 6, MPI_INT, &status);
+#endif
+    }
+    //+++++++++++ Start CPU Field Values  +++++++++++++++++++++
+    {
+      float *todo;
+      int NN[3], Nx, Ny, Nz, origin[3];
+      for (int c = 0; c < 3; c++){
+        if (remains[c]){
+          NN[c] = mygrid->uniquePointsloc[c];
+          origin[c] = 0;
+        }
+        else{
+          NN[c] = 1;
+          origin[c] = ri[c];
+        }
+      }
+      Nx = NN[0];
+      Ny = NN[1];
+      Nz = NN[2];
+      int size = Ncomp*NN[0] * NN[1] * NN[2];
+      todo = new float[size];
+      int ii, jj, kk;
+      for (int k = 0; k < Nz; k++){
+        kk = k + origin[2];
+        for (int j = 0; j < Ny; j++){
+          jj = j + origin[1];
+          for (int i = 0; i < Nx; i++){
+            ii = i + origin[0];
+            for (int c = 0; c < Ncomp; c++)
+              todo[c + i*Ncomp + j*Nx*Ncomp + k*Ny*Nx*Ncomp] = (float)mycurrent->JJ(c, i, j, k);
+          }
+        }
+      }
+#ifndef DEBUG_NO_MPI_FILE_WRITE
+      MPI_File_write(thefile, todo, size, MPI_FLOAT, &status);
+#endif
+      delete[]todo;
+    }
+    MPI_File_close(&thefile);
+    delete[] nomefile;
+    delete[] totUniquePoints;
   }
   MPI_Comm_free(&sliceCommunicator);
 }
@@ -1919,8 +1923,8 @@ void OUTPUT_MANAGER::writeCurrent(std::string fileName, request req){
 void  OUTPUT_MANAGER::callCurrent(request req){
 
   std::string nameBin = composeOutputName(outputDir, "J", "", myDomains[req.domain]->name, req.domain, req.dtime, ".bin");
-
-  writeCurrent(nameBin, req);
+  writeGridFieldSubDomain(nameBin, req);
+  //writeCurrent(nameBin, req);
 
 
 }
@@ -2080,32 +2084,32 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesSingleFile(std::string  fileName, SP
 }
 
 int OUTPUT_MANAGER::packageSize(int bufsize, int* groupProcNumData, int procID, int packageNumber){
-    if (packageNumber < groupProcNumData[procID]/bufsize){
-        return bufsize;
-    }
-    else if (packageNumber == (groupProcNumData[procID]/bufsize)){
-        return groupProcNumData[procID]%bufsize;
-    }
-    else{
-        return 0;
-    }
+  if (packageNumber < groupProcNumData[procID]/bufsize){
+    return bufsize;
+  }
+  else if (packageNumber == (groupProcNumData[procID]/bufsize)){
+    return groupProcNumData[procID]%bufsize;
+  }
+  else{
+    return 0;
+  }
 }
 
 int OUTPUT_MANAGER::numPackages(int bufsize, int* groupProcNumData, int procID){
-    return groupProcNumData[procID]/bufsize + 1;
+  return groupProcNumData[procID]/bufsize + 1;
 }
 
 void OUTPUT_MANAGER::fillRequestList(int bufsize, int* groupProcNumData, int groupNproc, std::vector<reqOutput> &reqList){
-    for(int i = 1; i < groupNproc; i++){
-        for(int p = 0; p < numPackages(bufsize, groupProcNumData,i);p++){
-            reqOutput newReq;
-            newReq.task = i;
-            newReq.p = p;
-            newReq.packageSize = packageSize(bufsize, groupProcNumData, i, p);
-            reqList.push_back(newReq);
-        }
+  for(int i = 1; i < groupNproc; i++){
+    for(int p = 0; p < numPackages(bufsize, groupProcNumData,i);p++){
+      reqOutput newReq;
+      newReq.task = i;
+      newReq.p = p;
+      newReq.packageSize = packageSize(bufsize, groupProcNumData, i, p);
+      reqList.push_back(newReq);
     }
-    std::sort(reqList.begin(),reqList.end(),compOutput);
+  }
+  std::sort(reqList.begin(),reqList.end(),compOutput);
 }
 
 void OUTPUT_MANAGER::writeAllSeparateFilesParticlesValues(std::string fileName, SPECIE* spec){
@@ -2211,7 +2215,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     }
     MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
   }
-  else{      
+  else{
     MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
@@ -2243,9 +2247,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
 
     for (int i = 0; i < reqList.size(); i++){
-        MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
+      MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-        MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
+      MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
 #endif
     }
 
@@ -2366,9 +2370,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
     fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
 
     for (int i = 0; i < reqList.size(); i++){
-        MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
+      MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
-        MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
+      MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
 #endif
     }
 
@@ -2418,11 +2422,11 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   {
 #if defined(PHASE_SPACE_USE_MPI_FILE_WRITE_ALL)
 
-      MPI_File_open(MPI_COMM_WORLD, nomefile,
-                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-      MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    MPI_File_open(MPI_COMM_WORLD, nomefile,
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     writeAllCPUParticlesValues(thefile, spec, maxNfloatLoc);
-     MPI_File_close(&thefile);
+    MPI_File_close(&thefile);
 
 #elif defined(PHASE_SPACE_USE_SEPARATE_FILES_MPI_FILE_WRITE_ALL)
 
@@ -2444,9 +2448,9 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     writeCPUParticlesValuesSingleFile(myFileName.str(),  spec);
 
 #else
-      MPI_File_open(MPI_COMM_WORLD, nomefile,
-                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-      MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+    MPI_File_open(MPI_COMM_WORLD, nomefile,
+                  MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     writeCPUParticlesValues(thefile, spec);
     MPI_File_close(&thefile);
 
@@ -2791,9 +2795,7 @@ void OUTPUT_MANAGER::findLocalSubdomainUniquePointsNumber(int *uniqueLocN, int l
 }
 
 void OUTPUT_MANAGER::autoVisualDiag(){
-  int myid;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-  if (myid == 0){
+  if (mygrid->myid  == mygrid->master_proc){
     std::cout << "*******OUTPUT MANAGER DEBUG***********" << std::endl;
     std::map< int, std::vector<request> >::iterator itMap;
     for (std::vector<int>::iterator itD = timeList.begin(); itD != timeList.end(); itD++) {
@@ -2813,25 +2815,25 @@ void OUTPUT_MANAGER::autoVisualDiag(){
 
 
 int OUTPUT_MANAGER::getFieldGroupSize(){
-    return fieldGroupSize;
+  return fieldGroupSize;
 }
 
 int OUTPUT_MANAGER::getParticleGroupSize(){
-    return particleGroupSize;
+  return particleGroupSize;
 }
 
 int OUTPUT_MANAGER::getParticleBufferSize(){
-    return particleBufferSize;
+  return particleBufferSize;
 }
 
 void OUTPUT_MANAGER::setFieldGroupSize(int gsize){
-    fieldGroupSize = gsize;
+  fieldGroupSize = gsize;
 }
 
 void OUTPUT_MANAGER::setParticleGroupSize(int gsize){
-    particleGroupSize = gsize;
+  particleGroupSize = gsize;
 }
 
 void OUTPUT_MANAGER::setParticleBufferSize(int bsize){
-    particleBufferSize = bsize;
+  particleBufferSize = bsize;
 }
