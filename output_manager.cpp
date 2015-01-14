@@ -1354,7 +1354,6 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
   if(shouldIWrite){
     int fileCommunicatorID = myOutputID/multifileGroupSize;
-    std::cout << "fileCommunicatorID = " << fileCommunicatorID << "\n";
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << fileCommunicatorID;
     char *nomefile = new char[myFileName.str().size() + 1];
