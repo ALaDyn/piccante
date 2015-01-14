@@ -31,11 +31,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define PHASE_SPACE_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
 
+#define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
 //#define FIELDS_USE_MPI_FILE_OUTPUT
 //#define FIELDS_USE_MPI_FILE_WRITE_ALL
 //#define FIELDS_USE_OUTPUT_WRITING_GROUPS
 //#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
-#define FIELDS_USE_MULTI_FILE
+//#define FIELDS_USE_MULTI_FILE
 #define FIELDS_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define MACRO_CPUGROUP_FOR_MULTIFILE 1024
 
@@ -248,6 +249,7 @@ private:
   bool checkCurrent();
   bool checkSpecies();
   bool isThePointInMyDomain(double rr[3]);
+  bool shouldICreateHyperplane(int remains[]);
   bool amIInTheSubDomain(request req);
   void nearestInt(double rr[3], int *ri, int *globalri);
   void setAndCheckRemains(int *remains, bool remainingCoord[]);

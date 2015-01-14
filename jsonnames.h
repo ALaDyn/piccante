@@ -143,6 +143,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define OUTPUTTYPEVALUE_DIAG "Diag"
 
 
+
+
 #define _JSON_DOUBLE_OUTPUT_FROM "from"
 #define _JSON_DOUBLE_OUTPUT_TO "to"
 #define _JSON_DOUBLE_OUTPUT_AT "at"

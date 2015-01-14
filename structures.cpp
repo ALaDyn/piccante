@@ -37,7 +37,7 @@ DA FARE:
 //*************************PLASMA******************************
 
 const std::string PLASMA::dFNames[] = {
-    "box",
+  "box",
     "left_linear_ramp",
     "right_linear_ramp",
     "left_right_linear_ramp",

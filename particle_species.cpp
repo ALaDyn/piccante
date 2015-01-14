@@ -3259,16 +3259,9 @@ void SPECIE::reloadDump(std::ifstream &ff){
 }
 
 void SPECIE::reloadBigBufferDump(std::ifstream &ff){
-
   ff.read((char*)&Np, sizeof(Np));
   SPECIE::reallocate_species();
-  int mysize=1000;
-  int cycles=Np/mysize;
-  int rest=Np%mysize;
-  //for (int i=0; i<)
   ff.read((char*)&ru(0, 0), sizeof(double)*Np*Ncomp);
-
-
 }
 
 bool SPECIE::areEnergyExtremesAvailable(){

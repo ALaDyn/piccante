@@ -1262,7 +1262,6 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   else if (req.type == OUT_CURRENT)
     Ncomp = 3;
 
-  int *totUniquePoints;
   int isInMyHyperplane = false, shouldIWrite = false;
   int uniqueN[3], uniqueLocN[3], slice_rNproc[3];
   int remains[3];
@@ -1279,13 +1278,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   isInMyHyperplane = isThePointInMyDomain(myDomains[req.domain]->coordinates);
 
   MPI_Comm outputCommunicator;
-  bool shouldICreateAnHyperplane=false;
 
-  for(int c=0;c<mygrid->getDimensionality();c++)
-    shouldICreateAnHyperplane |= (remains[c]==0);
 
-  if(shouldICreateAnHyperplane)
-  {
+  if(shouldICreateHyperplane(remains)){
     MPI_Comm sliceCommunicator;
     int mySliceID, sliceNProc;
     MPI_Cart_sub(mygrid->cart_comm, remains, &sliceCommunicator);
@@ -1307,7 +1302,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   MPI_Comm_rank(outputCommunicator, &myOutputID);
   MPI_Comm_size(outputCommunicator, &outputNProc);
 
-  totUniquePoints = new int[outputNProc];
+
+#ifdef FIELDS_USE_MPI_FILE_OUTPUT
+  int *totUniquePoints = new int[outputNProc];
   totUniquePoints[myOutputID] = uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
 
@@ -1319,7 +1316,6 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   char* nomefile = new char[fileName.length() + 1];
   strcpy(nomefile, fileName.c_str());
 
-#ifdef FIELDS_USE_MPI_FILE_OUTPUT
   if (shouldIWrite){
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
@@ -1337,8 +1333,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
     MPI_File_close(&thefile);
   }
-#else
-#ifdef FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
+  delete[] nomefile;
+#elif defined(FIELDS_USE_INDIVIDUAL_FILE_OUTPUT)
+  //MPI_File thefile;
+  char* nomefile = new char[fileName.length() + 1];
+  strcpy(nomefile, fileName.c_str());
   if (shouldIWrite){
     std::stringstream myFileName;
     myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
@@ -1350,8 +1349,98 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
     writeCPUFieldValuesSingleFile(myFileName.str(), uniqueLocN, locimin, remains, req);
 
   }
-#else
-#ifdef FIELDS_USE_MULTI_FILE
+#elif defined(FIELDS_USE_SEPARATE_FILES_MACROGROUPS)
+
+
+  if(shouldIWrite){
+    int fileCommunicatorID = myOutputID/multifileGroupSize;
+    std::cout << "fileCommunicatorID = " << fileCommunicatorID << "\n";
+    std::stringstream myFileName;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << fileCommunicatorID;
+    char *nomefile = new char[myFileName.str().size() + 1];
+    strcpy(nomefile, myFileName.str().c_str());
+
+    MPI_Comm FileCommunicator;
+    MPI_Comm_split(outputCommunicator, fileCommunicatorID, 0, &FileCommunicator);
+    int myFileId, fileNproc;
+    MPI_Comm_size(FileCommunicator, &fileNproc);
+    MPI_Comm_rank(FileCommunicator, &myFileId);
+
+    int *totUniquePoints = new int[fileNproc];
+    totUniquePoints[myFileId] = uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, FileCommunicator);
+
+    MPI_Offset disp = 0;
+    const int smallHeaderSize = (3 + 3) * sizeof(int);
+    const int bigHeaderSize = (1 + 3 + 3 + 1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+
+    MPI_File thefile;
+
+    MPI_Comm groupCommunicator;
+    MPI_Comm_split(FileCommunicator, (myFileId/fieldGroupSize), 0, &groupCommunicator);
+    int myGroupId, groupNproc;
+    MPI_Comm_size(groupCommunicator, &groupNproc);
+    MPI_Comm_rank(groupCommunicator, &myGroupId);
+
+    MPI_Comm MPIFileCommunicator;
+    MPI_Comm_split(FileCommunicator, (myFileId%fieldGroupSize), 0, &MPIFileCommunicator);
+    int myMPIFileId, MPIFileNproc;
+    MPI_Comm_size(MPIFileCommunicator, &MPIFileNproc);
+    MPI_Comm_rank(MPIFileCommunicator, &myMPIFileId);
+
+    int *groupBufferSize = new int[groupNproc];
+    int maxBufferSize, myBufferSize = (totUniquePoints[myFileId] * Ncomp + 6);
+    groupBufferSize[myGroupId] = myBufferSize;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupBufferSize, 1, MPI_INT, groupCommunicator);
+    MPI_Allreduce(&myBufferSize, &maxBufferSize, 1, MPI_INT, MPI_MAX, groupCommunicator);
+
+    float *databuf=new float[maxBufferSize];
+
+    int tag = 11;
+    if(myGroupId !=0){
+      prepareCPUFieldValues(databuf, uniqueLocN, imin, locimin, remains, req);
+      MPI_Send( databuf, maxBufferSize, MPI_FLOAT, 0, tag,groupCommunicator);
+    }
+    else{
+      MPI_Status status;
+      MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+
+      if (myOutputID == 0){
+        MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+        writeBigHeader(thefile, uniqueN, imin, slice_rNproc, Ncomp);
+      }
+      else{
+        findDispForSetView(&disp, myFileId, totUniquePoints, bigHeaderSize, smallHeaderSize, Ncomp);
+        if(fileCommunicatorID!=0)
+          disp-=bigHeaderSize;
+        MPI_File_set_view(thefile, disp, MPI_DOUBLE, MPI_DOUBLE, (char *) "native", MPI_INFO_NULL);
+      }
+
+      //la mia roba: la preparo e la scrivo
+      prepareCPUFieldValues(databuf, uniqueLocN, imin, locimin, remains, req);
+      MPI_File_write(thefile, databuf, groupBufferSize[0], MPI_FLOAT, &status);
+
+      for (int procID = 1; procID < (groupNproc); procID++){
+        MPI_Recv(databuf, maxBufferSize, MPI_FLOAT, procID, tag, groupCommunicator, &status);
+        MPI_File_write(thefile, databuf, groupBufferSize[procID], MPI_FLOAT, &status);
+      }
+      MPI_File_close(&thefile);
+    }
+    delete[] nomefile;
+    delete[] databuf;
+    delete[] totUniquePoints;
+    MPI_Comm_free(&groupCommunicator);
+    MPI_Comm_free(&MPIFileCommunicator);
+    MPI_Comm_free(&FileCommunicator);
+
+  }
+
+
+#elif defined(FIELDS_USE_MULTI_FILE)
+  int *totUniquePoints = new int[outputNProc];
+  totUniquePoints[myOutputID] = uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
+  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
+
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
     MPI_Comm_split(outputCommunicator, (myOutputID/fieldGroupSize), 0, &groupCommunicator);
@@ -1438,7 +1527,19 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
     MPI_Comm_free(&groupCommunicator);
   }
+  delete[] totUniquePoints;
 #else
+  int *totUniquePoints = new int[outputNProc];
+  totUniquePoints[myOutputID] = uniqueLocN[0] * uniqueLocN[1] * uniqueLocN[2];
+  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, totUniquePoints, 1, MPI_INT, outputCommunicator);
+
+  MPI_Offset disp = 0;
+  const int smallHeaderSize = (3 + 3) * sizeof(int);
+  const int bigHeaderSize = (1 + 3 + 3 + 1)*sizeof(int) + (uniqueN[0] + uniqueN[1] + uniqueN[2])*sizeof(float);
+
+  MPI_File thefile;
+  char* nomefile = new char[fileName.length() + 1];
+  strcpy(nomefile, fileName.c_str());
   if (shouldIWrite){
     MPI_Comm groupCommunicator;
     MPI_Comm MPIFileCommunicator;
@@ -1529,19 +1630,18 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       }
       MPI_File_close(&thefile);
     }
+    delete[] nomefile;
     delete[] databuf[0];
     delete[] databuf[1];
 
     MPI_Comm_free(&groupCommunicator);
     MPI_Comm_free(&MPIFileCommunicator);
   }
-#endif
-#endif
+  delete[] totUniquePoints;
 #endif
 
   MPI_Comm_free(&outputCommunicator);
-  delete[] nomefile;
-  delete[] totUniquePoints;
+
 }
 
 
@@ -1549,13 +1649,13 @@ void OUTPUT_MANAGER::callEMFieldDomain(request req){
   std::stringstream groupname;
   groupname << "Group" << fieldGroupSize;
   if (req.type == OUT_E_FIELD){
-    //    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-    std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
+        std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    //std::string nameBin = composeOutputName(outputDir, "E_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
   else if (req.type == OUT_B_FIELD){
-    //    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
-    std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
+        std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, "", req.domain, req.dtime, ".bin");
+    //std::string nameBin = composeOutputName(outputDir, "B_FIELD", myDomains[req.domain]->name, groupname.str(), req.domain, req.dtime, ".bin");
     writeGridFieldSubDomain(nameBin, req);
   }
 
@@ -2645,6 +2745,14 @@ bool OUTPUT_MANAGER::isThePointInMyDomain(double rr[3]){
   }
   return false;
 }
+bool OUTPUT_MANAGER::shouldICreateHyperplane(int remains[3]){
+  bool shouldICreateAnHyperplane=false;
+
+  for(int c=0; c<mygrid->getDimensionality(); c++)
+    shouldICreateAnHyperplane |= (remains[c]==0);
+  return shouldICreateAnHyperplane;
+}
+
 bool OUTPUT_MANAGER::amIInTheSubDomain(request req){
   double rmin[3], rmax[3];
   for (int c = 0; c < 3; c++){
