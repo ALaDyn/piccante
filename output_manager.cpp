@@ -1405,9 +1405,9 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
       //BEGIN OF NEW WRITE ALL CHANGE
-      int maxLocalGroupNproc;
-      MPI_Allreduce(&groupNproc, &maxLocalGroupNproc, 1, MPI_INT, MPI_MAX, groupCommunicator);
-      int rest = maxLocalGroupNproc - groupNproc;
+      int maxGroupNproc;
+      MPI_Allreduce(&groupNproc, &maxGroupNproc, 1, MPI_INT, MPI_MAX, MPIFileCommunicator);
+      int rest = maxGroupNproc - groupNproc;
       //END
       if (myOutputID == 0){
         MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
