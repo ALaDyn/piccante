@@ -1404,6 +1404,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       MPI_Status status;
       MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
 
+      //BEGIN OF NEW WRITE ALL CHANGE
+      int maxLocalGroupNproc;
+      MPI_Allreduce(&groupNproc, &maxLocalGroupNproc, 1, MPI_INT, MPI_MAX, groupCommunicator);
+      int rest = maxLocalGroupNproc - groupNproc;
+      //END
       if (myOutputID == 0){
         MPI_File_set_view(thefile, 0, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
         writeBigHeader(thefile, uniqueN, imin, slice_rNproc, Ncomp);
@@ -1417,12 +1422,17 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
 
       //la mia roba: la preparo e la scrivo
       prepareCPUFieldValues(databuf, uniqueLocN, imin, locimin, remains, req);
-      MPI_File_write(thefile, databuf, groupBufferSize[0], MPI_FLOAT, &status);
+      MPI_File_write_all(thefile, databuf, groupBufferSize[0], MPI_FLOAT, &status);
 
       for (int procID = 1; procID < (groupNproc); procID++){
         MPI_Recv(databuf, maxBufferSize, MPI_FLOAT, procID, tag, groupCommunicator, &status);
-        MPI_File_write(thefile, databuf, groupBufferSize[procID], MPI_FLOAT, &status);
+        MPI_File_write_all(thefile, databuf, groupBufferSize[procID], MPI_FLOAT, &status);
       }
+      //BEGIN OF NEW WRITE ALL CHANGE
+      for(int i=0; i< rest; i++){
+        MPI_File_write_all(thefile, databuf, 0, MPI_FLOAT, &status);
+      }
+      //END
       MPI_File_close(&thefile);
     }
     delete[] nomefile;
