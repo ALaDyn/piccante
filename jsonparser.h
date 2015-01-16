@@ -46,17 +46,17 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "json/json.h"
 
 namespace jsonParser{
-    extern bool isThisJsonMaster;
+  extern bool isThisJsonMaster;
 
-    struct laserPulseBoolFlags{
+  struct laserPulseBoolFlags{
 
-        bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
-        laserPulseBoolFlags(){
-            type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime =false;
-        }
-    };
+      bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
+      laserPulseBoolFlags(){
+        type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime =false;
+      }
+  };
 
-    struct outRequest{
+  struct outRequest{
       bool isFrom;
       bool isTo;
       bool isEvery;
@@ -69,58 +69,58 @@ namespace jsonParser{
       double at;
       std::string domainName;
       std::string specName;
-     };
+  };
 
-    bool checkVersion(Json::Value &document, int &version);
-    void parseJsonInputFile(Json::Value &root, std::string nomeFile);
-    int getDimensionality(Json::Value &document, int defaultDimensionality);
-    void setXrange(Json::Value &parent, GRID *grid);
-    void setYrange(Json::Value &parent,GRID *grid);
-    void setZrange(Json::Value &parent,GRID *grid);
+  bool checkVersion(Json::Value &document, int &version);
+  void parseJsonInputFile(Json::Value &root, std::string nomeFile);
+  int getDimensionality(Json::Value &document, int defaultDimensionality);
+  void setXrange(Json::Value &parent, GRID *grid);
+  void setYrange(Json::Value &parent,GRID *grid);
+  void setZrange(Json::Value &parent,GRID *grid);
 
-    bool setInt(int *number, Json::Value &parent, const char* name);
-    bool setDouble(double *number, Json::Value &parent,const char* name);
-    bool setBool(bool *number, Json::Value &parent, const char* name);
-    bool setString(std::string * number, Json::Value  &parent,const char* name);
+  bool setInt(int *number, Json::Value &parent, const char* name);
+  bool setDouble(double *number, Json::Value &parent,const char* name);
+  bool setBool(bool *number, Json::Value &parent, const char* name);
+  bool setString(std::string * number, Json::Value  &parent,const char* name);
 
-    bool setValue(Json::Value &child, Json::Value &parent, const char* name);
-    bool getRadiationFriction(Json::Value &document);
-    bool getLambda0(Json::Value &document, double& lambda0);
-    void setNCells(Json::Value &parent, GRID *grid);
-    void setNprocs(Json::Value &document, GRID *grid);
-    void setSimulationTime(Json::Value  &document,GRID *grid);
-    void setBoundaryConditions(Json::Value &parent,GRID *grid);
-    void setDumpControl(Json::Value  &parent, DUMP_CONTROL *myDumpControl);
-    void setStretchedGrid(Json::Value &document, GRID *grid);
-    void setMovingWindow(Json::Value &document, GRID *grid);
-    void setLaserPulses(Json::Value &document, EM_FIELD *emfield);
-    void setPlasmas(Json::Value &document, std::map<std::string, PLASMA*> &map);
-    bool checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas);
-    bool addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec);
-    void setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, gsl_rng* ext_rng);
+  bool setValue(Json::Value &child, Json::Value &parent, const char* name);
+  bool getRadiationFriction(Json::Value &document);
+  bool getLambda0(Json::Value &document, double& lambda0);
+  void setNCells(Json::Value &parent, GRID *grid);
+  void setNprocs(Json::Value &document, GRID *grid);
+  void setSimulationTime(Json::Value  &document,GRID *grid);
+  void setBoundaryConditions(Json::Value &parent,GRID *grid);
+  void setDumpControl(Json::Value  &parent, GRID *mygrid);
+  void setStretchedGrid(Json::Value &document, GRID *grid);
+  void setMovingWindow(Json::Value &document, GRID *grid);
+  void setLaserPulses(Json::Value &document, EM_FIELD *emfield);
+  void setPlasmas(Json::Value &document, std::map<std::string, PLASMA*> &map);
+  bool checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas);
+  bool addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec);
+  void setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, gsl_rng* ext_rng);
 
 
-    bool setLaserType(laserPulse*, Json::Value&);
-    bool setLaserPolarization(laserPulse*, Json::Value&);
-    bool setLaserDurationFWHM(laserPulse*, Json::Value&);
-    bool setLaserInitialPosition(laserPulse*, Json::Value&);
-    bool setLaserAmplitude(laserPulse*, Json::Value&);
-    bool setLaserWaist(laserPulse*, Json::Value&);
-    bool setLaserFocusPosition(laserPulse*, Json::Value&);
-    bool setLaserLambda(laserPulse*, Json::Value&);
-    bool setLaserRotation(laserPulse*, Json::Value&);
-    bool setLaserRiseTime(laserPulse*, Json::Value&);
-    bool checkLaserBoolFlags(laserPulseBoolFlags, laserPulse*);
-    int findPlasmaFunction(std::string);
+  bool setLaserType(laserPulse*, Json::Value&);
+  bool setLaserPolarization(laserPulse*, Json::Value&);
+  bool setLaserDurationFWHM(laserPulse*, Json::Value&);
+  bool setLaserInitialPosition(laserPulse*, Json::Value&);
+  bool setLaserAmplitude(laserPulse*, Json::Value&);
+  bool setLaserWaist(laserPulse*, Json::Value&);
+  bool setLaserFocusPosition(laserPulse*, Json::Value&);
+  bool setLaserLambda(laserPulse*, Json::Value&);
+  bool setLaserRotation(laserPulse*, Json::Value&);
+  bool setLaserRiseTime(laserPulse*, Json::Value&);
+  bool checkLaserBoolFlags(laserPulseBoolFlags, laserPulse*);
+  int findPlasmaFunction(std::string);
 
-    void setDomains(Json::Value &document, std::map<std::string, outDomain*>  &domains);
+  void setDomains(Json::Value &document, std::map<std::string, outDomain*>  &domains);
 
-    bool isOutTypeOk(std::string type);
-    bool isSpecNameOk(std::string specName, std::vector<SPECIE*> &species);
+  bool isOutTypeOk(std::string type);
+  bool isSpecNameOk(std::string specName, std::vector<SPECIE*> &species);
 
-    bool addOutReq(std::string type, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, jsonParser::outRequest outRequestVals);
+  bool addOutReq(std::string type, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, jsonParser::outRequest outRequestVals);
 
-    void setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, std::vector<SPECIE*> &species);
-
+  void setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, std::vector<SPECIE*> &species);
+  void setOutputDirPath(Json::Value &document, OUTPUT_MANAGER &manager);
 }
 #endif // JSONPARSER_H
