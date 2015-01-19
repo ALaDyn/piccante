@@ -16,7 +16,7 @@ boost : LIB = -lgsl -lgslcblas  -lboost_filesystem-mt -lboost_system-mt
 boost : $(EXE)
 
 hdf5 : OPT = -O3  -DUSE_BOOST -I/usr/lib/hdf5-1.8.12/hdf5/include -DUSE_HDF5
-hdf5 : LIB = -lgsl -lgslcblas -lboost_filesystem-mt -lboost_system-mt -lhdf5  -L/usr/lib/hdf5-1.8.12/hdf5/lib
+hdf5 : LIB = -lgsl -lgslcblas -lboost_filesystemt -lboost_system -lhdf5  -L/usr/lib/hdf5-1.8.12/hdf5/lib
 hdf5 : $(EXE)
 
 warn : OPT = -O3 -Wall -Winline -Wextra

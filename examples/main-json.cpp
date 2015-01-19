@@ -106,7 +106,7 @@ int main(int narg, char **args)
 
   grid.finalize();
 
-  jsonParser::setDumpControl(root, &grid.dumpControl);
+  jsonParser::setDumpControl(root, &grid);
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
@@ -149,10 +149,11 @@ int myIntVariable=0;
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
+  jsonParser::setOutputDirPath(root,manager);
 
-  manager.initialize(DIRECTORY_OUTPUT);
-//*******************************************END DIAG DEFINITION**************************************************
-grid.setDumpPath(DIRECTORY_DUMP);
+  manager.initialize();
+  //*******************************************END DIAG DEFINITION**************************************************
+  grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   if (grid.myid == grid.master_proc){

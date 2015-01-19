@@ -178,11 +178,17 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   multifileGroupSize = MACRO_CPUGROUP_FOR_MULTIFILE;
   particleGroupSize = PHASE_SPACE_GROUP_SIZE;
   particleBufferSize = NPARTICLE_BUFFER_SIZE;
+
+  outputDir = "OUTPUT";
 }
 
 OUTPUT_MANAGER::~OUTPUT_MANAGER(){
   for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); ++it)
     delete(*it);
+}
+
+void OUTPUT_MANAGER::setOutputPath(std::string dirName){
+  outputDir = dirName;
 }
 
 void OUTPUT_MANAGER::createDiagFile(){
@@ -289,6 +295,41 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir){
   }
 #endif
   outputDir = _outputDir;
+  prepareOutputMap();
+
+  if (!checkGrid()){
+    return;
+  }
+
+  if (isThereDiag){
+    createDiagFile();
+    createExtremaFiles();
+  }
+  if (isThereEMProbe){
+    createEMProbeFiles();
+  }
+
+  amIInit = true;
+}
+void OUTPUT_MANAGER::initialize(){
+#if defined (USE_BOOST)
+  std::string _newoutputDir;
+  std::stringstream ss;
+  time_t timer;
+  std::time(&timer);
+  ss << outputDir << "_" << (int)timer;
+  _newoutputDir = ss.str();
+  if (mygrid->myid == mygrid->master_proc){
+    if (!boost::filesystem::exists(outputDir)){
+      boost::filesystem::create_directories(outputDir);
+    }
+    else{
+      boost::filesystem::rename(outputDir, _newoutputDir);
+      boost::filesystem::create_directories(outputDir);
+    }
+  }
+#endif
+
   prepareOutputMap();
 
   if (!checkGrid()){

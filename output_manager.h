@@ -150,7 +150,10 @@ public:
   ~OUTPUT_MANAGER();
 
   void initialize(std::string _outputDir);
+  void initialize();
   void close();
+
+  void setOutputPath(std::string dirName);
 
   void addEBFieldFrom(double startTime, double frequency);
   void addEBFieldAt(double atTime);

@@ -1,139 +1,140 @@
 {
-    "VERSION": 1,
-    "dimensions": 2,
-    "lambda0": 1.0,
-    "radiationFriction": true,
-    "nProcY": 1,
-    "nProcZ": 1,
-    "xRange": [-20, 20],
-    "yRange": [-20, 20],
-    "zRange": [-20, 20],
-    "NCells": [5000, 100, 20],
-    "simulationTime": 15,
-    "boundaries": ["periodic", "periodic","periodic"],
-    "NO_StretchedGrid":{
-        "x":{"left": { "limit": -10.0, "NCells": 1000 },
-            "right": { "limit":  10.0, "NCells": 1000 } },
-        "y":{"left": { "limit": -15.0, "NCells": 1000 },
-            "right": { "limit":  15.0, "NCells": 1000 } },
-        "z":{"left": { "limit": -15.0, "NCells": 1000 },
-            "right": { "limit":  15.0, "NCells": 1000 } }
+  "VERSION": 1,
+  "dimensions": 2,
+  "lambda0": 1.0,
+  "radiationFriction": true,
+  "nProcY": 1,
+  "nProcZ": 1,
+  "xRange": [-20, 20],
+  "yRange": [-20, 20],
+  "zRange": [-20, 20],
+  "NCells": [5000, 100, 20],
+  "simulationTime": 15,
+  "boundaries": ["periodic", "periodic","periodic"],
+  "NO_StretchedGrid":{
+    "x":{"left": { "limit": -10.0, "NCells": 1000 },
+      "right": { "limit":  10.0, "NCells": 1000 } },
+    "y":{"left": { "limit": -15.0, "NCells": 1000 },
+      "right": { "limit":  15.0, "NCells": 1000 } },
+    "z":{"left": { "limit": -15.0, "NCells": 1000 },
+      "right": { "limit":  15.0, "NCells": 1000 } }
+  },
+  "MovingWindow":{
+    "start": 0,
+    "NO_beta": 1,
+    "NO_frequency":20
+  },
+  "restart":{
+    "DumpPath": "DUMP",
+    "doRestart": false,
+    "restartFromDump": 1,
+    "doDump": true,
+    "dumpEvery": 2.0
+  },
+  "special":{"variabile1": 32,"variabile2": 32.5},
+  "Plasma":[
+    {
+      "name": "bulk",
+      "densityFunction": "box",
+      "XRangeBox" : [-10, 10],
+      "YRangeBox" : [-10, 10],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 1.0,
+      "DensityLambda" : 1.0,
+      "NORampLength" : 0.2,
+      "NORampMinDensity" : 0.001,
+      "NOLeftRampLength" : 0.0,
+      "NORightRampLength" : 0.0,
+      "NOScaleLength" : 0.0,
+      "NOLeftScaleLength" : 0.0,
+      "NORightScaleLength" : 0.0,
+      "NOLeftRampMinDensity" : 0.0,
+      "NORightRampMinDensity" : 0.0,
+      "NOGratingDepth" : 0.0,
+      "NOGratingPeriod" : 0.0,
+      "NOGratingPhase" : 0.0
+    }
+  ],
+  "Species":[
+    {
+      "name": "ELE1",
+      "plasma": "bulk",
+      "ParticlesPerCell": [3,3,3],
+      "type": "ELECTRON",
+      "NOZ": 1.0,
+      "NOA": 1.0,
+      "isMarker": 0,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,-1.0]
     },
-    "MovingWindow":{
-        "start": 0,
-        "NO_beta": 1,
-        "NO_frequency":20
-    },
-    "restart":{
-        "doRestart": false,
-        "restartFromDump": 1,
-        "doDump": true,
-        "dumpEvery": 2.0
-    },
-    "special":{"variabile1": 32,"variabile2": 32.5},
-    "Plasma":[
-        {
-            "name": "bulk",
-            "densityFunction": "box",
-            "XRangeBox" : [-10, 10],
-            "YRangeBox" : [-10, 10],
-            "ZRangeBox" : [-100, 100],
-            "DensityCoefficient" : 1.0,
-            "DensityLambda" : 1.0,
-            "NORampLength" : 0.2,
-            "NORampMinDensity" : 0.001,
-            "NOLeftRampLength" : 0.0,
-            "NORightRampLength" : 0.0,
-            "NOScaleLength" : 0.0,
-            "NOLeftScaleLength" : 0.0,
-            "NORightScaleLength" : 0.0,
-            "NOLeftRampMinDensity" : 0.0,
-            "NORightRampMinDensity" : 0.0,
-            "NOGratingDepth" : 0.0,
-            "NOGratingPeriod" : 0.0,
-            "NOGratingPhase" : 0.0
-        }
-    ],
-    "Species":[
-        {
-            "name": "ELE1",
-            "plasma": "bulk",
-            "ParticlesPerCell": [3,3,3],
-            "type": "ELECTRON",
-            "NOZ": 1.0,
-            "NOA": 1.0,
-            "isMarker": 0,
-            "distribution": "Maxwell",
-            "distributionParams": [1.0e-5],
-            "distributionAddMomentum": [0.0,0.0,-1.0]
-        },
-        {
-            "name": "ELE2",
-            "plasma": "bulk",
-            "ParticlesPerCell": [3,3,3],
-            "type": "ELECTRON",
-            "NOZ": 1.0,
-            "NOA": 1.0,
-            "isMarker": 0,
-            "distribution": "Maxwell",
-            "distributionParams": [1.0e-5],
-            "distributionAddMomentum": [0.0,0.0,-1.0]
-        }
+    {
+      "name": "ELE2",
+      "plasma": "bulk",
+      "ParticlesPerCell": [3,3,3],
+      "type": "ELECTRON",
+      "NOZ": 1.0,
+      "NOA": 1.0,
+      "isMarker": 0,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,-1.0]
+    }
 
 
-    ],
-    "Laser":[
-        {
-            "enabled": true,
-            "type": "COS2_PLANE_WAVE",
-            "polarization": "S",
-            "durationFWHM": 5.0,
-            "initialPosition": -5.5,
-            "waist": 4,
-            "focusPosition": 0.0,
-            "a": 8.0,
-            "lambda": 1.0,
-            "rotation": false,
-            "angle": 10.0,
-            "center": 0,
-            "riseTime": 2
-        },
-        {
-            "enabled": true,
-            "type": "COSS2_PLANE_WAVE",
-            "polarization": "P",
-            "durationFWHM": 5.0,
-            "initialPosition": 5.5,
-            "a": 8.0
-        }
-    ],
-    "Domains":[
-        {
-            "name": "subd1",
-            "freeDim": [1,1,1],
-            "pointCoord": [0.0,0.0,0.0],
-            "xRange": [-10, 10],
-            "yRange": [-10, 10],
-            "zRange": [-10, 10]
-        },
-        {
-            "name": "subd2",
-            "freeDim": [1,0,0],
-            "pointCoord": [0.0,0.0756,0.0],
-            "xRange": [-10, 10],
-            "yRange": [-11, 11],
-            "zRange": [-12, 12]
-        }
+  ],
+  "Laser":[
+    {
+      "enabled": true,
+      "type": "COS2_PLANE_WAVE",
+      "polarization": "S",
+      "durationFWHM": 5.0,
+      "initialPosition": -5.5,
+      "waist": 4,
+      "focusPosition": 0.0,
+      "a": 8.0,
+      "lambda": 1.0,
+      "rotation": false,
+      "angle": 10.0,
+      "center": 0,
+      "riseTime": 2
+    },
+    {
+      "enabled": true,
+      "type": "COSS2_PLANE_WAVE",
+      "polarization": "P",
+      "durationFWHM": 5.0,
+      "initialPosition": 5.5,
+      "a": 8.0
+    }
+  ],
+  "Domains":[
+    {
+      "name": "subd1",
+      "freeDim": [1,1,1],
+      "pointCoord": [0.0,0.0,0.0],
+      "xRange": [-10, 10],
+      "yRange": [-10, 10],
+      "zRange": [-10, 10]
+    },
+    {
+      "name": "subd2",
+      "freeDim": [1,0,0],
+      "pointCoord": [0.0,0.0756,0.0],
+      "xRange": [-10, 10],
+      "yRange": [-11, 11],
+      "zRange": [-12, 12]
+    }
 
-    ]
-    ,
-    "Output":[
-       {"type": "E", "from":0.0, "to": 10.0, "every": 1.0, "in":"subd1"},
-        {"type": "Density", "spec": "ELE1", "at": 5.0, "every":0.5},
-        {"type": "Current", "every": 0.5},
-        {"type": "B", "from": 0.5, "every": 1.0, "in":"subd2"},
-        {"type": "PhSp", "spec": "ELE2", "every": 2.0},
-        {"type": "Diag", "every": 0.5, "at": 13.75}
-    ]
+  ],
+  "OutputPath": "OUTPUT",
+  "Output":[
+    {"type": "E", "from":0.0, "to": 10.0, "every": 1.0, "in":"subd1"},
+    {"type": "Density", "spec": "ELE1", "at": 5.0, "every":0.5},
+    {"type": "Current", "every": 0.5},
+    {"type": "B", "from": 0.5, "every": 1.0, "in":"subd2"},
+    {"type": "PhSp", "spec": "ELE2", "every": 2.0},
+    {"type": "Diag", "every": 0.5, "at": 13.75}
+  ]
 
 }

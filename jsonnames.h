@@ -35,6 +35,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _TAG_PML_ "pml"
 
 #define _OBJ_RESTART_ "restart"
+#define _JSON_STRING_DUMP_FOLDER_NAME "DumpPath"
 #define _BOOL_RESTART_ "doRestart"
 #define _BOOL_DODUMP_ "doDump"
 #define _DOUBLE_DUMPEVERY_ "dumpEvery"
@@ -132,6 +133,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _JSON_INTARRAY2_DOMAIN_Y_RANGE "yRange"
 #define _JSON_INTARRAY2_DOMAIN_Z_RANGE "zRange"
 
+#define _JSON_STRING_OUTPUT_FOLDER_NAME "OutputPath"
 #define _JSON_OBJARRAY_OUTPUT "Output"
 #define _JSON_STRING_OUTPUT_TYPE "type"
 #define OUTPUTTYPEVALUE_E "E"
