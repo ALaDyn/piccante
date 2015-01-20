@@ -45,7 +45,6 @@ public:
   double minima[7], maxima[7];   //components minima and maxima
   double totalMomentum[3], totalEnergy;
   std::string name;
-  bool isTestSpecies;  
   PLASMA  plasma;
   //  double (*initial_profile)(double , double , double , PLASMA*);
   SPECIEspectrum spectrum;
@@ -63,13 +62,13 @@ public:
   void creationFromFile1D(std::string name);
   void move_window();
   void addMarker();
+  void setTestSpecies();
   bool amIWithMarker();
   void output(std::ofstream &ff);
   static const int myWidth = 12;
   static const int myNarrowWidth = 6;
 
   std::string getName();
-
   void init_output_diag(std::ofstream &ff);
   void output_diag(int istep, std::ofstream &ff);
   void init_output_extrems(std::ofstream &ff);
@@ -140,6 +139,7 @@ private:
 #else
   double **val;
 #endif
+  bool isTestSpecies;
   double dummy;
   int valSize;
   int particlePerCell;
