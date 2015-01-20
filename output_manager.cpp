@@ -2195,10 +2195,11 @@ void OUTPUT_MANAGER::writeAllCPUParticlesValues(MPI_File thefile, SPECIE* spec, 
   }
 #ifndef DEBUG_NO_MPI_FILE_WRITE
   MPI_File_write_all(thefile, buf, resto*Ncomp, MPI_FLOAT, &status);
-#endif
+
   for (int i = 0; i < (maxPassaggi - passaggi); i++){
     MPI_File_write_all(thefile, buf, 0, MPI_FLOAT, &status);
   }
+  #endif
   delete[]buf;
 }
 
