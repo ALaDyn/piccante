@@ -178,6 +178,10 @@ std::string SPECIE::getName(){
 void SPECIE::addMarker(){
   flagWithMarker = true;
 }
+void SPECIE::setTestSpecies(){
+  isTestSpecies = true;
+}
+
 bool SPECIE::amIWithMarker(){
   return flagWithMarker;
 }

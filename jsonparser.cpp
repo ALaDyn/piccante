@@ -813,6 +813,11 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
         if(isMarker)
           newSpec->addMarker();
 
+        bool isTest = false;
+        setBool(&isTest, mySpecies, _JSON_BOOL_IS_TEST );
+        if(isTest)
+          newSpec->setTestSpecies();
+
         newSpec->creation();
 
         if(setString(&dummy, mySpecies, _JSON_STRING_DISTRIBUTION)){

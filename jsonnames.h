@@ -108,6 +108,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _JSON_DOUBLE_IONS_A "A"
 #define _JSON_DOUBLE_IONS_Z "Z"
 #define _JSON_BOOL_IS_MARKER "isMarker"
+#define _JSON_BOOL_IS_TEST "isTest"
 #define _JSON_STRING_DISTRIBUTION "distribution"
 
 #define _JSON_STRING_SPEIES_TYPE "type"

@@ -64,6 +64,7 @@
       "NOZ": 1.0,
       "NOA": 1.0,
       "isMarker": 0,
+      "isTest": false,
       "distribution": "Maxwell",
       "distributionParams": [1.0e-5],
       "distributionAddMomentum": [0.0,0.0,-1.0]
@@ -76,6 +77,7 @@
       "NOZ": 1.0,
       "NOA": 1.0,
       "isMarker": 0,
+      "isTest": false,
       "distribution": "Maxwell",
       "distributionParams": [1.0e-5],
       "distributionAddMomentum": [0.0,0.0,-1.0]
