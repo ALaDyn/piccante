@@ -2413,7 +2413,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
   delete[] groupProcNumData;
 }
 
-void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  fileName, SPECIE* spec){
+void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  fileName, SPECIE* spec, int NParticleToWrite){
   const int groupsize = particleGroupSize;
   const int bufsize = particleBufferSize*spec->Ncomp;
 
@@ -2445,8 +2445,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   sprintf(nomefile, "%s", myFileName.str().c_str());
 
   int Ncomp = spec->Ncomp;
+  int localNpart = NParticleToWrite;
 
-  int totalFloatNumber = spec->Np*Ncomp;
+  int totalFloatNumber = localNpart*Ncomp;
   int* groupProcNumData = new int[groupNproc];
   groupProcNumData[groupMyid] = totalFloatNumber;
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData, 1, MPI_INT, groupCommunicator);
@@ -2469,8 +2470,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   float* data = new float[bufsize];
 
   if (groupMyid != 0){
-    int numPackages = spec->Np/particleBufferSize;
-    int resto = spec->Np%particleBufferSize;
+    int numPackages = localNpart/particleBufferSize;
+    int resto = localNpart%particleBufferSize;
 
     for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
@@ -2493,8 +2494,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
     MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-    int numPackages = spec->Np / particleBufferSize;
-    int resto = spec->Np%particleBufferSize;
+    int numPackages = localNpart / particleBufferSize;
+    int resto = localNpart%particleBufferSize;
     for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
         int c;
@@ -2540,8 +2541,6 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
 void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
   SPECIE* spec = myspecies[req.target];
-  int* NfloatLoc = new int[mygrid->nproc];
-  int maxNfloatLoc = 0;
   //  int outputNComp, NCompFloat;
   //  bool flagMarker = spec->amIWithMarker();
   //  if (flagMarker){
@@ -2554,17 +2553,6 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
   //    outputNComp = spec->Ncomp;
   //    NfloatLoc[mygrid->myid] = spec->Np*outputNComp;
   //  }
-  NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
-  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
-
-  for (int pp = 0; pp < mygrid->nproc; pp++) {
-    maxNfloatLoc = MAX(maxNfloatLoc, NfloatLoc[pp]);
-  }
-
-  MPI_Offset disp = 0;
-  for (int pp = 0; pp < mygrid->myid; pp++)
-    disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
-  MPI_File thefile;
 
   char *nomefile = new char[fileName.size() + 1];
   nomefile[fileName.size()] = 0;
@@ -2572,25 +2560,34 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
 
   {
 #if defined(PHASE_SPACE_USE_MPI_FILE_WRITE_ALL)
+    int* NfloatLoc = new int[mygrid->nproc];
+    int maxNfloatLoc = 0;
+    NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
 
+    for (int pp = 0; pp < mygrid->nproc; pp++) {
+      maxNfloatLoc = MAX(maxNfloatLoc, NfloatLoc[pp]);
+    }
+    MPI_Offset disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+      disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+MPI_File thefile;
     MPI_File_open(MPI_COMM_WORLD, nomefile,
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     writeAllCPUParticlesValues(thefile, spec, maxNfloatLoc);
     MPI_File_close(&thefile);
-
+delete[] NfloatLoc;
 #elif defined(PHASE_SPACE_USE_SEPARATE_FILES_MPI_FILE_WRITE_ALL)
 
     writeAllSeparateFilesParticlesValues(nomefile,spec);
-
-
 
 #elif defined(PHASE_SPACE_USE_OUTPUT_WRITING_GROUPS)
 
     writeCPUParticlesValuesWritingGroups(nomefile,spec);
 
 #elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
-    writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec);
+    writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np);
 
 #elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
 
@@ -2599,17 +2596,29 @@ void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
     writeCPUParticlesValuesSingleFile(myFileName.str(),  spec);
 
 #else
+    int* NfloatLoc = new int[mygrid->nproc];
+    int maxNfloatLoc = 0;
+    NfloatLoc[mygrid->myid] = spec->Np*spec->Ncomp;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, MPI_COMM_WORLD);
+
+    for (int pp = 0; pp < mygrid->nproc; pp++) {
+      maxNfloatLoc = MAX(maxNfloatLoc, NfloatLoc[pp]);
+    }
+    MPI_Offset disp = 0;
+    for (int pp = 0; pp < mygrid->myid; pp++)
+      disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+    MPI_File thefile;
     MPI_File_open(MPI_COMM_WORLD, nomefile,
                   MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
     writeCPUParticlesValues(thefile, spec);
     MPI_File_close(&thefile);
-
+delete[] NfloatLoc;
 #endif
 
 
   }
-  delete[] NfloatLoc;
+
   delete[] nomefile;
 
 }
@@ -2638,6 +2647,36 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
   return counter;
 }
 
+int OUTPUT_MANAGER::findNumberOfParticlesInSubdomainAndReorder(request req){
+  double rmin[3], rmax[3];
+  for (int c = 0; c < 3; c++){
+    rmin[c] = myDomains[req.domain]->rmin[c];
+    rmax[c] = myDomains[req.domain]->rmax[c];
+  }
+  int counter = 0;
+  double rr[3], buffer;
+  SPECIE* spec = myspecies[req.target];
+  for (int p = 0; p < spec->Np; p++){
+    rr[0] = spec->r0(p);
+    rr[1] = spec->r1(p);
+    rr[2] = spec->r2(p);
+
+    if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
+      if (mygrid->getDimensionality() < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
+        if (mygrid->getDimensionality() < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
+          for(int c; c<spec->Ncomp; c++){
+            buffer = spec->ru(c,counter);
+            spec->ru(c,counter) = spec->ru(c,p);
+            spec->ru(c,p) = buffer;
+          }
+          counter++;
+        }
+      }
+    }
+  }
+  return counter;
+}
+
 void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request req){
   double rmin[3], rmax[3];
   for (int c = 0; c < 3; c++){
@@ -2656,36 +2695,41 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
   MPI_Comm_size(outputCommunicator, &outputNProc);
 
   int outputNPart = findNumberOfParticlesInSubdomain(req);
-  int* NfloatLoc = new int[outputNProc];
-  NfloatLoc[myOutputID] = outputNPart*spec->Ncomp;
-
-  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
-
-  MPI_Offset disp = 0;
-  for (int pp = 0; pp < myOutputID; pp++)
-    disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
-  MPI_File thefile;
-  MPI_Status status;
 
   char *nomefile = new char[fileName.size() + 1];
   nomefile[fileName.size()] = 0;
   sprintf(nomefile, "%s", fileName.c_str());
 
   if (shouldIWrite){
-#ifndef NEW_OUTPUT
+#if defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
+        writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart);
+
+#elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
+    std::stringstream myFileName;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
+    writeCPUParticlesValuesSingleFile(myFileName.str(), rmin, rmax, spec);
+delete[] NfloatLoc;
+#else
+
+    int* NfloatLoc = new int[outputNProc];
+    NfloatLoc[myOutputID] = outputNPart*spec->Ncomp;
+    MPI_Offset disp = 0;
+    for (int pp = 0; pp < myOutputID; pp++)
+      disp += (MPI_Offset)(NfloatLoc[pp] * sizeof(float));
+    MPI_File thefile;
+    MPI_Status status;
+    MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
+
     MPI_File_open(outputCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
     writeCPUParticlesValues(thefile, rmin, rmax, spec);
     MPI_File_close(&thefile);
-#else
-    std::stringstream myFileName;
-    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << myOutputID;
-    writeCPUParticlesValuesSingleFile(myFileName.str(), rmin, rmax, spec);
+    delete[] NfloatLoc;
 #endif
   }
   MPI_Comm_free(&outputCommunicator);
-  delete[] NfloatLoc;
+
   delete[] nomefile;
 }
 
