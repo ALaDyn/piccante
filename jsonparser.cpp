@@ -23,7 +23,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 using namespace jsonParser;
 
 bool jsonParser::isThisJsonMaster=true;
-
+int jsonParser::inputVersion = 1;
 bool jsonParser::checkVersion(Json::Value &document, int &version){
   setInt(&version, document, "VERSION");
   if(version==1)
@@ -41,12 +41,12 @@ void jsonParser::parseJsonInputFile(Json::Value &root, std::string nomeFile){
   Json::Reader reader;
   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
-  int version = -1;
-  if((!checkVersion(root, version))&&isThisJsonMaster){
-    std::cout << "WARNING: version " << version <<
-                 " may not be fully supported!" << std::endl;
+  int version = 1;
+  if(setInt(&version,root,_JSON_INT_VERSION)){
+    std::cout << "WARNING: version undefined, version = " << version <<
+                 " will be used as defautl!" << std::endl;
   }
-
+  inputVersion = version;
   if((!parsedSuccess)&&isThisJsonMaster){
     std::cout<<"Failed to parse JSON"<<std::endl
             <<reader.getFormatedErrorMessages()
@@ -255,9 +255,8 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid){
 }
 
 void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
-  std::string  name1 = _OBJ_STRETCHED_GRID_;
   Json::Value  stretching;
-  if(setValue(stretching, document, name1.c_str() ) ) {
+  if(setValue(stretching, document, _OBJ_STRETCHED_GRID_ ) ) {
     grid->enableStretchedGrid();
     std::string  name2;
     Json::Value stretching1D;
@@ -525,7 +524,7 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
       for(unsigned int index=0; index<lasers.size(); index++){
         Json::Value myLaser = lasers[index];
 
-        name2= _ENABLED_LASER_;
+        name2= _JSON_BOOL_ENABLED;
         bool enabled=false;
         setBool(&enabled, myLaser, name2.c_str());
         if(enabled){
@@ -671,12 +670,18 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 }
 
 bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas){
+  bool isEnambled=false;
   bool isThereName=false;
   bool isThereType=false;
   bool isTherePlasma=false;
   bool isTherePPC=false;
 
   std::string dummy;
+
+  if(inputVersion == 1)
+    isEnambled = true;
+
+  setBool(&isEnambled,child, _JSON_BOOL_ENABLED);
 
   isThereName=setString(&dummy,child, _JSON_STRING_SPECIE_NAME);
 
@@ -700,7 +705,7 @@ bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, P
       isThereType=true;
   }
 
-  return isThereName&&isThereType&&isTherePlasma&&isTherePPC;
+  return isEnambled&&isThereName&&isThereType&&isTherePlasma&&isTherePPC;
 }
 
 bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec){

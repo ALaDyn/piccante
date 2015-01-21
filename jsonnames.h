@@ -20,7 +20,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef JSONNAMES_H
 #define JSONNAMES_H
 
+#define _JSON_INT_VERSION "VERSION"
 #define INT_DIMENSIONS "dimensions"
+#define _JSON_BOOL_ENABLED "enabled"
+
 #define DOUBLEARRAY_X_RANGE "xRange"
 #define DOUBLEARRAY_Y_RANGE "yRange"
 #define DOUBLEARRAY_Z_RANGE "zRange"
@@ -56,7 +59,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _DOUBLE_FREQUENCY_MW_ "frequency"
 
 #define _OBJ_ARRAY_LASER_ "Laser"
-#define _ENABLED_LASER_ "enabled"
 
 #define _STRING_TYPE_ "type"
 #define _LASERTYPEVALUE_COS_PLANE_WAVE_ "COS2_PLANE_WAVE"

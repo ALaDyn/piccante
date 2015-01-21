@@ -47,7 +47,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace jsonParser{
   extern bool isThisJsonMaster;
-
+  extern int inputVersion;
   struct laserPulseBoolFlags{
 
       bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
