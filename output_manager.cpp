@@ -2417,8 +2417,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   const int groupsize = particleGroupSize;
   const int bufsize = particleBufferSize*spec->Ncomp;
 
-int myOutId;
-MPI_Comm_rank(outputCommunicator, &myOutId);
+  int myOutId;
+  MPI_Comm_rank(outputCommunicator, &myOutId);
   int fileCommunicatorID = myOutId/multifileGroupSize;
   MPI_Comm FileCommunicator;
   MPI_Comm_split(outputCommunicator, fileCommunicatorID, 0, &FileCommunicator);
@@ -2427,12 +2427,13 @@ MPI_Comm_rank(outputCommunicator, &myOutId);
   MPI_Comm_rank(FileCommunicator, &fileMyid);
 
   MPI_Comm groupCommunicator;
-  MPI_Comm MPIFileCommunicator;
   MPI_Comm_split(FileCommunicator, fileMyid / groupsize, 0, &groupCommunicator);
-  MPI_Comm_split(FileCommunicator, fileMyid % groupsize, 0, &MPIFileCommunicator);
   int groupMyid, groupNproc;
   MPI_Comm_size(groupCommunicator, &groupNproc);
   MPI_Comm_rank(groupCommunicator, &groupMyid);
+
+  MPI_Comm MPIFileCommunicator;
+  MPI_Comm_split(FileCommunicator, fileMyid % groupsize, 0, &MPIFileCommunicator);
   int mpiFileMyid, mpiFileNproc;
   MPI_Comm_size(MPIFileCommunicator, &mpiFileNproc);
   MPI_Comm_rank(MPIFileCommunicator, &mpiFileMyid);
@@ -2445,20 +2446,19 @@ MPI_Comm_rank(outputCommunicator, &myOutId);
   nomefile[myFileName.str().size()] = 0;
   sprintf(nomefile, "%s", myFileName.str().c_str());
 
-  int Ncomp = spec->Ncomp;
-  int localNpart = NParticleToWrite;
+  const int Ncomp = spec->Ncomp;
 
-  int totalFloatNumber = localNpart*Ncomp;
+  int totalFloatNumber = NParticleToWrite*Ncomp;
   int* groupProcNumData = new int[groupNproc];
   groupProcNumData[groupMyid] = totalFloatNumber;
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData, 1, MPI_INT, groupCommunicator);
+  long long int groupNumData = 0;
+  for (int i = 0; i < groupNproc; i++){
+    groupNumData += groupProcNumData[i];
+  }
 
   MPI_Offset disp = 0;
-  long long int groupNumData = 0;
   if (groupMyid == 0){
-    for (int i = 0; i < groupNproc; i++){
-      groupNumData += groupProcNumData[i];
-    }
     long long int *allGroupNumData = new long long int[mpiFileNproc];
     allGroupNumData[mpiFileMyid] = groupNumData;
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_LONG_LONG_INT, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
@@ -2466,13 +2466,17 @@ MPI_Comm_rank(outputCommunicator, &myOutId);
       disp += allGroupNumData[i] * sizeof(float);
     }
     delete[] allGroupNumData;
+
+    MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
+    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+
   }
 
   float* data = new float[bufsize];
 
   if (groupMyid != 0){
-    int numPackages = localNpart/particleBufferSize;
-    int resto = localNpart%particleBufferSize;
+    int numPackages = NParticleToWrite/particleBufferSize;
+    int resto = NParticleToWrite%particleBufferSize;
 
     for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
@@ -2492,11 +2496,9 @@ MPI_Comm_rank(outputCommunicator, &myOutId);
     MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
   }
   else{
-    MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
-    MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
 
-    int numPackages = localNpart / particleBufferSize;
-    int resto = localNpart%particleBufferSize;
+    int numPackages = NParticleToWrite / particleBufferSize;
+    int resto = NParticleToWrite%particleBufferSize;
     for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
         int c;
