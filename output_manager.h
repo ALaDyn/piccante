@@ -324,7 +324,7 @@ private:
   void fillRequestList(int bufsize, int* groupProcNumData, int groupNproc, std::vector<reqOutput> &reqList);
   void writeAllSeparateFilesParticlesValues(std::string fileName, SPECIE* spec);
   void writeCPUParticlesValuesWritingGroups(std::string fileName, SPECIE* spec);
-  void writeCPUParticlesValuesFewFilesWritingGroups(std::string fileName, SPECIE* spec, int NParticleToWrite);
+  void writeCPUParticlesValuesFewFilesWritingGroups(std::string fileName, SPECIE* spec, int NParticleToWrite, MPI_Comm outputCommunicator);
 
   void writeSpecPhaseSpace(std::string fileName, request req);
   void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);

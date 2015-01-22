@@ -2413,14 +2413,15 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
   delete[] groupProcNumData;
 }
 
-void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  fileName, SPECIE* spec, int NParticleToWrite){
+void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  fileName, SPECIE* spec, int NParticleToWrite, MPI_Comm outputCommunicator){
   const int groupsize = particleGroupSize;
   const int bufsize = particleBufferSize*spec->Ncomp;
 
-
-  int fileCommunicatorID = mygrid->myid/multifileGroupSize;
+int myOutId;
+MPI_Comm_rank(outputCommunicator, &myOutId);
+  int fileCommunicatorID = myOutId/multifileGroupSize;
   MPI_Comm FileCommunicator;
-  MPI_Comm_split(MPI_COMM_WORLD, fileCommunicatorID, 0, &FileCommunicator);
+  MPI_Comm_split(outputCommunicator, fileCommunicatorID, 0, &FileCommunicator);
   int fileMyid, fileNproc;
   MPI_Comm_size(FileCommunicator, &fileNproc);
   MPI_Comm_rank(FileCommunicator, &fileMyid);
@@ -2587,7 +2588,8 @@ delete[] NfloatLoc;
     writeCPUParticlesValuesWritingGroups(nomefile,spec);
 
 #elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
-    writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np);
+
+    writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np, MPI_COMM_WORLD);
 
 #elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
 
@@ -2664,7 +2666,7 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomainAndReorder(request req){
     if (rmax[0] >= rr[0] && rmin[0] < rr[0]){
       if (mygrid->getDimensionality() < 2 || (rmax[1] >= rr[1] && rmin[1] < rr[1])){
         if (mygrid->getDimensionality() < 3 || (rmax[2] >= rr[2] && rmin[2] < rr[2])){
-          for(int c; c<spec->Ncomp; c++){
+          for(int c=0; c<spec->Ncomp; c++){
             buffer = spec->ru(c,counter);
             spec->ru(c,counter) = spec->ru(c,p);
             spec->ru(c,p) = buffer;
@@ -2689,20 +2691,19 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
   shouldIWrite = amIInTheSubDomain(req);
 
   MPI_Comm outputCommunicator;
-  MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+  MPI_Comm_split(MPI_COMM_WORLD, shouldIWrite, 0, &outputCommunicator);
   int myOutputID, outputNProc;
   MPI_Comm_rank(outputCommunicator, &myOutputID);
   MPI_Comm_size(outputCommunicator, &outputNProc);
 
-  int outputNPart = findNumberOfParticlesInSubdomain(req);
-
+  int outputNPart = findNumberOfParticlesInSubdomainAndReorder(req);
   char *nomefile = new char[fileName.size() + 1];
   nomefile[fileName.size()] = 0;
   sprintf(nomefile, "%s", fileName.c_str());
 
   if (shouldIWrite){
 #if defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
-        writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart);
+        writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart, outputCommunicator);
 
 #elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
     std::stringstream myFileName;

@@ -42,7 +42,7 @@ void jsonParser::parseJsonInputFile(Json::Value &root, std::string nomeFile){
   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
   int version = 1;
-  if(setInt(&version,root,_JSON_INT_VERSION)){
+  if(!setInt(&version,root,_JSON_INT_VERSION)){
     std::cout << "WARNING: version undefined, version = " << version <<
                  " will be used as defautl!" << std::endl;
   }
