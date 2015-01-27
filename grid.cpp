@@ -797,7 +797,10 @@ void GRID::setLocalExtrems(){
 }
 void GRID::mpi_grid_initialize(int *narg, char **args)
 {
-  MPI_Init(narg, &args);
+  int isInitialized;
+  MPI_Initialized(&isInitialized);
+  if(!isInitialized)
+    MPI_Init(narg, &args);
   MPI_Comm_size(MPI_COMM_WORLD, &nproc);
   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 

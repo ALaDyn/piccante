@@ -84,11 +84,13 @@ namespace jsonParser{
   bool setString(std::string * number, Json::Value  &parent,const char* name);
 
   bool setValue(Json::Value &child, Json::Value &parent, const char* name);
-  bool getRadiationFriction(Json::Value &document);
+  void setRadiationFriction(Json::Value &document,GRID *grid);
   bool getLambda0(Json::Value &document, double& lambda0);
   void setNCells(Json::Value &parent, GRID *grid);
   void setNprocs(Json::Value &document, GRID *grid);
   void setSimulationTime(Json::Value  &document,GRID *grid);
+  void setMasterProc(Json::Value  &document,GRID *grid);
+  void setCourantFactor(Json::Value  &document,GRID *grid);
   void setBoundaryConditions(Json::Value &parent,GRID *grid);
   void setDumpControl(Json::Value  &parent, GRID *mygrid);
   void setStretchedGrid(Json::Value &document, GRID *grid);

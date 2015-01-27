@@ -23,7 +23,11 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _JSON_INT_VERSION "VERSION"
 #define INT_DIMENSIONS "dimensions"
 #define _JSON_BOOL_ENABLED "enabled"
+#define _JSON_INT_MASTERPROC "masterProc"
+#define _JSON_DOUBLE_COURANT_FACTOR "courantFactor"
 
+#define _JSON_DOUBLE_FRICTION_LENGTH_CM "lambda0"
+#define _JSON_BOOL_IS_FRICTION "radiationFriction"
 #define DOUBLEARRAY_X_RANGE "xRange"
 #define DOUBLEARRAY_Y_RANGE "yRange"
 #define DOUBLEARRAY_Z_RANGE "zRange"

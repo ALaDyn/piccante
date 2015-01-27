@@ -60,7 +60,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 int main(int narg, char **args)
 {
-    const int masterProc=0;
+  MPI_Init(&narg, &args);
+  const int masterProc=0;
 
   Json::Value root;
   jsonParser::parseJsonInputFile(root,"inputPiccante.json");
@@ -82,24 +83,14 @@ int main(int narg, char **args)
   jsonParser::setStretchedGrid(root,&grid);
   jsonParser::setBoundaryConditions(root, &grid);
 
-  if(jsonParser::getRadiationFriction(root))
-    grid.enableRadiationFriction();
-
-  double lamda0fromJson = 0.0;
-  if(jsonParser::getLambda0(root, lamda0fromJson))
-    grid.setLambda0(lamda0fromJson);
+  jsonParser::setRadiationFriction(root, &grid);
+  jsonParser::setMasterProc(root, &grid);
 
   grid.mpi_grid_initialize(&narg, args);
-  if(grid.myid==masterProc)
-      jsonParser::isThisJsonMaster=true;
-  else
-      jsonParser::isThisJsonMaster=false;
 
-  grid.setCourantFactor(0.98);
+  jsonParser::setCourantFactor(root, &grid);
   jsonParser::setSimulationTime(root,&grid);
   jsonParser::setMovingWindow(root,&grid);
-
-  grid.setMasterProc(masterProc);
 
   srand(time(NULL));
   grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);

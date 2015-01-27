@@ -41,18 +41,29 @@ void jsonParser::parseJsonInputFile(Json::Value &root, std::string nomeFile){
   Json::Reader reader;
   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
-  int version = 1;
-  if(!setInt(&version,root,_JSON_INT_VERSION)){
-    std::cout << "WARNING: version undefined, version = " << version <<
-                 " will be used as defautl!" << std::endl;
-  }
-  inputVersion = version;
   if((!parsedSuccess)&&isThisJsonMaster){
     std::cout<<"Failed to parse JSON"<<std::endl
             <<reader.getFormatedErrorMessages()
            <<std::endl;
     exit(1);
   }
+
+  int masterProc=0;
+  setInt(&masterProc,root, _JSON_INT_MASTERPROC);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if(rank==masterProc)
+    isThisJsonMaster=true;
+  else
+    isThisJsonMaster=false;
+
+  int version = 1;
+  if(!setInt(&version,root,_JSON_INT_VERSION)){
+    std::cout << "WARNING: version undefined, version = " << version <<
+                 " will be used as defautl!" << std::endl;
+  }
+  inputVersion = version;
+
 }
 
 
@@ -110,14 +121,16 @@ int jsonParser::getDimensionality(Json::Value &document, int defaultDimensionali
   return dim;
 }
 
-bool jsonParser::getRadiationFriction(Json::Value &document){
-  bool isFriction=false;
-  setBool(&isFriction, document, "radiationFriction");
-  return isFriction;
-}
+void jsonParser::setRadiationFriction(Json::Value &document, GRID *grid){
+  bool isFriction=false, isLambda=false;
+  double lambda0;
+  isLambda = setDouble(&lambda0, document, _JSON_DOUBLE_FRICTION_LENGTH_CM);
+  setBool(&isFriction, document, _JSON_BOOL_IS_FRICTION);
 
-bool jsonParser::getLambda0(Json::Value &document, double& lambda0){
-  return setDouble(&lambda0, document, "lambda0");
+  if(isFriction&&isLambda){
+    grid->enableRadiationFriction();
+    grid->setLambda0(lambda0);
+  }
 }
 
 void jsonParser::setXrange(Json::Value &parent,GRID *grid){
@@ -182,7 +195,17 @@ void jsonParser::setSimulationTime(Json::Value &document,GRID *grid){
   setDouble(&simulationTime,document, _DOUBLE_SIMULATION_TIME_);
   grid->setSimulationTime(simulationTime);
 }
+void jsonParser::setMasterProc(Json::Value  &document,GRID *grid){
+  int masterProc=0;
+  setInt(&masterProc,document, _JSON_INT_MASTERPROC);
+  grid->setMasterProc(masterProc);
+}
 
+void jsonParser::setCourantFactor(Json::Value  &document,GRID *grid){
+  double courantFactor=0.98;
+  setDouble(&courantFactor,document, _JSON_DOUBLE_COURANT_FACTOR);
+  grid->setCourantFactor(courantFactor);
+}
 void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
   std::string  name1= _OBJ_BOUNDARIES_;
   std::string  xCondition, yCondition, zCondition;
@@ -256,8 +279,16 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid){
 
 void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
   Json::Value  stretching;
+  bool isEnabled;
   if(setValue(stretching, document, _OBJ_STRETCHED_GRID_ ) ) {
-    grid->enableStretchedGrid();
+    if(inputVersion == 1)
+      isEnabled = true;
+
+    setBool(&isEnabled, stretching, _JSON_BOOL_ENABLED);
+    if(isEnabled){
+
+      grid->enableStretchedGrid();
+    }
     std::string  name2;
     Json::Value stretching1D;
 
@@ -329,24 +360,26 @@ void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
   }
 }
 void jsonParser::setMovingWindow(Json::Value  &document,GRID *grid){
-  std::string  name1 = _OBJ_MOVING_WINDOW_;
   Json::Value movingWindow;
-  if(setValue( movingWindow, document, name1.c_str() ) ) {
-    std::string  name2;
-    double start=0;
-    name2= _DOUBLE_START_MW_;
-    setDouble( &start, movingWindow, name2.c_str() );
-    grid->setStartMovingWindow(start);
+  bool isEnambled;
+  if(setValue( movingWindow, document, _OBJ_MOVING_WINDOW_ ) ) {
+    if(inputVersion == 1)
+      isEnambled = true;
 
-    name2= _DOUBLE_BETA_MW_;
-    double beta;
-    if(setDouble( &beta, movingWindow, name2.c_str() ) ){
-      grid->setBetaMovingWindow(beta);
-    }
-    name2= _DOUBLE_FREQUENCY_MW_;
-    int frequency;
-    if(setInt( &frequency, movingWindow, name2.c_str() ) ){
-      grid->setFrequencyMovingWindow(frequency);
+    setBool(&isEnambled, movingWindow, _JSON_BOOL_ENABLED);
+    if(isEnambled){
+      double start=0;
+      setDouble( &start, movingWindow, _DOUBLE_START_MW_ );
+      grid->setStartMovingWindow(start);
+
+      double beta;
+      if(setDouble( &beta, movingWindow, _DOUBLE_BETA_MW_ ) ){
+        grid->setBetaMovingWindow(beta);
+      }
+      int frequency;
+      if(setInt( &frequency, movingWindow, _DOUBLE_FREQUENCY_MW_ ) ){
+        grid->setFrequencyMovingWindow(frequency);
+      }
     }
   }
 

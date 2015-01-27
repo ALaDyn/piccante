@@ -1,8 +1,10 @@
 {
-  "VERSION": 1,
+  "VERSION": 2,
   "dimensions": 2,
+  "masterProc": 0,
   "lambda0": 1.0,
   "radiationFriction": true,
+  "courantFactor": 0.98,
   "nProcY": 1,
   "nProcZ": 1,
   "xRange": [-20, 20],
@@ -57,6 +59,7 @@
   ],
   "Species":[
     {
+            "enabled": true,
       "name": "ELE1",
       "plasma": "bulk",
       "ParticlesPerCell": [3,3,3],
@@ -70,6 +73,7 @@
       "distributionAddMomentum": [0.0,0.0,-1.0]
     },
     {
+             "enabled": false,
       "name": "ELE2",
       "plasma": "bulk",
       "ParticlesPerCell": [3,3,3],
