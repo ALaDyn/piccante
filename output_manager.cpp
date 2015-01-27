@@ -1333,11 +1333,11 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
       shouldIWrite = amIInTheSubDomain(req);
 
     MPI_Comm_free(&sliceCommunicator);
-    MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+    MPI_Comm_split(MPI_COMM_WORLD, shouldIWrite, 0, &outputCommunicator);
   }
   else{
     shouldIWrite = amIInTheSubDomain(req);
-    MPI_Comm_split(mygrid->cart_comm, shouldIWrite, 0, &outputCommunicator);
+    MPI_Comm_split(MPI_COMM_WORLD, shouldIWrite, 0, &outputCommunicator);
   }
   int myOutputID, outputNProc;
   MPI_Comm_rank(outputCommunicator, &myOutputID);
@@ -1396,7 +1396,7 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   if(shouldIWrite){
     int fileCommunicatorID = myOutputID/multifileGroupSize;
     std::stringstream myFileName;
-    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << fileCommunicatorID;
+    myFileName << fileName << "." << std::setfill('0') << std::setw(3) << fileCommunicatorID;
     char *nomefile = new char[myFileName.str().size() + 1];
     strcpy(nomefile, myFileName.str().c_str());
 
