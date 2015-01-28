@@ -1392,7 +1392,6 @@ void OUTPUT_MANAGER::writeGridFieldSubDomain(std::string fileName, request req){
   }
 #elif defined(FIELDS_USE_SEPARATE_FILES_MACROGROUPS)
 
-
   if(shouldIWrite){
     int fileCommunicatorID = myOutputID/multifileGroupSize;
     std::stringstream myFileName;

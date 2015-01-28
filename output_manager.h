@@ -37,8 +37,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 //#define FIELDS_USE_OUTPUT_WRITING_GROUPS
 //#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
 //#define FIELDS_USE_MULTI_FILE
-#define FIELDS_GROUP_SIZE 128
-#define MACRO_CPUGROUP_FOR_MULTIFILE 1024
+#define FIELDS_GROUP_SIZE 16
+#define MACRO_CPUGROUP_FOR_MULTIFILE 128
 
 #include <mpi.h>
 #include <iomanip>
