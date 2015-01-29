@@ -20,6 +20,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utilities.h"
 
+
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies){
   _mygrid->moveWindow();
   _myfield->moveWindow();
@@ -102,3 +103,13 @@ void dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std
   }
 }
 
+bool doesFileExist(const char *fileName)
+{
+  std::ifstream infile(fileName);
+  return infile.good();
+}
+
+void exitWithError(int error){
+  MPI_Finalize();
+  exit(error);
+}

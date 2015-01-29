@@ -32,7 +32,40 @@ bool jsonParser::checkVersion(Json::Value &document, int &version){
     return false;
 }
 
-void jsonParser::parseJsonInputFile(Json::Value &root, std::string nomeFile){
+void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileName){
+
+  for(int i=0; i<narg; i++){
+    if (std::string(args[i]) == _INPUT_LINE_INPUT_FILE_FLAG){
+      *inputFileName=std::string(args[i+1]);
+      break;
+    }
+  }
+
+  if(doesFileExist(inputFileName->c_str())){
+    return;
+  }
+  else{
+    *inputFileName= _DEFAULT_INPUT_FILE_NAME;
+    if(doesFileExist(inputFileName->c_str()) ) {
+      return;
+    }
+    else{
+      int rank;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      if(rank==0){
+        std::cout << "ERROR: no input file found!\n";
+      std::cout.flush();
+      }
+      exitWithError(12);
+    }
+
+  }
+
+}
+
+void jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **args){
+  std::string nomeFile;
+  lookForInputFile(narg, args, &nomeFile);
 
   std::ifstream inputFile(nomeFile.c_str());
   std::stringstream buffer;

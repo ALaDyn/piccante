@@ -43,6 +43,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "em_field.h"
 #include "particle_species.h"
 #include "output_manager.h"
+#include "utilities.h"
 #include "json/json.h"
 
 namespace jsonParser{
@@ -72,7 +73,9 @@ namespace jsonParser{
   };
 
   bool checkVersion(Json::Value &document, int &version);
-  void parseJsonInputFile(Json::Value &root, std::string nomeFile);
+  void lookForInputFile(int narg, char **args, std::string *inputFileName);
+
+  void parseJsonInputFile(Json::Value &root,  int narg, char **args);
   int getDimensionality(Json::Value &document, int defaultDimensionality);
   void setXrange(Json::Value &parent, GRID *grid);
   void setYrange(Json::Value &parent,GRID *grid);

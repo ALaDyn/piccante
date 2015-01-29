@@ -49,8 +49,9 @@ void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector
 void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
+bool doesFileExist(const char *fileName);
 
-
+void exitWithError(int error);
 
 #endif // UTILITIES_H
 
