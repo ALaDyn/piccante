@@ -52,6 +52,7 @@ void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, st
 bool doesFileExist(const char *fileName);
 
 void exitWithError(int error);
+void splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs);
 
 #endif // UTILITIES_H
 

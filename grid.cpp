@@ -640,21 +640,24 @@ void GRID::checkProcNumber(){
     exit(18);
   }
 
-  if(rnproc[0]*6 > NGridNodes[0]){
+  if(rnproc[0]*5 > NGridNodes[0]){
+    if (myid == master_proc)
       std::cout << "Too many MPI tasks along x (" << rnproc[0] <<")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
-      exit(18);
+    emergencyStop();
   }
   if(dimensions >= 2){
-      if(rnproc[1]*6 > NGridNodes[1]){
-          std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
-          exit(18);
-      }
+    if(rnproc[1]*5 > NGridNodes[1]){
+      if (myid == master_proc)
+        std::cout << "Too many MPI tasks along y (" << rnproc[1] <<")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
+      emergencyStop();
+    }
   }
   if(dimensions==3){
-      if(rnproc[2]*6 > NGridNodes[2]){
-          std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
-          exit(18);
-      }
+    if(rnproc[2]*5 > NGridNodes[2]){
+      if (myid == master_proc)
+        std::cout << "Too many MPI tasks along z (" << rnproc[2] <<")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
+      emergencyStop();
+    }
   }
 
 }

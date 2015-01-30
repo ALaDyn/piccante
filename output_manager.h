@@ -31,14 +31,14 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define PHASE_SPACE_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
 
-#define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
-//#define FIELDS_USE_MPI_FILE_OUTPUT
+//#define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
+#define FIELDS_USE_MPI_FILE_OUTPUT
 //#define FIELDS_USE_MPI_FILE_WRITE_ALL
 //#define FIELDS_USE_OUTPUT_WRITING_GROUPS
 //#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
 //#define FIELDS_USE_MULTI_FILE
-#define FIELDS_GROUP_SIZE 64
-#define MACRO_CPUGROUP_FOR_MULTIFILE 1024
+#define FIELDS_GROUP_SIZE 2
+#define MACRO_CPUGROUP_FOR_MULTIFILE 2
 
 #include <mpi.h>
 #include <iomanip>
@@ -68,6 +68,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "current.h"
 #include "em_field.h"
 #include "particle_species.h"
+#include "utilities.h"
 
 
 
@@ -297,6 +298,7 @@ private:
 
   std::string composeOutputName(std::string dir, std::string out, std::string opt, double time, std::string ext);
   std::string composeOutputName(std::string dir, std::string out, std::string opt1, std::string opt2, int domain, double time, std::string ext);
+  void appendIDtoFileName(char *nomefile, std::string fileName, int ID);
   void writeEMFieldBinaryHDF5(std::string fileName, request req);
 
   void callEMFieldProbe(request req);

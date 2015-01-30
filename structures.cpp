@@ -51,7 +51,8 @@ const std::string PLASMA::dFNames[] = {
     "rough_box",
     "box_minus_box",
     "left_grating",
-    "left_square_grating"
+  "left_square_grating",
+  "guide"
 };
 const distrib_function PLASMA::dFPoint[]= {
     box,
@@ -68,7 +69,8 @@ const distrib_function PLASMA::dFPoint[]= {
     rough_box,
     box_minus_box,
     left_grating,
-    left_square_grating
+    left_square_grating,
+    guide
 };
 
 bool PLASMA::isGrating(int dfIndex){
@@ -209,6 +211,42 @@ void PLASMA::setZRangeBox(double zmin, double zmax){
 PLASMA::~PLASMA(){
 }
 
+double guide(double x, double y, double z, PLASMAparams plist, double Z, double A){
+  double g_x0 = 0.0;
+  double g_x1 = 10.0;
+  double g_x2 = 20.0;
+  
+  double g_depth = 0.250 * 0.5;
+  double g_lambda = 2.0;
+
+  double phase = 2.0*M_PI*(x - g_x0)/g_lambda;
+  double yminbound1 = -10.0;
+  double ymaxbound1 = -9.0 + g_depth*(1.0 - cos(phase));
+  double ymaxbound2 = +10.0;
+  double yminbound2 = +9.0 + g_depth*(1.0 - cos(phase));
+
+  if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+    if((x>g_x0) && (x < g_x1)){
+      if (y< ymaxbound1 && y > yminbound1)
+	return plist.density_coefficient;
+      else if (y < ymaxbound2 && y > yminbound2)
+	return plist.density_coefficient;
+    }
+    if((x > g_x1)&&(x < g_x2)){
+      double uplimitmax = 10.0+(g_x1-x)/(g_x2-g_x1)*9.0;
+      double uplimitmin = 9.0+(g_x1-x)/(g_x2-g_x1)*9.0;
+      double downlimitmin = -10.0+(x-g_x1)/(g_x2-g_x1)*9.0;
+      double downlimitmax = -9.0+(x-g_x1)/(g_x2-g_x1)*9.0;
+      if(y < uplimitmax && y > uplimitmin)
+	return plist.density_coefficient;
+      if (y > downlimitmin && y < downlimitmax)
+	return plist.density_coefficient;
+    }
+  }
+  return -1.0;
+}
 
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&

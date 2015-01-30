@@ -113,3 +113,9 @@ void exitWithError(int error){
   MPI_Finalize();
   exit(error);
 }
+
+void splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs){
+  MPI_Comm_split(parentComm, color, 0, childComm);
+  MPI_Comm_size(*childComm, NProcs);
+  MPI_Comm_rank(*childComm, rank);
+}
