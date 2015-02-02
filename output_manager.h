@@ -23,22 +23,24 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 
-//#define PHASE_SPACE_USE_MPI_FILE_WRITE_ALL
+#define PHASE_SPACE_USE_MPI_FILE_WRITE_ALL
 //#define PHASE_SPACE_USE_SEPARATE_FILES_MPI_FILE_WRITE_ALL
 //#define PHASE_SPACE_USE_OUTPUT_WRITING_GROUPS
-#define PHASE_SPACE_USE_HYBRID_OUTPUT
+//#define PHASE_SPACE_USE_HYBRID_OUTPUT
 //#define PHASE_SPACE_USE_MULTIFILE_OUTPUT
 #define PHASE_SPACE_GROUP_SIZE 128 //1024 was the best case for 4096 MPI_TASKS on 1024 BlueGeneQ cores
 #define NPARTICLE_BUFFER_SIZE 1000000
 
-//#define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
-#define FIELDS_USE_MPI_FILE_OUTPUT
+#define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
+
+//#define FIELDS_TEST_SEPARATE_FILES_MACROGROUPS
+//#define FIELDS_USE_MPI_FILE_OUTPUT
 //#define FIELDS_USE_MPI_FILE_WRITE_ALL
 //#define FIELDS_USE_OUTPUT_WRITING_GROUPS
 //#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
 //#define FIELDS_USE_MULTI_FILE
-#define FIELDS_GROUP_SIZE 2
-#define MACRO_CPUGROUP_FOR_MULTIFILE 2
+#define FIELDS_GROUP_SIZE 64
+#define MACRO_CPUGROUP_FOR_MULTIFILE 1024
 
 #include <mpi.h>
 #include <iomanip>
@@ -348,6 +350,7 @@ private:
   void prepareCPUFieldValues(float *buffer, int uniqueLocN[], int imin[], int locimin[], int remains[3], request req);
 
   void findDispForSetView(MPI_Offset *disp, int myOutputID, int *totUniquePoints, int big_header, int small_header, int Ncomp);
+  void findDispForSetView(MPI_Offset *disp, int myOutputID, int *bufferSize);
   void setLocalOutputOffset(int *origin, int locimin[3], int ri[3], int remains[3]);
   void writeCPUFieldValues(MPI_File thefile, int uniqueLocN[3], int locimin[3], int remains[3], request req);
   int findNumberOfParticlesInSubdomain(request req);
