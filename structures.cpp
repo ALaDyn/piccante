@@ -52,7 +52,8 @@ const std::string PLASMA::dFNames[] = {
     "box_minus_box",
     "left_grating",
   "left_square_grating",
-  "guide"
+  "guide",
+  "modGrat"
 };
 const distrib_function PLASMA::dFPoint[]= {
     box,
@@ -70,7 +71,8 @@ const distrib_function PLASMA::dFPoint[]= {
     box_minus_box,
     left_grating,
     left_square_grating,
-    guide
+    guide,
+    modGrat
 };
 
 bool PLASMA::isGrating(int dfIndex){
@@ -79,6 +81,8 @@ bool PLASMA::isGrating(int dfIndex){
     else
         return false;
 }
+
+
 
 PLASMA::PLASMA(){
   params.rminbox[0] = params.rminbox[1] = params.rminbox[2] = 0.0;
@@ -246,6 +250,30 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
     }
   }
   return -1.0;
+}
+
+double modGrat(double x, double y, double z, PLASMAparams plist, double Z, double A){
+  double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
+  double g_depth_1 = 0.125;
+  double g_lambda_1 = 2.0;
+  double g_depth_2 = 0.06;
+  double g_lambda_2 = 0.2;
+
+
+  double phase1 = 2.0 * M_PI * ((y - g_y0)) / g_lambda_1;
+  double phase2 = 2.0 * M_PI * ((y - g_y0)) / g_lambda_2;
+  
+  double xminbound = plist.rminbox[0] + g_depth_1*(1.0 - cos(phase1)) + g_depth_2*(1.0 - cos(phase2));
+
+  if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      return plist.density_coefficient;    
+  }
+  else{
+    return -1;
+  }
+
 }
 
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A){

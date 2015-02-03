@@ -89,7 +89,7 @@ public:
   void setZRangeBox(double zmin, double zmax);
   ~PLASMA();
 
-  static const int maxdF = 16;
+  static const int maxdF = 17;
   static const std::string dFNames[];
   static const distrib_function dFPoint[];
 
@@ -125,6 +125,8 @@ double square_func(double x);
 double left_square_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double guide(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
+double modGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 //************** LASER PULSE TYPES *******
 enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };

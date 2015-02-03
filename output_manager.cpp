@@ -2598,24 +2598,18 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
     int resto = NParticleToWrite%particleBufferSize;
     for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
-        int c;
-        for (c = 0; c < Ncomp; c++){
+        for (int c = 0; c < Ncomp; c++){
           data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
         }
       }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
-#endif
     }
     for (int p = 0; p < resto; p++){
-      int c;
-      for (c = 0; c < Ncomp; c++){
+      for (int c = 0; c < Ncomp; c++){
         data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
       }
     }
-#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
-#endif
     MPI_Status status;
 
     std::vector<reqOutput> reqList;
@@ -2623,11 +2617,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
 
     for (int i = 0; i < reqList.size(); i++){
       MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
-#ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
-#endif
     }
-
 
     MPI_File_close(&thefile);
   }
