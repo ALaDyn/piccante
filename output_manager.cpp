@@ -2550,34 +2550,46 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   int totalFloatNumber = NParticleToWrite*Ncomp;
   int* groupProcNumData = new int[groupNproc];
   groupProcNumData[groupMyid] = totalFloatNumber;
-  MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData, 1, MPI_INT, groupCommunicator);
+  MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, groupProcNumData, 1, MPI_INT, groupCommunicator);
   long long int groupNumData = 0;
   for (int i = 0; i < groupNproc; i++){
     groupNumData += groupProcNumData[i];
   }
+  int myNumPackages = NParticleToWrite / particleBufferSize;
+  int resto = NParticleToWrite%particleBufferSize;
+#ifdef ENABLE_WRITE_ALL
+  int* groupNumPackages = new int[groupNproc];
+  groupNumPackages[groupMyid] = myNumPackages;
+  MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, groupNumPackages, 1, MPI_INT, groupCommunicator);
+  int totalGroupNumWriteOps = 0, maxWritingOps;
+  for (int i = 0; i < groupNproc; i++){
+    totalGroupNumWriteOps += groupNumPackages[i] + 1;
+  }
+#endif
 
-  MPI_Offset disp = 0;
   if (groupMyid == 0){
+    MPI_Offset disp = 0;
     long long int *allGroupNumData = new long long int[mpiFileNproc];
     allGroupNumData[mpiFileMyid] = groupNumData;
-    MPI_Allgather(MPI_IN_PLACE, 1, MPI_LONG_LONG_INT, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
+    MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
     for (int i = 0; i < mpiFileMyid; i++){
       disp += allGroupNumData[i] * sizeof(float);
     }
     delete[] allGroupNumData;
-
     MPI_File_open(MPIFileCommunicator, nomefile, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &thefile);
     MPI_File_set_view(thefile, disp, MPI_FLOAT, MPI_FLOAT, (char *) "native", MPI_INFO_NULL);
+#ifdef ENABLE_WRITE_ALL
 
+    MPI_Allreduce(&totalGroupNumWriteOps, &maxWritingOps, 1, MPI_INT, MPI_MAX, MPIFileCommunicator);
+#endif
   }
 
   float* data = new float[bufsize];
 
   if (groupMyid != 0){
-    int numPackages = NParticleToWrite/particleBufferSize;
-    int resto = NParticleToWrite%particleBufferSize;
+    for (int i = 0; i < myNumPackages; i++){
+      //prepareParticleBufferToBeWritten(data, particleBufferSize, particleBufferSize*i, spec);
 
-    for (int i = 0; i < numPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
         for (int c = 0; c < Ncomp; c++){
           data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
@@ -2587,39 +2599,59 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
     }
     for (int p = 0; p < resto; p++){
       for (int c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
+        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*myNumPackages);
       }
     }
-    MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, numPackages, groupCommunicator);
+    MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, myNumPackages, groupCommunicator);
   }
   else{
 
-    int numPackages = NParticleToWrite / particleBufferSize;
-    int resto = NParticleToWrite%particleBufferSize;
-    for (int i = 0; i < numPackages; i++){
+int counterWriteOps = 0;
+    for (int i = 0; i < myNumPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
         for (int c = 0; c < Ncomp; c++){
           data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
         }
       }
+#ifdef ENABLE_WRITE_ALL
+      MPI_File_write_all(thefile, data, bufsize, MPI_FLOAT, &status);
+      counterWriteOps ++;
+#else
       MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
+#endif
     }
     for (int p = 0; p < resto; p++){
       for (int c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
+        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*myNumPackages);
       }
     }
+#ifdef ENABLE_WRITE_ALL
+    MPI_File_write_all(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
+    counterWriteOps ++;
+#else
     MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
-    MPI_Status status;
+#endif
+
 
     std::vector<reqOutput> reqList;
     fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
 
     for (int i = 0; i < reqList.size(); i++){
       MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task,  reqList[i].p, groupCommunicator, &status);
+#ifdef ENABLE_WRITE_ALL
+      MPI_File_write_all(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
+      counterWriteOps ++;
+#else
       MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
+#endif
     }
 
+#ifdef ENABLE_WRITE_ALL
+    int remainingWriteOps = maxWritingOps - counterWriteOps;
+    for(int i = 0 ; i< remainingWriteOps; i++){
+      MPI_File_write_all(thefile, data, 0, MPI_FLOAT, &status);
+    }
+#endif
     MPI_File_close(&thefile);
   }
   MPI_Comm_free(&groupCommunicator);
@@ -2627,6 +2659,14 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   MPI_Comm_free(&FileCommunicator);
   delete[] data;
   delete[] groupProcNumData;
+}
+
+void OUTPUT_MANAGER::prepareParticleBufferToBeWritten(float *data, int nParticles, int firstParticle, SPECIE* spec){
+  for (int p = 0; p < nParticles; p++){
+    for (int c = 0; c < spec->Ncomp; c++){
+      data[c + p*spec->Ncomp] = (float)spec->ru(c, p + firstParticle);
+    }
+  }
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpace(std::string fileName, request req){
@@ -2680,6 +2720,10 @@ delete[] NfloatLoc;
 #elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
 
     writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np, MPI_COMM_WORLD);
+
+#elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT_WRITE_ALL)
+
+    writeALLCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np, MPI_COMM_WORLD);
 
 #elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
 
@@ -2814,6 +2858,9 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
     delete[] NfloatLoc;
 #elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
     writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart, outputCommunicator);
+
+#elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT_WRITE_ALL)
+    writeALLCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart, outputCommunicator);
 
 #else
     int* NfloatLoc = new int[outputNProc];

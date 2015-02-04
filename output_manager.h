@@ -329,6 +329,7 @@ private:
   void writeAllSeparateFilesParticlesValues(std::string fileName, SPECIE* spec);
   void writeCPUParticlesValuesWritingGroups(std::string fileName, SPECIE* spec);
   void writeCPUParticlesValuesFewFilesWritingGroups(std::string fileName, SPECIE* spec, int NParticleToWrite, MPI_Comm outputCommunicator);
+  void prepareParticleBufferToBeWritten(float *data, int nParticles, int firstParticle, SPECIE* spec);
 
   void writeSpecPhaseSpace(std::string fileName, request req);
   void writeSpecPhaseSpaceSubDomain(std::string fileName, request req);
