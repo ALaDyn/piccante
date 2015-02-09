@@ -1,3 +1,10 @@
+%!TEX TS-program = pdflatex
+%!TEX encoding = UTF-8 Unicode
+
+%%% you can use %!TEX TS-program = asymptotemk as the first line if you have the special asymptotemk build engine installed.
+%%% Otherwise, just compile as usual and then launch manually "asy piccante_guide-1.asy && asy piccante_guide-2.asy && asy piccante_guide-3.asy"
+%%% and finally recompile it all
+
 \documentclass[11pt,a4paper]{report}
 \usepackage[utf8x]{inputenc}
 \usepackage{ucs}
@@ -5,7 +12,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage[usenames,dvipsnames]{color}
+\usepackage[usenames,dvipsnames,svgnames,table,x11names]{xcolor}
 \usepackage{listings}
 \usepackage{verbatim}
 \usepackage[margin=2cm]{geometry}
@@ -236,11 +243,11 @@ The first three lines define the ranges of the simulation box in X, Y and Z.\\
 \verb+grid.setNCells(1500, 0, 0)+ defines 1500 grid points along x and 0 grid points along y and z. If \verb+DIMENSIONALITY+ is 1, the number of grid points along y and z is ignored.\\
 Finally \verb+grid.setNProcsAlongY(NPROC_ALONG_Y);+ and \verb+grid.setNProcsAlongZ(NPROC_ALONG_Z);+ respectively set the number of processes along y according to \verb+NPROC_ALONG_Y+ and the number of processes along z according to \verb+NPROC_ALONG_Z+.
 \begin{lstlisting}
-	//grid.enableStretchedGrid();
-	//grid.setXandNxLeftStretchedGrid(-15.0,1000);
-	//grid.setYandNyLeftStretchedGrid(-5.0, 70);
-	//grid.setXandNxRightStretchedGrid(15.0,1000);
-	//grid.setYandNyRightStretchedGrid(5.0, 70);
+	// grid.enableStretchedGrid();
+	// grid.setXandNxLeftStretchedGrid(-15.0,1000);
+	// grid.setYandNyLeftStretchedGrid(-5.0, 70);
+	// grid.setXandNxRightStretchedGrid(15.0,1000);
+	// grid.setYandNyRightStretchedGrid(5.0, 70);
 \end{lstlisting}
 The stretched grid is commented out in this example (so in this example the simulation grid is not stretched). However, this feature is described in subsection \ref{subsection_stretch}.
 \begin{lstlisting}

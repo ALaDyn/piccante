@@ -20,6 +20,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef JSONNAMES_H
 #define JSONNAMES_H
 
+#define _INPUT_LINE_INPUT_FILE_FLAG "-inputfile"
+#define _DEFAULT_INPUT_FILE_NAME "inputPiccante.json"
 #define _JSON_INT_VERSION "VERSION"
 #define INT_DIMENSIONS "dimensions"
 #define _JSON_BOOL_ENABLED "enabled"

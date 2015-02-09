@@ -61,10 +61,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 int main(int narg, char **args)
 {
   MPI_Init(&narg, &args);
-  const int masterProc=0;
 
   Json::Value root;
-  jsonParser::parseJsonInputFile(root,"inputPiccante.json");
+  jsonParser::parseJsonInputFile(root,narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
