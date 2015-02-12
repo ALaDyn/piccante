@@ -55,6 +55,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <map>
 #include <iostream>
+#include <istream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -225,6 +226,8 @@ public:
   void setFieldGroupSize(int gsize);
   void setParticleGroupSize(int gsize);
   void setParticleBufferSize(int bsize);
+
+  void copyInputFileInOutDir(std::string inputFileName);
 
 private:
   GRID* mygrid;

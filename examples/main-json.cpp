@@ -63,7 +63,7 @@ int main(int narg, char **args)
   MPI_Init(&narg, &args);
 
   Json::Value root;
-  jsonParser::parseJsonInputFile(root,narg, args);
+  std::string inputFileName = jsonParser::parseJsonInputFile(root,narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
@@ -142,6 +142,7 @@ int myIntVariable=0;
   jsonParser::setOutputDirPath(root,manager);
 
   manager.initialize();
+  manager.copyInputFileInOutDir(inputFileName);
   //*******************************************END DIAG DEFINITION**************************************************
   grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -63,7 +63,7 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
 
 }
 
-void jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **args){
+std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **args){
   std::string nomeFile;
   lookForInputFile(narg, args, &nomeFile);
 
@@ -97,6 +97,7 @@ void jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **args){
   }
   inputVersion = version;
 
+  return nomeFile;
 }
 
 

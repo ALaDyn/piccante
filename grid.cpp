@@ -1178,7 +1178,7 @@ double computeAlpha(double Dx, double Dxi){
     else
       alphaMax = guess;
     difference = result;
-  }
+  }  
   return guess;
 }
 

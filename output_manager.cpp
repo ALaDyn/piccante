@@ -3145,3 +3145,28 @@ void OUTPUT_MANAGER::setParticleGroupSize(int gsize){
 void OUTPUT_MANAGER::setParticleBufferSize(int bsize){
   particleBufferSize = bsize;
 }
+
+void OUTPUT_MANAGER::copyInputFileInOutDir(std::string inputFileName){
+    if(mygrid->myid != mygrid->master_proc)
+      return;
+
+    std::string copyInputFileName = outputDir + "/" + inputFileName;
+    std::ofstream newf;
+    newf.open(copyInputFileName.c_str(), std::ios_base::binary);
+
+    std::ifstream oldf;
+    oldf.open(inputFileName.c_str(), std::ios_base::binary | std::ios_base::ate);
+
+    int sizeFile = oldf.tellg();
+
+    char* buf = new char[sizeFile];
+
+    oldf.seekg(0,oldf.beg);
+    oldf.read(buf, sizeFile);
+    newf.write(buf, sizeFile);
+
+    oldf.close();
+    newf.close();
+
+    delete[] buf;
+}
