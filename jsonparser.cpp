@@ -626,8 +626,11 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
 
 int jsonParser::findPlasmaFunction(std::string plasmaFunction){
   for (int i = 0; i < PLASMA::maxdF; i++){
-    if (!plasmaFunction.compare(PLASMA::dFNames[i]))
+    //std::cout << "-" << plasmaFunction << "-  PLASMA::dFNames[" << i << "] = " <<  PLASMA::dFNames[i]<< std::endl;
+    if (!plasmaFunction.compare(PLASMA::dFNames[i])){
+      //std::cout << "i = " << i<< "  YES!\n";
       return i;
+    }
   }
   return -1;
 }

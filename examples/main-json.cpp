@@ -156,7 +156,6 @@ int myIntVariable=0;
   grid.istep = 0;
   if (grid.dumpControl.doRestart){
     dumpID = grid.dumpControl.restartFromDump;
-    std::cout << "restartID = " << dumpID << "\n";
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
 
