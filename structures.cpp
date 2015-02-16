@@ -54,7 +54,8 @@ const std::string PLASMA::dFNames[] = {
   "left_square_grating",
   "guide",
   "modGrat",
-  "spoofGrat"
+  "spoofGrat",
+  "clusters"
 };
 const distrib_function PLASMA::dFPoint[]= {
     box,
@@ -74,7 +75,8 @@ const distrib_function PLASMA::dFPoint[]= {
     left_square_grating,
     guide,
     modGrat,
-    spoofGrat
+    spoofGrat,
+  clusters
 };
 
 bool PLASMA::isGrating(int dfIndex){
@@ -213,6 +215,14 @@ void PLASMA::setZRangeBox(double zmin, double zmax){
   params.rmaxbox[2] = zmax;
 }
 
+void PLASMA::setCluserRadiusExtrems(double radiusmin, double radiusmax){
+  params.cluster_radius_extrems[0] = radiusmin;
+  params.cluster_radius_extrems[1] = radiusmax;
+}
+
+void PLASMA::setCluserDensity(double clusterDensity){
+  params.cluster_density = clusterDensity;
+}
 
 PLASMA::~PLASMA(){
 }
@@ -656,7 +666,11 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
   }
 }
 
+double clusters(double x, double y, double z, PLASMAparams plist, double Z, double A){
 
+
+
+}
 
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************

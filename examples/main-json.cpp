@@ -109,6 +109,8 @@ int myIntVariable=0;
     jsonParser::setInt( &myIntVariable, special, "variabile1");
     jsonParser::setDouble( &myDoubleVariable, special, "variabile2");
    }
+
+
 //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
