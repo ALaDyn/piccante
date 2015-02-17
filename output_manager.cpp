@@ -2606,7 +2606,9 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   }
   else{
 
+#ifdef ENABLE_WRITE_ALL
 int counterWriteOps = 0;
+#endif
     for (int i = 0; i < myNumPackages; i++){
       for (int p = 0; p < particleBufferSize; p++){
         for (int c = 0; c < Ncomp; c++){
@@ -2721,16 +2723,6 @@ delete[] NfloatLoc;
 
     writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np, MPI_COMM_WORLD);
 
-#elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT_WRITE_ALL)
-
-    writeALLCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, spec->Np, MPI_COMM_WORLD);
-
-#elif defined(PHASE_SPACE_USE_MULTIFILE_OUTPUT)
-
-    std::stringstream myFileName;
-    myFileName << fileName << "." << std::setfill('0') << std::setw(5) << mygrid->myid;
-    writeCPUParticlesValuesSingleFile(myFileName.str(),  spec);
-
 #else
     int* NfloatLoc = new int[mygrid->nproc];
     int maxNfloatLoc = 0;
@@ -2758,6 +2750,7 @@ delete[] NfloatLoc;
   delete[] nomefile;
 
 }
+
 int OUTPUT_MANAGER::findNumberOfParticlesInSubdomain(request req){
   double rmin[3], rmax[3];
   for (int c = 0; c < 3; c++){
@@ -2859,8 +2852,6 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
 #elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT)
     writeCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart, outputCommunicator);
 
-#elif defined(PHASE_SPACE_USE_HYBRID_OUTPUT_WRITE_ALL)
-    writeALLCPUParticlesValuesFewFilesWritingGroups(nomefile,spec, outputNPart, outputCommunicator);
 
 #else
     int* NfloatLoc = new int[outputNProc];
