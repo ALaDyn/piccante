@@ -21,6 +21,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define __STRUCTURES_H__
 
 #define _USE_MATH_DEFINES
+#define NUMBER_OF_PLASMA_FUNCTIONS 19
 
 #include <cmath>
 #include "commons.h"
@@ -42,6 +43,11 @@ struct PLASMAparams{
   double density_coefficient;
   double left_ramp_min_density;
   double right_ramp_min_density;
+  double cluster_radius_extrems[2];
+  double cluster_density;
+  double *xcenter, *zcenter, *radius2;
+  bool areParametersAllocated;
+
   void *additional_params;
 };
 #define NBIN_SPECTRUM 1000;
@@ -87,9 +93,12 @@ public:
   void setXRangeBox(double xmin, double xmax);
   void setYRangeBox(double ymin, double ymax);
   void setZRangeBox(double zmin, double zmax);
+  void setCluserRadiusExtrems(double radiusmin, double radiusmax);
+  void setCluserDensity(double clusterDensity);
+
   ~PLASMA();
 
-  static const int maxdF = 17;
+  static const int maxdF = NUMBER_OF_PLASMA_FUNCTIONS;
   static const std::string dFNames[];
   static const distrib_function dFPoint[];
 
@@ -128,6 +137,8 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
 
 double modGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
+double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double clusters(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
 enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
 enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };

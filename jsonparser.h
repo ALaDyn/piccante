@@ -75,7 +75,7 @@ namespace jsonParser{
   bool checkVersion(Json::Value &document, int &version);
   void lookForInputFile(int narg, char **args, std::string *inputFileName);
 
-  void parseJsonInputFile(Json::Value &root,  int narg, char **args);
+  std::string parseJsonInputFile(Json::Value &root,  int narg, char **args);
   int getDimensionality(Json::Value &document, int defaultDimensionality);
   void setXrange(Json::Value &parent, GRID *grid);
   void setYrange(Json::Value &parent,GRID *grid);

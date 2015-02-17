@@ -53,7 +53,9 @@ const std::string PLASMA::dFNames[] = {
     "left_grating",
   "left_square_grating",
   "guide",
-  "modGrat"
+  "modGrat",
+  "spoofGrat",
+  "clusters"
 };
 const distrib_function PLASMA::dFPoint[]= {
     box,
@@ -72,7 +74,9 @@ const distrib_function PLASMA::dFPoint[]= {
     left_grating,
     left_square_grating,
     guide,
-    modGrat
+    modGrat,
+    spoofGrat,
+  clusters
 };
 
 bool PLASMA::isGrating(int dfIndex){
@@ -211,6 +215,14 @@ void PLASMA::setZRangeBox(double zmin, double zmax){
   params.rmaxbox[2] = zmax;
 }
 
+void PLASMA::setCluserRadiusExtrems(double radiusmin, double radiusmax){
+  params.cluster_radius_extrems[0] = radiusmin;
+  params.cluster_radius_extrems[1] = radiusmax;
+}
+
+void PLASMA::setCluserDensity(double clusterDensity){
+  params.cluster_density = clusterDensity;
+}
 
 PLASMA::~PLASMA(){
 }
@@ -255,9 +267,9 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
 double modGrat(double x, double y, double z, PLASMAparams plist, double Z, double A){
   double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
   double g_depth_1 = 0.125;
-  double g_lambda_1 = 2.0;
-  double g_depth_2 = 0.06;
-  double g_lambda_2 = 0.2;
+  double g_lambda_1 = 1.0;
+  double g_depth_2 = 0.1;
+  double g_lambda_2 = 0.1;
 
 
   double phase1 = 2.0 * M_PI * ((y - g_y0)) / g_lambda_1;
@@ -275,6 +287,36 @@ double modGrat(double x, double y, double z, PLASMAparams plist, double Z, doubl
   }
 
 }
+
+double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, double A){
+  double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
+  double g_depth = 0.5;
+  double g_a = 0.125;
+  double g_d = 0.25;
+  
+	bool flag = false;
+  double rem = fmod(fabs(y-g_y0),(g_d*0.5));
+	if (rem <= g_a/2)
+		flag=true;
+
+  if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+		if (x-plist.rminbox[0] > g_depth)
+			return plist.density_coefficient;
+		else{ 
+			if(!flag)
+				return plist.density_coefficient;
+			else
+				return -1;
+		}
+  }
+  else{
+    return -1;
+  }
+
+}
+
 
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
@@ -624,7 +666,11 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
   }
 }
 
+double clusters(double x, double y, double z, PLASMAparams plist, double Z, double A){
 
+
+
+}
 
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************

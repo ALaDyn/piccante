@@ -725,6 +725,7 @@ void SPECIE::creation()
     createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
   else
     createParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
+
 }
 
 

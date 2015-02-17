@@ -63,7 +63,7 @@ int main(int narg, char **args)
   MPI_Init(&narg, &args);
 
   Json::Value root;
-  jsonParser::parseJsonInputFile(root,narg, args);
+  std::string inputFileName = jsonParser::parseJsonInputFile(root,narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
@@ -109,6 +109,8 @@ int myIntVariable=0;
     jsonParser::setInt( &myIntVariable, special, "variabile1");
     jsonParser::setDouble( &myDoubleVariable, special, "variabile2");
    }
+
+
 //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
@@ -142,6 +144,7 @@ int myIntVariable=0;
   jsonParser::setOutputDirPath(root,manager);
 
   manager.initialize();
+  manager.copyInputFileInOutDir(inputFileName);
   //*******************************************END DIAG DEFINITION**************************************************
   grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -155,7 +158,6 @@ int myIntVariable=0;
   grid.istep = 0;
   if (grid.dumpControl.doRestart){
     dumpID = grid.dumpControl.restartFromDump;
-    std::cout << "restartID = " << dumpID << "\n";
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
 
