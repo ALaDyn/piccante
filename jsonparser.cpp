@@ -54,7 +54,7 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
       if(rank==0){
         std::cout << "ERROR: no input file found!\n";
-      std::cout.flush();
+        std::cout.flush();
       }
       exitWithError(12);
     }
@@ -768,7 +768,7 @@ bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, P
         isTherePPC=true;
   }
 
-  if(setString(&dummy, child, _JSON_STRING_SPEIES_TYPE)){
+  if(setString(&dummy, child, _JSON_STRING_SPECIES_TYPE)){
     if(dummy.compare(SPECIES_TYPEVALUE_ELECTRON) ||
        dummy.compare(SPECIES_TYPEVALUE_POSITRON)||
        dummy.compare(SPECIES_TYPEVALUE_ION))
@@ -846,9 +846,9 @@ bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_r
 }
 
 void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species,  std::map<std::string, PLASMA*> plasmas, GRID* myGrid, gsl_rng* ext_rng){
-  std::string  name1= _JSON_OBJARRAY_SPECIES;
+  std::cout.flush();
   Json::Value specList;
-  if(setValue(specList, document, name1.c_str() ) && specList.isArray()){
+  if(setValue(specList, document, _JSON_OBJARRAY_SPECIES ) && specList.isArray()){
     for(unsigned int index=0; index<specList.size(); index++){
       Json::Value mySpecies = specList[index];
       if(checkSpecEssentials(mySpecies, plasmas)){
@@ -856,12 +856,12 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
 
         std::string dummy;
         Json::Value ppc;
-
         setString(&dummy, mySpecies, _JSON_STRING_SPECIE_PLASMANAME);
 
         newSpec->plasma = *plasmas[dummy];
 
-        setString(&dummy,mySpecies,_JSON_STRING_SPEIES_TYPE);
+        setString(&dummy,mySpecies,_JSON_STRING_SPECIES_TYPE);
+
         if(!dummy.compare(SPECIES_TYPEVALUE_ION))
           newSpec->type=ION;
         else if(!dummy.compare(SPECIES_TYPEVALUE_POSITRON))

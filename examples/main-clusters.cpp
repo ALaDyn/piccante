@@ -58,6 +58,34 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
+void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
+
+  std::ifstream myfile;
+  myfile.open(filename.c_str());
+  if (!myfile.good()){
+//    std::cout << "     disonore e tempesta! file \"" << filename << "\" does not exists" << std::endl;
+  }
+  else{
+  //  std::cout << " file exists "<< filename << std::endl;
+
+  }
+  int Nsph=0;
+
+  myfile.read((char*)&Nsph, sizeof(int));
+
+  spheres.NSpheres = Nsph;
+  //std::cout << "     Nsph = " << Nsph << std::endl;
+  spheres.coords = new float[spheres.NSpheres*4];
+
+  myfile.read((char*)&(spheres.fillingFactor), sizeof(float));
+  //std::cout << "     fillingFactor = " << spheres.fillingFactor << std::endl;
+  myfile.read((char*)spheres.rmin, sizeof(float)*3);
+  myfile.read((char*)spheres.rmax, sizeof(float)*3);
+  myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres*4);
+  myfile.close();
+
+}
+
 
 int main(int narg, char **args)
 {
@@ -101,16 +129,6 @@ int main(int narg, char **args)
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
-  //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
-int myIntVariable=0;
-  double myDoubleVariable=0;
-  bool isThereSpecial=false;
-  Json::Value special;
-  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
-    jsonParser::setInt( &myIntVariable, special, "variabile1");
-    jsonParser::setDouble( &myDoubleVariable, special, "variabile2");
-   }
-//********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
@@ -122,16 +140,39 @@ int myIntVariable=0;
   current.allocate(&grid);
   current.setAllValuesToZero();
   //*******************************************END FIELD DEFINITION***********************************************************
+  //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
+  bool isThereSpecial=false;
+  bool areThereSpheres=false;
+
+  std::string fileSpheresName;
+  Json::Value special;
+  SPHERES myspheres;
+  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
+    if(areThereSpheres = jsonParser::setString( &fileSpheresName, special, "spheresFile")){
+     readAndAllocateSpheres(myspheres, fileSpheresName);
+    }
+  }
+  std::map<std::string, PLASMA*>::iterator pIterator;
+
+  //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
 
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
 
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
 
-  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+  if(areThereSpheres){
+    for(pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++){
+       (pIterator)->second->params.spheres = &myspheres;
+     }
+  }
+ jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
     (*spec_iterator)->printParticleNumber();
+  }
+  if(areThereSpheres){
+    delete [] myspheres.coords;
   }
   //*******************************************END SPECIES DEFINITION***********************************************************
 

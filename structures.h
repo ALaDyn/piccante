@@ -25,6 +25,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cmath>
 #include "commons.h"
+#include <cstdio>
+#include <iostream>
 #if defined(_MSC_VER)
 #include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
 #include "gsl/gsl_randist.h"
@@ -32,6 +34,13 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
 #include <gsl/gsl_randist.h>
 #endif
+
+struct SPHERES{
+    float *coords;
+    int NSpheres;
+    float rmin[3], rmax[3];
+  float fillingFactor;
+};
 
 struct PLASMAparams{
   double rminbox[3];
@@ -43,12 +52,10 @@ struct PLASMAparams{
   double density_coefficient;
   double left_ramp_min_density;
   double right_ramp_min_density;
-  double cluster_radius_extrems[2];
-  double cluster_density;
-  double *xcenter, *zcenter, *radius2;
-  bool areParametersAllocated;
-
+  SPHERES *spheres;
   void *additional_params;
+  PLASMAparams operator=(const PLASMAparams& p1);
+
 };
 #define NBIN_SPECTRUM 1000;
 struct SPECIEspectrum{
@@ -93,8 +100,6 @@ public:
   void setXRangeBox(double xmin, double xmax);
   void setYRangeBox(double ymin, double ymax);
   void setZRangeBox(double zmin, double zmax);
-  void setCluserRadiusExtrems(double radiusmin, double radiusmax);
-  void setCluserDensity(double clusterDensity);
 
   ~PLASMA();
 
@@ -138,7 +143,7 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
 double modGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
-double clusters(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double spheres(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
 enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
 enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
@@ -230,6 +235,7 @@ private:
   bool init;
 
 };
+//**************** SPHERES *****************/
 
 #endif
 

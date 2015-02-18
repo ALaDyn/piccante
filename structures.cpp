@@ -33,57 +33,77 @@ DA FARE:
 - i flag devono essere bool !
 ***************************************************************/
 
+//*************************PLASMAparams*****************************
+PLASMAparams PLASMAparams::operator=(const PLASMAparams& p1){
+  left_ramp_length = p1.left_ramp_length;
+  right_ramp_length = p1.right_ramp_length;
+  left_scale_length = p1.left_scale_length;
+  right_scale_length = p1.right_scale_length;
+  density_coefficient = p1.density_coefficient;
+  left_ramp_min_density = p1.left_ramp_min_density;
+  right_ramp_min_density = p1.right_ramp_min_density;
+  additional_params = p1.additional_params;
+  rminbox[0] = p1.rminbox[0];
+  rminbox[1] = p1.rminbox[1];
+  rminbox[2] = p1.rminbox[2];
+  rmaxbox[0] = p1.rmaxbox[0];
+  rmaxbox[1] = p1.rmaxbox[1];
+  rmaxbox[2] = p1.rmaxbox[2];
+  spheres = p1.spheres;
+
+  return *this;
+}
 
 //*************************PLASMA******************************
 
 const std::string PLASMA::dFNames[] = {
   "box",
-    "left_linear_ramp",
-    "right_linear_ramp",
-    "left_right_linear_ramp",
-    "left_fixed_exp_ramp",
-    "right_fixed_exp_ramp",
-    "left_right_fixed_exp_ramp",
-    "left_free_exp_ramp",
-    "right_free_exp_ramp",
-    "left_right_free_exp_ramp",
-    "left soft ramp",
-    "rough_box",
-    "box_minus_box",
-    "left_grating",
+  "left_linear_ramp",
+  "right_linear_ramp",
+  "left_right_linear_ramp",
+  "left_fixed_exp_ramp",
+  "right_fixed_exp_ramp",
+  "left_right_fixed_exp_ramp",
+  "left_free_exp_ramp",
+  "right_free_exp_ramp",
+  "left_right_free_exp_ramp",
+  "left soft ramp",
+  "rough_box",
+  "box_minus_box",
+  "left_grating",
   "left_square_grating",
   "guide",
   "modGrat",
   "spoofGrat",
-  "clusters"
+  "spheres"
 };
 const distrib_function PLASMA::dFPoint[]= {
-    box,
-    left_linear_ramp,
-    right_linear_ramp,
-    left_right_linear_ramp,
-    left_fixed_exp_ramp,
-    right_fixed_exp_ramp,
-    left_right_fixed_exp_ramp,
-    left_free_exp_ramp,
-    right_free_exp_ramp,
-    left_right_free_exp_ramp,
-    left_soft_ramp,
-    rough_box,
-    box_minus_box,
-    left_grating,
-    left_square_grating,
-    guide,
-    modGrat,
-    spoofGrat,
-  clusters
+  box,
+  left_linear_ramp,
+  right_linear_ramp,
+  left_right_linear_ramp,
+  left_fixed_exp_ramp,
+  right_fixed_exp_ramp,
+  left_right_fixed_exp_ramp,
+  left_free_exp_ramp,
+  right_free_exp_ramp,
+  left_right_free_exp_ramp,
+  left_soft_ramp,
+  rough_box,
+  box_minus_box,
+  left_grating,
+  left_square_grating,
+  guide,
+  modGrat,
+  spoofGrat,
+  spheres
 };
 
 bool PLASMA::isGrating(int dfIndex){
-    if(dfIndex==13 || dfIndex==14)
-        return true;
-    else
-        return false;
+  if(dfIndex==13 || dfIndex==14)
+    return true;
+  else
+    return false;
 }
 
 
@@ -104,39 +124,46 @@ PLASMA::PLASMA(){
 
 PLASMA::PLASMA(const PLASMA& other)
 {
-  params.left_ramp_length = other.params.left_ramp_length;
-  params.right_ramp_length = other.params.right_ramp_length;
-  params.left_scale_length = other.params.left_scale_length;
-  params.right_scale_length = other.params.right_scale_length;
-  params.density_coefficient = other.params.density_coefficient;
-  params.left_ramp_min_density = other.params.left_ramp_min_density;
-  params.right_ramp_min_density = other.params.right_ramp_min_density;
-  params.additional_params = other.params.additional_params;
   density_function = other.density_function;
-  params.rminbox[0] = other.params.rminbox[0];
-  params.rminbox[1] = other.params.rminbox[1];
-  params.rminbox[2] = other.params.rminbox[2];
-  params.rmaxbox[0] = other.params.rmaxbox[0];
-  params.rmaxbox[1] = other.params.rmaxbox[1];
-  params.rmaxbox[2] = other.params.rmaxbox[2];
+
+params =   other.params;
+//  params.left_ramp_length = other.params.left_ramp_length;
+//  params.right_ramp_length = other.params.right_ramp_length;
+//  params.left_scale_length = other.params.left_scale_length;
+//  params.right_scale_length = other.params.right_scale_length;
+//  params.density_coefficient = other.params.density_coefficient;
+//  params.left_ramp_min_density = other.params.left_ramp_min_density;
+//  params.right_ramp_min_density = other.params.right_ramp_min_density;
+//  params.additional_params = other.params.additional_params;
+//  params.rminbox[0] = other.params.rminbox[0];
+//  params.rminbox[1] = other.params.rminbox[1];
+//  params.rminbox[2] = other.params.rminbox[2];
+//  params.rmaxbox[0] = other.params.rmaxbox[0];
+//  params.rmaxbox[1] = other.params.rmaxbox[1];
+//  params.rmaxbox[2] = other.params.rmaxbox[2];
+//  params.spheres = other.params.spheres;
 }
 
 PLASMA PLASMA::operator=(const PLASMA& p1){
-  params.left_ramp_length = p1.params.left_ramp_length;
-  params.right_ramp_length = p1.params.right_ramp_length;
-  params.left_scale_length = p1.params.left_scale_length;
-  params.right_scale_length = p1.params.right_scale_length;
-  params.density_coefficient = p1.params.density_coefficient;
-  params.left_ramp_min_density = p1.params.left_ramp_min_density;
-  params.right_ramp_min_density = p1.params.right_ramp_min_density;
-  params.additional_params = p1.params.additional_params;
   density_function = p1.density_function;
-  params.rminbox[0] = p1.params.rminbox[0];
-  params.rminbox[1] = p1.params.rminbox[1];
-  params.rminbox[2] = p1.params.rminbox[2];
-  params.rmaxbox[0] = p1.params.rmaxbox[0];
-  params.rmaxbox[1] = p1.params.rmaxbox[1];
-  params.rmaxbox[2] = p1.params.rmaxbox[2];
+
+  params = p1.params;
+//  params.left_ramp_length = p1.params.left_ramp_length;
+//  params.right_ramp_length = p1.params.right_ramp_length;
+//  params.left_scale_length = p1.params.left_scale_length;
+//  params.right_scale_length = p1.params.right_scale_length;
+//  params.density_coefficient = p1.params.density_coefficient;
+//  params.left_ramp_min_density = p1.params.left_ramp_min_density;
+//  params.right_ramp_min_density = p1.params.right_ramp_min_density;
+//  params.additional_params = p1.params.additional_params;
+//  params.rminbox[0] = p1.params.rminbox[0];
+//  params.rminbox[1] = p1.params.rminbox[1];
+//  params.rminbox[2] = p1.params.rminbox[2];
+//  params.rmaxbox[0] = p1.params.rmaxbox[0];
+//  params.rmaxbox[1] = p1.params.rmaxbox[1];
+//  params.rmaxbox[2] = p1.params.rmaxbox[2];
+//  params.spheres = p1.params.spheres;
+
   return *this;
 }
 
@@ -215,14 +242,6 @@ void PLASMA::setZRangeBox(double zmin, double zmax){
   params.rmaxbox[2] = zmax;
 }
 
-void PLASMA::setCluserRadiusExtrems(double radiusmin, double radiusmax){
-  params.cluster_radius_extrems[0] = radiusmin;
-  params.cluster_radius_extrems[1] = radiusmax;
-}
-
-void PLASMA::setCluserDensity(double clusterDensity){
-  params.cluster_density = clusterDensity;
-}
 
 PLASMA::~PLASMA(){
 }
@@ -246,9 +265,9 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
       (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if((x>g_x0) && (x < g_x1)){
       if (y< ymaxbound1 && y > yminbound1)
-	return plist.density_coefficient;
+        return plist.density_coefficient;
       else if (y < ymaxbound2 && y > yminbound2)
-	return plist.density_coefficient;
+        return plist.density_coefficient;
     }
     if((x > g_x1)&&(x < g_x2)){
       double uplimitmax = 10.0+(g_x1-x)/(g_x2-g_x1)*9.0;
@@ -256,9 +275,9 @@ double guide(double x, double y, double z, PLASMAparams plist, double Z, double 
       double downlimitmin = -10.0+(x-g_x1)/(g_x2-g_x1)*9.0;
       double downlimitmax = -9.0+(x-g_x1)/(g_x2-g_x1)*9.0;
       if(y < uplimitmax && y > uplimitmin)
-	return plist.density_coefficient;
+        return plist.density_coefficient;
       if (y > downlimitmin && y < downlimitmax)
-	return plist.density_coefficient;
+        return plist.density_coefficient;
     }
   }
   return -1.0;
@@ -280,7 +299,7 @@ double modGrat(double x, double y, double z, PLASMAparams plist, double Z, doubl
   if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
       (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
       (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
-      return plist.density_coefficient;    
+    return plist.density_coefficient;
   }
   else{
     return -1;
@@ -294,22 +313,22 @@ double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, dou
   double g_a = 0.125;
   double g_d = 0.25;
   
-	bool flag = false;
+  bool flag = false;
   double rem = fmod(fabs(y-g_y0),(g_d*0.5));
-	if (rem <= g_a/2)
-		flag=true;
+  if (rem <= g_a/2)
+    flag=true;
 
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
       (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
       (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
-		if (x-plist.rminbox[0] > g_depth)
-			return plist.density_coefficient;
-		else{ 
-			if(!flag)
-				return plist.density_coefficient;
-			else
-				return -1;
-		}
+    if (x-plist.rminbox[0] > g_depth)
+      return plist.density_coefficient;
+    else{
+      if(!flag)
+        return plist.density_coefficient;
+      else
+        return -1;
+    }
   }
   else{
     return -1;
@@ -320,8 +339,8 @@ double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, dou
 
 double box(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     return plist.density_coefficient;
   }
   else{
@@ -331,8 +350,8 @@ double box(double x, double y, double z, PLASMAparams plist, double Z, double A)
 
 double left_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       return (plist.density_coefficient - plist.left_ramp_min_density)*(x - plist.rminbox[0]) / plist.left_ramp_length + plist.left_ramp_min_density;
     }
@@ -347,8 +366,8 @@ double left_linear_ramp(double x, double y, double z, PLASMAparams plist, double
 
 double right_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x) <= (plist.rmaxbox[0] - plist.right_ramp_length)){
       return plist.density_coefficient;
     }
@@ -363,8 +382,8 @@ double right_linear_ramp(double x, double y, double z, PLASMAparams plist, doubl
 
 double left_right_linear_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       return (plist.density_coefficient - plist.left_ramp_min_density)*(x - plist.rminbox[0]) / plist.left_ramp_length + plist.left_ramp_min_density;
     }
@@ -382,8 +401,8 @@ double left_right_linear_ramp(double x, double y, double z, PLASMAparams plist, 
 
 double left_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       double xx = (x - plist.rminbox[0] - plist.left_ramp_length);
       double densDiff = (plist.density_coefficient - plist.left_ramp_min_density);
@@ -402,8 +421,8 @@ double left_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, dou
 
 double right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x) <= (plist.rmaxbox[0] - plist.right_ramp_length)){
       return plist.density_coefficient;
     }
@@ -422,8 +441,8 @@ double right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, do
 
 double left_right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       double xx = (x - plist.rminbox[0] - plist.left_ramp_length);
       double densDiff = (plist.density_coefficient - plist.left_ramp_min_density);
@@ -449,8 +468,8 @@ double left_right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plis
 
 double left_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       double xx = (x - plist.rminbox[0] - plist.left_ramp_length);
       return (plist.density_coefficient*exp(xx / plist.left_scale_length));
@@ -466,8 +485,8 @@ double left_free_exp_ramp(double x, double y, double z, PLASMAparams plist, doub
 
 double right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x) <= (plist.rmaxbox[0] - plist.right_ramp_length)){
       return plist.density_coefficient;
     }
@@ -483,8 +502,8 @@ double right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, dou
 
 double left_right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       double xx = (x - plist.rminbox[0] - plist.left_ramp_length);
       return (plist.density_coefficient*exp(xx / plist.left_scale_length));
@@ -506,8 +525,8 @@ double left_right_free_exp_ramp(double x, double y, double z, PLASMAparams plist
 double left_soft_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A){
   double lng;
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - plist.rminbox[0]) <= plist.left_ramp_length){
       lng = ((x - plist.rminbox[0]) / plist.left_ramp_length)*0.5*M_PI;
       return (plist.density_coefficient - plist.left_ramp_min_density)*sin(lng)*sin(lng) + plist.left_ramp_min_density;
@@ -532,8 +551,8 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
   double xminbound = plist.rminbox[0] + g_depth*(1.0 - cos(phase));
 
   if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - xminbound) <= plist.left_ramp_length){
       return (plist.density_coefficient - plist.left_ramp_min_density)*(x - xminbound) / plist.left_ramp_length + plist.left_ramp_min_density;
     }
@@ -580,24 +599,24 @@ double rough_box(double x, double y, double z, PLASMAparams plist, double Z, dou
   double ysize = plist.rmaxbox[1] - plist.rminbox[1];
 
   xlimit_left = rough_box_edgeCalc(xsize,
-    ysize,
-    plist.rminbox[0], y,
-    order,
-    params,
-    roughness,
-    shift);
+                                   ysize,
+                                   plist.rminbox[0], y,
+      order,
+      params,
+      roughness,
+      shift);
 
   xlimit_right = rough_box_edgeCalc(xsize,
-    ysize,
-    plist.rmaxbox[0], y,
-    order,
-    params + order,
-    roughness,
-    -shift);
+                                    ysize,
+                                    plist.rmaxbox[0], y,
+      order,
+      params + order,
+      roughness,
+      -shift);
 
   if ((xlimit_left <= x) && (x <= xlimit_right) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     return plist.density_coefficient;
   }
   else{
@@ -616,12 +635,12 @@ double box_minus_box(double x, double y, double z, PLASMAparams plist, double Z,
   double mbox_zmax = mbox_extrems[5];
 
   if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) &&
-    (!((mbox_xmin <= x) && (x <= mbox_xmax) &&
-    (mbox_ymin <= y) && (y <= mbox_ymax) &&
-    (mbox_zmin <= z) && (z <= mbox_zmax)))
-    ){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) &&
+      (!((mbox_xmin <= x) && (x <= mbox_xmax) &&
+         (mbox_ymin <= y) && (y <= mbox_ymax) &&
+         (mbox_zmin <= z) && (z <= mbox_zmax)))
+      ){
     return plist.density_coefficient;
   }
   else{
@@ -652,8 +671,8 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
   double xminbound = plist.rminbox[0] + g_depth*(1.0 - square_func(phase));
 
   if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
-    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
-    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
     if ((x - xminbound) <= plist.left_ramp_length){
       return (plist.density_coefficient - plist.left_ramp_min_density)*(x - xminbound) / plist.left_ramp_length + plist.left_ramp_min_density;
     }
@@ -666,10 +685,49 @@ double left_square_grating(double x, double y, double z, PLASMAparams plist, dou
   }
 }
 
-double clusters(double x, double y, double z, PLASMAparams plist, double Z, double A){
+void setCoordWithinBoundaries(double &x, double min, double max){
+  double box = max-min;
+  if(x<min){
+    x += box * ((int)((max - x) / box));
+  }
+  if(x>max){
+    x -= box* ((int)((x- min) / box));
+  }
+}
 
+double spheres(double x, double y, double z, PLASMAparams plist, double Z, double A){
+ SPHERES *myspheres = plist.spheres;
+  int Nspheres = myspheres->NSpheres;
+  double spDensity = plist.density_coefficient/myspheres->fillingFactor;
+  double value=0, xsp, ysp, zsp, radius;
+  double extrems[2];
+//  std::cout << " Nspheres = " << Nspheres << std::endl;
 
+  //std::cout << " density_coefficient = " << plist.density_coefficient << std::endl;
+  //std::cout << "  fillingFactor = " << plist.spheres->fillingFactor << std::endl;
+  //std::cout << " spheres density = " << spDensity << std::endl;
+  if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0])){
+    if((plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])){
+      if((plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+        setCoordWithinBoundaries(y,myspheres->rmin[1], myspheres->rmax[1]);
+        setCoordWithinBoundaries(z,myspheres->rmin[2], myspheres->rmax[2]);
+        for(int i=0; i<Nspheres; i++){
+          radius   = myspheres->coords[i*4+3];
+          xsp = plist.rmaxbox[0] - myspheres->coords[i*4+0] - radius;
+          ysp = myspheres->coords[i*4+1];
+          zsp = myspheres->coords[i*4+2];
+          double distance =     (xsp-x)*(xsp-x)+(ysp-y)*(ysp-y)+(zsp-z)*(zsp-z);
+          if( distance<(radius*radius) )
+            value += spDensity;
 
+        }
+      }
+    }
+  }
+  else{
+    value = -1;
+  }
+  return value;
 }
 
 //*************************END_PLASMA*****************************
@@ -694,9 +752,9 @@ laserPulse::~laserPulse(){}
 
 laserPulse::laserPulse(const laserPulse& other)
   :type(other.type), t_FWHM(other.t_FWHM), waist(other.waist), focus_position(other.focus_position),
-  laser_pulse_initial_position(other.laser_pulse_initial_position), normalized_amplitude(other.normalized_amplitude),
-  lambda0(other.lambda0), rotation(other.rotation), angle(other.angle),
-  rotation_center_along_x(other.rotation_center_along_x), rise_time(other.rise_time){}
+    laser_pulse_initial_position(other.laser_pulse_initial_position), normalized_amplitude(other.normalized_amplitude),
+    lambda0(other.lambda0), rotation(other.rotation), angle(other.angle),
+    rotation_center_along_x(other.rotation_center_along_x), rise_time(other.rise_time){}
 
 
 laserPulse laserPulse::operator=(const laserPulse& p1){

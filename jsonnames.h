@@ -119,7 +119,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _JSON_BOOL_IS_TEST "isTest"
 #define _JSON_STRING_DISTRIBUTION "distribution"
 
-#define _JSON_STRING_SPEIES_TYPE "type"
+#define _JSON_STRING_SPECIES_TYPE "type"
 #define SPECIES_TYPEVALUE_ELECTRON "ELECTRON"
 #define SPECIES_TYPEVALUE_POSITRON "POSITRON"
 #define SPECIES_TYPEVALUE_ION "ION"

@@ -716,7 +716,6 @@ void SPECIE::creation()
   double plasmarmin[3], plasmarmax[3];
   setLocalPlasmaMinimaAndMaxima(plasmarmin, plasmarmax);
   Np = getNumberOfParticlesWithin(plasmarmin, plasmarmax);
-
   allocate_species();
 
   long long disp = getSumNewParticlesOfAllPreviousProcessors(Np);

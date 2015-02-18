@@ -26,6 +26,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #else
 #include <stdint.h>
 #endif
+#include <cstdio>
+#include <iostream>
 #include <iomanip>
 #include <vector>
 #include <list>
