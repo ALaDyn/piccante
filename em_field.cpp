@@ -1552,19 +1552,16 @@ void EM_FIELD::moveWindow()
   }
 
   for (int k = 0; k < Ngz; k++)
-    for (int j = 0; j < Ngy; j++)
-    {
-    for (int i = -Nexchange; i < (Nx - shiftCellNumber); i++)
-      for (int c = 0; c < Ncomp; c++)
-      {
-      VEB(c, i, j - edge, k - edge) = VEB(c, i + shiftCellNumber, j - edge, k - edge);
+    for (int j = 0; j < Ngy; j++){
+      for (int i = -Nexchange; i < (Nx - shiftCellNumber); i++)
+        for (int c = 0; c < Ncomp; c++){
+          VEB(c, i, j - edge, k - edge) = VEB(c, i + shiftCellNumber, j - edge, k - edge);
+        }
+      for (int i = 0; i < (shiftCellNumber + 1); i++){
+        for (int c = 0; c < Ncomp; c++){
+          VEB(c, i + (Nx - shiftCellNumber), j - edge, k - edge) = recv_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy];
+        }
       }
-    for (int i = 0; i < (shiftCellNumber + 1); i++){
-      for (int c = 0; c < Ncomp; c++)
-      {
-        VEB(c, i + (Nx - shiftCellNumber), j - edge, k - edge) = recv_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy];
-      }
-    }
     }
 
   //TODO: si dovrebbe poter rimuovere
@@ -1830,20 +1827,24 @@ void EM_FIELD::filterCompAlongX(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 10.0;
-  double beta = 1.0;
-
-  double sum = alpha + 2.0*beta;
-  alpha = alpha / sum;
-  beta = beta / sum;
+  double alpha = 5.0/8.0;
+  double beta = 0.5;
+  double gamma = -1.0/8.0;
+  if ((mygrid->getNexchange() == 1) ){
+     alpha = 0.5;
+     beta = 0.5;
+     gamma = 0;
+  }
 
   for (int k = 0; k < Nz; k++){
     for (int j = 0; j < Ny; j++){
-      double oldVEB = VEB(comp, -1, j, k);
+      double minus1 = VEB(comp, -1, j, k);
+      double minus2 = VEB(comp, -2, j, k);
       for (int i = 0; i < Nx; i++){
         double ttemp = VEB(comp, i, j, k);
-        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*alpha*VEB(comp, i + 1, j, k) + beta*oldVEB;
-        oldVEB = ttemp;
+        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*( VEB(comp, i + 1, j, k) + minus1 ) + gamma*0.5*(VEB(comp, i + 2, j, k) + minus2);
+        minus2 = minus1;
+        minus1 = ttemp;
       }
     }
 
@@ -1855,20 +1856,24 @@ void EM_FIELD::filterCompAlongY(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 10.0;
-  double beta = 1.0;
-
-  double sum = alpha + 2.0*beta;
-  alpha = alpha / sum;
-  beta = beta / sum;
+  double alpha = 5.0/8.0;
+  double beta = 0.5;
+  double gamma = -1.0/8.0;
+  if ((mygrid->getNexchange() == 1) ){
+     alpha = 0.5;
+     beta = 0.5;
+     gamma = 0;
+  }
 
   for (int k = 0; k < Nz; k++){
     for (int i = 0; i < Nx; i++){
-      double oldVEB = VEB(comp, i, -1, k);
+      double minus1 = VEB(comp, i, -1, k);
+      double minus2 = VEB(comp, i, -2, k);
       for (int j = 0; j < Ny; j++){
         double ttemp = VEB(comp, i, j, k);
-        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*alpha*VEB(comp, i, j + 1, k) + beta*oldVEB;
-        oldVEB = ttemp;
+        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i, j + 1, k) + minus1) + gamma*0.5*(VEB(comp, i, j + 2, k) + minus2);
+        minus2 = minus1;
+        minus1 = ttemp;
       }
     }
 
@@ -1880,20 +1885,24 @@ void EM_FIELD::filterCompAlongZ(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 10.0;
-  double beta = 1.0;
-
-  double sum = alpha + 2.0*beta;
-  alpha = alpha / sum;
-  beta = beta / sum;
+  double alpha = 5.0/8.0;
+  double beta = 0.5;
+  double gamma = -1.0/8.0;
+  if ((mygrid->getNexchange() == 1) ){
+     alpha = 0.5;
+     beta = 0.5;
+     gamma = 0;
+  }
 
   for (int j = 0; j < Ny; j++){
     for (int i = 0; i < Nx; i++){
-      double oldVEB = VEB(comp, i, j, -1);
+      double minus1 = VEB(comp, i, j, -1);
+      double minus2 = VEB(comp, i, j, -2);
       for (int k = 0; k < Nz; k++){
         double ttemp = VEB(comp, i, j, k);
-        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*alpha*VEB(comp, i, j, k + 1) + beta*oldVEB;
-        oldVEB = ttemp;
+        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i, j, k + 1) + minus1) + gamma*0.5*(VEB(comp, i, j, k + 2) + minus2);
+        minus2 = minus1;
+        minus1 = ttemp;
       }
     }
 

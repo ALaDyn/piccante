@@ -232,6 +232,10 @@ int main(int narg, char **args)
 
     myfield.boundary_conditions();
     myfield.openBoundariesE_2();
+
+    if(!(grid.istep%20))
+      myfield.applyFilter(fltr_Ex|fltr_Ey, dir_x|dir_y);
+
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
