@@ -1,5 +1,3 @@
-
-
 /*******************************************************************************
 This file is part of piccante.
 
@@ -66,22 +64,16 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
   std::ifstream myfile;
   myfile.open(filename.c_str());
   if (!myfile.good()){
-//    std::cout << "     disonore e tempesta! file \"" << filename << "\" does not exists" << std::endl;
-  }
-  else{
-  //  std::cout << " file exists "<< filename << std::endl;
-
+    std::cout << "     spheres file: \"" << filename << "\" does not exists" << std::endl;
   }
   int Nsph=0;
 
   myfile.read((char*)&Nsph, sizeof(int));
 
   spheres.NSpheres = Nsph;
-  //std::cout << "     Nsph = " << Nsph << std::endl;
   spheres.coords = new float[spheres.NSpheres*4];
 
   myfile.read((char*)&(spheres.fillingFactor), sizeof(float));
-  //std::cout << "     fillingFactor = " << spheres.fillingFactor << std::endl;
   myfile.read((char*)spheres.rmin, sizeof(float)*3);
   myfile.read((char*)spheres.rmax, sizeof(float)*3);
   myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres*4);
