@@ -24,6 +24,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <mpi.h>
 #include <omp.h>
+ #ifdef _USE_FFTW_FILTER
+#include <fftw3-mpi.h>
+#endif
 
 #if defined(_MSC_VER)
 #include <ctime>
@@ -153,6 +156,9 @@ public:
   void dump(std::ofstream &ff);
   void debugDump(std::ofstream &ff);
   void reloadDump(std::ifstream &ff);
+
+  void fftw_filter_Efield();
+
   //PUBLIC INLINE FUNCTIONS
   inline double & E0(int i, int j, int k){
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
@@ -261,7 +267,7 @@ private:
     return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
   }
 
-
+    bool checkIfFilterPossible();
 };
 
 

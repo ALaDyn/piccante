@@ -1925,7 +1925,6 @@ void EM_FIELD::applyFilter(int flags, int dirflags){
   if (mygrid->isStretched() && (mygrid->myid == mygrid->master_proc)){
     std::cout << "WARNING: filtering and stretched grid are not compatible. Proceed at your own risk." << std::endl;
   }
-
   if (flags & fltr_Ex)
     filterDirSelect(0, dirflags);
   if (flags & fltr_Ey)
@@ -1940,3 +1939,131 @@ void EM_FIELD::applyFilter(int flags, int dirflags){
     filterDirSelect(5, dirflags);
 
 }
+
+bool EM_FIELD::checkIfFilterPossible(){
+
+    if(mygrid->uniquePoints[0]%mygrid->rnproc[0] != 0)
+        return false;
+
+    if(mygrid->rnproc[1]>1)
+        return false;
+
+    if(mygrid->rnproc[2]>1)
+        return false;
+
+    if(mygrid->getDimensionality()>2)
+        return false;
+
+    return true;
+
+}
+
+ #ifdef _USE_FFTW_FILTER
+void EM_FIELD::fftw_filter_Efield(){
+   // if (!checkIfFilterPossible())
+     //   return;
+    //std::cout << checkIfFilterPossible() << std::endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    const ptrdiff_t N0 = mygrid->uniquePoints[0], N1 = mygrid->uniquePoints[1];
+
+    fftw_plan planFW,planBW;
+    fftw_complex *data;
+    ptrdiff_t alloc_local, local_n0, local_0_start, i, j;
+
+    alloc_local = fftw_mpi_local_size_2d(N0, N1, mygrid->cart_comm, &local_n0, &local_0_start);
+    data = fftw_alloc_complex(alloc_local);
+
+    planFW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
+                                FFTW_FORWARD, FFTW_ESTIMATE);
+    planBW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
+                                  FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    {
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]= E0(i,j,0);
+                data[i*N1 + j][1]= 0;
+            }
+        fftw_execute(planFW);
+        double norm = N0*N1;
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]/=norm;
+                data[i*N1 + j][1]/=norm;
+                int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
+                int rj = (j < N1/2)?(j):(-(N1-j));
+                if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
+                    data[i*N1 + j][0]=0;
+                    data[i*N1 + j][1]=0;
+                }
+
+            }
+        fftw_execute(planBW);
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                E0(i,j,0) = data[i*N1 + j][0];
+            }
+    }
+
+    {
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]= E1(i,j,0);
+                data[i*N1 + j][1]= 0;
+            }
+        fftw_execute(planFW);
+        double norm = N0*N1;
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]/=norm;
+                data[i*N1 + j][1]/=norm;
+                int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
+                int rj = (j < N1/2)?(j):(-(N1-j));
+                if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
+                    data[i*N1 + j][0]=0;
+                    data[i*N1 + j][1]=0;
+                }
+
+            }
+        fftw_execute(planBW);
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                E1(i,j,0) = data[i*N1 + j][0];
+            }
+    }
+
+
+    {
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]= E2(i,j,0);
+                data[i*N1 + j][1]= 0;
+            }
+        fftw_execute(planFW);
+        double norm = N0*N1;
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                data[i*N1 + j][0]/=norm;
+                data[i*N1 + j][1]/=norm;
+                int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
+                int rj = (j < N1/2)?(j):(-(N1-j));
+                if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
+                    data[i*N1 + j][0]=0;
+                    data[i*N1 + j][1]=0;
+                }
+
+            }
+        fftw_execute(planBW);
+        for (i = 0; i < local_n0; ++i)
+            for (j = 0; j < N1; ++j){
+                E2(i,j,0) = data[i*N1 + j][0];
+            }
+    }
+
+
+
+    fftw_destroy_plan(planFW);
+    fftw_destroy_plan(planBW);
+}
+#endif
