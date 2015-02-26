@@ -93,8 +93,9 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
 int main(int narg, char **args)
 {
   MPI_Init(&narg, &args);
+#ifdef _USE_FFTW_FILTER
   fftw_mpi_init();
-
+#endif
   Json::Value root;
   jsonParser::parseJsonInputFile(root,narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
