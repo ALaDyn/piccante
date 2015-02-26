@@ -38,6 +38,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdarg>
 #include <vector>
 #include <map>
+#ifdef _USE_FFTW_FILTER
+#include<fftw3-mpi.h>
+#endif
 
 #include "commons.h"
 #include "grid.h"
@@ -90,6 +93,7 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
 int main(int narg, char **args)
 {
   MPI_Init(&narg, &args);
+  fftw_mpi_init();
 
   Json::Value root;
   jsonParser::parseJsonInputFile(root,narg, args);
@@ -230,10 +234,16 @@ int main(int narg, char **args)
     myfield.new_advance_E(&current);
 
     myfield.boundary_conditions();
+
+    #ifdef _USE_FFTW_FILTER
+	  myfield.fftw_filter_Efield();
+    myfield.boundary_conditions();
+    #endif
+
     myfield.openBoundariesE_2();
 
     if(!(grid.istep%20)){
-      myfield.applyFilter(fltr_Ex|fltr_Ey, dir_x|dir_y);
+      //myfield.applyFilter(fltr_Ex|fltr_Ey, dir_x|dir_y);
     }
 
     myfield.new_halfadvance_B();
