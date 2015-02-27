@@ -299,7 +299,7 @@ void GRID::printTStepEvery(int every){
   }
 }
 
-void GRID::initRNG(gsl_rng* rng, unsigned long int auxiliary_seed){
+void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed){
   //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
   //Seeding del generatore di numeri casuali.
   //Strategia: con il generatore Mersenne Twister di GSL (inizializzato allo stesso modo per tutti)
@@ -310,12 +310,12 @@ void GRID::initRNG(gsl_rng* rng, unsigned long int auxiliary_seed){
 
   gsl_rng* rng_aux;
 
-  unsigned long int* seeds;
+  uint32_t* seeds;
 
   rng_aux = gsl_rng_alloc(gsl_rng_mt19937);
 
   gsl_rng_set(rng_aux, auxiliary_seed);
-  seeds = new unsigned long int[myid + 1];
+  seeds = new uint32_t[myid + 1];
 
   for (int i = 0; i <= myid; i++){
     seeds[i] = gsl_rng_get(rng_aux);
@@ -522,7 +522,7 @@ void GRID::printProcInformations()
   printf("==================== %19s ====================\n", "GRID INITIALIZATION");
   printf("master_proc      = %i:\n", myid);
   printf("DIMENSIONALITY   = %i\n", dimensions);
-  double dtotcell = ((long int)uniquePoints[0])*((long int)uniquePoints[1])*uniquePoints[2];
+  double dtotcell = ((uint64_t)uniquePoints[0])*((uint64_t)uniquePoints[1])*uniquePoints[2];
   printf("Ncells           = %6g : ( %5i, %5i, %5i)\n", dtotcell, uniquePoints[0], uniquePoints[1], uniquePoints[2]);
   printf("Nprocs           = %6i : ( %5i, %5i, %5i)\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
   printf("Xrange           = [ %5g : %5g ]\n", rmin[0], rmax[0]);

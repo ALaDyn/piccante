@@ -310,7 +310,7 @@ int SPECIE::getNumberOfParticlesWithinFromFile1D(double plasmarmin[], double pla
   free(uz);
   return counter;
 }
-void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp){
 #ifdef NO_ALLOCATION
   if(!allocated){
     return;
@@ -368,7 +368,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
       }
 }
 
-void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp){
+void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp){
 #ifdef NO_ALLOCATION
   if(!allocated){
     return;
@@ -445,7 +445,7 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
   }
 }
 
-void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
+void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp, std::string name){
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
   int Nx = mygrid->Nloc[0];
@@ -544,7 +544,7 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
   free(uz);
 }
 
-void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name){
+void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp, std::string name){
   int counter = oldNumberOfParticles;
   double xloc, yloc, zloc;
   double myx, myy, myz;
@@ -687,16 +687,16 @@ void SPECIE::setLocalPlasmaMinimaAndMaxima(double *plasmarmin, double *plasmarma
   }
 
 }
-long long SPECIE::getSumNewParticlesOfAllPreviousProcessors(int number){
+uint64_t SPECIE::getSumNewParticlesOfAllPreviousProcessors(int number){
   int* NpartLoc = new int[mygrid->nproc];
   NpartLoc[mygrid->myid] = number;
 
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-  long long disp = lastParticle;
+  uint64_t disp = lastParticle;
   for (int pp = 0; pp < mygrid->myid; pp++)
     disp += NpartLoc[pp];
   for (int pp = 0; pp < mygrid->nproc; pp++)
-    lastParticle += (long long)NpartLoc[pp];
+    lastParticle += (uint64_t)NpartLoc[pp];
   delete[] NpartLoc;
   return disp;
 }
@@ -718,7 +718,7 @@ void SPECIE::creation()
   Np = getNumberOfParticlesWithin(plasmarmin, plasmarmax);
   allocate_species();
 
-  long long disp = getSumNewParticlesOfAllPreviousProcessors(Np);
+  uint64_t disp = getSumNewParticlesOfAllPreviousProcessors(Np);
 
   if (mygrid->isStretched())
     createStretchedParticlesWithinFrom(plasmarmin, plasmarmax, 0, disp);
@@ -764,11 +764,11 @@ void SPECIE::creationFromFile1D(std::string name){
   NpartLoc[mygrid->myid] = Np;
 
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NpartLoc, 1, MPI_INT, MPI_COMM_WORLD);
-  long long disp = 0;
+  uint64_t disp = 0;
   for (int pp = 0; pp < mygrid->myid; pp++)
     disp += NpartLoc[pp];
   for (int pp = 0; pp < mygrid->nproc; pp++)
-    lastParticle += (long long)NpartLoc[pp];
+    lastParticle += (uint64_t)NpartLoc[pp];
 
 
   if (mygrid->isStretched())
@@ -807,7 +807,7 @@ void SPECIE::move_window()
   Np += newNumberOfParticles;
   reallocate_species();
 
-  long long disp = getSumNewParticlesOfAllPreviousProcessors(newNumberOfParticles);
+  uint64_t disp = getSumNewParticlesOfAllPreviousProcessors(newNumberOfParticles);
 
   if ((mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)) && newNumberOfParticles > 0){
 

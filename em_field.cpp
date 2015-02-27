@@ -45,7 +45,7 @@ void EM_FIELD::allocate(GRID *grid){
   if (N_grid[1] == 1)
     YGrid_factor = 0;
 
-  Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
+  Ntot = ((uint64_t)N_grid[0]) * ((uint64_t)N_grid[1]) * ((uint64_t)N_grid[2]);
   Ncomp = 6;
 #ifndef NO_ALLOCATION
   val = (double *)malloc(Ntot*Ncomp*sizeof(double));
@@ -66,7 +66,7 @@ void EM_FIELD::reallocate(){
   if (N_grid[1] == 1)
     YGrid_factor = 0;
 
-  Ntot = ((long int)N_grid[0]) * ((long int)N_grid[1]) * ((long int)N_grid[2]);
+  Ntot = ((uint64_t)N_grid[0]) * ((uint64_t)N_grid[1]) * ((uint64_t)N_grid[2]);
   Ncomp = 6;
 #ifndef NO_ALLOCATION
   val = (double *)realloc((void*)val, Ntot*Ncomp*sizeof(double));

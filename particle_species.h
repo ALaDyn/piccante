@@ -116,8 +116,8 @@ public:
   inline double &u1(int np) { return val[np*Ncomp + 4]; }
   inline double &u2(int np) { return val[np*Ncomp + 5]; }
   inline double &w(int np) { return val[np*Ncomp + 6]; }
-  inline long int &marker(int np) { return *((long int*)(val + (np*Ncomp + 7))); }
-  //inline long int &marker(int np) { return *((long int*)(&dummy)); }
+  inline uint64_t &marker(int np) { return *((uint64_t*)(val + (np*Ncomp + 7))); }
+  //inline uint64_t &marker(int np) { return *((uint64_t*)(&dummy)); }
 #else
   inline double &ru(int c, int np) { return val[c][np]; }
   inline double &r0(int np) { return val[0][np]; }
@@ -127,8 +127,8 @@ public:
   inline double &u1(int np) { return val[4][np]; }
   inline double &u2(int np) { return val[5][np]; }
   inline double &w(int np) { return val[6][np]; }
-  inline long int &marker(int np) { return *((long int*)(&val[7][np])); }
-  //inline long int &marker(int np) { return *((long int*)(&dummy)); }
+  inline uint64_t &marker(int np) { return *((uint64_t*)(&val[7][np])); }
+  //inline uint64_t &marker(int np) { return *((uint64_t*)(&dummy)); }
 #endif
 
 
@@ -144,7 +144,7 @@ private:
   int valSize;
   int particlePerCell;
   int particlePerCellXYZ[3];
-  long long lastParticle;
+  uint64_t lastParticle;
   double savedExtrema[14];
   double savedEnergy;
   bool energyExtremesFlag;
@@ -158,13 +158,13 @@ private:
   void computeParticleMassChargeCoupling();
   void setNumberOfParticlePerCell();
   void setLocalPlasmaMinimaAndMaxima(double *plasmarmin, double *plasmarmax);
-  long long getSumNewParticlesOfAllPreviousProcessors(int number);
+  uint64_t getSumNewParticlesOfAllPreviousProcessors(int number);
   int getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]);
   int getNumberOfParticlesWithinFromFile1D(double plasmarmin[3], double plasmarmax[3], std::string name);
-  void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
-  void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp);
-  void createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
-  void createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, long long disp, std::string name);
+  void createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp);
+  void createStretchedParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp);
+  void createParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp, std::string name);
+  void createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3], double plasmarmax[3], int oldNumberOfParticles, uint64_t disp, std::string name);
 
 
   void computeLorentzMatrix(double ux, double uy, double uz, double matr[16]);

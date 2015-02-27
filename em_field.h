@@ -76,6 +76,8 @@ typedef unsigned __int64  uint64_t; */
 #include <stdlib.h>
 #endif
 
+#include <stdint.h>
+
 
 #include "commons.h"
 #include "structures.h"
@@ -221,7 +223,7 @@ public:
 
 private:
   int N_grid[3], Ncomp;
-  long int Ntot;
+  uint64_t Ntot;
   int ZGrid_factor, YGrid_factor;
   double *val; //   THE BIG poiniter
   GRID *mygrid;         // pointer to the GIRD object 

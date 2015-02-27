@@ -2428,12 +2428,12 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
   MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, groupProcNumData, 1, MPI_INT, groupCommunicator);
 
   MPI_Offset disp = 0;
-  long long int groupNumData = 0;
+  uint64_t groupNumData = 0;
   if (groupMyid == 0){
     for (int i = 0; i < groupNproc; i++){
       groupNumData += groupProcNumData[i];
     }
-    long long int *allGroupNumData = new long long int[mpiFileNproc];
+    uint64_t *allGroupNumData = new uint64_t[mpiFileNproc];
     allGroupNumData[mpiFileMyid] = groupNumData;
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_LONG_LONG_INT, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
     for (int i = 0; i < mpiFileMyid; i++){
@@ -2551,7 +2551,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   int* groupProcNumData = new int[groupNproc];
   groupProcNumData[groupMyid] = totalFloatNumber;
   MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, groupProcNumData, 1, MPI_INT, groupCommunicator);
-  long long int groupNumData = 0;
+  uint64_t groupNumData = 0;
   for (int i = 0; i < groupNproc; i++){
     groupNumData += groupProcNumData[i];
   }
@@ -2569,7 +2569,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
 
   if (groupMyid == 0){
     MPI_Offset disp = 0;
-    long long int *allGroupNumData = new long long int[mpiFileNproc];
+    uint64_t *allGroupNumData = new uint64_t[mpiFileNproc];
     allGroupNumData[mpiFileMyid] = groupNumData;
     MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, allGroupNumData, 1, MPI_LONG_LONG_INT, MPIFileCommunicator);
     for (int i = 0; i < mpiFileMyid; i++){

@@ -32,6 +32,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 //#include <malloc.h>
 //#include <cstring>
+#include <stdint.h>
 #include <ctime>       /* time */
 #if defined(_MSC_VER)
 #include <cstdlib>
@@ -120,7 +121,7 @@ public:
   int getTotalNumberOfTimesteps();
   void moveWindow();
   void printTStepEvery(int every);
-  void initRNG(gsl_rng* rng, unsigned long int auxiliary_seed);
+  void initRNG(gsl_rng* rng, uint32_t auxiliary_seed);
   void visualDiag();
   void mpi_grid_initialize(int *narg, char **args);
   void finalize();

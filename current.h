@@ -30,6 +30,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <stdint.h>
 
 #include "commons.h"
 #include "grid.h"
@@ -66,7 +67,7 @@ public:
 
 private:
   int N_grid[3];
-  long int Ntot;
+  uint64_t Ntot;
   int ZGrid_factor, YGrid_factor;
   double *val; //   THE BIG poiniter
   GRID *mygrid;         // pointer to the GIRD object 
