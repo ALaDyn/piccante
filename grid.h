@@ -174,7 +174,7 @@ public:
 private:
   int dimensions;
   static const int edge = 2;
-  static const int Nexchange = 2;
+  static const int Nexchange = 1;
 double courantFactor;
   bool isDimensionalitySet;
 
