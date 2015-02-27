@@ -103,7 +103,7 @@ public:
 
   bool areEnergyExtremesAvailable();
 
-  void printParticleNumber();
+  uint64_t printParticleNumber();
 
 
   //PUBLIC INLINE FUNCTIONS

@@ -3273,10 +3273,11 @@ bool SPECIE::areEnergyExtremesAvailable(){
 }
 
 
-void SPECIE::printParticleNumber(){
+uint64_t SPECIE::printParticleNumber(){
   if (mygrid->myid != mygrid->master_proc)
-    return;
+    return lastParticle;
   std::cout << name << " has " << lastParticle << " particles." << std::endl;
+  return lastParticle;
 }
 
 

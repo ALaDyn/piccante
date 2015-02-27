@@ -165,9 +165,15 @@ int main(int narg, char **args)
   }
  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
+  uint64_t totPartNum = 0;
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-    (*spec_iterator)->printParticleNumber();
+    totPartNum+=(*spec_iterator)->printParticleNumber();
   }
+  if(grid.myid == grid.master_proc){
+    std::cout << "Total particle number: " << totPartNum << std::endl;
+  }
+
+
   if(areThereSpheres){
     delete [] myspheres.coords;
   }
