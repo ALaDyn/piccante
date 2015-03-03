@@ -469,4 +469,5 @@ Desktop.ini
 $RECYCLE.BIN/
 
 
-
+# ignore main file
+main-1.cpp

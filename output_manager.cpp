@@ -2537,7 +2537,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
   MPI_Comm_size(MPIFileCommunicator, &mpiFileNproc);
   MPI_Comm_rank(MPIFileCommunicator, &mpiFileMyid);
 
-  MPI_File thefile;
+  MPI_File thefile = NULL;
   MPI_Status status;
   std::stringstream myFileName;
   myFileName << fileName << "." << std::setfill('0') << std::setw(5) << fileCommunicatorID;

@@ -22,6 +22,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <cstdint>
 #else
 #include <stdint.h>

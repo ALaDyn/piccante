@@ -76,7 +76,7 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
 
   if((!parsedSuccess)&&isThisJsonMaster){
     std::cout<<"Failed to parse JSON"<<std::endl
-            <<reader.getFormatedErrorMessages()
+            <<reader.getFormattedErrorMessages()
            <<std::endl;
     exit(1);
   }
