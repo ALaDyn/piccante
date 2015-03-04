@@ -18,6 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "em_field.h"
+//#define OLD_ACCESS
 
 EM_FIELD::EM_FIELD()
 {
@@ -610,45 +611,116 @@ void EM_FIELD::new_halfadvance_B()
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
+
   dt = mygrid->dt;
 
-  if (dimensions == 3)
-#pragma omp parallel for private(i,j)
+  int edge = mygrid->getEdge();
+
+  if (dimensions == 3){
+//#pragma omp parallel for private(i,j)
+
     for (k = 0; k < Nz; k++){
     dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
     for (j = 0; j < Ny; j++){
       dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
       for (i = 0; i < Nx; i++){
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+#ifndef OLD_ACCESS
+        double EZ, EZ_XP, EZ_YP;
+        double EY, EY_XP, EY_ZP;
+        double EX, EX_YP, EX_ZP;
+        EX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EX_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EX_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+        double *BX, *BY, *BZ;
+        BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+        *BX -= 0.5*dt*(  dyi*(EZ_YP - EZ) - dzi*(EY_ZP - EY));
+        *BY -= 0.5*dt*(  dzi*(EX_ZP - EX) - dxi*(EZ_XP - EZ));
+        *BZ -= 0.5*dt*(  dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
+#else
+
         B0(i, j, k) -= 0.5*dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)) - dzi*(E1(i, j, k + 1) - E1(i, j, k)));
         B1(i, j, k) -= 0.5*dt*(dzi*(E0(i, j, k + 1) - E0(i, j, k)) - dxi*(E2(i + 1, j, k) - E2(i, j, k)));
         B2(i, j, k) -= 0.5*dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)) - dyi*(E0(i, j + 1, k) - E0(i, j, k)));
+#endif
       }
     }
     }
-  else if (dimensions == 2)
-#pragma omp parallel for private(i)
+  }
+  else if (dimensions == 2){
+//#pragma omp parallel for private(i)
+
     for (j = 0; j < Ny; j++){
     dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
     for (i = 0; i < Nx; i++){
       k = 0;
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+#ifndef OLD_ACCESS
+      double EZ, EZ_XP, EZ_YP;
+      double EY, EY_XP;
+      double EX, EX_YP;
+      EX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EX_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j+1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j+1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
+      double *BX, *BY, *BZ;
+      BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+      *BX -= 0.5*dt*(  dyi*(EZ_YP - EZ));
+      *BY -= 0.5*dt*( -dxi*(EZ_XP - EZ));
+      *BZ -= 0.5*dt*(  dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
+
+#else
       B0(i, j, k) -= 0.5*dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)));
       B1(i, j, k) -= 0.5*dt*(-dxi*(E2(i + 1, j, k) - E2(i, j, k)));
       B2(i, j, k) -= 0.5*dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)) - dyi*(E0(i, j + 1, k) - E0(i, j, k)));
+#endif
     }
     }
+  }
   else if (dimensions == 1)
-#pragma omp parallel for
+//#pragma omp parallel for
     for (i = 0; i < Nx; i++){
     j = 0;
     k = 0;
     dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 
+#ifndef OLD_ACCESS
+    double EZ, EZ_XP;
+    double EY, EY_XP;
+    EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+    double *BX, *BY, *BZ;
+    BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+    *BY -= 0.5*dt*( -dxi*(EZ_XP - EZ));
+    *BZ -= 0.5*dt*(  dxi*(EY_XP - EY));
+#else
     //B0(i,j,k)-=0.5*dt*(0);
     B1(i, j, k) -= 0.5*dt*(-dxi*(E2(i + 1, j, k) - E2(i, j, k)));
     B2(i, j, k) -= 0.5*dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)));
+#endif
     }
 }
 void EM_FIELD::new_advance_B()
@@ -713,8 +785,18 @@ void EM_FIELD::new_advance_E()
   Nz = mygrid->Nloc[2];
   dt = mygrid->dt;
 
+  int edge = mygrid->getEdge();
+
+  double *Bx, *By, *Bz, *Ex, *Ey, *Ez;
+  Ex = &val[ 0 * N_grid[0]*N_grid[1]*N_grid[2]];
+  Ey = &val[ 1 * N_grid[0]*N_grid[1]*N_grid[2]];
+  Ez = &val[ 2 * N_grid[0]*N_grid[1]*N_grid[2]];
+  Bx = &val[ 3 * N_grid[0]*N_grid[1]*N_grid[2]];
+  By = &val[ 4 * N_grid[0]*N_grid[1]*N_grid[2]];
+  Bz = &val[ 5 * N_grid[0]*N_grid[1]*N_grid[2]];
+
   if (dimensions == 3)
-#pragma omp parallel for private(i,j)
+//#pragma omp parallel for private(i,j)
     for (k = 0; k < Nz; k++){
     dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
     for (j = 0; j < Ny; j++){
@@ -731,7 +813,7 @@ void EM_FIELD::new_advance_E()
     }
     }
   else if (dimensions == 2)
-#pragma omp parallel for private(i)
+//#pragma omp parallel for private(i)
     for (j = 0; j < Ny; j++){
     dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
     for (i = 0; i < Nx; i++){
@@ -745,7 +827,7 @@ void EM_FIELD::new_advance_E()
     }
     }
   else if (dimensions == 1)
-#pragma omp parallel for
+//#pragma omp parallel for
     for (i = 0; i < Nx; i++){
     j = 0;
     k = 0;
@@ -770,6 +852,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
   Nz = mygrid->Nloc[2];
   dt = mygrid->dt;
 
+  int edge = mygrid->getEdge();
   if (dimensions == 3)
     for (k = 0; k < Nz; k++){
     dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
@@ -777,9 +860,32 @@ void EM_FIELD::new_advance_E(CURRENT *current)
       dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
       for (i = 0; i < Nx; i++){
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+#ifndef OLD_ACCESS
+        double BZ, BZ_XM, BZ_YM;
+        double BY, BY_XM, BY_ZM;
+        double BX, BX_YM, BX_ZM;
+        BX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BX_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BX_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        double *EX, *EY, *EZ;
+        EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+        *EX += dt*(  dyi*(BZ - BZ_YM) - dzi*(BY - BY_ZM) - mygrid->den_factor*current->Jx(i, j, k) );
+        *EY += dt*(  dzi*(BX - BX_ZM) - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
+        *EZ += dt*(  dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k) );
+#else
         E0(i, j, k) += dt*((dyi*(B2(i, j, k) - B2(i, j - 1, k)) - dzi*(B1(i, j, k) - B1(i, j, k - 1))) - mygrid->den_factor*current->Jx(i, j, k));
         E1(i, j, k) += dt*((dzi*(B0(i, j, k) - B0(i, j, k - 1)) - dxi*(B2(i, j, k) - B2(i - 1, j, k))) - mygrid->den_factor*current->Jy(i, j, k));
         E2(i, j, k) += dt*((dxi*(B1(i, j, k) - B1(i - 1, j, k)) - dyi*(B0(i, j, k) - B0(i, j - 1, k))) - mygrid->den_factor*current->Jz(i, j, k));
+#endif
       }
     }
     }
@@ -789,9 +895,32 @@ void EM_FIELD::new_advance_E(CURRENT *current)
     for (i = 0; i < Nx; i++){
       k = 0;
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+      dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+
+#ifndef OLD_ACCESS
+      double BZ, BZ_XM, BZ_YM;
+      double BY, BY_XM;
+      double BX, BX_YM;
+      BX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BX_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      double *EX, *EY, *EZ;
+      EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+      *EX += dt*(   dyi*(BZ - BZ_YM) - mygrid->den_factor*current->Jx(i, j, k) );
+      *EY += dt*( - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
+      *EZ += dt*(   dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k) );
+#else
       E0(i, j, k) += dt*((dyi*(B2(i, j, k) - B2(i, j - 1, k))) - mygrid->den_factor*current->Jx(i, j, k));
       E1(i, j, k) += dt*((-dxi*(B2(i, j, k) - B2(i - 1, j, k))) - mygrid->den_factor*current->Jy(i, j, k));
       E2(i, j, k) += dt*((dxi*(B1(i, j, k) - B1(i - 1, j, k)) - dyi*(B0(i, j, k) - B0(i, j - 1, k))) - mygrid->den_factor*current->Jz(i, j, k));
+      #endif
     }
     }
   else if (dimensions == 1)
@@ -800,9 +929,25 @@ void EM_FIELD::new_advance_E(CURRENT *current)
     k = 0;
     dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 
+#ifndef OLD_ACCESS
+    double BZ, BZ_XM;
+    double BY, BY_XM;
+    BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    double *EX, *EY, *EZ;
+    EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+    EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+    *EY += dt*( - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
+    *EZ += dt*(   dxi*(BY - BY_XM) - mygrid->den_factor*current->Jz(i, j, k) );
+#else
     E0(i, j, k) += -dt*mygrid->den_factor*current->Jx(i, j, k);//dt*(0);
     E1(i, j, k) += dt*(-dxi*(B2(i, j, k) - B2(i - 1, j, k)) - mygrid->den_factor*current->Jy(i, j, k));
     E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)) - mygrid->den_factor*current->Jz(i, j, k));
+      #endif
     }
 
 }

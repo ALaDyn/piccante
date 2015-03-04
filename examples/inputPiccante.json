@@ -4,7 +4,7 @@
   "masterProc": 0,
   "OutputPath": "OUTPUT",
   "lambda0": 1.0,
-  "radiationFriction": true,
+  "radiationFriction": false,
   "courantFactor": 0.98,
   "nProcY": 2,
   "nProcZ": 1,
