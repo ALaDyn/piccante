@@ -176,29 +176,29 @@ int myIntVariable=0;
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
-    //manager.callDiags(grid.istep);
+    manager.callDiags(grid.istep);
 
-//    myfield.openBoundariesE_1();
-//    myfield.new_halfadvance_B();
-//    myfield.boundary_conditions();
+    myfield.openBoundariesE_1();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
 
-//    current.setAllValuesToZero();
-//    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-//      (*spec_iterator)->current_deposition_standard(&current);
-//    }
-//    current.pbc();
+    current.setAllValuesToZero();
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      (*spec_iterator)->current_deposition_standard(&current);
+    }
+    current.pbc();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->position_parallel_pbc();
     }
 
-//    myfield.openBoundariesB();
-//    myfield.new_advance_E(&current);
+    myfield.openBoundariesB();
+    myfield.new_advance_E(&current);
 
-//    myfield.boundary_conditions();
-//    myfield.openBoundariesE_2();
-//    myfield.new_halfadvance_B();
-//    myfield.boundary_conditions();
+    myfield.boundary_conditions();
+    myfield.openBoundariesE_2();
+    myfield.new_halfadvance_B();
+    myfield.boundary_conditions();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       if(grid.isRadiationFrictionEnabled()){
