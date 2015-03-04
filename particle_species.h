@@ -108,15 +108,15 @@ public:
 
   //PUBLIC INLINE FUNCTIONS
 #ifdef _ACC_SINGLE_POINTER
-  inline double &ru(int c, int np) { return val[c + np*Ncomp]; }
-  inline double &r0(int np) { return val[np*Ncomp + 0]; }
-  inline double &r1(int np) { return val[np*Ncomp + 1]; }
-  inline double &r2(int np) { return val[np*Ncomp + 2]; }
-  inline double &u0(int np) { return val[np*Ncomp + 3]; }
-  inline double &u1(int np) { return val[np*Ncomp + 4]; }
-  inline double &u2(int np) { return val[np*Ncomp + 5]; }
-  inline double &w(int np) { return val[np*Ncomp + 6]; }
-  inline uint64_t &marker(int np) { return *((uint64_t*)(val + (np*Ncomp + 7))); }
+  inline double &ru(int c, int np) { return pData[c + np*Ncomp]; }
+  inline double &r0(int np) { return pData[np*Ncomp + 0]; }
+  inline double &r1(int np) { return pData[np*Ncomp + 1]; }
+  inline double &r2(int np) { return pData[np*Ncomp + 2]; }
+  inline double &u0(int np) { return pData[np*Ncomp + 3]; }
+  inline double &u1(int np) { return pData[np*Ncomp + 4]; }
+  inline double &u2(int np) { return pData[np*Ncomp + 5]; }
+  inline double &w(int np) { return pData[np*Ncomp + 6]; }
+  inline uint64_t &marker(int np) { return *((uint64_t*)(pData + (np*Ncomp + 7))); }
   //inline uint64_t &marker(int np) { return *((uint64_t*)(&dummy)); }
 #else
   inline double &ru(int c, int np) { return val[c][np]; }
@@ -135,7 +135,7 @@ public:
 
 private:
 #ifdef _ACC_SINGLE_POINTER
-  double *val;
+  double *pData;
 #else
   double **val;
 #endif

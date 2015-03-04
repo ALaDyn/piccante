@@ -111,6 +111,15 @@ int EM_FIELD::getNcomp(){
   return Ncomp;
 }
 
+double* EM_FIELD::getDataPointer(){
+  return val;
+}
+void EM_FIELD::writeN_grid(int *N_grid){
+  N_grid[0] = this->N_grid[0];
+  N_grid[1] = this->N_grid[1];
+  N_grid[2] = this->N_grid[2];
+}
+
 integer_or_halfinteger EM_FIELD::getCompCoords(int c){
   integer_or_halfinteger crd;
 

@@ -104,6 +104,8 @@ enum filterDir{
 
 class EM_FIELD{
 public:
+    double *getDataPointer();
+    void writeN_grid(int *N_grid);
   double minima[6], maxima[8];  //14 utility values minima: Exmin Eymin, ..., Bzmin;     maxima: Exmax, Eymax, ..., Bzmax, Emax, Bmax
   double total_energy[7];  // Ex2, Ey2, Ez2, Bx2, By2, Bz2 E2+B2 (totalenergy)
   double total_momentum[3];  // pointing vector Sx Sy Sz

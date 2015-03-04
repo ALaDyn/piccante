@@ -49,7 +49,7 @@ void SPECIE::allocate_species()
     return;
 #ifndef NO_ALLOCATION
 #ifdef _ACC_SINGLE_POINTER
-  val = (double*)malloc((Np*Ncomp)*sizeof(double));
+  pData = (double*)malloc((Np*Ncomp)*sizeof(double));
 #else
   val = (double**)malloc(Ncomp*sizeof(double*));
   for (int c = 0; c < Ncomp; c++){
@@ -64,7 +64,7 @@ void SPECIE::allocate_species()
 }
 SPECIE::~SPECIE(){
 #ifdef _ACC_SINGLE_POINTER
-  free(val);
+  free(pData);
 #else
   for (int c = 0; c < Ncomp; c++){
     free(val[c]);
@@ -83,7 +83,7 @@ void SPECIE::erase()
     exit(11);
   }
 #ifdef _ACC_SINGLE_POINTER
-  memset((void*)val, 0, (Np*Ncomp)*sizeof(double));
+  memset((void*)pData, 0, (Np*Ncomp)*sizeof(double));
 #else
   for (int c = 0; c < Ncomp; c++){
     memset((void*)val[c], 0, Np*sizeof(double));
@@ -107,7 +107,7 @@ void SPECIE::reallocate_species()
   if (Np > valSize){
     valSize = Np + allocsize;
 #ifdef _ACC_SINGLE_POINTER
-    val = (double *)realloc((void*)val, valSize*Ncomp*sizeof(double));
+    pData = (double *)realloc((void*)pData, valSize*Ncomp*sizeof(double));
 #else
     for (int c = 0; c < Ncomp; c++){
       val[c] = (double *)realloc((void*)val[c], valSize*sizeof(double));
@@ -117,7 +117,7 @@ void SPECIE::reallocate_species()
   else if (Np < (valSize - allocsize)){
     valSize = Np + allocsize;
 #ifdef _ACC_SINGLE_POINTER
-    val = (double *)realloc((void*)val, valSize*Ncomp*sizeof(double));
+    pData = (double *)realloc((void*)pData, valSize*Ncomp*sizeof(double));
 #else
     for (int c = 0; c < Ncomp; c++){
       val[c] = (double *)realloc((void*)val[c], valSize*sizeof(double));
@@ -156,7 +156,7 @@ SPECIE SPECIE::operator = (SPECIE &destro)
   }
   else reallocate_species();
 #ifdef _ACC_SINGLE_POINTER
-  memcpy((void*)val, (void*)destro.val, Np*Ncomp*sizeof(double));
+  memcpy((void*)pData, (void*)destro.pData, Np*Ncomp*sizeof(double));
 #else
   for (int c = 0; c < Ncomp; c++){
     memcpy((void*)val[c], (void*)destro.val[c], Np*sizeof(double));
@@ -1166,6 +1166,10 @@ void SPECIE::position_obc()
   Np -= nlost;
   reallocate_species();
 }
+
+inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+  return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
+}
 void SPECIE::momenta_advance(EM_FIELD *ebfield)
 {
 
@@ -1190,6 +1194,10 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
   dt = mygrid->dt;
 
+  double *myfield = ebfield->getDataPointer();
+  int edge = mygrid->getEdge();
+  int N_grid[3];
+  ebfield->writeN_grid(N_grid);
   switch (mygrid->getDimensionality())
   {
 
@@ -1199,7 +1207,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
         for (c = 0; c < 3; c++)
         {
-          xx[c] = ru(c, p);
+          xx[c] = pData[c + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hii[c] = wii[c] = 0;
         }
@@ -1236,26 +1244,35 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+              double EX, EY, EZ;
+              EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              double BX, BY, BZ;
+              BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+              dvol = hiw[0][i] * wiw[1][j];
+              E[0] += EX*dvol;  //Ex
+              dvol = wiw[0][i] * hiw[1][j];
+              E[1] += EY*dvol;  //Ey
+              dvol = wiw[0][i] * wiw[1][j];
+              E[2] += EZ*dvol;  //Ez
+
+              dvol = wiw[0][i] * hiw[1][j];
+              B[0] += BX*dvol;  //Bx
+              dvol = hiw[0][i] * wiw[1][j];
+              B[1] += BY*dvol;  //By
+              dvol = hiw[0][i] * hiw[1][j];
+              B[2] += BZ*dvol;  //Bz
             }
           }
         }
 
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+        u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+        u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+        u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
 
         gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
@@ -1277,9 +1294,9 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
         u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+        pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
       break;
 
@@ -1289,7 +1306,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
         for (c = 0; c < 3; c++)
         {
-          xx[c] = ru(c, p);
+          xx[c] = pData[c + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hii[c] = wii[c] = 0;
         }
@@ -1319,29 +1336,38 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         {
           j1 = j + wii[1] - 1;
           j2 = j + hii[1] - 1;
-          for (i = 0; i < 3; i++)
-          {
+          for (i = 0; i < 3; i++){
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j],
-                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j],
-                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j],
-                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j],
-                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j],
-                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j],
-                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            double EX, EY, EZ;
+            EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            double BX, BY, BZ;
+            BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+
+            dvol = hiw[0][i] * wiw[1][j];
+            E[0] += EX*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j];
+            E[1] += EY*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j];
+            E[2] += EZ*dvol;  //Ez
+
+            dvol = wiw[0][i] * hiw[1][j];
+            B[0] += BX*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j];
+            B[1] += BY*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j];
+            B[2] += BZ*dvol;  //Bz
           }
         }
 
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+        u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+        u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+        u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
 
         gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
@@ -1363,9 +1389,9 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
         u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+        pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
       break;
 
@@ -1375,7 +1401,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
         for (c = 0; c < 3; c++)
         {
-          xx[c] = ru(c, p);
+          xx[c] = pData[c + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hii[c] = wii[c] = 0;
         }
@@ -1405,24 +1431,33 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          double EX, EY, EZ;
+          EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          double BX, BY, BZ;
+          BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-          dvol = wiw[0][i],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = hiw[0][i] * wiw[1][j];
+          E[0] += EX*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j];
+          E[1] += EY*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j];
+          E[2] += EZ*dvol;  //Ez
+
+          dvol = wiw[0][i] * hiw[1][j];
+          B[0] += BX*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j];
+          B[1] += BY*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j];
+          B[2] += BZ*dvol;  //Bz
         }
 
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+        u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+        u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+        u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
 
         gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
@@ -1444,9 +1479,9 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
         u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+        pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+        pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+        pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
       }
       break;
   }
@@ -3246,7 +3281,7 @@ void SPECIE::dump(std::ofstream &ff){
 }
 void SPECIE::dumpBigBuffer(std::ofstream &ff){
   ff.write((char*)&Np, sizeof(Np));
-  ff.write((char*)val, sizeof(double)*Np*Ncomp);
+  ff.write((char*)pData, sizeof(double)*Np*Ncomp);
 }
 void SPECIE::debugDump(std::ofstream &ff){
   ff << this->name << Np << std::endl;
