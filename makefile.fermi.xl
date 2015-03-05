@@ -3,7 +3,8 @@ EXE = piccante
 
 OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o  utilities.o  jsoncpp.o jsonparser.o
 
-OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
+#OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
+OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
 GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
 GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
