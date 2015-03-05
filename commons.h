@@ -96,6 +96,9 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
   return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
 }
+inline int pIndex(int c, int p, int Ncomp, int Npart){
+  return c + p*Ncomp;
+}
 
 #if defined (_GCC)
 #define MAX(a,b) \

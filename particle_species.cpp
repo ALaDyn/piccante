@@ -1364,18 +1364,18 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
             B[2] += BZ*dvol;  //Bz
 #else
             dvol = hiw[0][i] * wiw[1][j],
-                          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-                      dvol = wiw[0][i] * hiw[1][j],
-                          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-                      dvol = wiw[0][i] * wiw[1][j],
-                          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j],
+                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j],
+                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-                      dvol = wiw[0][i] * hiw[1][j],
-                          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-                      dvol = hiw[0][i] * wiw[1][j],
-                          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-                      dvol = hiw[0][i] * hiw[1][j],
-                          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j],
+                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j],
+                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j],
+                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
 #endif
           }
         }
@@ -2634,15 +2634,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
       for (p = 0; p < Np; p++)
       {
         double ux, uy, uz;
-        ux = pData[3 + p*Ncomp];
-        uy = pData[4 + p*Ncomp];
-        uz = pData[5 + p*Ncomp];
+        ux = pData[pIndex( 3, p, Ncomp, Np)];
+        uy = pData[pIndex( 4, p, Ncomp, Np)];
+        uz = pData[pIndex( 5, p, Ncomp, Np)];
 
         gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
+          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2650,8 +2650,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         }
         for (c = 0; c < 3; c++)
         {
-          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
-          pData[c + p*Ncomp] += dt*vv[c];
+          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
@@ -2686,7 +2686,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
-              double weight = pData[6 + p*Ncomp];
+              double weight = pData[pIndex( 6, p, Ncomp, Np)];
               double *JX, *JY, *JZ;
               JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
               JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -2709,14 +2709,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
       for (p = 0; p < Np; p++)
       {
         double ux, uy, uz;
-        ux = pData[3 + p*Ncomp];
-        uy = pData[4 + p*Ncomp];
-        uz = pData[5 + p*Ncomp];
+        ux = pData[pIndex( 3, p, Ncomp, Np)];
+        uy = pData[pIndex( 4, p, Ncomp, Np)];
+        uz = pData[pIndex( 5, p, Ncomp, Np)];
+
 
         gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
+          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2724,8 +2725,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         }
         for (c = 0; c < 2; c++)
         {
-          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
-          pData[c + p*Ncomp] += dt*vv[c];
+          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
@@ -2758,21 +2759,19 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-            double weight = pData[6 + p*Ncomp];
+            double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
             double *JX, *JY, *JZ;
             JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
             JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
             JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
             dvol = hiw[0][i] * wiw[1][j];
-            *JX += 1.;//(w(p)*dvol*vv[0] * chargeSign);
+            *JX += weight*dvol*vv[0] * chargeSign;
             dvol = wiw[0][i] * hiw[1][j];
             *JY += weight*dvol*vv[1] * chargeSign;
             dvol = wiw[0][i] * wiw[1][j];
             *JZ += weight*dvol*vv[2] * chargeSign;
-if(&(current->Jx(i2, j1, k1)) != JX){
-   std::cout << "merdaccia " << &(current->Jx(i2, j1, k1)) << "  " << JX << std::endl;
-          }
+
 #else
             dvol = hiw[0][i] * wiw[1][j],
                 current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
@@ -2790,14 +2789,14 @@ if(&(current->Jx(i2, j1, k1)) != JX){
       for (p = 0; p < Np; p++)
       {
         double ux, uy, uz;
-        ux = pData[3 + p*Ncomp];
-        uy = pData[4 + p*Ncomp];
-        uz = pData[5 + p*Ncomp];
+        ux = pData[pIndex( 3, p, Ncomp, Np)];
+        uy = pData[pIndex( 4, p, Ncomp, Np)];
+        uz = pData[pIndex( 5, p, Ncomp, Np)];
 
         gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
+          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2805,8 +2804,8 @@ if(&(current->Jx(i2, j1, k1)) != JX){
         }
         for (c = 0; c < 1; c++)
         {
-          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
-          pData[c + p*Ncomp] += dt*vv[c];
+          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
 
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
@@ -2835,7 +2834,7 @@ if(&(current->Jx(i2, j1, k1)) != JX){
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          double weight = pData[6 + p*Ncomp];
+          double weight = pData[pIndex( 6, p, Ncomp, Np)];
           double *JX, *JY, *JZ;
           JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
           JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
