@@ -164,6 +164,9 @@ public:
   void fftw_filter_Efield();
 
   //PUBLIC INLINE FUNCTIONS
+//  static inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+//    return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
+//  }
   inline double & E0(int i, int j, int k){
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       0, i, j, k,
@@ -267,12 +270,7 @@ private:
   void filterCompAlongZ(int comp);
 
   //PRIVATE INLINE FUNCTIONS
-//  inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-//    return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
-//  }
-  inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-    return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
-  }
+
 
     bool checkIfFilterPossible();
 };

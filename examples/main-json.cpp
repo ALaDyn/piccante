@@ -176,7 +176,7 @@ int myIntVariable=0;
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 
-    manager.callDiags(grid.istep);
+    //manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

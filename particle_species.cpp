@@ -18,6 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "particle_species.h"
+//#define OLD_ACCESS
 
 
 SPECIE::SPECIE()
@@ -1167,9 +1168,7 @@ void SPECIE::position_obc()
   reallocate_species();
 }
 
-inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-  return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
-}
+
 void SPECIE::momenta_advance(EM_FIELD *ebfield)
 {
 
@@ -1196,6 +1195,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
   double *myfield = ebfield->getDataPointer();
   int edge = mygrid->getEdge();
+  int ebComp = ebfield->getNcomp();
   int N_grid[3];
   ebfield->writeN_grid(N_grid);
   switch (mygrid->getDimensionality())
@@ -1245,13 +1245,13 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
               double EX, EY, EZ;
-              EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-              EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-              EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+              EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+              EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
               double BX, BY, BZ;
-              BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-              BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-              BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+              BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+              BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+              BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
               dvol = hiw[0][i] * wiw[1][j];
               E[0] += EX*dvol;  //Ex
@@ -1339,15 +1339,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           for (i = 0; i < 3; i++){
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-
+#ifndef OLD_ACCESS
             double EX, EY, EZ;
-            EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-            EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-            EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
             double BX, BY, BZ;
-            BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-            BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-            BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+            BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
             dvol = hiw[0][i] * wiw[1][j];
             E[0] += EX*dvol;  //Ex
@@ -1362,6 +1362,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
             B[1] += BY*dvol;  //By
             dvol = hiw[0][i] * hiw[1][j];
             B[2] += BZ*dvol;  //Bz
+#else
+            dvol = hiw[0][i] * wiw[1][j],
+                          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+                      dvol = wiw[0][i] * hiw[1][j],
+                          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+                      dvol = wiw[0][i] * wiw[1][j],
+                          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+                      dvol = wiw[0][i] * hiw[1][j],
+                          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+                      dvol = hiw[0][i] * wiw[1][j],
+                          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+                      dvol = hiw[0][i] * hiw[1][j],
+                          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+#endif
           }
         }
 
@@ -1432,13 +1447,13 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
           double EX, EY, EZ;
-          EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
           double BX, BY, BZ;
-          BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
           dvol = hiw[0][i] * wiw[1][j];
           E[0] += EX*dvol;  //Ex
@@ -2575,8 +2590,6 @@ void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin
 
 void SPECIE::current_deposition_standard(CURRENT *current)
 {
-
-
   if (mygrid->withParticles == NO)
     return;
   if (mygrid->withCurrent == NO)
@@ -2596,7 +2609,10 @@ void SPECIE::current_deposition_standard(CURRENT *current)
   double dvol, xx[3], vv[3];           // tensor_product,       absolute particle position
 
   dt = mygrid->dt;
-
+  double* myCurrent = current->getDataPointer();
+  int N_grid[3];
+  current->writeN_grid(N_grid);
+  int edge=mygrid->getEdge();
   if (!(mygrid->withCurrent == YES && (!isTestSpecies)))
   {
     for (p = 0; p < Np; p++)
@@ -2617,11 +2633,16 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     case 3:
       for (p = 0; p < Np; p++)
       {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        double ux, uy, uz;
+        ux = pData[3 + p*Ncomp];
+        uy = pData[4 + p*Ncomp];
+        uz = pData[5 + p*Ncomp];
+
+        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*ru(c + 3, p);
+          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2629,8 +2650,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         }
         for (c = 0; c < 3; c++)
         {
-          xx[c] = ru(c, p) + 0.5*dt*vv[c];
-          ru(c, p) += dt*vv[c];
+          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
+          pData[c + p*Ncomp] += dt*vv[c];
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
@@ -2665,13 +2686,18 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
+              double weight = pData[6 + p*Ncomp];
+              double *JX, *JY, *JZ;
+              JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JZ = &myCurrent[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                  current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                  current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                  current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+              *JX += weight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+              *JY += weight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+              *JZ += weight*dvol*vv[2] * chargeSign;
 
             }
           }
@@ -2682,11 +2708,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     case 2:
       for (p = 0; p < Np; p++)
       {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        double ux, uy, uz;
+        ux = pData[3 + p*Ncomp];
+        uy = pData[4 + p*Ncomp];
+        uz = pData[5 + p*Ncomp];
 
+        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*ru(c + 3, p);
+          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2694,8 +2724,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         }
         for (c = 0; c < 2; c++)
         {
-          xx[c] = ru(c, p) + 0.5*dt*vv[c];
-          ru(c, p) += dt*vv[c];
+          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
+          pData[c + p*Ncomp] += dt*vv[c];
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
@@ -2727,12 +2757,30 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+            double weight = pData[6 + p*Ncomp];
+            double *JX, *JY, *JZ;
+            JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+            dvol = hiw[0][i] * wiw[1][j];
+            *JX += 1.;//(w(p)*dvol*vv[0] * chargeSign);
+            dvol = wiw[0][i] * hiw[1][j];
+            *JY += weight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i] * wiw[1][j];
+            *JZ += weight*dvol*vv[2] * chargeSign;
+if(&(current->Jx(i2, j1, k1)) != JX){
+   std::cout << "merdaccia " << &(current->Jx(i2, j1, k1)) << "  " << JX << std::endl;
+          }
+#else
             dvol = hiw[0][i] * wiw[1][j],
                 current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
             dvol = wiw[0][i] * hiw[1][j],
                 current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
             dvol = wiw[0][i] * wiw[1][j],
                 current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+#endif
           }
         }
       }
@@ -2741,11 +2789,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     case 1:
       for (p = 0; p < Np; p++)
       {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+        double ux, uy, uz;
+        ux = pData[3 + p*Ncomp];
+        uy = pData[4 + p*Ncomp];
+        uz = pData[5 + p*Ncomp];
 
+        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
         for (c = 0; c < 3; c++)
         {
-          vv[c] = gamma_i*ru(c + 3, p);
+          vv[c] = gamma_i*pData[c + 3 + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hiw[c][0] = wiw[c][0] = 0;
           hiw[c][2] = wiw[c][2] = 0;
@@ -2753,8 +2805,9 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         }
         for (c = 0; c < 1; c++)
         {
-          xx[c] = ru(c, p) + 0.5*dt*vv[c];
-          ru(c, p) += dt*vv[c];
+          xx[c] = pData[c + p*Ncomp] + 0.5*dt*vv[c];
+          pData[c + p*Ncomp] += dt*vv[c];
+
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
@@ -2782,12 +2835,18 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i],
-              current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-          dvol = wiw[0][i],
-              current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-          dvol = wiw[0][i],
-              current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
+          double weight = pData[6 + p*Ncomp];
+          double *JX, *JY, *JZ;
+          JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+          dvol = hiw[0][i];
+          *JX += weight*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i];
+          *JY += weight*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i];
+          *JZ += weight*dvol*vv[2] * chargeSign;
 
         }
       }

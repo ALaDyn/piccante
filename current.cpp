@@ -96,6 +96,15 @@ CURRENT CURRENT::operator = (CURRENT &destro)
   return *this;
 }
 
+double *CURRENT::getDataPointer(){
+  return val;
+}
+
+void CURRENT::writeN_grid(int *N_grid){
+  N_grid[0]=this->N_grid[0];
+  N_grid[1]=this->N_grid[1];
+  N_grid[2]=this->N_grid[2];
+}
 
 integer_or_halfinteger CURRENT::getJCoords(int c){
   integer_or_halfinteger crd;
