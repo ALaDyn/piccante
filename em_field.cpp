@@ -696,7 +696,7 @@ void EM_FIELD::new_halfadvance_B()
           EX_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           EX_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           EZ_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
@@ -784,122 +784,7 @@ void EM_FIELD::new_halfadvance_B()
 #endif
     }
 }
-void EM_FIELD::new_advance_B()
-{
-  EBEnergyExtremesFlag = false;
-  int i, j, k;
-  int Nx, Ny, Nz;
-  double dt, dxi, dyi, dzi;
-  int dimensions = mygrid->getDimensionality();
 
-  Nx = mygrid->Nloc[0];
-  Ny = mygrid->Nloc[1];
-  Nz = mygrid->Nloc[2];
-  dt = mygrid->dt;
-
-  if (dimensions == 3)
-    for (k = 0; k < Nz; k++){
-      dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
-      for (j = 0; j < Ny; j++){
-        dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-        for (i = 0; i < Nx; i++){
-          dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-          B0(i, j, k) -= dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)) - dzi*(E1(i, j, k + 1) - E1(i, j, k)));
-          B1(i, j, k) -= dt*(dzi*(E0(i, j, k + 1) - E0(i, j, k)) - dxi*(E2(i + 1, j, k) - E2(i, j, k)));
-          B2(i, j, k) -= dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)) - dyi*(E0(i, j + 1, k) - E0(i, j, k)));
-        }
-      }
-    }
-  else if (dimensions == 2)
-    for (j = 0; j < Ny; j++){
-      dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-      for (i = 0; i < Nx; i++){
-        k = 0;
-        dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-
-        B0(i, j, k) -= dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)));
-        B1(i, j, k) -= dt*(-dxi*(E2(i + 1, j, k) - E2(i, j, k)));
-        B2(i, j, k) -= dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)) - dyi*(E0(i, j + 1, k) - E0(i, j, k)));
-      }
-    }
-  else if (dimensions == 1)
-    for (i = 0; i < Nx; i++){
-      j = 0;
-      k = 0;
-      dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-
-      //B0(i,j,k)-=dt*(0);
-      B1(i, j, k) -= dt*(-dxi*(E2(i + 1, j, k) - E2(i, j, k)));
-      B2(i, j, k) -= dt*(dxi*(E1(i + 1, j, k) - E1(i, j, k)));
-    }
-}
-void EM_FIELD::new_advance_E()
-{
-  EBEnergyExtremesFlag = false;
-  int i, j, k;
-  int Nx, Ny, Nz;
-  double dt, dxi, dyi, dzi;
-  int dimensions = mygrid->getDimensionality();
-
-  Nx = mygrid->Nloc[0];
-  Ny = mygrid->Nloc[1];
-  Nz = mygrid->Nloc[2];
-  dt = mygrid->dt;
-
-  int edge = mygrid->getEdge();
-
-  double *Bx, *By, *Bz, *Ex, *Ey, *Ez;
-  Ex = &val[ 0 * N_grid[0]*N_grid[1]*N_grid[2]];
-  Ey = &val[ 1 * N_grid[0]*N_grid[1]*N_grid[2]];
-  Ez = &val[ 2 * N_grid[0]*N_grid[1]*N_grid[2]];
-  Bx = &val[ 3 * N_grid[0]*N_grid[1]*N_grid[2]];
-  By = &val[ 4 * N_grid[0]*N_grid[1]*N_grid[2]];
-  Bz = &val[ 5 * N_grid[0]*N_grid[1]*N_grid[2]];
-
-  if (dimensions == 3)
-    //#pragma omp parallel for private(i,j)
-    for (k = 0; k < Nz; k++){
-      dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
-      for (j = 0; j < Ny; j++){
-        dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
-        for (i = 0; i < Nx; i++){
-          dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-          E0(i, j, k) += dt*(dyi*(B2(i, j, k) - B2(i, j - 1, k)) -
-                             dzi*(B1(i, j, k) - B1(i, j, k - 1)));
-          E1(i, j, k) += dt*(dzi*(B0(i, j, k) - B0(i, j, k - 1)) -
-                             dxi*(B2(i, j, k) - B2(i - 1, j, k)));
-          E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)) -
-                             dyi*(B0(i, j, k) - B0(i, j - 1, k)));
-        }
-      }
-    }
-  else if (dimensions == 2)
-    //#pragma omp parallel for private(i)
-    for (j = 0; j < Ny; j++){
-      dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
-      for (i = 0; i < Nx; i++){
-        k = 0;
-        dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-
-        E0(i, j, k) += dt*(dyi*(B2(i, j, k) - B2(i, j - 1, k)));
-        E1(i, j, k) += dt*(-dxi*(B2(i, j, k) - B2(i - 1, j, k)));
-        E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)) -
-                           dyi*(B0(i, j, k) - B0(i, j - 1, k)));
-      }
-    }
-  else if (dimensions == 1)
-    //#pragma omp parallel for
-    for (i = 0; i < Nx; i++){
-      j = 0;
-      k = 0;
-      dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
-
-      //E0(i,j,k)+=dt*(0);
-      E1(i, j, k) += dt*(-dxi*(B2(i, j, k) - B2(i - 1, j, k)));
-      E2(i, j, k) += dt*(dxi*(B1(i, j, k) - B1(i - 1, j, k)));
-    }
-
-}
 void EM_FIELD::new_advance_E(CURRENT *current)
 {
   EBEnergyExtremesFlag = false;

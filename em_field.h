@@ -128,8 +128,6 @@ public:
   void boundary_conditions();  // set on the ghost cells the boundary values  
 
   void new_halfadvance_B();
-  void new_advance_B();
-  void new_advance_E();
   void new_advance_E(CURRENT *current);
 
   static const int myWidth = 12;

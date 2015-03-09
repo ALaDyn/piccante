@@ -1,18 +1,18 @@
 {
   "VERSION": 2,
-  "dimensions": 2,
+  "dimensions": 3,
   "masterProc": 0,
   "OutputPath": "OUTPUT",
   "lambda0": 1.0,
-  "radiationFriction": true,
+  "radiationFriction": false,
   "courantFactor": 0.98,
   "nProcY": 2,
-  "nProcZ": 1,
-  "xRange": [-20, 20],
-  "yRange": [-20, 20],
-  "zRange": [-20, 20],
-  "NCells": [200, 200, 20],
-  "simulationTime": 1,
+  "nProcZ": 2,
+  "xRange": [-5, 5],
+  "yRange": [-5, 5],
+  "zRange": [-5, 5],
+  "NCells": [300, 100, 100],
+  "simulationTime": 20,
   "boundaries": ["periodic", "periodic","periodic"],
   "NO_StretchedGrid":{
     "x":{"left": { "limit": -10.0, "NCells": 1000 },
@@ -23,6 +23,7 @@
       "right": { "limit":  15.0, "NCells": 1000 } }
   },
   "MovingWindow":{
+    "enabled": false,
     "start": 0,
     "NO_beta": 1,
     "NO_frequency":20
@@ -37,7 +38,7 @@
   "special":{"variabile1": 32,"variabile2": 32.5},
   "Plasma":[
     {
-      "name": "bulk",
+      "name": "XXbulk",
       "densityFunction": "box",
       "XRangeBox" : [-5, 5],
       "YRangeBox" : [-5, 5],
@@ -76,7 +77,7 @@
  ],
   "Laser":[
     {
-      "enabled": true,
+      "enabled": false,
       "type": "COS2_PLANE_WAVE",
       "polarization": "S",
       "durationFWHM": 5.0,
@@ -91,11 +92,11 @@
       "riseTime": 2
     },
     {
-      "enabled": false,
-      "type": "COSS2_PLANE_WAVE",
+      "enabled": true,
+      "type": "COS2_PLANE_WAVE",
       "polarization": "P",
-      "durationFWHM": 5.0,
-      "initialPosition": 5.5,
+      "durationFWHM": 4.0,
+      "initialPosition": 0.0,
       "a": 8.0
     }
   ],
@@ -119,10 +120,10 @@
 
   ],
   "Output":[
-    {"type": "B", "every": 1.0},
-    {"type": "Density", "spec": "ELE1", "every": 5.0, "in":"subd1"},
-    {"type": "PhSp", "spec": "ELE2", "every": 2.0},
-    {"type": "Diag", "every": 5.0}
+    {"type": "EB", "every": 1.0},
+    {"type": "XDensity", "spec": "ELE1", "every": 5.0, "in":"subd1"},
+    {"type": "XPhSp", "spec": "ELE2", "every": 2.0},
+    {"type": "Diag", "every": 0.25}
   ]
 
 }
