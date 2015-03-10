@@ -18,7 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "em_field.h"
-//#define OLD_ACCESS
+				    //#define OLD_ACCESS
 
 EM_FIELD::EM_FIELD()
 {
@@ -816,7 +816,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
           BX_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           BX_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i, j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           BZ_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           double *EX, *EY, *EZ;
