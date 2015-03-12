@@ -1253,18 +1253,18 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
               BY = myfield[my_indice(edge,1, 1, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
               BZ = myfield[my_indice(edge,1, 1, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
-              dvol = hiw[0][i] * wiw[1][j];
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
               E[0] += EX*dvol;  //Ex
-              dvol = wiw[0][i] * hiw[1][j];
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
               E[1] += EY*dvol;  //Ey
-              dvol = wiw[0][i] * wiw[1][j];
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
               E[2] += EZ*dvol;  //Ez
 
-              dvol = wiw[0][i] * hiw[1][j];
+              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k];
               B[0] += BX*dvol;  //Bx
-              dvol = hiw[0][i] * wiw[1][j];
+              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k];
               B[1] += BY*dvol;  //By
-              dvol = hiw[0][i] * hiw[1][j];
+              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k];
               B[2] += BZ*dvol;  //Bz
             }
           }
@@ -1455,18 +1455,18 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           BY = myfield[my_indice(edge,0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
           BZ = myfield[my_indice(edge,0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
-          dvol = hiw[0][i] * wiw[1][j];
+          dvol = hiw[0][i];
           E[0] += EX*dvol;  //Ex
-          dvol = wiw[0][i] * hiw[1][j];
+          dvol = wiw[0][i];
           E[1] += EY*dvol;  //Ey
-          dvol = wiw[0][i] * wiw[1][j];
+          dvol = wiw[0][i];
           E[2] += EZ*dvol;  //Ez
 
-          dvol = wiw[0][i] * hiw[1][j];
+          dvol = wiw[0][i];
           B[0] += BX*dvol;  //Bx
-          dvol = hiw[0][i] * wiw[1][j];
+          dvol = hiw[0][i];
           B[1] += BY*dvol;  //By
-          dvol = hiw[0][i] * hiw[1][j];
+          dvol = hiw[0][i];
           B[2] += BZ*dvol;  //Bz
         }
 
