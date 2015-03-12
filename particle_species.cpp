@@ -1447,13 +1447,13 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
           double EX, EY, EZ;
-          EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EX = myfield[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EY = myfield[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EZ = myfield[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
           double BX, BY, BZ;
-          BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BX = myfield[my_indice(edge,0, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BY = myfield[my_indice(edge,0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BZ = myfield[my_indice(edge,0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
           dvol = hiw[0][i] * wiw[1][j];
           E[0] += EX*dvol;  //Ex
