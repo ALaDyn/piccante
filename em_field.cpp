@@ -887,6 +887,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
       EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
       EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
+      *EX += dt*(                    - mygrid->den_factor*current->Jx(i, j, k) );
       *EY += dt*( - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
       *EZ += dt*(   dxi*(BY - BY_XM) - mygrid->den_factor*current->Jz(i, j, k) );
 #else
