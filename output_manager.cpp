@@ -18,7 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "output_manager.h"
-
+//#define NO_FUNCTION
 int is_big_endian()
 {
   union {
@@ -2588,20 +2588,10 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
 
   if (groupMyid != 0){
     for (int i = 0; i < myNumPackages; i++){
-      //prepareParticleBufferToBeWritten(data, particleBufferSize, particleBufferSize*i, spec);
-
-      for (int p = 0; p < particleBufferSize; p++){
-        for (int c = 0; c < Ncomp; c++){
-          data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
-        }
-      }
+      prepareParticleBufferToBeWritten(data, particleBufferSize, particleBufferSize*i, spec);
       MPI_Send(data, bufsize, MPI_FLOAT, 0, i, groupCommunicator);
     }
-    for (int p = 0; p < resto; p++){
-      for (int c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*myNumPackages);
-      }
-    }
+    prepareParticleBufferToBeWritten(data, resto, particleBufferSize*myNumPackages, spec);
     MPI_Send(data, resto*Ncomp, MPI_FLOAT, 0, myNumPackages, groupCommunicator);
   }
   else{
@@ -2610,11 +2600,8 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
 int counterWriteOps = 0;
 #endif
     for (int i = 0; i < myNumPackages; i++){
-      for (int p = 0; p < particleBufferSize; p++){
-        for (int c = 0; c < Ncomp; c++){
-          data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*i);
-        }
-      }
+      prepareParticleBufferToBeWritten(data, particleBufferSize, particleBufferSize*i, spec);
+
 #ifdef ENABLE_WRITE_ALL
       MPI_File_write_all(thefile, data, bufsize, MPI_FLOAT, &status);
       counterWriteOps ++;
@@ -2622,11 +2609,9 @@ int counterWriteOps = 0;
       MPI_File_write(thefile, data, bufsize, MPI_FLOAT, &status);
 #endif
     }
-    for (int p = 0; p < resto; p++){
-      for (int c = 0; c < Ncomp; c++){
-        data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*myNumPackages);
-      }
-    }
+
+    prepareParticleBufferToBeWritten(data, resto, particleBufferSize*myNumPackages, spec);
+
 #ifdef ENABLE_WRITE_ALL
     MPI_File_write_all(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
     counterWriteOps ++;
@@ -2664,9 +2649,23 @@ int counterWriteOps = 0;
 }
 
 void OUTPUT_MANAGER::prepareParticleBufferToBeWritten(float *data, int nParticles, int firstParticle, SPECIE* spec){
-  for (int p = 0; p < nParticles; p++){
-    for (int c = 0; c < spec->Ncomp; c++){
-      data[c + p*spec->Ncomp] = (float)spec->ru(c, p + firstParticle);
+  if(spec->amIWithMarker()){
+    printf("Oh yeah\n");
+    for (int p = 0; p < nParticles; p++){
+      for (int c = 0; c <  (spec->Ncomp-1); c++){
+        data[c + p*spec->Ncomp] = (float)spec->ru(c, p + firstParticle);
+      }
+      int marker;
+      marker= (int)spec->marker(p + firstParticle);
+      float *dummy = (float*)((void*)&marker);
+      data[(spec->Ncomp-1) + p*spec->Ncomp] = dummy[0];
+    }
+  }
+  else{
+    for (int p = 0; p < nParticles; p++){
+      for (int c = 0; c < spec->Ncomp; c++){
+        data[c + p*spec->Ncomp] = (float)spec->ru(c, p + firstParticle);
+      }
     }
   }
 }
