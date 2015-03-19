@@ -315,7 +315,6 @@ private:
   void writeSpecDensitySubDomain(std::string fileName, request req);
   void callSpecDensity(request req);
 
-  void writeCurrent(std::string fileName, request req);
   void callCurrent(request req);
 
   void writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec);
