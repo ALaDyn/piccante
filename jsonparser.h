@@ -129,5 +129,7 @@ namespace jsonParser{
 
   void setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manager, std::map<std::string, outDomain*>  &domains, std::vector<SPECIE*> &species);
   void setOutputDirPath(Json::Value &document, OUTPUT_MANAGER &manager);
+  void setOutputParameters(Json::Value &document, OUTPUT_MANAGER &manager);
+
 }
 #endif // JSONPARSER_H
