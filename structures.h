@@ -21,9 +21,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define __STRUCTURES_H__
 
 #define _USE_MATH_DEFINES
-#define NUMBER_OF_PLASMA_FUNCTIONS 19
+#define NUMBER_OF_PLASMA_FUNCTIONS 20
 
-#include <cmath>
+#include <math.h>
 #include "commons.h"
 #include <cstdio>
 #include <iostream>
@@ -134,6 +134,7 @@ double rough_box_edgeCalc(double x0, double y0, double x, double y, int order, d
 double box_minus_box(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double square_func(double x);
 double left_square_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);

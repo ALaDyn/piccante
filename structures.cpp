@@ -75,7 +75,8 @@ const std::string PLASMA::dFNames[] = {
   "guide",
   "modGrat",
   "spoofGrat",
-  "spheres"
+  "spheres",
+  "left_blazed_grating"
 };
 const distrib_function PLASMA::dFPoint[]= {
   box,
@@ -96,7 +97,8 @@ const distrib_function PLASMA::dFPoint[]= {
   guide,
   modGrat,
   spoofGrat,
-  spheres
+  spheres,
+  left_blazed_grating
 };
 
 bool PLASMA::isGrating(int dfIndex){
@@ -564,6 +566,32 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
     return -1;
   }
 }
+
+
+double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
+  double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
+  double* paramlist = (double*)plist.additional_params;
+  double g_depth = 0.571;
+  double g_lambda = 1.35;
+  double g_phase = paramlist[2];
+
+  double xminbound = plist.rminbox[0]+(fabs((y-g_y0)/g_lambda-floor((y-g_y0)/g_lambda))-1.0)*g_depth;
+
+  if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
+    if ((x - xminbound) <= plist.left_ramp_length){
+      return (plist.density_coefficient - plist.left_ramp_min_density)*(x - xminbound) / plist.left_ramp_length + plist.left_ramp_min_density;
+    }
+    else{
+      return plist.density_coefficient;
+    }
+  }
+  else{
+    return -1;
+  }
+}
+
 
 double* rough_box_prepareAdditionalParams(gsl_rng* rng, double roughness, double shift){
   const int order = 20;
