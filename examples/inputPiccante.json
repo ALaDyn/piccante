@@ -65,10 +65,8 @@
       "enabled": true,
       "name": "ELE1",
       "plasma": "bulk",
-      "ParticlesPerCell": [2,2,3],
+      "ParticlesPerCell": [2,2,2],
       "type": "ELECTRON",
-      "NOZ": 1.0,
-      "NOA": 1.0,
       "isMarker": false,
       "isTest": false,
       "NOdistribution": "Maxwell",
@@ -77,12 +75,12 @@
     },
     {
       "enabled": false,
-      "name": "ELE2",
+      "name": "ION",
       "plasma": "bulk",
-      "ParticlesPerCell": [3,3,3],
-      "type": "ELECTRON",
-      "NOZ": 1.0,
-      "NOA": 1.0,
+      "ParticlesPerCell": [2,2,2],
+      "type": "ION",
+      "Z": 1.0,
+      "A": 1.0,
       "isMarker": false,
       "isTest": false,
       "distribution": "Maxwell",
@@ -136,10 +134,15 @@
     }
 
   ],
+  "multifileGroupSize": 2048,
+  "fieldGroupSize": 128,
+  "particleGroupSize": 128,
+  "particleBufferSize": 1000000,
   "Output":[
     {"type": "EB", "from":0.0, "to": 10.0, "every": 10.0},
     {"type": "Density", "spec": "ELE1", "at": 5.0, "every":10.0},
     {"type": "Diag", "every": 0.5, "at": 13.75}
+
   ]
 
 }

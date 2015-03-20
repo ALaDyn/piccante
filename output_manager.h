@@ -33,12 +33,9 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #define FIELDS_USE_SEPARATE_FILES_MACROGROUPS
 
-//#define FIELDS_TEST_SEPARATE_FILES_MACROGROUPS
 //#define FIELDS_USE_MPI_FILE_OUTPUT
 //#define FIELDS_USE_MPI_FILE_WRITE_ALL
 //#define FIELDS_USE_OUTPUT_WRITING_GROUPS
-//#define FIELDS_USE_INDIVIDUAL_FILE_OUTPUT
-//#define FIELDS_USE_MULTI_FILE
 #define FIELDS_GROUP_SIZE 64
 #define MACRO_CPUGROUP_FOR_MULTIFILE 1024
 
@@ -226,6 +223,8 @@ public:
   void setFieldGroupSize(int gsize);
   void setParticleGroupSize(int gsize);
   void setParticleBufferSize(int bsize);
+  void setMultifileGroupSize(int bsize);
+
 
   void copyInputFileInOutDir(std::string inputFileName);
 
@@ -316,7 +315,6 @@ private:
   void writeSpecDensitySubDomain(std::string fileName, request req);
   void callSpecDensity(request req);
 
-  void writeCurrent(std::string fileName, request req);
   void callCurrent(request req);
 
   void writeCPUParticlesValues(MPI_File thefile, double rmin[3], double rmax[3], SPECIE* spec);

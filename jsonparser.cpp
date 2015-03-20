@@ -169,7 +169,7 @@ void jsonParser::setRadiationFriction(Json::Value &document, GRID *grid){
 
 void jsonParser::setXrange(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
-  const char* name = DOUBLEARRAY_X_RANGE;
+  const char* name = _JSON_DOUBLEARRAY_X_RANGE;
   if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
@@ -180,7 +180,7 @@ void jsonParser::setXrange(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setYrange(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
-  const char* name = DOUBLEARRAY_Y_RANGE;
+  const char* name = _JSON_DOUBLEARRAY_Y_RANGE;
   if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
@@ -191,7 +191,7 @@ void jsonParser::setYrange(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setZrange(Json::Value &parent,GRID *grid){
   double min=-1.0, max=1.0;
-  const char* name = DOUBLEARRAY_Z_RANGE;
+  const char* name = _JSON_DOUBLEARRAY_Z_RANGE;
   if(!parent[name].isNull()){
     if(parent[name].isArray()){
       min=parent[name][0].asDouble();
@@ -204,7 +204,7 @@ void jsonParser::setZrange(Json::Value &parent,GRID *grid){
 void jsonParser::setNCells(Json::Value &parent,GRID *grid){
   int Nx, Ny, Nz;
   Nx=Ny=Nz=1;
-  const char* name = _INT_N_CELLS_;
+  const char* name = _JSON_INT_N_CELLS_;
   if(!parent[name].isNull()){
     if(parent[name].isArray()){
       Nx=parent[name][0].asInt();
@@ -217,8 +217,8 @@ void jsonParser::setNCells(Json::Value &parent,GRID *grid){
 }
 void jsonParser::setNprocs(Json::Value &document,GRID *grid){
   int nProcY=1, nProcZ=1;
-  setInt(&nProcY, document,_INT_N_PROC_Y_);
-  setInt(&nProcZ, document,_INT_N_PROC_Z_);
+  setInt(&nProcY, document,_JSON_INT_N_PROC_Y_);
+  setInt(&nProcZ, document,_JSON_INT_N_PROC_Z_);
 
   grid->setNProcsAlongY(nProcY);
   grid->setNProcsAlongZ(nProcZ);
@@ -226,7 +226,7 @@ void jsonParser::setNprocs(Json::Value &document,GRID *grid){
 
 void jsonParser::setSimulationTime(Json::Value &document,GRID *grid){
   double simulationTime;
-  setDouble(&simulationTime,document, _DOUBLE_SIMULATION_TIME_);
+  setDouble(&simulationTime,document, _JSON_DOUBLE_SIMULATION_TIME_);
   grid->setSimulationTime(simulationTime);
 }
 void jsonParser::setMasterProc(Json::Value  &document,GRID *grid){
@@ -241,7 +241,7 @@ void jsonParser::setCourantFactor(Json::Value  &document,GRID *grid){
   grid->setCourantFactor(courantFactor);
 }
 void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
-  std::string  name1= _OBJ_BOUNDARIES_;
+  std::string  name1= _JSON_OBJ_BOUNDARIES_;
   std::string  xCondition, yCondition, zCondition;
   int xFlag, yFlag, zFlag;
   xFlag = xPBC;
@@ -255,25 +255,25 @@ void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
       xCondition = boundaries[0].asString();
       yCondition = boundaries[1].asString();
       zCondition = boundaries[2].asString();
-      if(! xCondition.compare(_TAG_PERIODIC_BC_))
+      if(! xCondition.compare(_JSON_TAG_PERIODIC_BC_))
         xFlag = xPBC;
-      else if(! xCondition.compare(_TAG_OPEN_BC_))
+      else if(! xCondition.compare(_JSON_TAG_OPEN_BC_))
         xFlag = xOpen;
-      else if(! xCondition.compare(_TAG_PML_))
+      else if(! xCondition.compare(_JSON_TAG_PML_))
         xFlag = xPML;
 
-      if(! yCondition.compare(_TAG_PERIODIC_BC_))
+      if(! yCondition.compare(_JSON_TAG_PERIODIC_BC_))
         yFlag = yPBC;
-      else if(! yCondition.compare(_TAG_OPEN_BC_))
+      else if(! yCondition.compare(_JSON_TAG_OPEN_BC_))
         yFlag = yOpen;
-      else if(! yCondition.compare(_TAG_PML_))
+      else if(! yCondition.compare(_JSON_TAG_PML_))
         yFlag = yPML;
 
-      if(! zCondition.compare(_TAG_PERIODIC_BC_))
+      if(! zCondition.compare(_JSON_TAG_PERIODIC_BC_))
         zFlag = zPBC;
-      else if(! zCondition.compare(_TAG_OPEN_BC_))
+      else if(! zCondition.compare(_JSON_TAG_OPEN_BC_))
         zFlag = zOpen;
-      else if(! zCondition.compare(_TAG_PML_))
+      else if(! zCondition.compare(_JSON_TAG_PML_))
         zFlag = zPML;
 
     }
@@ -285,28 +285,25 @@ void jsonParser::setBoundaryConditions(Json::Value &parent,GRID *grid){
 void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid){
   mygrid->dumpControl.doRestart = false;
   mygrid->dumpControl.doDump = false;
-  std::string  name1= _OBJ_RESTART_;
-  std::string  name2;
+
   Json::Value restartObject;
-  if(setValue(restartObject,parent,name1.c_str())){
-    name2 = _JSON_STRING_DUMP_FOLDER_NAME;
+  if(setValue(restartObject,parent, _JSON_OBJ_RESTART_)){
+
     std::string folderName;
-    if( setString(&folderName, restartObject,name2.c_str()) ){
+    if( setString(&folderName, restartObject, _JSON_STRING_DUMP_FOLDER_NAME ) ){
       mygrid->setDumpPath(folderName);
     }
+    else{
+      mygrid->setDumpPath(_STRING_DUMP_DEFAULT_PATH);
+    }
 
+    setBool(&mygrid->dumpControl.doRestart,restartObject,_JSON_BOOL_RESTART_);
 
-    name2 = _BOOL_RESTART_;
-    setBool(&mygrid->dumpControl.doRestart,restartObject,name2.c_str());
+    setDouble(&mygrid->dumpControl.dumpEvery,restartObject,_JSON_DOUBLE_DUMPEVERY_);
 
-    name2 = _DOUBLE_DUMPEVERY_;
-    setDouble(&mygrid->dumpControl.dumpEvery,restartObject,name2.c_str());
+    setBool(&mygrid->dumpControl.doDump,restartObject,_JSON_BOOL_DODUMP_);
 
-    name2 = _BOOL_DODUMP_;
-    setBool(&mygrid->dumpControl.doDump,restartObject,name2.c_str());
-
-    name2 = _INT_RESTART_FROM_DUMP_;
-    setInt(&mygrid->dumpControl.restartFromDump,restartObject,name2.c_str());
+    setInt(&mygrid->dumpControl.restartFromDump,restartObject,_JSON_INT_RESTART_FROM_DUMP_);
 
   }
 }
@@ -314,7 +311,7 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid){
 void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
   Json::Value  stretching;
   bool isEnabled;
-  if(setValue(stretching, document, _OBJ_STRETCHED_GRID_ ) ) {
+  if(setValue(stretching, document, _JSON_OBJ_STRETCHED_GRID_ ) ) {
     if(inputVersion == 1)
       isEnabled = true;
 
@@ -326,68 +323,68 @@ void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
     std::string  name2;
     Json::Value stretching1D;
 
-    name2= _OBJ_X_STTETCHING_;
+    name2= _JSON_OBJ_X_STTETCHING_;
     if(setValue(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3 = _OBJ_LEFT_STRETCHING_;
+      std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;
       if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingLeft,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingLeft, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setXandNxLeftStretchedGrid(limit,NCells);
       }
-      name3=_OBJ_RIGHT_STRETCHING_;
+      name3=_JSON_OBJ_RIGHT_STRETCHING_;
       Json::Value stretchingRight;
       if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingRight,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingRight, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setXandNxRightStretchedGrid(limit,NCells);
       }
     }
 
-    name2= _OBJ_Y_STTETCHING_;
+    name2= _JSON_OBJ_Y_STTETCHING_;
     if(setValue(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3 = _OBJ_LEFT_STRETCHING_;
+      std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;
       if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingLeft,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingLeft, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setYandNyLeftStretchedGrid(limit,NCells);
       }
-      name3=_OBJ_RIGHT_STRETCHING_;
+      name3=_JSON_OBJ_RIGHT_STRETCHING_;
       Json::Value stretchingRight;
       if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingRight,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingRight, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setYandNyRightStretchedGrid(limit,NCells);
       }
     }
 
-    name2= _OBJ_Z_STTETCHING_;
+    name2= _JSON_OBJ_Z_STTETCHING_;
     if(setValue(stretching1D, stretching,name2.c_str() ) ){
-      std::string  name3 = _OBJ_LEFT_STRETCHING_;
+      std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;
       if(setValue(stretchingLeft, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingLeft,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingLeft, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingLeft,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingLeft, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setZandNzLeftStretchedGrid(limit,NCells);
       }
-      name3=_OBJ_RIGHT_STRETCHING_;
+      name3=_JSON_OBJ_RIGHT_STRETCHING_;
       Json::Value stretchingRight;
       if(setValue(stretchingRight, stretching1D,name3.c_str() ) ){
         double limit;
         int NCells;
-        setInt(&NCells,stretchingRight,_INT_NCELL_STRETCHING_);
-        setDouble(&limit, stretchingRight, _DOUBLE_LIMIT_STRETCHING);
+        setInt(&NCells,stretchingRight,_JSON_INT_NCELL_STRETCHING_);
+        setDouble(&limit, stretchingRight, _JSON_DOUBLE_LIMIT_STRETCHING);
         grid->setZandNzRightStretchedGrid(limit,NCells);
       }
     }
@@ -396,22 +393,22 @@ void jsonParser::setStretchedGrid(Json::Value &document,GRID *grid){
 void jsonParser::setMovingWindow(Json::Value  &document,GRID *grid){
   Json::Value movingWindow;
   bool isEnambled;
-  if(setValue( movingWindow, document, _OBJ_MOVING_WINDOW_ ) ) {
+  if(setValue( movingWindow, document, _JSON_OBJ_MOVING_WINDOW_ ) ) {
     if(inputVersion == 1)
       isEnambled = true;
 
     setBool(&isEnambled, movingWindow, _JSON_BOOL_ENABLED);
     if(isEnambled){
       double start=0;
-      setDouble( &start, movingWindow, _DOUBLE_START_MW_ );
+      setDouble( &start, movingWindow, _JSON_DOUBLE_START_MW_ );
       grid->setStartMovingWindow(start);
 
       double beta;
-      if(setDouble( &beta, movingWindow, _DOUBLE_BETA_MW_ ) ){
+      if(setDouble( &beta, movingWindow, _JSON_DOUBLE_BETA_MW_ ) ){
         grid->setBetaMovingWindow(beta);
       }
       int frequency;
-      if(setInt( &frequency, movingWindow, _DOUBLE_FREQUENCY_MW_ ) ){
+      if(setInt( &frequency, movingWindow, _JSON_DOUBLE_FREQUENCY_MW_ ) ){
         grid->setFrequencyMovingWindow(frequency);
       }
     }
@@ -420,7 +417,7 @@ void jsonParser::setMovingWindow(Json::Value  &document,GRID *grid){
 }
 
 bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _STRING_TYPE_;
+  std::string name2= _JSON_STRING_TYPE_;
   std::string type;
   bool flag=false;
   if(flag=setString(&type,mylaser,name2.c_str())){
@@ -443,7 +440,7 @@ bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _STRING_POLARIZATION_;
+  std::string name2= _JSON_STRING_POLARIZATION_;
   std::string polarization;
   bool flag=false;
   if(flag=setString(&polarization,mylaser,name2.c_str())){
@@ -463,7 +460,7 @@ bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser)
 }
 
 bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_DURATION_FWHM_;
+  std::string name2= _JSON_DOUBLE_LASER_DURATION_FWHM_;
   double durationFWHM;
   bool flag=false;
   if(flag=setDouble(&durationFWHM,mylaser,name2.c_str())){
@@ -473,7 +470,7 @@ bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser)
 }
 
 bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_INITIAL_POSITION_;
+  std::string name2= _JSON_DOUBLE_LASER_INITIAL_POSITION_;
   double initialPosition;
   bool flag=false;
   if(flag=setDouble(&initialPosition,mylaser,name2.c_str())){
@@ -483,7 +480,7 @@ bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylas
 }
 
 bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_A_;
+  std::string name2= _JSON_DOUBLE_LASER_A_;
   double amplitude;
   bool flag=false;
   if(flag=setDouble(&amplitude,mylaser,name2.c_str())){
@@ -493,7 +490,7 @@ bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_WAIST_;
+  std::string name2= _JSON_DOUBLE_LASER_WAIST_;
   double waist;
   bool flag=false;
   if(flag=setDouble(&waist,mylaser,name2.c_str())){
@@ -502,7 +499,7 @@ bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser){
   return flag;
 }
 bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_FOCUS_POSITION_;
+  std::string name2= _JSON_DOUBLE_LASER_FOCUS_POSITION_;
   double focusPosition;
   bool flag=false;
   if(flag=setDouble(&focusPosition,mylaser,name2.c_str())){
@@ -511,7 +508,7 @@ bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser
   return flag;
 }
 bool jsonParser::setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_LAMBDA_;
+  std::string name2= _JSON_DOUBLE_LASER_LAMBDA_;
   double lambda;
   bool flag=false;
   if(flag=setDouble(&lambda,mylaser,name2.c_str())){
@@ -521,17 +518,17 @@ bool jsonParser::setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _BOOL_LASER_ROTATION_;
+  std::string name2= _JSON_BOOL_LASER_ROTATION_;
   bool rotation;
   bool flag=false;
   flag=setBool(&rotation,mylaser,name2.c_str());
   if(rotation){
 
     double angle=0, center=0;
-    name2= _DOUBLE_ROTATION_ANGLE_;
+    name2= _JSON_DOUBLE_ROTATION_ANGLE_;
     setDouble(&angle,mylaser,name2.c_str());
 
-    name2= _DOUBLE_ROTATION_CENTER_;
+    name2= _JSON_DOUBLE_ROTATION_CENTER_;
     setDouble(&center,mylaser,name2.c_str());
 
     pulse1->setRotationAngleAndCenter(2.0*M_PI*(angle / 360.0), center);
@@ -540,7 +537,7 @@ bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser){
 }
 
 bool jsonParser::setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser){
-  std::string name2= _DOUBLE_LASER_RISE_TIME_;
+  std::string name2= _JSON_DOUBLE_LASER_RISE_TIME_;
   double riseTime;
   bool flag=false;
   if(flag=setDouble(&riseTime,mylaser,name2.c_str())){
@@ -581,7 +578,7 @@ bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *puls
 }
 
 void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
-  std::string  name1= _OBJ_ARRAY_LASER_;
+  std::string  name1= _JSON_OBJ_ARRAY_LASER_;
   Json::Value lasers;
 
   if(setValue( lasers, document, name1.c_str() ) ) {
@@ -1195,10 +1192,28 @@ void jsonParser::setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manage
 }
 
 void jsonParser::setOutputDirPath(Json::Value &document, OUTPUT_MANAGER &manager){
-  std::string  name1= _JSON_STRING_OUTPUT_FOLDER_NAME;
   std::string  folderName;
-  if(setString(&folderName , document, name1.c_str()) )
+  if(setString(&folderName , document, _JSON_STRING_OUTPUT_FOLDER_NAME) )
     manager.setOutputPath(folderName);
+  else{
+    manager.setOutputPath( _STRING_OUTPUT_DIR_DEFAULT_PATH );
+  }
+}
+
+void jsonParser::setOutputParameters(Json::Value &document, OUTPUT_MANAGER &manager){
+  int bufferInt;
+  if(setInt(&bufferInt , document, _JSON_INT_OUTPUT_MULTIFILE_GROUP_SIZE) )
+    manager.setMultifileGroupSize(bufferInt);
+
+  if(setInt(&bufferInt , document, _JSON_INT_OUTPUT_FIELD_GROUP_SIZE) )
+    manager.setFieldGroupSize(bufferInt);
+
+  if(setInt(&bufferInt , document, _JSON_INT_OUTPUT_PARTICLES_GROUP_SIZE) )
+    manager.setParticleGroupSize(bufferInt);
+
+  if(setInt(&bufferInt , document, _JSON_INT_OUTPUT_PARTICLES_BUFFER_SIZE) )
+    manager.setParticleBufferSize(bufferInt);
+
 }
 
 

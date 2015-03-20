@@ -1205,8 +1205,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       for (p = 0; p < Np; p++)
       {
         //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
+        for (c = 0; c < 3; c++){
           xx[c] = pData[c + p*Ncomp];
           hiw[c][1] = wiw[c][1] = 1;
           hii[c] = wii[c] = 0;
@@ -2617,12 +2616,16 @@ void SPECIE::current_deposition_standard(CURRENT *current)
   {
     for (p = 0; p < Np; p++)
     {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      double ux, uy, uz;
+      ux = pData[pIndex( 3, p, Ncomp, Np)];
+      uy = pData[pIndex( 4, p, Ncomp, Np)];
+      uz = pData[pIndex( 5, p, Ncomp, Np)];
 
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        vv[c] = gamma_i*ru(c + 3, p);
-        ru(c, p) += dt*vv[c];
+        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
+        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+
       }
     }
     return;
@@ -2655,8 +2658,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
-          //wii[c]=(int)(rr+0.5); //whole integer int
-          //hii[c]=(int)(rr);     //half integer int
+
           wii[c] = (int)floor(rr + 0.5); //whole integer int
           hii[c] = (int)floor(rr);     //half integer int
           rr -= wii[c];
@@ -2686,6 +2688,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+
               double weight = pData[pIndex( 6, p, Ncomp, Np)];
               double *JX, *JY, *JZ;
               JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -2698,6 +2702,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
               *JY += weight*dvol*vv[1] * chargeSign;
               dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
               *JZ += weight*dvol*vv[2] * chargeSign;
+#else
+                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                    current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                    current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                    current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+ #endif
+
 
             }
           }
@@ -2730,8 +2743,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
-          //wii[c]=(int)(rr+0.5); //whole integer int
-          //hii[c]=(int)(rr);     //half integer int
+
           wii[c] = (int)floor(rr + 0.5); //whole integer int
           hii[c] = (int)floor(rr);     //half integer int
           rr -= wii[c];
@@ -2759,7 +2771,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-            double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
+            double weight =  pData[pIndex( 6, p, Ncomp, Np)]; //
             double *JX, *JY, *JZ;
             JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
             JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -2810,8 +2822,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
           rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
           rh = rr - 0.5;
-          //wii[c]=(int)(rr+0.5); //whole integer int
-          //hii[c]=(int)(rr);     //half integer int
+
           wii[c] = (int)floor(rr + 0.5); //whole integer int
           hii[c] = (int)floor(rr);     //half integer int
           rr -= wii[c];
@@ -2834,6 +2845,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+
           double weight = pData[pIndex( 6, p, Ncomp, Np)];
           double *JX, *JY, *JZ;
           JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -2846,7 +2859,15 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           *JY += weight*dvol*vv[1] * chargeSign;
           dvol = wiw[0][i];
           *JZ += weight*dvol*vv[2] * chargeSign;
+#else
 
+            dvol = hiw[0][i],
+                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i],
+                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i],
+                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#endif
         }
       }
       break;
@@ -2908,18 +2929,25 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
   double mycsi[3];
 
   dt = mygrid->dt;
-
+  double* myCurrent = current->getDataPointer();
+  int N_grid[3];
+  current->writeN_grid(N_grid);
+  int edge=mygrid->getEdge();
   if (mygrid->withCurrent == YES && (!isTestSpecies))
   {
     for (p = 0; p < Np; p++)
     {
-
       //debug_warning_particle_outside_boundaries(r0(p), r1(p), r2(p), p);
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      double ux, uy, uz;
+      ux = pData[pIndex( 3, p, Ncomp, Np)];
+      uy = pData[pIndex( 4, p, Ncomp, Np)];
+      uz = pData[pIndex( 5, p, Ncomp, Np)];
+
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
       for (c = 0; c < 3; c++)
       {
-        vv[c] = gamma_i*ru(c + 3, p);
+        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
@@ -2927,14 +2955,14 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
       }
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        xx[c] = ru(c, p) + 0.5*dt*vv[c];
-        ru(c, p) += dt*vv[c];
+        xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+
         mycsi[c] = mygrid->unStretchGrid(xx[c], c);
         mydr[c] = mygrid->derivativeStretchingFunction(mycsi[c], c);
         rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
         rh = rr - 0.5;
-        //wii[c]=(int)(rr+0.5); //whole integer int
-        //hii[c]=(int)(rr);     //half integer int
+
         wii[c] = (int)floor(rr + 0.5); //whole integer int
         hii[c] = (int)floor(rr);     //half integer int
         rr -= wii[c];
@@ -2967,12 +2995,28 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               {
                 i1 = i + wii[0] - 1;
                 i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+                double weight = pData[pIndex( 6, p, Ncomp, Np)];
+                double *JX, *JY, *JZ;
+                JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JZ = &myCurrent[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+                *JX += weight*dvol*vv[0] * chargeSign;
+                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+                *JY += weight*dvol*vv[1] * chargeSign;
+                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+                *JZ += weight*dvol*vv[2] * chargeSign;
+
+#else
                 dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
                     current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
                 dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
                     current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
                 dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
                     current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+ #endif
 
               }
             }
@@ -2991,12 +3035,27 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             {
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+                double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
+                double *JX, *JY, *JZ;
+                JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+                dvol = hiw[0][i] * wiw[1][j];
+                *JX += weight*dvol*vv[0] * chargeSign;
+                dvol = wiw[0][i] * hiw[1][j];
+                *JY += weight*dvol*vv[1] * chargeSign;
+                dvol = wiw[0][i] * wiw[1][j];
+                *JZ += weight*dvol*vv[2] * chargeSign;
+#else
               dvol = hiw[0][i] * wiw[1][j],
                   current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
               dvol = wiw[0][i] * hiw[1][j],
                   current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
               dvol = wiw[0][i] * wiw[1][j],
                   current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#endif
             }
           }
           break;
@@ -3009,13 +3068,28 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+                double weight =  pData[pIndex( 6, p, Ncomp, Np)];
+                double *JX, *JY, *JZ;
+                JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+                JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+                dvol = hiw[0][i];
+                *JX += weight*dvol*vv[0] * chargeSign;
+                dvol = wiw[0][i];
+                *JY += weight*dvol*vv[1] * chargeSign;
+                dvol = wiw[0][i];
+                *JZ += weight*dvol*vv[2] * chargeSign;
+#else
+
             dvol = hiw[0][i],
                 current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
             dvol = wiw[0][i],
                 current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
             dvol = wiw[0][i],
                 current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
-
+#endif
           }
           break;
       }
@@ -3026,12 +3100,16 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
   {
     for (p = 0; p < Np; p++)
     {
-      gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+      double ux, uy, uz;
+      ux = pData[pIndex( 3, p, Ncomp, Np)];
+      uy = pData[pIndex( 4, p, Ncomp, Np)];
+      uz = pData[pIndex( 5, p, Ncomp, Np)];
 
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        vv[c] = gamma_i*ru(c + 3, p);
-        ru(c, p) += dt*vv[c];
+        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
+        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
       }
     }
   }

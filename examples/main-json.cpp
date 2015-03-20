@@ -52,7 +52,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #define DIRECTORY_OUTPUT "OUTPUT"
-#define DIRECTORY_DUMP "DUMP"
+
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
@@ -147,11 +147,12 @@ int myIntVariable=0;
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
   jsonParser::setOutputDirPath(root,manager);
+  jsonParser::setOutputParameters(root,manager);
 
   manager.initialize();
   manager.copyInputFileInOutDir(inputFileName);
   //*******************************************END DIAG DEFINITION**************************************************
-  grid.setDumpPath(DIRECTORY_DUMP);
+
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   if (grid.myid == grid.master_proc){
