@@ -1,7 +1,8 @@
 COMPILER = mpixlcxx
 EXE = piccante
+MAIN = main-piccante.cpp
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o  utilities.o jsoncpp.o jsonparser.o
+OBJ = main-piccante.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o  utilities.o jsoncpp.o jsonparser.o
 
 OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -DUSE_BOOST 
 
@@ -14,6 +15,9 @@ BOOST_INC = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/include/
 LIB = -lgsl -lgslcblas -lboost_system -lboost_filesystem 
 
 all : $(EXE)
+
+specific : MAIN = main-1.cpp
+specific : $(EXE)
 
 scal : COMPILER = scalasca -instrument mpixlcxx
 scal : EXE = piccante.scalasca
@@ -31,8 +35,8 @@ deb2 : $(EXE)
 $(EXE) : $(OBJ)
 				$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -L$(BOOST_LIB) -I$(GSL_INC) -I$(BOOST_INC) $(LIB) 
 
-main-1.o: main-1.cpp 
-				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c main-1.cpp
+main-piccante.o: $(MAIN)
+				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c $(MAIN)
 
 grid.o : grid.cpp 
 				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c grid.cpp

@@ -1,7 +1,7 @@
 COMPILER = mpic++
 EXE = piccante
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o jsonparser.o
+OBJ = main-piccante.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o jsonparser.o
 
 OPT = -O3 
 
@@ -38,8 +38,8 @@ vec : $(EXE)
 $(EXE) : $(OBJ)
 				$(COMPILER) -o $(EXE) $(OPT) $(OBJ)  $(LIB) 
 
-main-1.o: main-1.cpp 
-				$(COMPILER) $(OPT) -c main-1.cpp
+main-piccante.o: main-piccante.cpp 
+				$(COMPILER) $(OPT) -c main-piccante.cpp
 
 grid.o : grid.cpp 
 				$(COMPILER) $(OPT) -c grid.cpp

@@ -1,7 +1,8 @@
 COMPILER = mpic++
 EXE = piccante
+MAIN = main-piccante.cpp
 
-OBJ = main-1.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o jsonparser.o
+OBJ = main-piccante.o grid.o structures.o current.o em_field.o particle_species.o output_manager.o utilities.o jsoncpp.o jsonparser.o
 
 OPT = -O3 
 
@@ -10,6 +11,9 @@ LFLAGS = -Wall
 LIB = -lgsl -lgslcblas 
 
 all : $(EXE)
+
+specific : $(EXE)
+specific : MAIN = main-1.cpp
 
 boost : OPT = -O3 -DUSE_BOOST
 boost : LIB = -lgsl -lgslcblas  -lboost_filesystem -lboost_system
@@ -38,8 +42,8 @@ vec : $(EXE)
 $(EXE) : $(OBJ)
 				$(COMPILER) -o $(EXE) $(OPT) $(OBJ)  $(LIB) 
 
-main-1.o: main-1.cpp 
-				$(COMPILER) $(OPT) -c main-1.cpp
+main-piccante.o: $(MAIN) 
+				$(COMPILER) $(OPT) -c $(MAIN)
 
 grid.o : grid.cpp 
 				$(COMPILER) $(OPT) -c grid.cpp
