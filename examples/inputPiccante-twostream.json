@@ -1,0 +1,92 @@
+{
+    "VERSION": 2,
+    "dimensions": 3,
+    "masterProc": 0,
+    "OutputPath": "OUTPUT",
+    "lambda0": 1.0,
+    "radiationFriction": false,
+    "courantFactor": 0.98,
+    "nProcY": 16,
+    "nProcZ": 8,
+    "xRange": [-2.0, 2.0],
+    "yRange": [-2.0, 2.0],
+    "zRange": [-0.5, 0.5],
+    "NCells": [512, 512, 128],
+    "simulationTime": 1.0,
+    "boundaries": ["periodic", "periodic","periodic"],
+    "StretchedGrid":{
+        "enabled": false,
+        "x":{"left": { "limit": -10.0, "NCells": 1000 },
+            "right": { "limit":  10.0, "NCells": 1000 } },
+        "y":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } },
+        "z":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } }
+    },
+    "MovingWindow":{
+        "enabled": false,
+        "start": 0,
+        "NO_beta": 1,
+        "NO_frequency":20
+    },
+    "restart":{
+        "DumpPath": "DUMP",
+        "doRestart": false,
+        "restartFromDump": 1,
+        "doDump": false,
+        "dumpEvery": 2.0
+    },
+    "special":{"variabile1": 32,"variabile2": 32.5},
+    "Plasma":[
+        {
+            "name": "bulk",
+            "densityFunction": "box",
+            "XRangeBox" : [-10, 10],
+            "YRangeBox" : [-10, 10],
+            "ZRangeBox" : [-10, 10],
+            "DensityCoefficient" : 1.0,
+            "DensityLambda" : 1.0
+        }
+    ],
+    "Species":[
+        {
+            "enabled": true,
+            "name": "ELE1",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "isMarker": false,
+            "isTest": false,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,-1.0]
+        },
+        {
+            "enabled": true,
+            "name": "ELE2",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "isMarker": false,
+            "isTest": false,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,1.0]
+        }
+    ],
+    "multifileGroupSize": 2048,
+    "fieldGroupSize": 128,
+    "particleGroupSize": 128,
+    "particleBufferSize": 1000000,
+    "Output":[
+        {"type": "EB", "every": 1.0},
+        {"type": "Density", "spec": "ELE1", "every": 1.0},
+        {"type": "Density", "spec": "ELE2", "every": 1.0},
+        {"type": "PhSp", "spec": "ELE1", "every": 1.0},
+        {"type": "PhSp", "spec": "ELE2", "every": 1.0},
+
+        {"type": "Diag", "every": 0.5}
+
+    ]
+
+}

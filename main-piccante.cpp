@@ -170,11 +170,6 @@ int myIntVariable=0;
 
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
-#ifdef NO_ALLOCATION
-    manager.close();
-    MPI_Finalize();
-    exit(0);
-#endif
 
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
 

@@ -1,0 +1,85 @@
+{
+    "VERSION": 2,
+    "dimensions": 2,
+    "masterProc": 0,
+    "OutputPath": "OUTPUT",
+    "lambda0": 1.0,
+    "radiationFriction": false,
+    "courantFactor": 0.98,
+    "nProcY": 32,
+    "nProcZ": 1,
+    "xRange": [-50, 0],
+    "yRange": [-15, 15],
+    "zRange": [-1, 1],
+    "NCells": [1536, 512, 1],
+    "simulationTime": 100,
+    "boundaries": ["open", "periodic","periodic"],
+    "StretchedGrid":{
+        "enabled": false,
+        "x":{"left": { "limit": -10.0, "NCells": 1000 },
+            "right": { "limit":  10.0, "NCells": 1000 } },
+        "y":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } },
+        "z":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } }
+    },
+    "MovingWindow":{
+        "enabled": true,
+        "start": 0,
+        "NO_beta": 1,
+        "NO_frequency":20
+    },
+    "restart":{
+        "DumpPath": "DUMP",
+        "doRestart": false,
+        "restartFromDump": 1,
+        "doDump": false,
+        "dumpEvery": 2.0
+    },
+    "Laser":[
+        {
+            "enabled": true,
+            "type": "GAUSSIAN",
+            "polarization": "S",
+            "durationFWHM": 10.0,
+            "initialPosition": -10.01,
+            "waist": 4,
+            "focusPosition": 0.0,
+            "a": 8.0,
+            "lambda": 1.0
+        }
+    ],
+    "Plasma":[
+        {
+            "name": "bulk",
+            "densityFunction": "box",
+            "XRangeBox" : [0, 100],
+            "YRangeBox" : [-20, 20],
+            "ZRangeBox" : [-100, 100],
+            "DensityCoefficient" : 0.0025,
+            "DensityLambda" : 1.0
+        }
+    ],
+    "Species":[
+        {
+            "enabled": true,
+            "name": "ELE1",
+            "plasma": "bulk",
+            "ParticlesPerCell": [2,2,2],
+            "type": "ELECTRON",
+            "isMarker": false,
+            "isTest": false
+        }
+    ],
+    "multifileGroupSize": 2048,
+    "fieldGroupSize": 128,
+    "particleGroupSize": 128,
+    "particleBufferSize": 1000000,
+    "Output":[
+        {"type": "EB", "from":0.0, "every": 10.0},
+        {"type": "Density", "spec": "ELE1", "every":10.0},
+        {"type": "PhSp", "spec": "ELE1", "every":10.0},
+        {"type": "Diag", "every": 1.0}
+    ]
+
+}

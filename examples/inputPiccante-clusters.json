@@ -1,0 +1,236 @@
+{
+  "VERSION": 1,
+  "dimensions": 2,
+  "OutputPath": "OUTPUT",
+  "nProcY": 1024,
+  "nProcZ": 4,
+  "xRange": [-50, 10],
+  "yRange": [-40, 40],
+  "zRange": [-2, 2],
+  "NCells": [6000, 8192, 400],
+  "simulationTime": 60,
+  "boundaries": ["open", "periodic","periodic"],
+"special":{
+    "spheresFile": "spheres4.bin"
+},
+  "NOStretchedGrid":{
+      "enabled": false,
+    "NOx":{"left": { "limit": -10.0, "NCells": 256 },
+      "right": { "limit":  10.0, "NCells": 256 } },
+    "y":{"left": { "limit": -10.0, "NCells": 256 },
+      "right": { "limit":  10.0, "NCells": 256 } },
+    "z":{"left": { "limit": -10.0, "NCells": 256 },
+      "right": { "limit":  10.0, "NCells": 256 } }
+  },
+  "MovingWindow":{
+    "enabled": true,
+    "start": 5
+  },
+  "restart":{
+    "DumpPath": "DUMP",
+    "doRestart": false,
+    "restartFromDump": 3,
+    "doDump": true,
+    "dumpEvery": 10.0
+  },
+"Laser":[
+    {
+      "enabled": true,
+      "type": "GAUSSIAN",
+      "polarization": "P",
+      "durationFWHM": 12.3,
+      "initialPosition": -16.31,
+      "waist": 4,
+      "focusPosition": 0.0,
+      "a": 18.0,
+      "lambda": 0.8,
+      "rotation": true,
+      "angle": 30.0,
+      "center": 0
+    }
+  ],
+  "Plasma":[
+    {
+      "name": "foam",
+      "densityFunction": "spheres",
+      "XRangeBox" : [0.0, 8.0],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 1.0,
+      "DensityLambda" : 0.8
+    },
+    {
+      "name": "foamC",
+      "densityFunction": "spheres",
+      "XRangeBox" : [0, 8.0],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 0.99,
+      "DensityLambda" : 0.8
+    },
+    {
+      "name": "foamH",
+      "densityFunction": "spheres",
+      "XRangeBox" : [0, 8.0],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 0.01,
+      "DensityLambda" : 0.8
+    },
+    {
+      "name": "foil",
+      "densityFunction": "box",
+      "XRangeBox" : [8, 8.5],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 40.0,
+      "DensityLambda" : 0.8
+    },
+    {
+      "name": "cont",
+      "densityFunction": "box",
+      "XRangeBox" : [8.5, 8.51],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 10.0,
+      "DensityLambda" : 0.8
+    },
+    {
+      "name": "contIons",
+      "densityFunction": "box",
+      "XRangeBox" : [8.5, 8.51],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 5.0,
+      "DensityLambda" : 0.8
+    }
+  ],
+  "Species":[
+    {
+      "name": "ELEfoam",
+      "plasma": "foam",
+      "ParticlesPerCell": [8,8,2],
+      "type": "ELECTRON",
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "Cfoam",
+      "plasma": "foamC",
+      "ParticlesPerCell": [6,6,2],
+      "type": "ION",
+      "Z": 6,
+      "A": 12,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "Hfoam",
+      "plasma": "foamH",
+      "ParticlesPerCell": [3,3,2],
+      "type": "ION",
+      "Z": 1,
+      "A": 1,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "ELEal",
+      "plasma": "foil",
+      "ParticlesPerCell": [7,7,2],
+      "type": "ELECTRON",
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "Al",
+      "plasma": "foil",
+      "ParticlesPerCell": [4,4,1],
+      "type": "ION",
+      "Z": 13,
+      "A": 27,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "ELEcont",
+      "plasma": "cont",
+      "ParticlesPerCell": [5,5,2],
+      "type": "ELECTRON",
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "Hcont",
+      "plasma": "contIons",
+      "ParticlesPerCell": [5,5,2],
+      "type": "ION",
+      "Z": 1,
+      "A": 1,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    },
+    {
+      "name": "Ccont",
+      "plasma": "contIons",
+      "ParticlesPerCell": [5,5,2],
+      "type": "ION",
+      "Z": 6,
+      "A": 12,
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    }
+  ],
+  "Domains":[
+    {"name": "target", "freeDim": [1,1,1], "pointCoord": [0.0, 0.0, 0.0],
+      "xRange": [-10,20], "yRange": [-20, 20], "zRange": [-10, 10]},
+    {"name": "large","freeDim": [1,1,1], "pointCoord": [10.0, 0.0, 0.0],
+      "yRange": [-10, 35], "zRange": [-15, 15]},
+    {"name": "rear","freeDim": [1,1,1],"pointCoord": [10.0, 0.0, 0.0],
+      "xRange": [8.5,60] }
+],
+  "Output":[
+    {"type": "EB", "from": 0.0, "to": 32.0, "every": 4.0, "in": "target"},
+    {"type": "EB", "from": 10.0, "every": 2.0, "in": "rear"},
+    {"type": "Density", "spec": "ELEfoam", "from": 0.0, "to": 48.0, "every": 4.0, "in": "target"},
+    {"type": "Density", "spec": "ELEal", "from": 0.0, "to": 48.0, "every": 4.0,   "in": "target"},
+    {"type": "Density", "spec": "ELEcont", "from": 0.0, "to": 48.0, "every": 4.0, "in": "target"},
+    {"type": "Density", "spec": "Cfoam", "from": 0.0, "to": 48.0, "every": 4.0,   "in": "target"},
+    {"type": "Density", "spec": "Hfoam", "from": 0.0, "to": 48.0, "every": 4.0,   "in": "target"},
+    {"type": "Density", "spec": "Al", "from": 0.0, "to": 48.0, "every": 4.0,      "in": "target"},
+    {"type": "Density", "spec": "Ccont", "from": 0.0, "to": 48.0, "every": 4.0,   "in": "target"},
+    {"type": "Density", "spec": "Hcont", "from": 0.0, "to": 48.0, "every": 4.0,   "in": "target"},
+
+    {"type": "PhSp",    "spec": "ELEfoam", "from": 4, "every": 4.0, "to": 32.0, "in": "target"},
+    {"type": "PhSp",    "spec": "ELEal",   "from": 4, "every": 4.0, "to": 32.0, "in": "target"},
+    {"type": "PhSp",    "spec": "Hfoam", "from": 4, "every": 4.0, "to": 32.0, "in": "target"},
+    {"type": "PhSp",    "spec": "Cfoam", "from": 4, "every": 4.0, "to": 32.0, "in": "target"},
+    
+    {"type": "PhSp",    "spec": "Ccont", "from": 8, "every": 4.0, "in": "large"},
+    {"type": "PhSp",    "spec": "Hcont", "from": 8, "every": 4.0, "in": "large"},
+    {"type": "PhSp",    "spec": "Hfoam", "from": 24, "every": 4.0, "in": "large"},
+    {"type": "PhSp",    "spec": "Cfoam", "from": 24, "every": 4.0, "in": "large"},
+    
+    {"type": "PhSp",    "spec": "ELEfoam", "at": 32, "in": "rear"},
+    {"type": "PhSp",    "spec": "ELEcont", "at": 32, "in": "rear"},
+    {"type": "PhSp",    "spec": "ELEal",   "at": 32, "in": "rear"},
+    {"type": "PhSp",    "spec": "ELEfoam", "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "ELEcont", "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "ELEal",   "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "Hfoam", "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "Cfoam", "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "Ccont", "at": 40, "in": "rear"},
+    {"type": "PhSp",    "spec": "Hcont", "at": 40, "in": "rear"},
+    
+    {"type": "Diag", "every": 2}
+  ]
+ 
+}
