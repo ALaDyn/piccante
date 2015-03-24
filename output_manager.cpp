@@ -828,7 +828,7 @@ void OUTPUT_MANAGER::appendIDtoFileName(char *nomefile, std::string fileName, in
 #if defined(USE_HDF5)
 
 void OUTPUT_MANAGER::writeEMFieldBinaryHDF5(std::string fileName, request req){
-  int dimensionality = mygrid->accesso.dimensions;
+  int dimensionality = mygrid->getDimensionality();
   int Ncomp = myfield->getNcomp();
 
   MPI_Info info = MPI_INFO_NULL;
