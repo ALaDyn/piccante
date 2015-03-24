@@ -1,148 +1,92 @@
 {
-  "VERSION": 2,
-  "dimensions": 2,
-  "masterProc": 0,
-  "OutputPath": "OUTPUT",
-  "lambda0": 1.0,
-  "radiationFriction": false,
-  "courantFactor": 0.98,
-  "nProcY": 2,
-  "nProcZ": 1,
-  "xRange": [-20, 20],
-  "yRange": [-20, 20],
-  "zRange": [-20, 20],
-  "NCells": [1200, 400, 20],
-  "simulationTime": 15,
-  "boundaries": ["periodic", "periodic","periodic"],
-  "StretchedGrid":{
-    "enabled": false,
-    "x":{"left": { "limit": -10.0, "NCells": 1000 },
-      "right": { "limit":  10.0, "NCells": 1000 } },
-    "y":{"left": { "limit": -15.0, "NCells": 1000 },
-      "right": { "limit":  15.0, "NCells": 1000 } },
-    "z":{"left": { "limit": -15.0, "NCells": 1000 },
-      "right": { "limit":  15.0, "NCells": 1000 } }
-  },
-  "MovingWindow":{
-    "enabled": true,
-    "start": 0,
-    "NO_beta": 1,
-    "NO_frequency":20
-  },
-  "restart":{
-    "DumpPath": "DUMP",
-    "doRestart": false,
-    "restartFromDump": 1,
-    "doDump": false,
-    "dumpEvery": 2.0
-  },
-  "special":{"variabile1": 32,"variabile2": 32.5},
-  "Plasma":[
-    {
-      "name": "bulk",
-      "densityFunction": "box",
-      "XRangeBox" : [0, 100],
-      "YRangeBox" : [-10, 10],
-      "ZRangeBox" : [-100, 100],
-      "DensityCoefficient" : 0.0025,
-      "DensityLambda" : 1.0,
-      "NORampLength" : 0.2,
-      "NORampMinDensity" : 0.001,
-      "NOLeftRampLength" : 0.0,
-      "NORightRampLength" : 0.0,
-      "NOScaleLength" : 0.0,
-      "NOLeftScaleLength" : 0.0,
-      "NORightScaleLength" : 0.0,
-      "NOLeftRampMinDensity" : 0.0,
-      "NORightRampMinDensity" : 0.0,
-      "NOGratingDepth" : 0.0,
-      "NOGratingPeriod" : 0.0,
-      "NOGratingPhase" : 0.0
-    }
-  ],
-  "Species":[
-    {
-      "enabled": true,
-      "name": "ELE1",
-      "plasma": "bulk",
-      "ParticlesPerCell": [2,2,2],
-      "type": "ELECTRON",
-      "isMarker": false,
-      "isTest": false,
-      "NOdistribution": "Maxwell",
-      "NOdistributionParams": [1.0e-5],
-      "NOdistributionAddMomentum": [0.0,0.0,0.0]
+    "VERSION": 2,
+    "dimensions": 3,
+    "masterProc": 0,
+    "OutputPath": "OUTPUT",
+    "lambda0": 1.0,
+    "radiationFriction": false,
+    "courantFactor": 0.98,
+    "nProcY": 16,
+    "nProcZ": 8,
+    "xRange": [-2.0, 2.0],
+    "yRange": [-2.0, 2.0],
+    "zRange": [-0.5, 0.5],
+    "NCells": [512, 512, 128],
+    "simulationTime": 1.0,
+    "boundaries": ["periodic", "periodic","periodic"],
+    "StretchedGrid":{
+        "enabled": false,
+        "x":{"left": { "limit": -10.0, "NCells": 1000 },
+            "right": { "limit":  10.0, "NCells": 1000 } },
+        "y":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } },
+        "z":{"left": { "limit": -15.0, "NCells": 1000 },
+            "right": { "limit":  15.0, "NCells": 1000 } }
     },
-    {
-      "enabled": false,
-      "name": "ION",
-      "plasma": "bulk",
-      "ParticlesPerCell": [2,2,2],
-      "type": "ION",
-      "Z": 1.0,
-      "A": 1.0,
-      "isMarker": false,
-      "isTest": false,
-      "distribution": "Maxwell",
-      "distributionParams": [1.0e-5],
-      "distributionAddMomentum": [0.0,0.0,0.0]
-    }
-
-
-  ],
-  "Laser":[
-    {
-      "enabled": true,
-      "type": "GAUSSIAN",
-      "polarization": "S",
-      "durationFWHM": 5.0,
-      "initialPosition": -5.5,
-      "waist": 4,
-      "focusPosition": 0.0,
-      "a": 8.0,
-      "lambda": 1.0,
-      "rotation": false,
-      "angle": 10.0,
-      "center": 0,
-      "riseTime": 2
+    "MovingWindow":{
+        "enabled": false,
+        "start": 0,
+        "NO_beta": 1,
+        "NO_frequency":20
     },
-    {
-      "enabled": false,
-      "type": "COS2_PLANE_WAVE",
-      "polarization": "P",
-      "durationFWHM": 5.0,
-      "initialPosition": 5.5,
-      "a": 8.0
-    }
-  ],
-  "Domains":[
-    {
-      "name": "subd1",
-      "freeDim": [1,1,1],
-      "pointCoord": [0.0,0.0,0.0],
-      "xRange": [-10, 10],
-      "yRange": [-10, 10],
-      "zRange": [-10, 10]
+    "restart":{
+        "DumpPath": "DUMP",
+        "doRestart": false,
+        "restartFromDump": 1,
+        "doDump": false,
+        "dumpEvery": 2.0
     },
-    {
-      "name": "subd2",
-      "freeDim": [1,0,0],
-      "pointCoord": [0.0,0.0756,0.0],
-      "xRange": [-10, 10],
-      "yRange": [-11, 11],
-      "zRange": [-12, 12]
-    }
+    "special":{"variabile1": 32,"variabile2": 32.5},
+    "Plasma":[
+        {
+            "name": "bulk",
+            "densityFunction": "box",
+            "XRangeBox" : [-10, 10],
+            "YRangeBox" : [-10, 10],
+            "ZRangeBox" : [-10, 10],
+            "DensityCoefficient" : 1.0,
+            "DensityLambda" : 1.0
+        }
+    ],
+    "Species":[
+        {
+            "enabled": true,
+            "name": "ELE1",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "isMarker": false,
+            "isTest": false,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,-1.0]
+        },
+        {
+            "enabled": true,
+            "name": "ELE2",
+            "plasma": "bulk",
+            "ParticlesPerCell": [3,3,3],
+            "type": "ELECTRON",
+            "isMarker": false,
+            "isTest": false,
+            "distribution": "Maxwell",
+            "distributionParams": [1.0e-5],
+            "distributionAddMomentum": [0.0,0.0,1.0]
+        }
+    ],
+    "multifileGroupSize": 2048,
+    "fieldGroupSize": 128,
+    "particleGroupSize": 128,
+    "particleBufferSize": 1000000,
+    "Output":[
+        {"type": "EB", "every": 1.0},
+        {"type": "Density", "spec": "ELE1", "every": 1.0},
+        {"type": "Density", "spec": "ELE2", "every": 1.0},
+        {"type": "PhSp", "spec": "ELE1", "every": 1.0},
+        {"type": "PhSp", "spec": "ELE2", "every": 1.0},
 
-  ],
-  "multifileGroupSize": 2048,
-  "fieldGroupSize": 128,
-  "particleGroupSize": 128,
-  "particleBufferSize": 1000000,
-  "Output":[
-    {"type": "EB", "from":0.0, "to": 10.0, "every": 10.0},
-    {"type": "Density", "spec": "ELE1", "at": 5.0, "every":10.0},
-    {"type": "Diag", "every": 0.5, "at": 13.75}
+        {"type": "Diag", "every": 0.5}
 
-  ]
+    ]
 
 }

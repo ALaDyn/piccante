@@ -2620,6 +2620,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
       ux = pData[pIndex( 3, p, Ncomp, Np)];
       uy = pData[pIndex( 4, p, Ncomp, Np)];
       uz = pData[pIndex( 5, p, Ncomp, Np)];
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
@@ -2640,7 +2641,6 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         ux = pData[pIndex( 3, p, Ncomp, Np)];
         uy = pData[pIndex( 4, p, Ncomp, Np)];
         uz = pData[pIndex( 5, p, Ncomp, Np)];
-
         gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
         for (c = 0; c < 3; c++)
