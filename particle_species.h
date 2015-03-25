@@ -69,14 +69,10 @@ public:
   static const int myNarrowWidth = 6;
 
   std::string getName();
-  void init_output_diag(std::ofstream &ff);
-  void output_diag(int istep, std::ofstream &ff);
+  //void init_output_diag(std::ofstream &ff);
+  //void output_diag(int istep, std::ofstream &ff);
   void init_output_extrems(std::ofstream &ff);
   void output_extrems(int istep, std::ofstream &ff);
-  void init_output_stat(std::ofstream &fdiag, std::ofstream &fextrem);
-  void output_stat(int istep, std::ofstream &fdiag, std::ofstream &fextrem, std::ofstream &fspectrum);
-  void position_advance();
-  void position_pbc();
   void position_parallel_pbc();
   void position_obc();
   void momenta_advance(EM_FIELD *ebfield);

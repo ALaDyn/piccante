@@ -29,7 +29,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 //*****VERSION*****
-#define CURRENT_VERSION "version 1.4.0"
+#define CURRENT_VERSION "version 1.4.2"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2

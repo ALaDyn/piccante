@@ -839,29 +839,30 @@ void SPECIE::output(std::ofstream &ff)
   }
 }
 
-void SPECIE::init_output_diag(std::ofstream &ff){
-  if (mygrid->withParticles == NO)
-    return;
+//void SPECIE::init_output_diag(std::ofstream &ff){
+//  if (mygrid->withParticles == NO)
+//    return;
 
-  if (mygrid->myid == mygrid->master_proc){
-    ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time" << " " << std::setw(myWidth) << "Etot";
-    ff << " " << std::setw(myWidth) << "Px" << " " << std::setw(myWidth) << "Py" << " " << std::setw(myWidth) << "Pz" << std::endl;
-  }
-}
-void SPECIE::output_diag(int istep, std::ofstream &ff){
-  if (mygrid->withParticles == NO)
-    return;
+//  if (mygrid->myid == mygrid->master_proc){
+//    ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time" << " " << std::setw(myWidth) << "Etot";
+//    ff << " " << std::setw(myWidth) << "Px" << " " << std::setw(myWidth) << "Py" << " " << std::setw(myWidth) << "Pz" << std::endl;
+//  }
+//}
+//void SPECIE::output_diag(int istep, std::ofstream &ff){
+//  if (mygrid->withParticles == NO)
+//    return;
 
-  //double extrema[14];
-  computeKineticEnergyWExtrems();
-  if (mygrid->myid == mygrid->master_proc){
-    ff << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
-    for (int c = 0; c < 3; c++){
-      ff << " " << std::setw(myWidth) << totalMomentum[c];
-    }
-    ff << std::endl;
-  }
-}
+//  //double extrema[14];
+//  computeKineticEnergyWExtrems();
+//  if (mygrid->myid == mygrid->master_proc){
+//    ff << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
+//    for (int c = 0; c < 3; c++){
+//      ff << " " << std::setw(myWidth) << totalMomentum[c];
+//    }
+//    ff << std::endl;
+//  }
+//}
+
 void SPECIE::init_output_extrems(std::ofstream &ff){
   if (mygrid->withParticles == NO)
     return;
@@ -891,47 +892,6 @@ void SPECIE::output_extrems(int istep, std::ofstream &ff){
     ff << std::endl;
   }
 }
-void SPECIE::init_output_stat(std::ofstream &fdiag, std::ofstream &fextrem){
-  if (mygrid->withParticles == NO)
-    return;
-
-  init_output_extrems(fextrem);
-  init_output_diag(fdiag);
-}
-void SPECIE::output_stat(int istep, std::ofstream &fdiag, std::ofstream &fextrem, std::ofstream &fspectrum){
-  if (mygrid->withParticles == NO)
-    return;
-
-
-  computeKineticEnergyWExtrems();
-
-  if (mygrid->myid == mygrid->master_proc){
-    fdiag << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
-    for (int c = 0; c < 3; c++){
-      fdiag << " " << std::setw(myWidth) << totalMomentum[c];
-    }
-    fdiag << std::endl;
-
-    fextrem << std::setw(myNarrowWidth) << istep << " " << std::setw(myWidth) << mygrid->time;
-    for (int c = 0; c < 7; c++){
-      fextrem << " " << std::setw(myWidth) << minima[c] << " " << std::setw(myWidth) << maxima[c];
-    }
-    fextrem << std::endl;
-
-    fspectrum << "#" << std::setw(myWidth) << "Ebinmin";
-    fspectrum << " " << std::setw(myWidth) << "Ebinmax";
-    fspectrum << " " << std::setw(myWidth) << "value";
-    fspectrum << std::endl;
-    for (int ibin = 0; ibin < spectrum.Nbin; ibin++){
-      fspectrum << " " << std::setw(myWidth) << (ibin*spectrum.Dk);
-      fspectrum << " " << std::setw(myWidth) << ((ibin + 1)*spectrum.Dk);
-      fspectrum << " " << std::setw(myWidth) << (spectrum.values[ibin]);
-      fspectrum << std::endl;
-
-    }
-  }
-
-}
 
 void SPECIE::outputSpectrum(std::ofstream &fspectrum){
   computeKineticEnergyWExtrems();
@@ -950,86 +910,6 @@ void SPECIE::outputSpectrum(std::ofstream &fspectrum){
   }
 }
 
-
-void SPECIE::position_advance()
-{
-  if (mygrid->withParticles == NO)
-    return;
-
-  double dt, gamma_i;
-  int p;
-
-  dt = mygrid->dt;
-
-  switch (mygrid->getDimensionality())
-  {
-    case 3:
-      //#pragma omp parallel for
-      for (p = 0; p < Np; p++)
-      {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-        r0(p) += dt*gamma_i*u0(p);
-        r1(p) += dt*gamma_i*u1(p);
-        r2(p) += dt*gamma_i*u2(p);
-
-      }
-      break;
-    case 2:
-
-      for (p = 0; p < Np; p++)
-      {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-        r0(p) += dt*gamma_i*u0(p);
-        r1(p) += dt*gamma_i*u1(p);
-
-      }
-      break;
-    case 1:
-
-      for (p = 0; p < Np; p++)
-      {
-        gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-        r0(p) += dt*gamma_i*u0(p);
-
-      }
-      break;
-
-  }
-}
-void SPECIE::position_pbc()
-{
-  if (mygrid->withParticles == NO)
-    return;
-
-  int p;
-
-  /*
-      cambiare in questo senso:
-      se una particella è persa, la scambio con l'ultima particella attiva e diminiusco di uno il numero di particelle attive
-      se anche questa è da buttare via, proseguon nella ricerca di partcielle buone con la penultima attiva fino a quando non trovo una buana
-      da sostiuire a quella in esame
-      così dicendo riduco Np_loc che è anche l'estremo del ciclo for
-
-      */
-
-  for (p = 0; p<Np; p++)
-  {
-    if (ru(0, p)> mygrid->rmaxloc[0])
-      ru(0, p) -= (mygrid->rmaxloc[0] - mygrid->rminloc[0]);
-    if (ru(0, p) < mygrid->rminloc[0])
-      ru(0, p) += (mygrid->rmaxloc[0] - mygrid->rminloc[0]);
-
-    if (ru(1, p) > mygrid->rmaxloc[1])
-      ru(1, p) -= (mygrid->rmaxloc[1] - mygrid->rminloc[1]);
-    if (ru(1, p) < mygrid->rminloc[1])
-      ru(1, p) += (mygrid->rmaxloc[1] - mygrid->rminloc[1]);
-
-    if (ru(2, p) > mygrid->rmaxloc[2])
-      ru(2, p) -= (mygrid->rmaxloc[2] - mygrid->rminloc[2]);
-    if (ru(2, p) < mygrid->rminloc[2])
-      ru(2, p) += (mygrid->rmaxloc[2] - mygrid->rminloc[2]);
-  }
-}
 void SPECIE::position_parallel_pbc()
 {
   if (mygrid->withParticles == NO)
