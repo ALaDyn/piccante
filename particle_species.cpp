@@ -1078,6 +1078,10 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
   int ebComp = ebfield->getNcomp();
   int N_grid[3];
   ebfield->writeN_grid(N_grid);
+  int Nx, Ny, Nz;
+  Nx=N_grid[0];
+  Ny=N_grid[1];
+  Nz=N_grid[2];
   switch (mygrid->getDimensionality())
   {
 
@@ -1111,6 +1115,9 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         }
         E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
+
+
+#ifdef OLDPUSHER
         for (k = 0; k < 3; k++)
         {
           k1 = k + wii[2] - 1;
@@ -1148,7 +1155,316 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
             }
           }
         }
+#else
+        {
+          double EXLLL, EXCLL, EXRLL, EXLCL, EXCCL, EXRCL, EXLRL, EXCRL, EXRRL;
+          double EYLLL, EYCLL, EYRLL, EYLCL, EYCCL, EYRCL, EYLRL, EYCRL, EYRRL;
+          double EZLLL, EZCLL, EZRLL, EZLCL, EZCCL, EZRCL, EZLRL, EZCRL, EZRRL;
 
+          double EXLLC, EXCLC, EXRLC, EXLCC, EXCCC, EXRCC, EXLRC, EXCRC, EXRRC;
+          double EYLLC, EYCLC, EYRLC, EYLCC, EYCCC, EYRCC, EYLRC, EYCRC, EYRRC;
+          double EZLLC, EZCLC, EZRLC, EZLCC, EZCCC, EZRCC, EZLRC, EZCRC, EZRRC;
+
+          double EXLLR, EXCLR, EXRLR, EXLCR, EXCCR, EXRCR, EXLRR, EXCRR, EXRRR;
+          double EYLLR, EYCLR, EYRLR, EYLCR, EYCCR, EYRCR, EYLRR, EYCRR, EYRRR;
+          double EZLLR, EZCLR, EZRLR, EZLCR, EZCCR, EZRCR, EZLRR, EZCRR, EZRRR;
+
+          double BXLLL, BXCLL, BXRLL, BXLCL, BXCCL, BXRCL, BXLRL, BXCRL, BXRRL;
+          double BYLLL, BYCLL, BYRLL, BYLCL, BYCCL, BYRCL, BYLRL, BYCRL, BYRRL;
+          double BZLLL, BZCLL, BZRLL, BZLCL, BZCCL, BZRCL, BZLRL, BZCRL, BZRRL;
+
+          double BXLLC, BXCLC, BXRLC, BXLCC, BXCCC, BXRCC, BXLRC, BXCRC, BXRRC;
+          double BYLLC, BYCLC, BYRLC, BYLCC, BYCCC, BYRCC, BYLRC, BYCRC, BYRRC;
+          double BZLLC, BZCLC, BZRLC, BZLCC, BZCCC, BZRCC, BZLRC, BZCRC, BZRRC;
+
+          double BXLLR, BXCLR, BXRLR, BXLCR, BXCCR, BXRCR, BXLRR, BXCRR, BXRRR;
+          double BYLLR, BYCLR, BYRLR, BYLCR, BYCCR, BYRCR, BYLRR, BYCRR, BYRRR;
+          double BZLLR, BZCLR, BZRLR, BZLCR, BZCCR, BZRCR, BZLRR, BZCRR, BZRRR;
+          int iiL, iiC, iiR, hiL, hiC, hiR;
+          iiL = wii[0]-1;
+          iiC = wii[0];
+          iiR = wii[0]+1;
+          hiL = hii[0]-1;
+          hiC = hii[0];
+          hiR = hii[0]+1;
+
+          int ijL, ijC, ijR, hjL, hjC, hjR;
+          ijL = wii[1]-1;
+          ijC = wii[1];
+          ijR = wii[1]+1;
+          hjL = hii[1]-1;
+          hjC = hii[1];
+          hjR = hii[1]+1;
+
+          int ikL, ikC, ikR, hkL, hkC, hkR;
+          ikL = wii[2]-1;
+          ikC = wii[2];
+          ikR = wii[2]+1;
+          hkL = hii[2]-1;
+          hkC = hii[2];
+          hkR = hii[2]+1;
+
+          {
+            EXLLL = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXCLL = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXRLL = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXLCL = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXCCL = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXRCL = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXLRL = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, ebComp)];
+            EXCRL = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, ebComp)];
+            EXRRL = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, ebComp)];
+
+            EYLLL = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYCLL = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYRLL = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYLCL = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYCCL = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYRCL = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYLRL = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            EYCRL = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            EYRRL = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
+
+            EZLLL = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZCLL = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZRLL = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZLCL = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZCCL = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZRCL = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZLRL = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            EZCRL = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            EZRRL = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            EXLLC = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXCLC = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXRLC = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXLCC = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXCCC = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXRCC = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXLRC = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXCRC = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXRRC = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
+
+            EYLLC = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYCLC = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYRLC = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYLCC = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYCCC = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYRCC = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYLRC = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYCRC = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYRRC = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+
+            EZLLC = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZCLC = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZRLC = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZLCC = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZCCC = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZRCC = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZLRC = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZCRC = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZRRC = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            EXLLR = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXCLR = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXRLR = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXLCR = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXCCR = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXRCR = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXLRR = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, ebComp)];
+            EXCRR = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, ebComp)];
+            EXRRR = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, ebComp)];
+
+            EYLLR = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYCLR = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYRLR = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYLCR = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYCCR = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYRCR = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYLRR = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            EYCRR = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            EYRRR = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
+
+            EZLLR = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZCLR = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZRLR = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZLCR = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZCCR = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZRCR = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZLRR = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            EZCRR = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            EZRRR = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            BXLLL = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXCLL = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXRLL = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXLCL = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXCCL = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXRCL = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXLRL = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkL, Nx, Ny, Nz, ebComp)];
+            BXCRL = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkL, Nx, Ny, Nz, ebComp)];
+            BXRRL = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkL, Nx, Ny, Nz, ebComp)];
+
+            BYLLL = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYCLL = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYRLL = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYLCL = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYCCL = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYRCL = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYLRL = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            BYCRL = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            BYRRL = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
+
+            BZLLL = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZCLL = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZRLL = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZLCL = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZCCL = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZRCL = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZLRL = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            BZCRL = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            BZRRL = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            BXLLC = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXCLC = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXRLC = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXLCC = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXCCC = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXRCC = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXLRC = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXCRC = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXRRC = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
+
+            BYLLC = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYCLC = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYRLC = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYLCC = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYCCC = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYRCC = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYLRC = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYCRC = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYRRC = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+
+            BZLLC = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZCLC = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZRLC = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZLCC = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZCCC = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZRCC = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZLRC = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZCRC = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZRRC = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            BXLLR = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXCLR = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXRLR = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXLCR = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXCCR = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXRCR = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXLRR = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkR, Nx, Ny, Nz, ebComp)];
+            BXCRR = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkR, Nx, Ny, Nz, ebComp)];
+            BXRRR = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkR, Nx, Ny, Nz, ebComp)];
+
+            BYLLR = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYCLR = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYRLR = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYLCR = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYCCR = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYRCR = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYLRR = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            BYCRR = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            BYRRR = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
+
+            BZLLR = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZCLR = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZRLR = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZLCR = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZCCR = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZRCR = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZLRR = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            BZCRR = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            BZRRR = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            E[0] += wiw[2][0]*( (wiw[1][0] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
+                            + (wiw[1][1] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
+                            + (wiw[1][2] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL)))
+                + wiw[2][1]*( (wiw[1][0] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
+                            + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
+                            + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)))
+                + wiw[2][2]*( (wiw[1][0] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
+                            + (wiw[1][1] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
+                            + (wiw[1][2] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR)));
+
+
+
+            E[1] += wiw[2][0]*( (hiw[1][0] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
+                            + (hiw[1][1] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
+                            + (hiw[1][2] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL)))
+                + wiw[2][1]*( (hiw[1][0] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
+                            + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
+                            + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)))
+                + wiw[2][2]*( (hiw[1][0] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
+                            + (hiw[1][1] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
+                            + (hiw[1][2] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR)));
+
+            E[2] += hiw[2][0]*( (wiw[1][0] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
+                            + (wiw[1][1] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
+                            + (wiw[1][2] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL)))
+                + hiw[2][1]*( (wiw[1][0] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
+                            + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
+                            + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)))
+                + hiw[2][2]*( (wiw[1][0] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
+                            + (wiw[1][1] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
+                            + (wiw[1][2] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR)));
+
+
+            B[0] += hiw[2][0]*( (hiw[1][0] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
+                            + (hiw[1][1] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
+                            + (hiw[1][2] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL)))
+                + hiw[2][1]*( (hiw[1][0] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
+                            + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
+                            + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)))
+                + hiw[2][2]*( (hiw[1][0] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
+                            + (hiw[1][1] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
+                            + (hiw[1][2] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR)));
+
+
+            B[1] += hiw[2][2]*( (wiw[1][0] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
+                            + (wiw[1][1] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
+                            + (wiw[1][2] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR)))
+                + hiw[2][0]*( (wiw[1][0] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
+                            + (wiw[1][1] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
+                            + (wiw[1][2] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL)))
+                + hiw[2][1]*( (wiw[1][0] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
+                            + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
+                            + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
+
+            B[2] += wiw[2][0]*( (hiw[1][0] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
+                            + (hiw[1][1] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
+                            + (hiw[1][2] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL)))
+                + wiw[2][1]*( (hiw[1][0] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
+                            + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
+                            + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)))
+                + wiw[2][2]*( (hiw[1][0] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
+                            + (hiw[1][1] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
+                            + (hiw[1][2] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR)));
+          }
+
+        }
+
+#endif
         u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
         u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
         u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
@@ -1210,6 +1526,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         }
         E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
+        #ifdef OLDPUSHER
         k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
@@ -1258,7 +1575,134 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 #endif
           }
         }
+#else
+        {
 
+          double EXLLC, EXCLC, EXRLC, EXLCC, EXCCC, EXRCC, EXLRC, EXCRC, EXRRC;
+          double EYLLC, EYCLC, EYRLC, EYLCC, EYCCC, EYRCC, EYLRC, EYCRC, EYRRC;
+          double EZLLC, EZCLC, EZRLC, EZLCC, EZCCC, EZRCC, EZLRC, EZCRC, EZRRC;
+
+
+          double BXLLC, BXCLC, BXRLC, BXLCC, BXCCC, BXRCC, BXLRC, BXCRC, BXRRC;
+          double BYLLC, BYCLC, BYRLC, BYLCC, BYCCC, BYRCC, BYLRC, BYCRC, BYRRC;
+          double BZLLC, BZCLC, BZRLC, BZLCC, BZCCC, BZRCC, BZLRC, BZCRC, BZRRC;
+
+          int iiL, iiC, iiR, hiL, hiC, hiR;
+          iiL = wii[0]-1;
+          iiC = wii[0];
+          iiR = wii[0]+1;
+          hiL = hii[0]-1;
+          hiC = hii[0];
+          hiR = hii[0]+1;
+
+          int ijL, ijC, ijR, hjL, hjC, hjR;
+          ijL = wii[1]-1;
+          ijC = wii[1];
+          ijR = wii[1]+1;
+          hjL = hii[1]-1;
+          hjC = hii[1];
+          hjR = hii[1]+1;
+
+          int ikC, hkC;
+          ikC = 0;
+          hkC = 0;
+
+
+          {
+            EXLLC = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXCLC = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXRLC = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXLCC = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXCCC = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXRCC = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXLRC = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXCRC = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXRRC = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
+
+            EYLLC = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYCLC = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYRLC = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYLCC = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYCCC = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYRCC = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYLRC = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYCRC = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYRRC = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+
+            EZLLC = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZCLC = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZRLC = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZLCC = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZCCC = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZRCC = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZLRC = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZCRC = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZRRC = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+          }
+
+
+          {
+            BXLLC = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXCLC = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXRLC = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXLCC = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXCCC = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXRCC = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXLRC = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXCRC = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXRRC = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
+
+            BYLLC = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYCLC = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYRLC = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYLCC = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYCCC = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYRCC = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYLRC = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYCRC = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYRRC = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+
+            BZLLC = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZCLC = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZRLC = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZLCC = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZCCC = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZRCC = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZLRC = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZCRC = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZRRC = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+          }
+
+          {
+            E[0] += ( (wiw[1][0] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
+                + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
+                + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)));
+
+            E[1] += ( (hiw[1][0] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
+                + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
+                + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)));
+
+            E[2] += ( (wiw[1][0] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
+                + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
+                + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)));
+
+
+            B[0] += ( (hiw[1][0] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
+                + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
+                + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)));
+
+            B[1] += ( (wiw[1][0] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
+                + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
+                + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
+
+            B[2] += ( (hiw[1][0] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
+                + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
+                + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)));
+          }
+
+        }
+
+#endif
         u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
         u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
         u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
