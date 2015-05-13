@@ -27,7 +27,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _REORDER_MPI_CART_PROCESSES 1
 
 #include <string>
-
+#include <stdint.h>
 //*****VERSION*****
 #define CURRENT_VERSION "version 1.4.2"
 
@@ -93,10 +93,10 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 //inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
 //  return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
 //}
-inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+inline uint64_t my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
   return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
 }
-inline int pIndex(int c, int p, int Ncomp, int Npart){
+inline uint64_t pIndex(int c, int p, int Ncomp, int Npart){
   return c + p*Ncomp;
 }
 
