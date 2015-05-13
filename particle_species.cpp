@@ -1398,68 +1398,68 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
           {
             E[0] += wiw[2][0]*( (wiw[1][0] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
-                            + (wiw[1][1] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
-                            + (wiw[1][2] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL)))
+                + (wiw[1][1] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
+                + (wiw[1][2] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL)))
                 + wiw[2][1]*( (wiw[1][0] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                            + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                            + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)))
+                + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
+                + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)))
                 + wiw[2][2]*( (wiw[1][0] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
-                            + (wiw[1][1] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
-                            + (wiw[1][2] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR)));
+                + (wiw[1][1] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
+                + (wiw[1][2] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR)));
 
 
 
             E[1] += wiw[2][0]*( (hiw[1][0] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
-                            + (hiw[1][1] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
-                            + (hiw[1][2] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL)))
+                + (hiw[1][1] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
+                + (hiw[1][2] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL)))
                 + wiw[2][1]*( (hiw[1][0] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                            + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                            + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)))
+                + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
+                + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)))
                 + wiw[2][2]*( (hiw[1][0] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
-                            + (hiw[1][1] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
-                            + (hiw[1][2] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR)));
+                + (hiw[1][1] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
+                + (hiw[1][2] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR)));
 
             E[2] += hiw[2][0]*( (wiw[1][0] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
-                            + (wiw[1][1] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
-                            + (wiw[1][2] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL)))
+                + (wiw[1][1] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
+                + (wiw[1][2] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL)))
                 + hiw[2][1]*( (wiw[1][0] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                            + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                            + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)))
+                + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
+                + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)))
                 + hiw[2][2]*( (wiw[1][0] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
-                            + (wiw[1][1] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
-                            + (wiw[1][2] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR)));
+                + (wiw[1][1] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
+                + (wiw[1][2] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR)));
 
 
             B[0] += hiw[2][0]*( (hiw[1][0] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
-                            + (hiw[1][1] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
-                            + (hiw[1][2] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL)))
+                + (hiw[1][1] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
+                + (hiw[1][2] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL)))
                 + hiw[2][1]*( (hiw[1][0] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                            + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                            + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)))
+                + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
+                + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)))
                 + hiw[2][2]*( (hiw[1][0] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
-                            + (hiw[1][1] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
-                            + (hiw[1][2] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR)));
+                + (hiw[1][1] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
+                + (hiw[1][2] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR)));
 
 
             B[1] += hiw[2][2]*( (wiw[1][0] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
-                            + (wiw[1][1] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
-                            + (wiw[1][2] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR)))
+                + (wiw[1][1] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
+                + (wiw[1][2] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR)))
                 + hiw[2][0]*( (wiw[1][0] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
-                            + (wiw[1][1] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
-                            + (wiw[1][2] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL)))
+                + (wiw[1][1] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
+                + (wiw[1][2] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL)))
                 + hiw[2][1]*( (wiw[1][0] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                            + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                            + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
+                + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
+                + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
 
             B[2] += wiw[2][0]*( (hiw[1][0] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
-                            + (hiw[1][1] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
-                            + (hiw[1][2] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL)))
+                + (hiw[1][1] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
+                + (hiw[1][2] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL)))
                 + wiw[2][1]*( (hiw[1][0] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                            + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                            + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)))
+                + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
+                + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)))
                 + wiw[2][2]*( (hiw[1][0] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
-                            + (hiw[1][1] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
-                            + (hiw[1][2] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR)));
+                + (hiw[1][1] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
+                + (hiw[1][2] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR)));
           }
 
         }
@@ -1526,7 +1526,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         }
         E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-        #ifdef OLDPUSHER
+#ifdef OLDPUSHER
         k1 = k2 = 0;
         for (j = 0; j < 3; j++)
         {
@@ -2955,12 +2955,14 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     }
     return;
   }
-
+  int Nx, Ny, Nz;
+  Nx=N_grid[0];
+  Ny=N_grid[1];
+  Nz=N_grid[2];
   switch (mygrid->getDimensionality())
   {
     case 3:
-      for (p = 0; p < Np; p++)
-      {
+      for (p = 0; p < Np; p++){
         double ux, uy, uz;
         ux = pData[pIndex( 3, p, Ncomp, Np)];
         uy = pData[pIndex( 4, p, Ncomp, Np)];
@@ -2999,6 +3001,8 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
         }
 
+        double myweight = pData[pIndex( 6, p, Ncomp, Np)];
+#ifdef OLDCURRENT
 
         for (k = 0; k < 3; k++)
         {
@@ -3027,19 +3031,265 @@ void SPECIE::current_deposition_standard(CURRENT *current)
               dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
               *JZ += weight*dvol*vv[2] * chargeSign;
 #else
-                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                    current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                    current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                    current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
- #endif
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                  current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                  current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                  current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#endif
 
 
             }
           }
         }
       }
+#else
+        {
+          double *JXLLL, *JXCLL, *JXRLL, *JXLCL, *JXCCL, *JXRCL, *JXLRL, *JXCRL, *JXRRL;
+          double *JYLLL, *JYCLL, *JYRLL, *JYLCL, *JYCCL, *JYRCL, *JYLRL, *JYCRL, *JYRRL;
+          double *JZLLL, *JZCLL, *JZRLL, *JZLCL, *JZCCL, *JZRCL, *JZLRL, *JZCRL, *JZRRL;
+
+          double *JXLLC, *JXCLC, *JXRLC, *JXLCC, *JXCCC, *JXRCC, *JXLRC, *JXCRC, *JXRRC;
+          double *JYLLC, *JYCLC, *JYRLC, *JYLCC, *JYCCC, *JYRCC, *JYLRC, *JYCRC, *JYRRC;
+          double *JZLLC, *JZCLC, *JZRLC, *JZLCC, *JZCCC, *JZRCC, *JZLRC, *JZCRC, *JZRRC;
+
+          double *JXLLR, *JXCLR, *JXRLR, *JXLCR, *JXCCR, *JXRCR, *JXLRR, *JXCRR, *JXRRR;
+          double *JYLLR, *JYCLR, *JYRLR, *JYLCR, *JYCCR, *JYRCR, *JYLRR, *JYCRR, *JYRRR;
+          double *JZLLR, *JZCLR, *JZRLR, *JZLCR, *JZCCR, *JZRCR, *JZLRR, *JZCRR, *JZRRR;
+
+
+          int iiL, iiC, iiR, hiL, hiC, hiR;
+          iiL = wii[0]-1;
+          iiC = wii[0];
+          iiR = wii[0]+1;
+          hiL = hii[0]-1;
+          hiC = hii[0];
+          hiR = hii[0]+1;
+
+          int ijL, ijC, ijR, hjL, hjC, hjR;
+          ijL = wii[1]-1;
+          ijC = wii[1];
+          ijR = wii[1]+1;
+          hjL = hii[1]-1;
+          hjC = hii[1];
+          hjR = hii[1]+1;
+
+          int ikL, ikC, ikR, hkL, hkC, hkR;
+          ikL = wii[2]-1;
+          ikC = wii[2];
+          ikR = wii[2]+1;
+          hkL = hii[2]-1;
+          hkC = hii[2];
+          hkR = hii[2]+1;
+
+
+          {
+            JXLLL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCLL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRLL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLCL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCCL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRCL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLRL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCRL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRRL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCLL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRLL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLCL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCCL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRCL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLRL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCRL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRRL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCLL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRLL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLCL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCCL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRCL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLRL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCRL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRRL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+            JXLLC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCLC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRLC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLCC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCCC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRCC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLRC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCRC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRRC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCLC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRLC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLCC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCCC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRCC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLRC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCRC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRRC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCLC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRLC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLCC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCCC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRCC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLRC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCRC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRRC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+            JXLLR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCLR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRLR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLCR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCCR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRCR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLRR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCRR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRRR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCLR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRLR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLCR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCCR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRCR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLRR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCRR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRRR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCLR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRLR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLCR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCCR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRCR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLRR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCRR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRRR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+
+            double WSVx, WSVy, WSVz;
+            WSVx =myweight*vv[0]*chargeSign;
+            WSVy =myweight*vv[1]*chargeSign;
+            WSVz =myweight*vv[2]*chargeSign;
+
+            {
+              *JXLLL += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][0];
+              *JXCLL += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][0];
+              *JXRLL += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][0];
+              *JXLCL += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][0];
+              *JXCCL += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][0];
+              *JXRCL += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][0];
+              *JXLRL += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][0];
+              *JXCRL += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][0];
+              *JXRRL += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][0];
+
+              *JXLLC += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][1];
+              *JXCLC += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][1];
+              *JXRLC += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][1];
+              *JXLCC += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][1];
+              *JXCCC += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][1];
+              *JXRCC += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][1];
+              *JXLRC += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][1];
+              *JXCRC += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][1];
+              *JXRRC += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][1];
+
+              *JXLLR += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][2];
+              *JXCLR += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][2];
+              *JXRLR += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][2];
+              *JXLCR += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][2];
+              *JXCCR += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][2];
+              *JXRCR += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][2];
+              *JXLRR += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][2];
+              *JXCRR += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][2];
+              *JXRRR += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][2];
+            }
+
+            {
+              *JYLLL += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][0];
+              *JYCLL += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][0];
+              *JYRLL += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][0];
+              *JYLCL += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][0];
+              *JYCCL += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][0];
+              *JYRCL += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][0];
+              *JYLRL += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][0];
+              *JYCRL += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][0];
+              *JYRRL += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][0];
+
+              *JYLLC += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][1];
+              *JYCLC += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][1];
+              *JYRLC += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][1];
+              *JYLCC += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][1];
+              *JYCCC += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][1];
+              *JYRCC += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][1];
+              *JYLRC += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][1];
+              *JYCRC += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][1];
+              *JYRRC += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][1];
+
+              *JYLLR += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][2];
+              *JYCLR += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][2];
+              *JYRLR += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][2];
+              *JYLCR += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][2];
+              *JYCCR += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][2];
+              *JYRCR += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][2];
+              *JYLRR += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][2];
+              *JYCRR += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][2];
+              *JYRRR += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][2];
+            }
+
+            {
+              *JZLLL += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][0];
+              *JZCLL += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][0];
+              *JZRLL += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][0];
+              *JZLCL += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][0];
+              *JZCCL += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][0];
+              *JZRCL += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][0];
+              *JZLRL += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][0];
+              *JZCRL += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][0];
+              *JZRRL += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][0];
+
+              *JZLLC += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][1];
+              *JZCLC += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][1];
+              *JZRLC += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][1];
+              *JZLCC += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][1];
+              *JZCCC += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][1];
+              *JZRCC += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][1];
+              *JZLRC += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][1];
+              *JZCRC += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][1];
+              *JZRRC += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][1];
+
+              *JZLLR += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][2];
+              *JZCLR += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][2];
+              *JZRLR += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][2];
+              *JZLCR += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][2];
+              *JZCCR += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][2];
+              *JZRCR += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][2];
+              *JZLRR += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][2];
+              *JZCRR += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][2];
+              *JZRRR += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][2];
+            }
+
+
+          }
+        }
+#endif
+      }
+
+
       break;
 
     case 2:
@@ -3185,12 +3435,12 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           *JZ += weight*dvol*vv[2] * chargeSign;
 #else
 
-            dvol = hiw[0][i],
-                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i],
-                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i],
-                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+          dvol = hiw[0][i],
+              current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i],
+              current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i],
+              current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 #endif
         }
       }
@@ -3340,7 +3590,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
                     current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
                 dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
                     current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
- #endif
+#endif
 
               }
             }
@@ -3360,18 +3610,18 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-                double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
-                double *JX, *JY, *JZ;
-                JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
+              double *JX, *JY, *JZ;
+              JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-                dvol = hiw[0][i] * wiw[1][j];
-                *JX += weight*dvol*vv[0] * chargeSign;
-                dvol = wiw[0][i] * hiw[1][j];
-                *JY += weight*dvol*vv[1] * chargeSign;
-                dvol = wiw[0][i] * wiw[1][j];
-                *JZ += weight*dvol*vv[2] * chargeSign;
+              dvol = hiw[0][i] * wiw[1][j];
+              *JX += weight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j];
+              *JY += weight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j];
+              *JZ += weight*dvol*vv[2] * chargeSign;
 #else
               dvol = hiw[0][i] * wiw[1][j],
                   current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
@@ -3393,18 +3643,18 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-                double weight =  pData[pIndex( 6, p, Ncomp, Np)];
-                double *JX, *JY, *JZ;
-                JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            double weight =  pData[pIndex( 6, p, Ncomp, Np)];
+            double *JX, *JY, *JZ;
+            JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-                dvol = hiw[0][i];
-                *JX += weight*dvol*vv[0] * chargeSign;
-                dvol = wiw[0][i];
-                *JY += weight*dvol*vv[1] * chargeSign;
-                dvol = wiw[0][i];
-                *JZ += weight*dvol*vv[2] * chargeSign;
+            dvol = hiw[0][i];
+            *JX += weight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i];
+            *JY += weight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i];
+            *JZ += weight*dvol*vv[2] * chargeSign;
 #else
 
             dvol = hiw[0][i],
