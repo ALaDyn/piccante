@@ -936,33 +936,34 @@ void SPECIE::position_parallel_pbc()
   {
     nlost = 0;
     ninright = ninleft = nright = nleft = 0;
+    double Length = (mygrid->rmax[direction] - mygrid->rmin[direction]);
     for (p = 0; p < Np; p++)
     {
-      if (ru(direction, p) > mygrid->rmaxloc[direction])
+      if (pData[direction + p*Ncomp] > mygrid->rmaxloc[direction])
       {
         nlost++;
         nright++;
         if (mygrid->rmyid[direction] == mygrid->rnproc[direction] - 1)
-          ru(direction, p) -= (mygrid->rmax[direction] - mygrid->rmin[direction]);
+          pData[direction + p*Ncomp] -= Length;
         sendr_buffer = (double*)realloc(sendr_buffer, nright*Ncomp*sizeof(double));
         for (c = 0; c < Ncomp; c++)
-          sendr_buffer[c + Ncomp*(nright - 1)] = ru(c, p);
+          sendr_buffer[c + Ncomp*(nright - 1)] = pData[c + p*Ncomp];
 
       }
-      else if (ru(direction, p) < mygrid->rminloc[direction])
+      else if (pData[direction + p*Ncomp] < mygrid->rminloc[direction])
       {
         nlost++;
         nleft++;
         if (mygrid->rmyid[direction] == 0)
-          ru(direction, p) += (mygrid->rmax[direction] - mygrid->rmin[direction]);
+          pData[direction + p*Ncomp] += Length;
         sendl_buffer = (double*)realloc(sendl_buffer, nleft*Ncomp*sizeof(double));
         for (c = 0; c < Ncomp; c++)
-          sendl_buffer[c + Ncomp*(nleft - 1)] = ru(c, p);
+          sendl_buffer[c + Ncomp*(nleft - 1)] = pData[c + p*Ncomp];
       }
       else
       {
         for (c = 0; c < Ncomp; c++)
-          ru(c, p - nlost) = ru(c, p);
+          pData[c + (p-nlost)*Ncomp] = pData[c + p*Ncomp];
       }
     }
     MPI_Cart_shift(mygrid->cart_comm, direction, 1, &ileft, &iright);
@@ -995,7 +996,7 @@ void SPECIE::position_parallel_pbc()
 
     for (int pp = 0; pp < nnew; pp++){
       for (c = 0; c < Ncomp; c++){
-        ru(c, pp + nold - nlost) = recv_buffer[pp*Ncomp + c];
+        pData[c + (pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
       }
     }
   }
