@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -38,16 +38,16 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 
 class CURRENT{
-  public:
-    double *getDataPointer();
-    void writeN_grid(int *N_grid);
-    int Ncomp; // N grid point including ghost cells,N_grid[0]*N_grid[1]*N_grid[2], comp number
-    //double max_value[6],min_value[6];  //12 utility values
+public:
+  double *getDataPointer();
+  void writeN_grid(int *N_grid);
+  int Ncomp; // N grid point including ghost cells,N_grid[0]*N_grid[1]*N_grid[2], comp number
+  //double max_value[6],min_value[6];  //12 utility values
 
-    CURRENT();
-    ~CURRENT();
-    void allocate(GRID *grid); //field allocation
-    void reallocate();	//REALLOCATION only if load balancing is introduced
+  CURRENT();
+  ~CURRENT();
+  void allocate(GRID *grid); //field allocation
+  void reallocate();  //REALLOCATION only if load balancing is introduced
   void setAllValuesToZero();
   CURRENT operator = (CURRENT &destro);
 

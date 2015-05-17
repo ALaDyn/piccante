@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -175,7 +175,7 @@ private:
   int dimensions;
   static const int edge = 2;
   static const int Nexchange = 1;
-double courantFactor;
+  double courantFactor;
   bool isDimensionalitySet;
 
   int totalNumberOfTimesteps;

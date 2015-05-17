@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -118,7 +118,7 @@ struct reqOutput{
   int task;
   int p;
   int packageSize;
-} ;
+};
 
 struct outDomain{
   double coordinates[3];

@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -18,7 +18,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "em_field.h"
-				    //#define OLD_ACCESS
+//#define OLD_ACCESS
 
 EM_FIELD::EM_FIELD()
 {
@@ -79,7 +79,7 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
 {
   if (allocated)
     memset((void*)val, 0, Ntot*Ncomp*sizeof(double));
-  else		{
+  else    {
 #ifndef NO_ALLOCATION
     printf("ERROR: erase_field\n");
     exit(17);
@@ -124,27 +124,27 @@ integer_or_halfinteger EM_FIELD::getCompCoords(int c){
   integer_or_halfinteger crd;
 
   switch (c){
-    case 0: //Ex
-      crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
-      break;
-    case 1://Ey
-      crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
-      break;
-    case 2://Ez
-      crd.x = _INTG_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
-      break;
-    case 3://Bx
-      crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _HALF_CRD;
-      break;
-    case 4://By
-      crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
-      break;
-    case 5://Bz
-      crd.x = _HALF_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
-      break;
-    default:
-      crd.x = _NULL_CRD; crd.y = _NULL_CRD; crd.z = _NULL_CRD;
-      break;
+  case 0: //Ex
+    crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
+    break;
+  case 1://Ey
+    crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
+    break;
+  case 2://Ez
+    crd.x = _INTG_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
+    break;
+  case 3://Bx
+    crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _HALF_CRD;
+    break;
+  case 4://By
+    crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
+    break;
+  case 5://Bz
+    crd.x = _HALF_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
+    break;
+  default:
+    crd.x = _NULL_CRD; crd.y = _NULL_CRD; crd.z = _NULL_CRD;
+    break;
   }
   return crd;
 }
@@ -211,8 +211,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
         for (int c = 0; c < Nc; c++)
         {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, (Nx - 1) - Nxchng + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-           send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = val[index];
+          size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, (Nx - 1) - Nxchng + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = val[index];
 #else
           send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = VEB(c, (Nx - 1) - Nxchng + i, j - edge, k - edge);
 #endif
@@ -220,8 +220,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 0, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+    MPI_COMM_WORLD, &status);
 
 
 
@@ -235,10 +235,10 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
           for (int c = 0; c < Nc; c++)
           {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - Nxchng, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          val[index] = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
-          index=my_indice(edge, YGrid_factor, ZGrid_factor, c, 1 + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = val[index];
+            size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - Nxchng, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            val[index] = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
+            index = my_indice(edge, YGrid_factor, ZGrid_factor, c, 1 + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = val[index];
 #else
             VEB(c, i - Nxchng, j - edge, k - edge) = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
             send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = VEB(c, 1 + i, j - edge, k - edge);
@@ -249,8 +249,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+    MPI_COMM_WORLD, &status);
 
   if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))){
 
@@ -261,8 +261,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
           for (int c = 0; c < Nc; c++)
           {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, Nx + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          val[index] =  recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
+            size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, Nx + i, j - edge, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            val[index] = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
 #else
             VEB(c, Nx + i, j - edge, k - edge) = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
 #endif
@@ -301,7 +301,7 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
         for (int c = 0; c < Nc; c++)
         {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, (Ny - 1) - Nxchng + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, (Ny - 1) - Nxchng + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
           send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = val[index];
 #else
           send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = VEB(c, i - edge, (Ny - 1) - Nxchng + j, k - edge);
@@ -311,8 +311,8 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 1, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+    MPI_COMM_WORLD, &status);
   // ======   send right: send_buff=right_edge
   if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != 0)){
 
@@ -323,10 +323,10 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
           for (int c = 0; c < Nc; c++)
           {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - Nxchng, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          val[index] = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
-          index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, 1 + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = val[index];
+            size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - Nxchng, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            val[index] = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
+            index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, 1 + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = val[index];
 #else
             VEB(c, i - edge, j - Nxchng, k - edge) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
             send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = VEB(c, i - edge, 1 + j, k - edge);
@@ -336,8 +336,8 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+    MPI_COMM_WORLD, &status);
   // ====== copy recv_buffer to the right edge
   if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != (mygrid->rnproc[1] - 1))){
 
@@ -348,8 +348,8 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
           for (int c = 0; c < Nc; c++)
           {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, Ny + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          val[index] =  recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
+            size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, Ny + j, k - edge, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+            val[index] = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
 #else
             VEB(c, i - edge, Ny + j, k - edge) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
 #endif
@@ -386,7 +386,7 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
         for (int c = 0; c < Nc; c++)
         {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, (Nz - 1) - Nxchng + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, (Nz - 1) - Nxchng + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
           send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = val[index];
 #else
           send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = VEB(c, i - edge, j - edge, (Nz - 1) - Nxchng + k);
@@ -395,8 +395,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 2, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+    MPI_COMM_WORLD, &status);
 
   // ====== update left boundary and send edge to left receive from right
 
@@ -407,9 +407,9 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
         for (int c = 0; c < Nc; c++)
         {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, k - Nxchng, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, k - Nxchng, N_grid[0], N_grid[1], N_grid[2], Ncomp);
           val[index] = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
-          index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, 1 + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, 1 + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
           send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = val[index];
 #else
           VEB(c, i - edge, j - edge, k - Nxchng) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
@@ -420,8 +420,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+    MPI_COMM_WORLD, &status);
   // ====== update right edge
 
   for (int k = 0; k < Nxchng; k++)
@@ -431,8 +431,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
         for (int c = 0; c < Nc; c++)
         {
 #ifndef OLD_ACCESS
-          int index=my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, Nz + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
-          val[index] =  recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
+          size_t index = my_indice(edge, YGrid_factor, ZGrid_factor, c, i - edge, j - edge, Nz + k, N_grid[0], N_grid[1], N_grid[2], Ncomp);
+          val[index] = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
 #else
           VEB(c, i - edge, j - edge, Nz + k) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
 #endif
@@ -652,7 +652,7 @@ void EM_FIELD::openBoundariesB(){
 
 void EM_FIELD::boundary_conditions()  // set on the ghost cells the boundary values
 {
-  if(!allocated){
+  if (!allocated){
     return;
   }
   EBEnergyExtremesFlag = false;
@@ -690,24 +690,24 @@ void EM_FIELD::new_halfadvance_B()
           double EZ, EZ_XP, EZ_YP;
           double EY, EY_XP, EY_ZP;
           double EX, EX_YP, EX_ZP;
-          EX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EX_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EX_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY_ZP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k+1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EZ_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j+1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EX = val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EX_YP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j + 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EX_ZP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k + 1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY_ZP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k + 1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EZ_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EZ_YP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j + 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
           double *BX, *BY, *BZ;
-          BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-          *BX -= 0.5*dt*(  dyi*(EZ_YP - EZ) - dzi*(EY_ZP - EY));
-          *BY -= 0.5*dt*(  dzi*(EX_ZP - EX) - dxi*(EZ_XP - EZ));
-          *BZ -= 0.5*dt*(  dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
+          *BX -= 0.5*dt*(dyi*(EZ_YP - EZ) - dzi*(EY_ZP - EY));
+          *BY -= 0.5*dt*(dzi*(EX_ZP - EX) - dxi*(EZ_XP - EZ));
+          *BZ -= 0.5*dt*(dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
 #else
 
           B0(i, j, k) -= 0.5*dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)) - dzi*(E1(i, j, k + 1) - E1(i, j, k)));
@@ -730,22 +730,22 @@ void EM_FIELD::new_halfadvance_B()
         double EZ, EZ_XP, EZ_YP;
         double EY, EY_XP;
         double EX, EX_YP;
-        EX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EX_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j+1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EZ_YP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j+1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EX = val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EX_YP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j + 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ_YP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j + 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
         double *BX, *BY, *BZ;
-        BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-        *BX -= 0.5*dt*(  dyi*(EZ_YP - EZ));
-        *BY -= 0.5*dt*( -dxi*(EZ_XP - EZ));
-        *BZ -= 0.5*dt*(  dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
+        *BX -= 0.5*dt*(dyi*(EZ_YP - EZ));
+        *BY -= 0.5*dt*(-dxi*(EZ_XP - EZ));
+        *BZ -= 0.5*dt*(dxi*(EY_XP - EY) - dyi*(EX_YP - EX));
 
 #else
         B0(i, j, k) -= 0.5*dt*(dyi*(E2(i, j + 1, k) - E2(i, j, k)));
@@ -765,18 +765,18 @@ void EM_FIELD::new_halfadvance_B()
 #ifndef OLD_ACCESS
       double EZ, EZ_XP;
       double EY, EY_XP;
-      EY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      EZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      EY_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      EZ_XP = val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i+1, j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
       double *BX, *BY, *BZ;
-      BX    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      BY    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      BZ    = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-      *BY -= 0.5*dt*( -dxi*(EZ_XP - EZ));
-      *BZ -= 0.5*dt*(  dxi*(EY_XP - EY));
+      *BY -= 0.5*dt*(-dxi*(EZ_XP - EZ));
+      *BZ -= 0.5*dt*(dxi*(EY_XP - EY));
 #else
       //B0(i,j,k)-=0.5*dt*(0);
       B1(i, j, k) -= 0.5*dt*(-dxi*(E2(i + 1, j, k) - E2(i, j, k)));
@@ -810,23 +810,23 @@ void EM_FIELD::new_advance_E(CURRENT *current)
           double BZ, BZ_XM, BZ_YM;
           double BY, BY_XM, BY_ZM;
           double BX, BX_YM, BX_ZM;
-          BX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BX_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BX_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BY_ZM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i, j,   k-1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          BZ_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BX = val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BX_YM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j - 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BX_ZM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k - 1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BY_ZM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k - 1, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BZ_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          BZ_YM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j - 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
           double *EX, *EY, *EZ;
-          EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-          EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+          EZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-          *EX += dt*(  dyi*(BZ - BZ_YM) - dzi*(BY - BY_ZM) - mygrid->den_factor*current->Jx(i, j, k) );
-          *EY += dt*(  dzi*(BX - BX_ZM) - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
-          *EZ += dt*(  dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k) );
+          *EX += dt*(dyi*(BZ - BZ_YM) - dzi*(BY - BY_ZM) - mygrid->den_factor*current->Jx(i, j, k));
+          *EY += dt*(dzi*(BX - BX_ZM) - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k));
+          *EZ += dt*(dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k));
 #else
           E0(i, j, k) += dt*((dyi*(B2(i, j, k) - B2(i, j - 1, k)) - dzi*(B1(i, j, k) - B1(i, j, k - 1))) - mygrid->den_factor*current->Jx(i, j, k));
           E1(i, j, k) += dt*((dzi*(B0(i, j, k) - B0(i, j, k - 1)) - dxi*(B2(i, j, k) - B2(i - 1, j, k))) - mygrid->den_factor*current->Jy(i, j, k));
@@ -847,21 +847,21 @@ void EM_FIELD::new_advance_E(CURRENT *current)
         double BZ, BZ_XM, BZ_YM;
         double BY, BY_XM;
         double BX, BX_YM;
-        BX    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BX_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 3, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        BZ_YM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j-1, k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BX = val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BX_YM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j - 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BY_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        BZ_YM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j - 1, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
         double *EX, *EY, *EZ;
-        EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-        EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+        EZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-        *EX += dt*(   dyi*(BZ - BZ_YM) - mygrid->den_factor*current->Jx(i, j, k) );
-        *EY += dt*( - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
-        *EZ += dt*(   dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k) );
+        *EX += dt*(dyi*(BZ - BZ_YM) - mygrid->den_factor*current->Jx(i, j, k));
+        *EY += dt*(-dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k));
+        *EZ += dt*(dxi*(BY - BY_XM) - dyi*(BX - BX_YM) - mygrid->den_factor*current->Jz(i, j, k));
 #else
         E0(i, j, k) += dt*((dyi*(B2(i, j, k) - B2(i, j - 1, k))) - mygrid->den_factor*current->Jx(i, j, k));
         E1(i, j, k) += dt*((-dxi*(B2(i, j, k) - B2(i - 1, j, k))) - mygrid->den_factor*current->Jy(i, j, k));
@@ -878,18 +878,18 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 #ifndef OLD_ACCESS
       double BZ, BZ_XM;
       double BY, BY_XM;
-      BY    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      BZ    = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      BY_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 4, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      BZ_XM = val[my_indice(edge,YGrid_factor, ZGrid_factor, 5, i-1, j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BY_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      BZ_XM = val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i - 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
       double *EX, *EY, *EZ;
-      EX   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 0, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      EY   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 1, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
-      EZ   = &val[my_indice(edge,YGrid_factor, ZGrid_factor, 2, i,   j,   k,   N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 0, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      EZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-      *EX += dt*(                    - mygrid->den_factor*current->Jx(i, j, k) );
-      *EY += dt*( - dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k) );
-      *EZ += dt*(   dxi*(BY - BY_XM) - mygrid->den_factor*current->Jz(i, j, k) );
+      *EX += dt*(-mygrid->den_factor*current->Jx(i, j, k));
+      *EY += dt*(-dxi*(BZ - BZ_XM) - mygrid->den_factor*current->Jy(i, j, k));
+      *EZ += dt*(dxi*(BY - BY_XM) - mygrid->den_factor*current->Jz(i, j, k));
 #else
       E0(i, j, k) += -dt*mygrid->den_factor*current->Jx(i, j, k);//dt*(0);
       E1(i, j, k) += dt*(-dxi*(B2(i, j, k) - B2(i - 1, j, k)) - mygrid->den_factor*current->Jy(i, j, k));
@@ -903,18 +903,18 @@ void EM_FIELD::init_output_diag(std::ofstream &ff)
 {
   if (mygrid->myid == mygrid->master_proc){
     ff << std::setw(myNarrowWidth) << "#step"
-       << " " << std::setw(myWidth) << "time"
-       << " " << std::setw(myWidth) << "Etot"
-       << " " << std::setw(myWidth) << "Ex2"
-       << " " << std::setw(myWidth) << "Ey2"
-       << " " << std::setw(myWidth) << "Ez2"
-       << " " << std::setw(myWidth) << "Bx2"
-       << " " << std::setw(myWidth) << "By2"
-       << " " << std::setw(myWidth) << "Bz2"
-       << " " << std::setw(myWidth) << "Sx"
-       << " " << std::setw(myWidth) << "Sy"
-       << " " << std::setw(myWidth) << "Sz"
-       << std::endl;
+      << " " << std::setw(myWidth) << "time"
+      << " " << std::setw(myWidth) << "Etot"
+      << " " << std::setw(myWidth) << "Ex2"
+      << " " << std::setw(myWidth) << "Ey2"
+      << " " << std::setw(myWidth) << "Ez2"
+      << " " << std::setw(myWidth) << "Bx2"
+      << " " << std::setw(myWidth) << "By2"
+      << " " << std::setw(myWidth) << "Bz2"
+      << " " << std::setw(myWidth) << "Sx"
+      << " " << std::setw(myWidth) << "Sy"
+      << " " << std::setw(myWidth) << "Sz"
+      << std::endl;
   }
 }
 void EM_FIELD::output_diag(int istep, std::ofstream &ff)
@@ -1027,39 +1027,39 @@ void EM_FIELD::smooth_filter(int filter_points){
 }
 
 void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
-  if(mygrid->myid==mygrid->master_proc){
+  if (mygrid->myid == mygrid->master_proc){
     std::string pulseType;
     switch (pulse->type){
-      case GAUSSIAN:
-        pulseType = "GAUSSIAN PULSE";
-        break;
-      case PLANE_WAVE:
-        pulseType = "PLANE WAVE";
-        break;
-      case COS2_PLANE_WAVE:
-        pulseType = "COS2 PLANE WAVE";
-        break;
-      case COS2_PLATEAU_PLANE_WAVE:
-        pulseType = "COS2 PLATEAU PLANE WAVE";
-        break;
-      default:
-        pulseType = "";
-        break;
+    case GAUSSIAN:
+      pulseType = "GAUSSIAN PULSE";
+      break;
+    case PLANE_WAVE:
+      pulseType = "PLANE WAVE";
+      break;
+    case COS2_PLANE_WAVE:
+      pulseType = "COS2 PLANE WAVE";
+      break;
+    case COS2_PLATEAU_PLANE_WAVE:
+      pulseType = "COS2 PLATEAU PLANE WAVE";
+      break;
+    default:
+      pulseType = "";
+      break;
     }
     std::string pulsePolarization;
     switch (pulse->polarization){
-      case P_POLARIZATION:
-        pulsePolarization = "P";
-        break;
-      case S_POLARIZATION:
-        pulsePolarization = "S";
-        break;
-      case CIRCULAR_POLARIZATION:
-        pulsePolarization = "Circular";
-        break;
-      default:
-        pulsePolarization = "";
-        break;
+    case P_POLARIZATION:
+      pulsePolarization = "P";
+      break;
+    case S_POLARIZATION:
+      pulsePolarization = "S";
+      break;
+    case CIRCULAR_POLARIZATION:
+      pulsePolarization = "Circular";
+      break;
+    default:
+      pulsePolarization = "";
+      break;
     }
 
     printf("==================== %19s ====================\n", pulseType.c_str());
@@ -1077,117 +1077,117 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
 }
 
 void EM_FIELD::addPulse(laserPulse* pulse){
-  if(!allocated){
+  if (!allocated){
     return;
   }
   EBEnergyExtremesFlag = false;
   writeNewPulseInformation(pulse);
   switch (pulse->type){
-    case GAUSSIAN:
-      {
-        if (pulse->rotation){
-          initialize_gaussian_pulse_angle(pulse->lambda0,
-                                          pulse->normalized_amplitude,
-                                          pulse->laser_pulse_initial_position,
-                                          pulse->t_FWHM,
-                                          pulse->waist,
-                                          pulse->focus_position,
-                                          pulse->rotation_center_along_x,
-                                          pulse->angle,
-                                          pulse->polarization);
-        }
-        else{
-          initialize_gaussian_pulse_angle(pulse->lambda0,
-                                          pulse->normalized_amplitude,
-                                          pulse->laser_pulse_initial_position,
-                                          pulse->t_FWHM,
-                                          pulse->waist,
-                                          pulse->focus_position,
-                                          0.0,
-                                          0.0,
-                                          pulse->polarization);
-        }
-        break;
-      }
-    case PLANE_WAVE:{
-        if (pulse->rotation) {
-          initialize_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               pulse->angle,
-               pulse->polarization);
-        }
-        else{
-          initialize_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               0.0,
-               pulse->polarization);
-        }
-        break;
-      }
-    case COS2_PLANE_WAVE:
-      {
-        if (pulse->rotation) {
-          initialize_cos2_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               pulse->laser_pulse_initial_position,
-               pulse->t_FWHM,
-               pulse->rotation_center_along_x,
-               pulse->angle,
-               pulse->polarization,
-               pulse->t_FWHM);
-        }
-        else{
-          initialize_cos2_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               pulse->laser_pulse_initial_position,
-               pulse->t_FWHM,
-               0.0,
-               0.0,
-               pulse->polarization,
-               pulse->t_FWHM);
-        }
-        break;
-      }
+  case GAUSSIAN:
+  {
+    if (pulse->rotation){
+      initialize_gaussian_pulse_angle(pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        pulse->waist,
+        pulse->focus_position,
+        pulse->rotation_center_along_x,
+        pulse->angle,
+        pulse->polarization);
+    }
+    else{
+      initialize_gaussian_pulse_angle(pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        pulse->waist,
+        pulse->focus_position,
+        0.0,
+        0.0,
+        pulse->polarization);
+    }
+    break;
+  }
+  case PLANE_WAVE:{
+    if (pulse->rotation) {
+      initialize_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->angle,
+        pulse->polarization);
+    }
+    else{
+      initialize_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        0.0,
+        pulse->polarization);
+    }
+    break;
+  }
+  case COS2_PLANE_WAVE:
+  {
+    if (pulse->rotation) {
+      initialize_cos2_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        pulse->rotation_center_along_x,
+        pulse->angle,
+        pulse->polarization,
+        pulse->t_FWHM);
+    }
+    else{
+      initialize_cos2_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        0.0,
+        0.0,
+        pulse->polarization,
+        pulse->t_FWHM);
+    }
+    break;
+  }
 
-    case COS2_PLATEAU_PLANE_WAVE:
-      {
-        if (pulse->rotation) {
-          initialize_cos2_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               pulse->laser_pulse_initial_position,
-               pulse->t_FWHM,
-               pulse->rotation_center_along_x,
-               pulse->angle,
-               pulse->polarization,
-               pulse->rise_time);
-        }
-        else{
-          initialize_cos2_plane_wave_angle
-              (pulse->lambda0,
-               pulse->normalized_amplitude,
-               pulse->laser_pulse_initial_position,
-               pulse->t_FWHM,
-               0.0,
-               0.0,
-               pulse->polarization,
-               pulse->rise_time);
-        }
-        break;
-      }
+  case COS2_PLATEAU_PLANE_WAVE:
+  {
+    if (pulse->rotation) {
+      initialize_cos2_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        pulse->rotation_center_along_x,
+        pulse->angle,
+        pulse->polarization,
+        pulse->rise_time);
+    }
+    else{
+      initialize_cos2_plane_wave_angle
+        (pulse->lambda0,
+        pulse->normalized_amplitude,
+        pulse->laser_pulse_initial_position,
+        pulse->t_FWHM,
+        0.0,
+        0.0,
+        pulse->polarization,
+        pulse->rise_time);
+    }
+    break;
+  }
 
-    default:{}
+  default:{}
   }
 }
 
 void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
-                                                double laser_pulse_initial_position,
-                                                double t_FWHM, double xcenter, double angle,
-                                                pulsePolarization polarization, double rise_time)
+  double laser_pulse_initial_position,
+  double t_FWHM, double xcenter, double angle,
+  pulsePolarization polarization, double rise_time)
 {
 
   //DA USARE laser_pulse_initial_position !
@@ -1340,7 +1340,7 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
 }
 
 void EM_FIELD::initialize_plane_wave_angle(double lambda0, double amplitude,
-                                           double angle, pulsePolarization polarization)
+  double angle, pulsePolarization polarization)
 {
   int i, j, k;
   int Nx, Ny, Nz;
@@ -1397,8 +1397,8 @@ void EM_FIELD::auxiliary_rotation(double xin, double yin, double &xp, double &yp
   //rotation of vector (0,0,theta) centered in (xcenter,0,0)
 }
 void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude, double laser_pulse_initial_position,
-                                               double t_FWHM, double waist, double focus_position, double xcenter,
-                                               double angle, pulsePolarization polarization)
+  double t_FWHM, double waist, double focus_position, double xcenter,
+  double angle, pulsePolarization polarization)
 {
   int i, j, k;
   int Nx, Ny, Nz;
@@ -1485,44 +1485,44 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
 }
 
 //TODO DA RIVEDERE
-/*void inject_field(double angle)
-    {
-    int i,j,k;
-    int Nx,Ny,Nz;
-    double dx, dy, dz, lambda, xw, yw, zw, xh, yh, zh, rx, ry, sigma_z, phi;
-    double amplitude=1, X0, t;
-    Nx=mygrid->Nloc[0];
-    Ny=mygrid->Nloc[1];
-    Nz=mygrid->Nloc[2];
-    dx=mygrid->dr[0];
-    dy=mygrid->dr[1];
-    dz=mygrid->dr[2];
-    t=mygrid->time;
-    lambda=mygrid->lambda0;
-    sigma_z=mygrid->t_FWHM;
-    X0=mygrid->laser_pulse_initial_position;
+/*
+void inject_field(double angle) {
+int i, j, k;
+int Nx, Ny, Nz;
+double dx, dy, dz, lambda, xw, yw, zw, xh, yh, zh, rx, ry, sigma_z, phi;
+double amplitude = 1, X0, t;
+Nx = mygrid->Nloc[0];
+Ny = mygrid->Nloc[1];
+Nz = mygrid->Nloc[2];
+dx = mygrid->dr[0];
+dy = mygrid->dr[1];
+dz = mygrid->dr[2];
+t = mygrid->time;
+lambda = mygrid->lambda0;
+sigma_z = mygrid->t_FWHM;
+X0 = mygrid->laser_pulse_initial_position;
 
-    for(k=0;k<Nz;k++)
-    for(j=0;j<Ny;j++)
-    {
-    i=10;
+for (k = 0; k < Nz; k++)
+for (j = 0; j < Ny; j++)
+{
+i = 10;
 
-    xw=i*dx+mygrid->rminloc[0];
-    yw=j*dy+mygrid->rminloc[1];
-    zw=k*dz+mygrid->rminloc[2];
-    xh=(i+0.5)*dx+mygrid->rminloc[0];
-    yh=(j+0.5)*dy+mygrid->rminloc[1];
-    zh=(k+0.5)*dz+mygrid->rminloc[2];
+xw = i*dx + mygrid->rminloc[0];
+yw = j*dy + mygrid->rminloc[1];
+zw = k*dz + mygrid->rminloc[2];
+xh = (i + 0.5)*dx + mygrid->rminloc[0];
+yh = (j + 0.5)*dy + mygrid->rminloc[1];
+zh = (k + 0.5)*dz + mygrid->rminloc[2];
 
-    E0(i,j,k) += amplitude*cos_plane_wave_angle( xh, yw, zw, t, lambda, sigma_z, X0, 0, 0);
-    E1(i,j,k) += amplitude*cos_plane_wave_angle( xw, yh, zw, t, lambda, sigma_z, X0, 0, 1);
-    E2(i,j,k) += amplitude*cos_plane_wave_angle( xw, yw, zh, t, lambda, sigma_z, X0, 0, 2);
-    B0(i,j,k) += amplitude*cos_plane_wave_angle( xw, yh, zh, t, lambda, sigma_z, X0, 0, 3);
-    B1(i,j,k) += amplitude*cos_plane_wave_angle( xh, yw, zh, t, lambda, sigma_z, X0, 0, 4);
-    B2(i,j,k) += amplitude*cos_plane_wave_angle( xh, yh, zw, t, lambda, sigma_z, X0, 0, 5);
-    }
-
-    }*/
+E0(i, j, k) += amplitude*cos_plane_wave_angle(xh, yw, zw, t, lambda, sigma_z, X0, 0, 0);
+E1(i, j, k) += amplitude*cos_plane_wave_angle(xw, yh, zw, t, lambda, sigma_z, X0, 0, 1);
+E2(i, j, k) += amplitude*cos_plane_wave_angle(xw, yw, zh, t, lambda, sigma_z, X0, 0, 2);
+B0(i, j, k) += amplitude*cos_plane_wave_angle(xw, yh, zh, t, lambda, sigma_z, X0, 0, 3);
+B1(i, j, k) += amplitude*cos_plane_wave_angle(xh, yw, zh, t, lambda, sigma_z, X0, 0, 4);
+B2(i, j, k) += amplitude*cos_plane_wave_angle(xh, yh, zw, t, lambda, sigma_z, X0, 0, 5);
+}
+}
+*/
 
 void EM_FIELD::addFieldsFromFile(std::string name){
   std::ifstream fileEMField(name.c_str(), std::ifstream::in);
@@ -1635,8 +1635,8 @@ void EM_FIELD::moveWindow()
   MPI_Status status;
   MPI_Cart_shift(mygrid->cart_comm, 0, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-               MPI_COMM_WORLD, &status);
+    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+    MPI_COMM_WORLD, &status);
 
   if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
     memset((void*)recv_buffer, 0, sendcount*sizeof(double));
@@ -1919,10 +1919,10 @@ void EM_FIELD::filterCompAlongX(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 5.0/8.0;
+  double alpha = 5.0 / 8.0;
   double beta = 0.5;
-  double gamma = -1.0/8.0;
-  if ((mygrid->getNexchange() == 1) ){
+  double gamma = -1.0 / 8.0;
+  if ((mygrid->getNexchange() == 1)){
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
@@ -1934,7 +1934,7 @@ void EM_FIELD::filterCompAlongX(int comp){
       double minus2 = VEB(comp, -2, j, k);
       for (int i = 0; i < Nx; i++){
         double ttemp = VEB(comp, i, j, k);
-        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*( VEB(comp, i + 1, j, k) + minus1 ) + gamma*0.5*(VEB(comp, i + 2, j, k) + minus2);
+        VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i + 1, j, k) + minus1) + gamma*0.5*(VEB(comp, i + 2, j, k) + minus2);
         minus2 = minus1;
         minus1 = ttemp;
       }
@@ -1948,10 +1948,10 @@ void EM_FIELD::filterCompAlongY(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 5.0/8.0;
+  double alpha = 5.0 / 8.0;
   double beta = 0.5;
-  double gamma = -1.0/8.0;
-  if ((mygrid->getNexchange() == 1) ){
+  double gamma = -1.0 / 8.0;
+  if ((mygrid->getNexchange() == 1)){
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
@@ -1977,10 +1977,10 @@ void EM_FIELD::filterCompAlongZ(int comp){
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
 
-  double alpha = 5.0/8.0;
+  double alpha = 5.0 / 8.0;
   double beta = 0.5;
-  double gamma = -1.0/8.0;
-  if ((mygrid->getNexchange() == 1) ){
+  double gamma = -1.0 / 8.0;
+  if ((mygrid->getNexchange() == 1)){
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
@@ -2034,16 +2034,16 @@ void EM_FIELD::applyFilter(int flags, int dirflags){
 
 bool EM_FIELD::checkIfFilterPossible(){
 
-  if(mygrid->uniquePoints[0]%mygrid->rnproc[0] != 0)
+  if (mygrid->uniquePoints[0] % mygrid->rnproc[0] != 0)
     return false;
 
-  if(mygrid->rnproc[1]>1)
+  if (mygrid->rnproc[1] > 1)
     return false;
 
-  if(mygrid->rnproc[2]>1)
+  if (mygrid->rnproc[2] > 1)
     return false;
 
-  if(mygrid->getDimensionality()>2)
+  if (mygrid->getDimensionality() > 2)
     return false;
 
   return true;
@@ -2059,7 +2059,7 @@ void EM_FIELD::fftw_filter_Efield(){
 
   const ptrdiff_t N0 = mygrid->uniquePoints[0], N1 = mygrid->uniquePoints[1];
 
-  fftw_plan planFW,planBW;
+  fftw_plan planFW, planBW;
   fftw_complex *data;
   ptrdiff_t alloc_local, local_n0, local_0_start, i, j;
 
@@ -2067,61 +2067,61 @@ void EM_FIELD::fftw_filter_Efield(){
   data = fftw_alloc_complex(alloc_local);
 
   planFW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
-                                FFTW_FORWARD, FFTW_ESTIMATE);
+    FFTW_FORWARD, FFTW_ESTIMATE);
   planBW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
-                                FFTW_BACKWARD, FFTW_ESTIMATE);
+    FFTW_BACKWARD, FFTW_ESTIMATE);
 
   {
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]= E0(i,j,0);
-        data[i*N1 + j][1]= 0;
+        data[i*N1 + j][0] = E0(i, j, 0);
+        data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]/=norm;
-        data[i*N1 + j][1]/=norm;
-        int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
-        int rj = (j < N1/2)?(j):(-(N1-j));
-        if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
-          data[i*N1 + j][0]=0;
-          data[i*N1 + j][1]=0;
+        data[i*N1 + j][0] /= norm;
+        data[i*N1 + j][1] /= norm;
+        int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
+        int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+          data[i*N1 + j][0] = 0;
+          data[i*N1 + j][1] = 0;
         }
 
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        E0(i,j,0) = data[i*N1 + j][0];
+        E0(i, j, 0) = data[i*N1 + j][0];
       }
   }
 
   {
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]= E1(i,j,0);
-        data[i*N1 + j][1]= 0;
+        data[i*N1 + j][0] = E1(i, j, 0);
+        data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]/=norm;
-        data[i*N1 + j][1]/=norm;
-        int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
-        int rj = (j < N1/2)?(j):(-(N1-j));
-        if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
-          data[i*N1 + j][0]=0;
-          data[i*N1 + j][1]=0;
+        data[i*N1 + j][0] /= norm;
+        data[i*N1 + j][1] /= norm;
+        int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
+        int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+          data[i*N1 + j][0] = 0;
+          data[i*N1 + j][1] = 0;
         }
 
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        E1(i,j,0) = data[i*N1 + j][0];
+        E1(i, j, 0) = data[i*N1 + j][0];
       }
   }
 
@@ -2129,27 +2129,27 @@ void EM_FIELD::fftw_filter_Efield(){
   {
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]= E2(i,j,0);
-        data[i*N1 + j][1]= 0;
+        data[i*N1 + j][0] = E2(i, j, 0);
+        data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        data[i*N1 + j][0]/=norm;
-        data[i*N1 + j][1]/=norm;
-        int ri = (local_0_start+i < N0/2)?(local_0_start+i):(-(N0-local_0_start+1));
-        int rj = (j < N1/2)?(j):(-(N1-j));
-        if (abs(ri)>0.8*N0/2 && abs(rj)>0.8*N1/2){
-          data[i*N1 + j][0]=0;
-          data[i*N1 + j][1]=0;
+        data[i*N1 + j][0] /= norm;
+        data[i*N1 + j][1] /= norm;
+        int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
+        int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+          data[i*N1 + j][0] = 0;
+          data[i*N1 + j][1] = 0;
         }
 
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
       for (j = 0; j < N1; ++j){
-        E2(i,j,0) = data[i*N1 + j][0];
+        E2(i, j, 0) = data[i*N1 + j][0];
       }
   }
 
@@ -2159,3 +2159,4 @@ void EM_FIELD::fftw_filter_Efield(){
   fftw_destroy_plan(planBW);
 }
 #endif
+

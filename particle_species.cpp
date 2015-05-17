@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -19,6 +19,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "particle_species.h"
 //#define OLD_ACCESS
+#define OLDPUSHER
 
 
 SPECIE::SPECIE()
@@ -358,7 +359,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                       r2(counter) = zloc + dzp*(kp + 0.5);
                       u0(counter) = u1(counter) = u2(counter) = 0;
                       w(counter) = weight;
-                      if(flagWithMarker)
+                      if (flagWithMarker)
                         marker(counter) = (counter + disp);
                       if (isTestSpecies)
                         w(counter) = (double)(counter + disp);
@@ -429,7 +430,7 @@ void SPECIE::createStretchedParticlesWithinFrom(double plasmarmin[3], double pla
                       r2(counter) = myz;
                       u0(counter) = u1(counter) = u2(counter) = 0;
                       w(counter) = weight*mydx*mydy*mydz;
-                      if(flagWithMarker)
+                      if (flagWithMarker)
                         marker(counter) = (counter + disp);
                       if (isTestSpecies)
                         w(counter) = (double)(counter + disp);
@@ -821,10 +822,10 @@ void SPECIE::move_window()
 }
 //void SPECIE::output_bin(ofstream &ff)
 //{
-//	if (mygrid->with_particles == NO)
-//		return;
+//  if (mygrid->with_particles == NO)
+//    return;
 
-//	ff.write((char *)val, sizeof(double)*Ncomp*Np);
+//  ff.write((char *)val, sizeof(double)*Ncomp*Np);
 //}
 void SPECIE::output(std::ofstream &ff)
 {
@@ -869,13 +870,13 @@ void SPECIE::init_output_extrems(std::ofstream &ff){
 
   if (mygrid->myid == mygrid->master_proc){
     ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time"
-       << " " << std::setw(myWidth) << "xmin" << " " << std::setw(myWidth) << "xmax"
-       << " " << std::setw(myWidth) << "ymin" << " " << std::setw(myWidth) << "ymax"
-       << " " << std::setw(myWidth) << "zmin" << " " << std::setw(myWidth) << "zmax"
-       << " " << std::setw(myWidth) << "pxmin" << " " << std::setw(myWidth) << "pxmax"
-       << " " << std::setw(myWidth) << "pymin" << " " << std::setw(myWidth) << "pymax"
-       << " " << std::setw(myWidth) << "pzmin" << " " << std::setw(myWidth) << "pzmax"
-       << " " << std::setw(myWidth) << "gammamin" << " " << std::setw(myWidth) << "gammamax" << std::endl;
+      << " " << std::setw(myWidth) << "xmin" << " " << std::setw(myWidth) << "xmax"
+      << " " << std::setw(myWidth) << "ymin" << " " << std::setw(myWidth) << "ymax"
+      << " " << std::setw(myWidth) << "zmin" << " " << std::setw(myWidth) << "zmax"
+      << " " << std::setw(myWidth) << "pxmin" << " " << std::setw(myWidth) << "pxmax"
+      << " " << std::setw(myWidth) << "pymin" << " " << std::setw(myWidth) << "pymax"
+      << " " << std::setw(myWidth) << "pzmin" << " " << std::setw(myWidth) << "pzmax"
+      << " " << std::setw(myWidth) << "gammamin" << " " << std::setw(myWidth) << "gammamax" << std::endl;
   }
 }
 void SPECIE::output_extrems(int istep, std::ofstream &ff){
@@ -963,31 +964,31 @@ void SPECIE::position_parallel_pbc()
       else
       {
         for (c = 0; c < Ncomp; c++)
-          pData[c + (p-nlost)*Ncomp] = pData[c + p*Ncomp];
+          pData[c + (p - nlost)*Ncomp] = pData[c + p*Ncomp];
       }
     }
     MPI_Cart_shift(mygrid->cart_comm, direction, 1, &ileft, &iright);
     // ====== send right receive from left
     ninleft = 0;
     MPI_Sendrecv(&nright, 1, MPI_INT, iright, 13,
-                 &ninleft, 1, MPI_INT, ileft, 13,
-                 MPI_COMM_WORLD, &status);
+      &ninleft, 1, MPI_INT, ileft, 13,
+      MPI_COMM_WORLD, &status);
     nnew = ninleft;
 
     // ====== send left receive from right
     ninright = 0;
     MPI_Sendrecv(&nleft, 1, MPI_INT, ileft, 13,
-                 &ninright, 1, MPI_INT, iright, 13,
-                 MPI_COMM_WORLD, &status);
+      &ninright, 1, MPI_INT, iright, 13,
+      MPI_COMM_WORLD, &status);
     nnew += ninright;
     recv_buffer = (double*)realloc(recv_buffer, nnew*Ncomp*sizeof(double));
     // ====== send right receive from left
     MPI_Sendrecv(sendr_buffer, nright*Ncomp, MPI_DOUBLE, iright, 13,
-                 recv_buffer, ninleft*Ncomp, MPI_DOUBLE, ileft, 13,
-                 MPI_COMM_WORLD, &status);
+      recv_buffer, ninleft*Ncomp, MPI_DOUBLE, ileft, 13,
+      MPI_COMM_WORLD, &status);
     MPI_Sendrecv(sendl_buffer, nleft*Ncomp, MPI_DOUBLE, ileft, 13,
-                 (recv_buffer + ninleft*Ncomp), ninright*Ncomp, MPI_DOUBLE, iright, 13,
-                 MPI_COMM_WORLD, &status);
+      (recv_buffer + ninleft*Ncomp), ninright*Ncomp, MPI_DOUBLE, iright, 13,
+      MPI_COMM_WORLD, &status);
     nold = Np;
     Np = Np - nlost + nnew;
 
@@ -1063,7 +1064,10 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
   }
   double dt, gamma_i;
   int p, c;  // particle_int, component_int
-  int i, j, k, i1, j1, k1, i2, j2, k2;
+  int i, i1, j1, k1, i2, j2, k2;
+#ifdef OLDPUSHER
+  int j, k;
+#endif
   //int indexMaxQuadraticShape[]={1,4};
   int hii[3], wii[3];           // half integer index,   whole integer index
   double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
@@ -1080,82 +1084,82 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
   int N_grid[3];
   ebfield->writeN_grid(N_grid);
   int Nx, Ny, Nz;
-  Nx=N_grid[0];
-  Ny=N_grid[1];
-  Nz=N_grid[2];
+  Nx = N_grid[0];
+  Ny = N_grid[1];
+  Nz = N_grid[2];
   switch (mygrid->getDimensionality())
   {
 
-    case 3:
-      for (p = 0; p < Np; p++)
+  case 3:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++){
+        xx[c] = pData[c + p*Ncomp];
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++){
-          xx[c] = pData[c + p*Ncomp];
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 3; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
 
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
 
 
 #ifdef OLDPUSHER
-        for (k = 0; k < 3; k++)
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
+        for (j = 0; j < 3; j++)
         {
-          k1 = k + wii[2] - 1;
-          k2 = k + hii[2] - 1;
-          for (j = 0; j < 3; j++)
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
+          for (i = 0; i < 3; i++)
           {
-            j1 = j + wii[1] - 1;
-            j2 = j + hii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-              i2 = i + hii[0] - 1;
-              double EX, EY, EZ;
-              EX = myfield[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-              EY = myfield[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-              EZ = myfield[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-              double BX, BY, BZ;
-              BX = myfield[my_indice(edge,1, 1, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-              BY = myfield[my_indice(edge,1, 1, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-              BZ = myfield[my_indice(edge,1, 1, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
+            double EX, EY, EZ;
+            EX = myfield[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EY = myfield[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EZ = myfield[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            double BX, BY, BZ;
+            BX = myfield[my_indice(edge,1, 1, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BY = myfield[my_indice(edge,1, 1, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BZ = myfield[my_indice(edge,1, 1, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
-              E[0] += EX*dvol;  //Ex
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
-              E[1] += EY*dvol;  //Ey
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
-              E[2] += EZ*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+            E[0] += EX*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+            E[1] += EY*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+            E[2] += EZ*dvol;  //Ez
 
-              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k];
-              B[0] += BX*dvol;  //Bx
-              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k];
-              B[1] += BY*dvol;  //By
-              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k];
-              B[2] += BZ*dvol;  //Bz
-            }
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k];
+            B[0] += BX*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k];
+            B[1] += BY*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k];
+            B[2] += BZ*dvol;  //Bz
           }
         }
+      }
 #else
         {
           double EXLLL, EXCLL, EXRLL, EXLCL, EXCCL, EXRCL, EXLRL, EXCRL, EXRRL;
@@ -1182,285 +1186,285 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           double BYLLR, BYCLR, BYRLR, BYLCR, BYCCR, BYRCR, BYLRR, BYCRR, BYRRR;
           double BZLLR, BZCLR, BZRLR, BZLCR, BZCCR, BZRCR, BZLRR, BZCRR, BZRRR;
           int iiL, iiC, iiR, hiL, hiC, hiR;
-          iiL = wii[0]-1;
+          iiL = wii[0] - 1;
           iiC = wii[0];
-          iiR = wii[0]+1;
-          hiL = hii[0]-1;
+          iiR = wii[0] + 1;
+          hiL = hii[0] - 1;
           hiC = hii[0];
-          hiR = hii[0]+1;
+          hiR = hii[0] + 1;
 
           int ijL, ijC, ijR, hjL, hjC, hjR;
-          ijL = wii[1]-1;
+          ijL = wii[1] - 1;
           ijC = wii[1];
-          ijR = wii[1]+1;
-          hjL = hii[1]-1;
+          ijR = wii[1] + 1;
+          hjL = hii[1] - 1;
           hjC = hii[1];
-          hjR = hii[1]+1;
+          hjR = hii[1] + 1;
 
           int ikL, ikC, ikR, hkL, hkC, hkR;
-          ikL = wii[2]-1;
+          ikL = wii[2] - 1;
           ikC = wii[2];
-          ikR = wii[2]+1;
-          hkL = hii[2]-1;
+          ikR = wii[2] + 1;
+          hkL = hii[2] - 1;
           hkC = hii[2];
-          hkR = hii[2]+1;
+          hkR = hii[2] + 1;
 
           {
-            EXLLL = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, ebComp)];
-            EXCLL = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, ebComp)];
-            EXRLL = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, ebComp)];
-            EXLCL = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, ebComp)];
-            EXCCL = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, ebComp)];
-            EXRCL = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, ebComp)];
-            EXLRL = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, ebComp)];
-            EXCRL = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, ebComp)];
-            EXRRL = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, ebComp)];
+            EXLLL = myfield[my_indice(edge, 1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXCLL = myfield[my_indice(edge, 1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXRLL = myfield[my_indice(edge, 1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, ebComp)];
+            EXLCL = myfield[my_indice(edge, 1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXCCL = myfield[my_indice(edge, 1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXRCL = myfield[my_indice(edge, 1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, ebComp)];
+            EXLRL = myfield[my_indice(edge, 1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, ebComp)];
+            EXCRL = myfield[my_indice(edge, 1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, ebComp)];
+            EXRRL = myfield[my_indice(edge, 1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, ebComp)];
 
-            EYLLL = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            EYCLL = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            EYRLL = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            EYLCL = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            EYCCL = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            EYRCL = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            EYLRL = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
-            EYCRL = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
-            EYRRL = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            EYLLL = myfield[my_indice(edge, 1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYCLL = myfield[my_indice(edge, 1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYRLL = myfield[my_indice(edge, 1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            EYLCL = myfield[my_indice(edge, 1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYCCL = myfield[my_indice(edge, 1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYRCL = myfield[my_indice(edge, 1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            EYLRL = myfield[my_indice(edge, 1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            EYCRL = myfield[my_indice(edge, 1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            EYRRL = myfield[my_indice(edge, 1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
 
-            EZLLL = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            EZCLL = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            EZRLL = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            EZLCL = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            EZCCL = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            EZRCL = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            EZLRL = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
-            EZCRL = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
-            EZRRL = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            EZLLL = myfield[my_indice(edge, 1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZCLL = myfield[my_indice(edge, 1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZRLL = myfield[my_indice(edge, 1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            EZLCL = myfield[my_indice(edge, 1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZCCL = myfield[my_indice(edge, 1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZRCL = myfield[my_indice(edge, 1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            EZLRL = myfield[my_indice(edge, 1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            EZCRL = myfield[my_indice(edge, 1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            EZRRL = myfield[my_indice(edge, 1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            EXLLC = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXCLC = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXRLC = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXLCC = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXCCC = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXRCC = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXLRC = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
-            EXCRC = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
-            EXRRC = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXLLC = myfield[my_indice(edge, 1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXCLC = myfield[my_indice(edge, 1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXRLC = myfield[my_indice(edge, 1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXLCC = myfield[my_indice(edge, 1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXCCC = myfield[my_indice(edge, 1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXRCC = myfield[my_indice(edge, 1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXLRC = myfield[my_indice(edge, 1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXCRC = myfield[my_indice(edge, 1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXRRC = myfield[my_indice(edge, 1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
 
-            EYLLC = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYCLC = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYRLC = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYLCC = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYCCC = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYRCC = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYLRC = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            EYCRC = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            EYRRC = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYLLC = myfield[my_indice(edge, 1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYCLC = myfield[my_indice(edge, 1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYRLC = myfield[my_indice(edge, 1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYLCC = myfield[my_indice(edge, 1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYCCC = myfield[my_indice(edge, 1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYRCC = myfield[my_indice(edge, 1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYLRC = myfield[my_indice(edge, 1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYCRC = myfield[my_indice(edge, 1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYRRC = myfield[my_indice(edge, 1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
 
-            EZLLC = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZCLC = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZRLC = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZLCC = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZCCC = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZRCC = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZLRC = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            EZCRC = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            EZRRC = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZLLC = myfield[my_indice(edge, 1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZCLC = myfield[my_indice(edge, 1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZRLC = myfield[my_indice(edge, 1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZLCC = myfield[my_indice(edge, 1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZCCC = myfield[my_indice(edge, 1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZRCC = myfield[my_indice(edge, 1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZLRC = myfield[my_indice(edge, 1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZCRC = myfield[my_indice(edge, 1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZRRC = myfield[my_indice(edge, 1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            EXLLR = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, ebComp)];
-            EXCLR = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, ebComp)];
-            EXRLR = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, ebComp)];
-            EXLCR = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, ebComp)];
-            EXCCR = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, ebComp)];
-            EXRCR = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, ebComp)];
-            EXLRR = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, ebComp)];
-            EXCRR = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, ebComp)];
-            EXRRR = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, ebComp)];
+            EXLLR = myfield[my_indice(edge, 1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXCLR = myfield[my_indice(edge, 1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXRLR = myfield[my_indice(edge, 1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, ebComp)];
+            EXLCR = myfield[my_indice(edge, 1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXCCR = myfield[my_indice(edge, 1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXRCR = myfield[my_indice(edge, 1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, ebComp)];
+            EXLRR = myfield[my_indice(edge, 1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, ebComp)];
+            EXCRR = myfield[my_indice(edge, 1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, ebComp)];
+            EXRRR = myfield[my_indice(edge, 1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, ebComp)];
 
-            EYLLR = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            EYCLR = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            EYRLR = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            EYLCR = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            EYCCR = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            EYRCR = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            EYLRR = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
-            EYCRR = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
-            EYRRR = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            EYLLR = myfield[my_indice(edge, 1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYCLR = myfield[my_indice(edge, 1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYRLR = myfield[my_indice(edge, 1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            EYLCR = myfield[my_indice(edge, 1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYCCR = myfield[my_indice(edge, 1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYRCR = myfield[my_indice(edge, 1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            EYLRR = myfield[my_indice(edge, 1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            EYCRR = myfield[my_indice(edge, 1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            EYRRR = myfield[my_indice(edge, 1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
 
-            EZLLR = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            EZCLR = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            EZRLR = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            EZLCR = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            EZCCR = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            EZRCR = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            EZLRR = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
-            EZCRR = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
-            EZRRR = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            EZLLR = myfield[my_indice(edge, 1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZCLR = myfield[my_indice(edge, 1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZRLR = myfield[my_indice(edge, 1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            EZLCR = myfield[my_indice(edge, 1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZCCR = myfield[my_indice(edge, 1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZRCR = myfield[my_indice(edge, 1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            EZLRR = myfield[my_indice(edge, 1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            EZCRR = myfield[my_indice(edge, 1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            EZRRR = myfield[my_indice(edge, 1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            BXLLL = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkL, Nx, Ny, Nz, ebComp)];
-            BXCLL = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkL, Nx, Ny, Nz, ebComp)];
-            BXRLL = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkL, Nx, Ny, Nz, ebComp)];
-            BXLCL = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkL, Nx, Ny, Nz, ebComp)];
-            BXCCL = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkL, Nx, Ny, Nz, ebComp)];
-            BXRCL = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkL, Nx, Ny, Nz, ebComp)];
-            BXLRL = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkL, Nx, Ny, Nz, ebComp)];
-            BXCRL = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkL, Nx, Ny, Nz, ebComp)];
-            BXRRL = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkL, Nx, Ny, Nz, ebComp)];
+            BXLLL = myfield[my_indice(edge, 1, 1, 3, iiL, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXCLL = myfield[my_indice(edge, 1, 1, 3, iiC, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXRLL = myfield[my_indice(edge, 1, 1, 3, iiR, hjL, hkL, Nx, Ny, Nz, ebComp)];
+            BXLCL = myfield[my_indice(edge, 1, 1, 3, iiL, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXCCL = myfield[my_indice(edge, 1, 1, 3, iiC, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXRCL = myfield[my_indice(edge, 1, 1, 3, iiR, hjC, hkL, Nx, Ny, Nz, ebComp)];
+            BXLRL = myfield[my_indice(edge, 1, 1, 3, iiL, hjR, hkL, Nx, Ny, Nz, ebComp)];
+            BXCRL = myfield[my_indice(edge, 1, 1, 3, iiC, hjR, hkL, Nx, Ny, Nz, ebComp)];
+            BXRRL = myfield[my_indice(edge, 1, 1, 3, iiR, hjR, hkL, Nx, Ny, Nz, ebComp)];
 
-            BYLLL = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            BYCLL = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            BYRLL = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
-            BYLCL = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            BYCCL = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            BYRCL = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
-            BYLRL = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
-            BYCRL = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
-            BYRRL = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            BYLLL = myfield[my_indice(edge, 1, 1, 4, hiL, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYCLL = myfield[my_indice(edge, 1, 1, 4, hiC, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYRLL = myfield[my_indice(edge, 1, 1, 4, hiR, ijL, hkL, Nx, Ny, Nz, ebComp)];
+            BYLCL = myfield[my_indice(edge, 1, 1, 4, hiL, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYCCL = myfield[my_indice(edge, 1, 1, 4, hiC, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYRCL = myfield[my_indice(edge, 1, 1, 4, hiR, ijC, hkL, Nx, Ny, Nz, ebComp)];
+            BYLRL = myfield[my_indice(edge, 1, 1, 4, hiL, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            BYCRL = myfield[my_indice(edge, 1, 1, 4, hiC, ijR, hkL, Nx, Ny, Nz, ebComp)];
+            BYRRL = myfield[my_indice(edge, 1, 1, 4, hiR, ijR, hkL, Nx, Ny, Nz, ebComp)];
 
-            BZLLL = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            BZCLL = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            BZRLL = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
-            BZLCL = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            BZCCL = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            BZRCL = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
-            BZLRL = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
-            BZCRL = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
-            BZRRL = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            BZLLL = myfield[my_indice(edge, 1, 1, 5, hiL, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZCLL = myfield[my_indice(edge, 1, 1, 5, hiC, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZRLL = myfield[my_indice(edge, 1, 1, 5, hiR, hjL, ikL, Nx, Ny, Nz, ebComp)];
+            BZLCL = myfield[my_indice(edge, 1, 1, 5, hiL, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZCCL = myfield[my_indice(edge, 1, 1, 5, hiC, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZRCL = myfield[my_indice(edge, 1, 1, 5, hiR, hjC, ikL, Nx, Ny, Nz, ebComp)];
+            BZLRL = myfield[my_indice(edge, 1, 1, 5, hiL, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            BZCRL = myfield[my_indice(edge, 1, 1, 5, hiC, hjR, ikL, Nx, Ny, Nz, ebComp)];
+            BZRRL = myfield[my_indice(edge, 1, 1, 5, hiR, hjR, ikL, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            BXLLC = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXCLC = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXRLC = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXLCC = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXCCC = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXRCC = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXLRC = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
-            BXCRC = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
-            BXRRC = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXLLC = myfield[my_indice(edge, 1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXCLC = myfield[my_indice(edge, 1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXRLC = myfield[my_indice(edge, 1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXLCC = myfield[my_indice(edge, 1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXCCC = myfield[my_indice(edge, 1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXRCC = myfield[my_indice(edge, 1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXLRC = myfield[my_indice(edge, 1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXCRC = myfield[my_indice(edge, 1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXRRC = myfield[my_indice(edge, 1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
 
-            BYLLC = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYCLC = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYRLC = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYLCC = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYCCC = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYRCC = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYLRC = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            BYCRC = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            BYRRC = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYLLC = myfield[my_indice(edge, 1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYCLC = myfield[my_indice(edge, 1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYRLC = myfield[my_indice(edge, 1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYLCC = myfield[my_indice(edge, 1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYCCC = myfield[my_indice(edge, 1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYRCC = myfield[my_indice(edge, 1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYLRC = myfield[my_indice(edge, 1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYCRC = myfield[my_indice(edge, 1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYRRC = myfield[my_indice(edge, 1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
 
-            BZLLC = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZCLC = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZRLC = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZLCC = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZCCC = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZRCC = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZLRC = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            BZCRC = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            BZRRC = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZLLC = myfield[my_indice(edge, 1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZCLC = myfield[my_indice(edge, 1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZRLC = myfield[my_indice(edge, 1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZLCC = myfield[my_indice(edge, 1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZCCC = myfield[my_indice(edge, 1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZRCC = myfield[my_indice(edge, 1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZLRC = myfield[my_indice(edge, 1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZCRC = myfield[my_indice(edge, 1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZRRC = myfield[my_indice(edge, 1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            BXLLR = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkR, Nx, Ny, Nz, ebComp)];
-            BXCLR = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkR, Nx, Ny, Nz, ebComp)];
-            BXRLR = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkR, Nx, Ny, Nz, ebComp)];
-            BXLCR = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkR, Nx, Ny, Nz, ebComp)];
-            BXCCR = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkR, Nx, Ny, Nz, ebComp)];
-            BXRCR = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkR, Nx, Ny, Nz, ebComp)];
-            BXLRR = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkR, Nx, Ny, Nz, ebComp)];
-            BXCRR = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkR, Nx, Ny, Nz, ebComp)];
-            BXRRR = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkR, Nx, Ny, Nz, ebComp)];
+            BXLLR = myfield[my_indice(edge, 1, 1, 3, iiL, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXCLR = myfield[my_indice(edge, 1, 1, 3, iiC, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXRLR = myfield[my_indice(edge, 1, 1, 3, iiR, hjL, hkR, Nx, Ny, Nz, ebComp)];
+            BXLCR = myfield[my_indice(edge, 1, 1, 3, iiL, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXCCR = myfield[my_indice(edge, 1, 1, 3, iiC, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXRCR = myfield[my_indice(edge, 1, 1, 3, iiR, hjC, hkR, Nx, Ny, Nz, ebComp)];
+            BXLRR = myfield[my_indice(edge, 1, 1, 3, iiL, hjR, hkR, Nx, Ny, Nz, ebComp)];
+            BXCRR = myfield[my_indice(edge, 1, 1, 3, iiC, hjR, hkR, Nx, Ny, Nz, ebComp)];
+            BXRRR = myfield[my_indice(edge, 1, 1, 3, iiR, hjR, hkR, Nx, Ny, Nz, ebComp)];
 
-            BYLLR = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            BYCLR = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            BYRLR = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
-            BYLCR = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            BYCCR = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            BYRCR = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
-            BYLRR = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
-            BYCRR = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
-            BYRRR = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            BYLLR = myfield[my_indice(edge, 1, 1, 4, hiL, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYCLR = myfield[my_indice(edge, 1, 1, 4, hiC, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYRLR = myfield[my_indice(edge, 1, 1, 4, hiR, ijL, hkR, Nx, Ny, Nz, ebComp)];
+            BYLCR = myfield[my_indice(edge, 1, 1, 4, hiL, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYCCR = myfield[my_indice(edge, 1, 1, 4, hiC, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYRCR = myfield[my_indice(edge, 1, 1, 4, hiR, ijC, hkR, Nx, Ny, Nz, ebComp)];
+            BYLRR = myfield[my_indice(edge, 1, 1, 4, hiL, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            BYCRR = myfield[my_indice(edge, 1, 1, 4, hiC, ijR, hkR, Nx, Ny, Nz, ebComp)];
+            BYRRR = myfield[my_indice(edge, 1, 1, 4, hiR, ijR, hkR, Nx, Ny, Nz, ebComp)];
 
-            BZLLR = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            BZCLR = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            BZRLR = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
-            BZLCR = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            BZCCR = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            BZRCR = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
-            BZLRR = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
-            BZCRR = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
-            BZRRR = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            BZLLR = myfield[my_indice(edge, 1, 1, 5, hiL, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZCLR = myfield[my_indice(edge, 1, 1, 5, hiC, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZRLR = myfield[my_indice(edge, 1, 1, 5, hiR, hjL, ikR, Nx, Ny, Nz, ebComp)];
+            BZLCR = myfield[my_indice(edge, 1, 1, 5, hiL, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZCCR = myfield[my_indice(edge, 1, 1, 5, hiC, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZRCR = myfield[my_indice(edge, 1, 1, 5, hiR, hjC, ikR, Nx, Ny, Nz, ebComp)];
+            BZLRR = myfield[my_indice(edge, 1, 1, 5, hiL, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            BZCRR = myfield[my_indice(edge, 1, 1, 5, hiC, hjR, ikR, Nx, Ny, Nz, ebComp)];
+            BZRRR = myfield[my_indice(edge, 1, 1, 5, hiR, hjR, ikR, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            E[0] += wiw[2][0]*( (wiw[1][0] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
-                + (wiw[1][1] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL))
-                + (wiw[1][2] *(hiw[0][0]*EXLLL + hiw[0][1]*EXCLL + hiw[0][2]*EXRLL)))
-                + wiw[2][1]*( (wiw[1][0] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)))
-                + wiw[2][2]*( (wiw[1][0] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
-                + (wiw[1][1] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR))
-                + (wiw[1][2] *(hiw[0][0]*EXLLR + hiw[0][1]*EXCLR + hiw[0][2]*EXRLR)));
+            E[0] += wiw[2][0] * ((wiw[1][0] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
+              + (wiw[1][1] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
+              + (wiw[1][2] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL)))
+              + wiw[2][1] * ((wiw[1][0] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
+              + (wiw[1][1] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
+              + (wiw[1][2] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC)))
+              + wiw[2][2] * ((wiw[1][0] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR))
+              + (wiw[1][1] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR))
+              + (wiw[1][2] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR)));
 
 
 
-            E[1] += wiw[2][0]*( (hiw[1][0] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
-                + (hiw[1][1] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL))
-                + (hiw[1][2] *(wiw[0][0]*EYLCL + wiw[0][1]*EYCCL + wiw[0][2]*EYRCL)))
-                + wiw[2][1]*( (hiw[1][0] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)))
-                + wiw[2][2]*( (hiw[1][0] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
-                + (hiw[1][1] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR))
-                + (hiw[1][2] *(wiw[0][0]*EYLCR + wiw[0][1]*EYCCR + wiw[0][2]*EYRCR)));
+            E[1] += wiw[2][0] * ((hiw[1][0] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL))
+              + (hiw[1][1] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL))
+              + (hiw[1][2] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL)))
+              + wiw[2][1] * ((hiw[1][0] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+              + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+              + (hiw[1][2] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC)))
+              + wiw[2][2] * ((hiw[1][0] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR))
+              + (hiw[1][1] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR))
+              + (hiw[1][2] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR)));
 
-            E[2] += hiw[2][0]*( (wiw[1][0] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
-                + (wiw[1][1] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL))
-                + (wiw[1][2] *(wiw[0][0]*EZLRL + wiw[0][1]*EZCRL + wiw[0][2]*EZRRL)))
-                + hiw[2][1]*( (wiw[1][0] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)))
-                + hiw[2][2]*( (wiw[1][0] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
-                + (wiw[1][1] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR))
-                + (wiw[1][2] *(wiw[0][0]*EZLRR + wiw[0][1]*EZCRR + wiw[0][2]*EZRRR)));
-
-
-            B[0] += hiw[2][0]*( (hiw[1][0] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
-                + (hiw[1][1] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL))
-                + (hiw[1][2] *(wiw[0][0]*BXLLL + wiw[0][1]*BXCLL + wiw[0][2]*BXRLL)))
-                + hiw[2][1]*( (hiw[1][0] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)))
-                + hiw[2][2]*( (hiw[1][0] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
-                + (hiw[1][1] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR))
-                + (hiw[1][2] *(wiw[0][0]*BXLLR + wiw[0][1]*BXCLR + wiw[0][2]*BXRLR)));
+            E[2] += hiw[2][0] * ((wiw[1][0] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL))
+              + (wiw[1][1] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL))
+              + (wiw[1][2] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL)))
+              + hiw[2][1] * ((wiw[1][0] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
+              + (wiw[1][1] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
+              + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)))
+              + hiw[2][2] * ((wiw[1][0] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR))
+              + (wiw[1][1] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR))
+              + (wiw[1][2] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR)));
 
 
-            B[1] += hiw[2][2]*( (wiw[1][0] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
-                + (wiw[1][1] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR))
-                + (wiw[1][2] *(hiw[0][0]*BYLCR + hiw[0][1]*BYCCR + hiw[0][2]*BYRCR)))
-                + hiw[2][0]*( (wiw[1][0] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
-                + (wiw[1][1] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL))
-                + (wiw[1][2] *(hiw[0][0]*BYLCL + hiw[0][1]*BYCCL + hiw[0][2]*BYRCL)))
-                + hiw[2][1]*( (wiw[1][0] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
+            B[0] += hiw[2][0] * ((hiw[1][0] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL))
+              + (hiw[1][1] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL))
+              + (hiw[1][2] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL)))
+              + hiw[2][1] * ((hiw[1][0] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
+              + (hiw[1][1] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
+              + (hiw[1][2] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC)))
+              + hiw[2][2] * ((hiw[1][0] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR))
+              + (hiw[1][1] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR))
+              + (hiw[1][2] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR)));
 
-            B[2] += wiw[2][0]*( (hiw[1][0] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
-                + (hiw[1][1] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL))
-                + (hiw[1][2] *(hiw[0][0]*BZLRL + hiw[0][1]*BZCRL + hiw[0][2]*BZRRL)))
-                + wiw[2][1]*( (hiw[1][0] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)))
-                + wiw[2][2]*( (hiw[1][0] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
-                + (hiw[1][1] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR))
-                + (hiw[1][2] *(hiw[0][0]*BZLRR + hiw[0][1]*BZCRR + hiw[0][2]*BZRRR)));
+
+            B[1] += hiw[2][2] * ((wiw[1][0] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR))
+              + (wiw[1][1] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR))
+              + (wiw[1][2] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR)))
+              + hiw[2][0] * ((wiw[1][0] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL))
+              + (wiw[1][1] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL))
+              + (wiw[1][2] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL)))
+              + hiw[2][1] * ((wiw[1][0] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+              + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+              + (wiw[1][2] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC)));
+
+            B[2] += wiw[2][0] * ((hiw[1][0] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL))
+              + (hiw[1][1] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL))
+              + (hiw[1][2] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL)))
+              + wiw[2][1] * ((hiw[1][0] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
+              + (hiw[1][1] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
+              + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)))
+              + wiw[2][2] * ((hiw[1][0] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR))
+              + (hiw[1][1] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR))
+              + (hiw[1][2] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR)));
           }
 
         }
@@ -1493,89 +1497,89 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
         pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
         pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
-      }
-      break;
+    }
+    break;
 
-    case 2:
-      for (p = 0; p < Np; p++)
+  case 2:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = pData[c + p*Ncomp];
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 2; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
+        xx[c] = pData[c + p*Ncomp];
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 2; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
 
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
 #ifdef OLDPUSHER
-        k1 = k2 = 0;
-        for (j = 0; j < 3; j++)
-        {
-          j1 = j + wii[1] - 1;
-          j2 = j + hii[1] - 1;
-          for (i = 0; i < 3; i++){
-            i1 = i + wii[0] - 1;
-            i2 = i + hii[0] - 1;
+      k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
+        for (i = 0; i < 3; i++){
+          i1 = i + wii[0] - 1;
+          i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-            double EX, EY, EZ;
-            EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-            EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-            EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-            double BX, BY, BZ;
-            BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-            BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-            BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          double EX, EY, EZ;
+          EX = myfield[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EY = myfield[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EZ = myfield[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          double BX, BY, BZ;
+          BX = myfield[my_indice(edge,1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BY = myfield[my_indice(edge,1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BZ = myfield[my_indice(edge,1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
 
-            dvol = hiw[0][i] * wiw[1][j];
-            E[0] += EX*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j];
-            E[1] += EY*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j];
-            E[2] += EZ*dvol;  //Ez
+          dvol = hiw[0][i] * wiw[1][j];
+          E[0] += EX*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j];
+          E[1] += EY*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j];
+          E[2] += EZ*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j];
-            B[0] += BX*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j];
-            B[1] += BY*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j];
-            B[2] += BZ*dvol;  //Bz
+          dvol = wiw[0][i] * hiw[1][j];
+          B[0] += BX*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j];
+          B[1] += BY*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j];
+          B[2] += BZ*dvol;  //Bz
 #else
-            dvol = hiw[0][i] * wiw[1][j],
-                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j],
-                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j],
-                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i] * wiw[1][j],
+            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j],
+            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j],
+            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j],
-                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j],
-                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j],
-                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i] * hiw[1][j],
+            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j],
+            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j],
+            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
 #endif
-          }
         }
+      }
 #else
         {
 
@@ -1589,20 +1593,20 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           double BZLLC, BZCLC, BZRLC, BZLCC, BZCCC, BZRCC, BZLRC, BZCRC, BZRRC;
 
           int iiL, iiC, iiR, hiL, hiC, hiR;
-          iiL = wii[0]-1;
+          iiL = wii[0] - 1;
           iiC = wii[0];
-          iiR = wii[0]+1;
-          hiL = hii[0]-1;
+          iiR = wii[0] + 1;
+          hiL = hii[0] - 1;
           hiC = hii[0];
-          hiR = hii[0]+1;
+          hiR = hii[0] + 1;
 
           int ijL, ijC, ijR, hjL, hjC, hjR;
-          ijL = wii[1]-1;
+          ijL = wii[1] - 1;
           ijC = wii[1];
-          ijR = wii[1]+1;
-          hjL = hii[1]-1;
+          ijR = wii[1] + 1;
+          hjL = hii[1] - 1;
           hjC = hii[1];
-          hjR = hii[1]+1;
+          hjR = hii[1] + 1;
 
           int ikC, hkC;
           ikC = 0;
@@ -1610,95 +1614,95 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
 
           {
-            EXLLC = myfield[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXCLC = myfield[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXRLC = myfield[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
-            EXLCC = myfield[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXCCC = myfield[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXRCC = myfield[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
-            EXLRC = myfield[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
-            EXCRC = myfield[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
-            EXRRC = myfield[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXLLC = myfield[my_indice(edge, 1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXCLC = myfield[my_indice(edge, 1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXRLC = myfield[my_indice(edge, 1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, ebComp)];
+            EXLCC = myfield[my_indice(edge, 1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXCCC = myfield[my_indice(edge, 1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXRCC = myfield[my_indice(edge, 1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, ebComp)];
+            EXLRC = myfield[my_indice(edge, 1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXCRC = myfield[my_indice(edge, 1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, ebComp)];
+            EXRRC = myfield[my_indice(edge, 1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, ebComp)];
 
-            EYLLC = myfield[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYCLC = myfield[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYRLC = myfield[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            EYLCC = myfield[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYCCC = myfield[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYRCC = myfield[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            EYLRC = myfield[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            EYCRC = myfield[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            EYRRC = myfield[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYLLC = myfield[my_indice(edge, 1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYCLC = myfield[my_indice(edge, 1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYRLC = myfield[my_indice(edge, 1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            EYLCC = myfield[my_indice(edge, 1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYCCC = myfield[my_indice(edge, 1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYRCC = myfield[my_indice(edge, 1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            EYLRC = myfield[my_indice(edge, 1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYCRC = myfield[my_indice(edge, 1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            EYRRC = myfield[my_indice(edge, 1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
 
-            EZLLC = myfield[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZCLC = myfield[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZRLC = myfield[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            EZLCC = myfield[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZCCC = myfield[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZRCC = myfield[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            EZLRC = myfield[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            EZCRC = myfield[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            EZRRC = myfield[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZLLC = myfield[my_indice(edge, 1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZCLC = myfield[my_indice(edge, 1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZRLC = myfield[my_indice(edge, 1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            EZLCC = myfield[my_indice(edge, 1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZCCC = myfield[my_indice(edge, 1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZRCC = myfield[my_indice(edge, 1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            EZLRC = myfield[my_indice(edge, 1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZCRC = myfield[my_indice(edge, 1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            EZRRC = myfield[my_indice(edge, 1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
           }
 
 
           {
-            BXLLC = myfield[my_indice(edge,1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXCLC = myfield[my_indice(edge,1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXRLC = myfield[my_indice(edge,1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
-            BXLCC = myfield[my_indice(edge,1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXCCC = myfield[my_indice(edge,1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXRCC = myfield[my_indice(edge,1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
-            BXLRC = myfield[my_indice(edge,1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
-            BXCRC = myfield[my_indice(edge,1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
-            BXRRC = myfield[my_indice(edge,1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXLLC = myfield[my_indice(edge, 1, 1, 3, iiL, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXCLC = myfield[my_indice(edge, 1, 1, 3, iiC, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXRLC = myfield[my_indice(edge, 1, 1, 3, iiR, hjL, hkC, Nx, Ny, Nz, ebComp)];
+            BXLCC = myfield[my_indice(edge, 1, 1, 3, iiL, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXCCC = myfield[my_indice(edge, 1, 1, 3, iiC, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXRCC = myfield[my_indice(edge, 1, 1, 3, iiR, hjC, hkC, Nx, Ny, Nz, ebComp)];
+            BXLRC = myfield[my_indice(edge, 1, 1, 3, iiL, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXCRC = myfield[my_indice(edge, 1, 1, 3, iiC, hjR, hkC, Nx, Ny, Nz, ebComp)];
+            BXRRC = myfield[my_indice(edge, 1, 1, 3, iiR, hjR, hkC, Nx, Ny, Nz, ebComp)];
 
-            BYLLC = myfield[my_indice(edge,1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYCLC = myfield[my_indice(edge,1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYRLC = myfield[my_indice(edge,1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
-            BYLCC = myfield[my_indice(edge,1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYCCC = myfield[my_indice(edge,1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYRCC = myfield[my_indice(edge,1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
-            BYLRC = myfield[my_indice(edge,1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            BYCRC = myfield[my_indice(edge,1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
-            BYRRC = myfield[my_indice(edge,1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYLLC = myfield[my_indice(edge, 1, 1, 4, hiL, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYCLC = myfield[my_indice(edge, 1, 1, 4, hiC, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYRLC = myfield[my_indice(edge, 1, 1, 4, hiR, ijL, hkC, Nx, Ny, Nz, ebComp)];
+            BYLCC = myfield[my_indice(edge, 1, 1, 4, hiL, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYCCC = myfield[my_indice(edge, 1, 1, 4, hiC, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYRCC = myfield[my_indice(edge, 1, 1, 4, hiR, ijC, hkC, Nx, Ny, Nz, ebComp)];
+            BYLRC = myfield[my_indice(edge, 1, 1, 4, hiL, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYCRC = myfield[my_indice(edge, 1, 1, 4, hiC, ijR, hkC, Nx, Ny, Nz, ebComp)];
+            BYRRC = myfield[my_indice(edge, 1, 1, 4, hiR, ijR, hkC, Nx, Ny, Nz, ebComp)];
 
-            BZLLC = myfield[my_indice(edge,1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZCLC = myfield[my_indice(edge,1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZRLC = myfield[my_indice(edge,1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
-            BZLCC = myfield[my_indice(edge,1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZCCC = myfield[my_indice(edge,1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZRCC = myfield[my_indice(edge,1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
-            BZLRC = myfield[my_indice(edge,1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            BZCRC = myfield[my_indice(edge,1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
-            BZRRC = myfield[my_indice(edge,1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZLLC = myfield[my_indice(edge, 1, 1, 5, hiL, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZCLC = myfield[my_indice(edge, 1, 1, 5, hiC, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZRLC = myfield[my_indice(edge, 1, 1, 5, hiR, hjL, ikC, Nx, Ny, Nz, ebComp)];
+            BZLCC = myfield[my_indice(edge, 1, 1, 5, hiL, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZCCC = myfield[my_indice(edge, 1, 1, 5, hiC, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZRCC = myfield[my_indice(edge, 1, 1, 5, hiR, hjC, ikC, Nx, Ny, Nz, ebComp)];
+            BZLRC = myfield[my_indice(edge, 1, 1, 5, hiL, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZCRC = myfield[my_indice(edge, 1, 1, 5, hiC, hjR, ikC, Nx, Ny, Nz, ebComp)];
+            BZRRC = myfield[my_indice(edge, 1, 1, 5, hiR, hjR, ikC, Nx, Ny, Nz, ebComp)];
           }
 
           {
-            E[0] += ( (wiw[1][0] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                + (wiw[1][1] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC))
-                + (wiw[1][2] *(hiw[0][0]*EXLLC + hiw[0][1]*EXCLC + hiw[0][2]*EXRLC)));
+            E[0] += ((wiw[1][0] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
+              + (wiw[1][1] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
+              + (wiw[1][2] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC)));
 
-            E[1] += ( (hiw[1][0] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                + (hiw[1][1] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC))
-                + (hiw[1][2] *(wiw[0][0]*EYLCC + wiw[0][1]*EYCCC + wiw[0][2]*EYRCC)));
+            E[1] += ((hiw[1][0] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+              + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+              + (hiw[1][2] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC)));
 
-            E[2] += ( (wiw[1][0] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                + (wiw[1][1] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC))
-                + (wiw[1][2] *(wiw[0][0]*EZLRC + wiw[0][1]*EZCRC + wiw[0][2]*EZRRC)));
+            E[2] += ((wiw[1][0] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
+              + (wiw[1][1] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
+              + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)));
 
 
-            B[0] += ( (hiw[1][0] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                + (hiw[1][1] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC))
-                + (hiw[1][2] *(wiw[0][0]*BXLLC + wiw[0][1]*BXCLC + wiw[0][2]*BXRLC)));
+            B[0] += ((hiw[1][0] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
+              + (hiw[1][1] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
+              + (hiw[1][2] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC)));
 
-            B[1] += ( (wiw[1][0] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                + (wiw[1][1] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC))
-                + (wiw[1][2] *(hiw[0][0]*BYLCC + hiw[0][1]*BYCCC + hiw[0][2]*BYRCC)));
+            B[1] += ((wiw[1][0] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+              + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+              + (wiw[1][2] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC)));
 
-            B[2] += ( (hiw[1][0] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                + (hiw[1][1] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC))
-                + (hiw[1][2] *(hiw[0][0]*BZLRC + hiw[0][1]*BZCRC + hiw[0][2]*BZRRC)));
+            B[2] += ((hiw[1][0] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
+              + (hiw[1][1] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
+              + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)));
           }
 
         }
@@ -1731,98 +1735,98 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
         pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
         pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
-      }
-      break;
+    }
+    break;
 
-    case 1:
-      for (p = 0; p < Np; p++)
+  case 1:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = pData[c + p*Ncomp];
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 1; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
-
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
-
-        k1 = k2 = j1 = j2 = 0;
-        for (i = 0; i < 3; i++)
-        {
-          i1 = i + wii[0] - 1;
-          i2 = i + hii[0] - 1;
-          double EX, EY, EZ;
-          EX = myfield[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          EY = myfield[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          EZ = myfield[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          double BX, BY, BZ;
-          BX = myfield[my_indice(edge,0, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          BY = myfield[my_indice(edge,0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-          BZ = myfield[my_indice(edge,0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
-
-          dvol = hiw[0][i];
-          E[0] += EX*dvol;  //Ex
-          dvol = wiw[0][i];
-          E[1] += EY*dvol;  //Ey
-          dvol = wiw[0][i];
-          E[2] += EZ*dvol;  //Ez
-
-          dvol = wiw[0][i];
-          B[0] += BX*dvol;  //Bx
-          dvol = hiw[0][i];
-          B[1] += BY*dvol;  //By
-          dvol = hiw[0][i];
-          B[2] += BZ*dvol;  //Bz
-        }
-
-        u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
-        u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
-        u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
-
-        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-        ess[0] = 2 * dummy*tee[0];
-        ess[1] = 2 * dummy*tee[1];
-        ess[2] = 2 * dummy*tee[2];
-
-        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-        pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+        xx[c] = pData[c + p*Ncomp];
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
       }
-      break;
+      for (c = 0; c < 1; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+      k1 = k2 = j1 = j2 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        i2 = i + hii[0] - 1;
+        double EX, EY, EZ;
+        EX = myfield[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EY = myfield[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EZ = myfield[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        double BX, BY, BZ;
+        BX = myfield[my_indice(edge, 0, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BY = myfield[my_indice(edge, 0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BZ = myfield[my_indice(edge, 0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+
+        dvol = hiw[0][i];
+        E[0] += EX*dvol;  //Ex
+        dvol = wiw[0][i];
+        E[1] += EY*dvol;  //Ey
+        dvol = wiw[0][i];
+        E[2] += EZ*dvol;  //Ez
+
+        dvol = wiw[0][i];
+        B[0] += BX*dvol;  //Bx
+        dvol = hiw[0][i];
+        B[1] += BY*dvol;  //By
+        dvol = hiw[0][i];
+        B[2] += BZ*dvol;  //Bz
+      }
+
+      u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+      pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+    }
+    break;
   }
 }
 
@@ -1859,157 +1863,41 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
   switch (mygrid->getDimensionality())
   {
 
-    case 3:
-      for (p = 0; p < Np; p++)
+  case 3:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = ru(c, p);
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 3; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
-
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
-
-        for (k = 0; k < 3; k++)
-        {
-          k1 = k + wii[2] - 1;
-          k2 = k + hii[2] - 1;
-          for (j = 0; j < 3; j++)
-          {
-            j1 = j + wii[1] - 1;
-            j2 = j + hii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-              i2 = i + hii[0] - 1;
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
-
-              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
-            }
-          }
-        }
-
-        oldP[0] = ru(3, p);
-        oldP[1] = ru(4, p);
-        oldP[2] = ru(5, p);
-
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-        ess[0] = 2 * dummy*tee[0];
-        ess[1] = 2 * dummy*tee[1];
-        ess[2] = 2 * dummy*tee[2];
-
-        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-        pn[0] = 0.5*(oldP[0] + ru(3, p));
-        pn[1] = 0.5*(oldP[1] + ru(4, p));
-        pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-        vn[0] = pn[0] / gamman;
-        vn[1] = pn[1] / gamman;
-        vn[2] = pn[2] / gamman;
-
-        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-        vdotE2 = vdotE2*vdotE2;
-
-        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
-
+        xx[c] = ru(c, p);
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
       }
-      break;
-
-    case 2:
-      for (p = 0; p < Np; p++)
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = ru(c, p);
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 2; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
 
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-        k1 = k2 = 0;
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -2018,188 +1906,304 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j],
-                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j],
-                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j],
-                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j],
-                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j],
-                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j],
-                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
           }
         }
-
-        oldP[0] = ru(3, p);
-        oldP[1] = ru(4, p);
-        oldP[2] = ru(5, p);
-
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-        ess[0] = 2 * dummy*tee[0];
-        ess[1] = 2 * dummy*tee[1];
-        ess[2] = 2 * dummy*tee[2];
-
-        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-        pn[0] = 0.5*(oldP[0] + ru(3, p));
-        pn[1] = 0.5*(oldP[1] + ru(4, p));
-        pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-        vn[0] = pn[0] / gamman;
-        vn[1] = pn[1] / gamman;
-        vn[2] = pn[2] / gamman;
-
-        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-        vdotE2 = vdotE2*vdotE2;
-
-        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
       }
-      break;
 
-    case 1:
-      for (p = 0; p < Np; p++)
+      oldP[0] = ru(3, p);
+      oldP[1] = ru(4, p);
+      oldP[2] = ru(5, p);
+
+      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+      pn[0] = 0.5*(oldP[0] + ru(3, p));
+      pn[1] = 0.5*(oldP[1] + ru(4, p));
+      pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+      vn[0] = pn[0] / gamman;
+      vn[1] = pn[1] / gamman;
+      vn[2] = pn[2] / gamman;
+
+      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+      vdotE2 = vdotE2*vdotE2;
+
+      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
+
+    }
+    break;
+
+  case 2:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
       {
-        //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = ru(c, p);
-          hiw[c][1] = wiw[c][1] = 1;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 1; c++)
-        {
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
+        xx[c] = ru(c, p);
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 2; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
 
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-        E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
 
-        k1 = k2 = j1 = j2 = 0;
+      k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i] * wiw[1][j],
+            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j],
+            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j],
+            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i] * hiw[1][j],
+            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j],
+            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j],
+            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
         }
-
-        oldP[0] = ru(3, p);
-        oldP[1] = ru(4, p);
-        oldP[2] = ru(5, p);
-
-        u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
-        u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
-        u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
-
-        gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
-
-        tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
-        tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
-        tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
-
-        u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
-        u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
-        u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
-
-        dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
-
-        ess[0] = 2 * dummy*tee[0];
-        ess[1] = 2 * dummy*tee[1];
-        ess[2] = 2 * dummy*tee[2];
-
-        u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
-        u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
-        u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
-
-        ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
-        ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
-        ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
-
-        pn[0] = 0.5*(oldP[0] + ru(3, p));
-        pn[1] = 0.5*(oldP[1] + ru(4, p));
-        pn[2] = 0.5*(oldP[2] + ru(5, p));
-
-        gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
-
-        vn[0] = pn[0] / gamman;
-        vn[1] = pn[1] / gamman;
-        vn[2] = pn[2] / gamman;
-
-        fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
-        fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
-        fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
-
-        fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
-
-        vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
-        vdotE2 = vdotE2*vdotE2;
-
-        ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
-        ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
-        ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
-
       }
-      break;
+
+      oldP[0] = ru(3, p);
+      oldP[1] = ru(4, p);
+      oldP[2] = ru(5, p);
+
+      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+      pn[0] = 0.5*(oldP[0] + ru(3, p));
+      pn[1] = 0.5*(oldP[1] + ru(4, p));
+      pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+      vn[0] = pn[0] / gamman;
+      vn[1] = pn[1] / gamman;
+      vn[2] = pn[2] / gamman;
+
+      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+      vdotE2 = vdotE2*vdotE2;
+
+      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
+    }
+    break;
+
+  case 1:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
+      {
+        xx[c] = ru(c, p);
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 1; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+      k1 = k2 = j1 = j2 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        i2 = i + hii[0] - 1;
+        dvol = hiw[0][i],
+          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+        dvol = wiw[0][i],
+          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+        dvol = wiw[0][i],
+          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+        dvol = wiw[0][i],
+          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+        dvol = hiw[0][i],
+          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+        dvol = hiw[0][i],
+          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+      }
+
+      oldP[0] = ru(3, p);
+      oldP[1] = ru(4, p);
+      oldP[2] = ru(5, p);
+
+      u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+      u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+      u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+      ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+      pn[0] = 0.5*(oldP[0] + ru(3, p));
+      pn[1] = 0.5*(oldP[1] + ru(4, p));
+      pn[2] = 0.5*(oldP[2] + ru(5, p));
+
+      gamman = sqrt(1.0 + (pn[0] * pn[0] + pn[1] * pn[1] + pn[2] * pn[2]));
+
+      vn[0] = pn[0] / gamman;
+      vn[1] = pn[1] / gamman;
+      vn[2] = pn[2] / gamman;
+
+      fLorentz[0] = coupling*(E[0] + vn[1] * B[2] - vn[2] * B[1]);
+      fLorentz[1] = coupling*(E[1] + vn[2] * B[0] - vn[0] * B[2]);
+      fLorentz[2] = coupling*(E[2] + vn[0] * B[1] - vn[1] * B[0]);
+
+      fLorentz2 = fLorentz[0] * fLorentz[0] + fLorentz[1] * fLorentz[1] + fLorentz[2] * fLorentz[2];
+
+      vdotE2 = vn[0] * E[0] + vn[1] * E[1] + vn[2] * E[2];
+      vdotE2 = vdotE2*vdotE2;
+
+      ru(3, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[0] * dt;
+      ru(4, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[1] * dt;
+      ru(5, p) -= RRcoefficient*(gamman*gamman)*(fLorentz2 - vdotE2)*vn[2] * dt;
+
+    }
+    break;
   }
 }
 
@@ -2259,39 +2263,11 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 
     switch (mygrid->getDimensionality())
     {
-      case 3:
-        for (k = 0; k < 3; k++)
-        {
-          k1 = k + wii[2] - 1;
-          k2 = k + hii[2] - 1;
-          for (j = 0; j < 3; j++)
-          {
-            j1 = j + wii[1] - 1;
-            j2 = j + hii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-              i2 = i + hii[0] - 1;
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                  E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                  E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                  E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
-
-              dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
-                  B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-              dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
-                  B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-              dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
-                  B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
-            }
-          }
-        }
-        break;
-
-      case 2:
-        k1 = k2 = 0;
+    case 3:
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
@@ -2300,44 +2276,72 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
-            dvol = hiw[0][i] * wiw[1][j],
-                E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-            dvol = wiw[0][i] * hiw[1][j],
-                E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-            dvol = wiw[0][i] * wiw[1][j],
-                E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-            dvol = wiw[0][i] * hiw[1][j],
-                B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-            dvol = hiw[0][i] * wiw[1][j],
-                B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-            dvol = hiw[0][i] * hiw[1][j],
-                B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
           }
         }
-        break;
+      }
+      break;
 
-      case 1:
-        k1 = k2 = j1 = j2 = 0;
+    case 2:
+      k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
-          dvol = hiw[0][i],
-              E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
-          dvol = wiw[0][i],
-              E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
-          dvol = wiw[0][i],
-              E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+          dvol = hiw[0][i] * wiw[1][j],
+            E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j],
+            E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j],
+            E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
 
-          dvol = wiw[0][i],
-              B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
-          dvol = hiw[0][i],
-              B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
-          dvol = hiw[0][i],
-              B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+          dvol = wiw[0][i] * hiw[1][j],
+            B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j],
+            B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j],
+            B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
         }
-        break;
+      }
+      break;
+
+    case 1:
+      k1 = k2 = j1 = j2 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        i2 = i + hii[0] - 1;
+        dvol = hiw[0][i],
+          E[0] += ebfield->E0(i2, j1, k1)*dvol;  //Ex
+        dvol = wiw[0][i],
+          E[1] += ebfield->E1(i1, j2, k1)*dvol;  //Ey
+        dvol = wiw[0][i],
+          E[2] += ebfield->E2(i1, j1, k2)*dvol;  //Ez
+
+        dvol = wiw[0][i],
+          B[0] += ebfield->B0(i1, j2, k2)*dvol;  //Bx
+        dvol = hiw[0][i],
+          B[1] += ebfield->B1(i2, j1, k2)*dvol;  //By
+        dvol = hiw[0][i],
+          B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
+      }
+      break;
     }
 
     u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
@@ -2554,8 +2558,8 @@ void SPECIE::current_deposition(CURRENT *current)
       gamma_i = 1. / sqrt(1 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
       vy = gamma_i*u1(p);
       vz = gamma_i*u2(p);
-      //			ru(1, p) += dt*vy;
-      //			ru(2, p) += dt*vz;
+      //      ru(1, p) += dt*vy;
+      //      ru(2, p) += dt*vz;
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
         xx1[c] = ru(c, p);
@@ -2770,7 +2774,7 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
   double temp;
   double phi;
   double cos_theta, sin_theta;
-  double theta;
+  //double theta;
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM){
     for (int p = 0; p < Np; p++)
     {
@@ -2856,55 +2860,55 @@ void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin
   switch (distribution.type)
   {
     //TRASFORMARE LE ISTRUZIONI NEI DIVERSI CASI IN CHIAMATE A FUNZIONI PRIVATE
-    case WATERBAG:
-      callWaterbag(ext_rng,
-                   distribution.p0,
-                   distribution.p0,
-                   distribution.p0,
-                   uxin, uyin, uzin);
-      break;
+  case WATERBAG:
+    callWaterbag(ext_rng,
+      distribution.p0,
+      distribution.p0,
+      distribution.p0,
+      uxin, uyin, uzin);
+    break;
 
-    case WATERBAG_3TEMP:
+  case WATERBAG_3TEMP:
 
-      callWaterbag(ext_rng,
-                   distribution.p0_x,
-                   distribution.p0_y,
-                   distribution.p0_z,
-                   uxin, uyin, uzin);
-      break;
+    callWaterbag(ext_rng,
+      distribution.p0_x,
+      distribution.p0_y,
+      distribution.p0_z,
+      uxin, uyin, uzin);
+    break;
 
-    case UNIF_SPHERE:
-      callUnifSphere(ext_rng,
-                     distribution.p0,
-                     uxin, uyin, uzin);
-      break;
+  case UNIF_SPHERE:
+    callUnifSphere(ext_rng,
+      distribution.p0,
+      uxin, uyin, uzin);
+    break;
 
-    case SUPERGAUSSIAN:
-      callSupergaussian(ext_rng,
-                        distribution.p0,
-                        distribution.alpha,
-                        uxin, uyin, uzin);
-      break;
+  case SUPERGAUSSIAN:
+    callSupergaussian(ext_rng,
+      distribution.p0,
+      distribution.alpha,
+      uxin, uyin, uzin);
+    break;
 
-    case MAXWELL:
-      callMaxwell(ext_rng,
-                  distribution.temp,
-                  uxin, uyin, uzin);
-      break;
+  case MAXWELL:
+    callMaxwell(ext_rng,
+      distribution.temp,
+      uxin, uyin, uzin);
+    break;
 
-    case JUTTNER:
-      callJuttner(ext_rng,
-                  distribution.a,
-                  uxin, uyin, uzin);
-      break;
+  case JUTTNER:
+    callJuttner(ext_rng,
+      distribution.a,
+      uxin, uyin, uzin);
+    break;
 
-    case SPECIAL:
-      callSpecial(ext_rng,
-                  distribution.a);
-      break;
+  case SPECIAL:
+    callSpecial(ext_rng,
+      distribution.a);
+    break;
 
-    default:
-      break;
+  default:
+    break;
 
 
   }
@@ -2925,7 +2929,10 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
   double dt, gamma_i;
   int p, c;  // particle_int, component_int
-  int i, j, k, i1, j1, k1, i2, j2, k2;
+  int i, j, i1, j1, k1, i2, j2, k2;
+#ifdef OLDCURRENT
+  int k;
+#endif
   //int indexMaxQuadraticShape[]={1,4};
   int hii[3], wii[3];           // half integer index,   whole integer index
   double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
@@ -2936,115 +2943,115 @@ void SPECIE::current_deposition_standard(CURRENT *current)
   double* myCurrent = current->getDataPointer();
   int N_grid[3];
   current->writeN_grid(N_grid);
-  int edge=mygrid->getEdge();
+  int edge = mygrid->getEdge();
   if (!(mygrid->withCurrent == YES && (!isTestSpecies)))
   {
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
-      ux = pData[pIndex( 3, p, Ncomp, Np)];
-      uy = pData[pIndex( 4, p, Ncomp, Np)];
-      uz = pData[pIndex( 5, p, Ncomp, Np)];
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
-        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
 
       }
     }
     return;
   }
   int Nx, Ny, Nz;
-  Nx=N_grid[0];
-  Ny=N_grid[1];
-  Nz=N_grid[2];
+  Nx = N_grid[0];
+  Ny = N_grid[1];
+  Nz = N_grid[2];
   switch (mygrid->getDimensionality())
   {
-    case 3:
-      for (p = 0; p < Np; p++){
-        double ux, uy, uz;
-        ux = pData[pIndex( 3, p, Ncomp, Np)];
-        uy = pData[pIndex( 4, p, Ncomp, Np)];
-        uz = pData[pIndex( 5, p, Ncomp, Np)];
-        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+  case 3:
+    for (p = 0; p < Np; p++){
+      double ux, uy, uz;
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
-        for (c = 0; c < 3; c++)
-        {
-          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
-          hiw[c][1] = wiw[c][1] = 1;
-          hiw[c][0] = wiw[c][0] = 0;
-          hiw[c][2] = wiw[c][2] = 0;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 3; c++)
-        {
-          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
-          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+      for (c = 0; c < 3; c++)
+      {
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        hiw[c][1] = wiw[c][1] = 1;
+        hiw[c][0] = wiw[c][0] = 0;
+        hiw[c][2] = wiw[c][2] = 0;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 3; c++)
+      {
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
 
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
 
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
 
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
 
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
 
-        double myweight = pData[pIndex( 6, p, Ncomp, Np)];
+      double myweight = pData[pIndex(6, p, Ncomp, Np)];
 #ifdef OLDCURRENT
 
-        for (k = 0; k < 3; k++)
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
+        for (j = 0; j < 3; j++)
         {
-          k1 = k + wii[2] - 1;
-          k2 = k + hii[2] - 1;
-          for (j = 0; j < 3; j++)
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
+          for (i = 0; i < 3; i++)
           {
-            j1 = j + wii[1] - 1;
-            j2 = j + hii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-              i2 = i + hii[0] - 1;
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
 
-              double weight = pData[pIndex( 6, p, Ncomp, Np)];
-              double *JX, *JY, *JZ;
-              JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-              JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-              JZ = &myCurrent[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            double weight = pData[pIndex( 6, p, Ncomp, Np)];
+            double *JX, *JY, *JZ;
+            JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JZ = &myCurrent[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
-              *JX += weight*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
-              *JY += weight*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
-              *JZ += weight*dvol*vv[2] * chargeSign;
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+            *JX += weight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+            *JY += weight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+            *JZ += weight*dvol*vv[2] * chargeSign;
 #else
-              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                  current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                  current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                  current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+              current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+              current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+              current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 #endif
 
 
-            }
           }
         }
       }
+    }
 #else
         {
           double *JXLLL, *JXCLL, *JXRLL, *JXLCL, *JXCCL, *JXRCL, *JXLRL, *JXCRL, *JXRRL;
@@ -3061,132 +3068,132 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
 
           int iiL, iiC, iiR, hiL, hiC, hiR;
-          iiL = wii[0]-1;
+          iiL = wii[0] - 1;
           iiC = wii[0];
-          iiR = wii[0]+1;
-          hiL = hii[0]-1;
+          iiR = wii[0] + 1;
+          hiL = hii[0] - 1;
           hiC = hii[0];
-          hiR = hii[0]+1;
+          hiR = hii[0] + 1;
 
           int ijL, ijC, ijR, hjL, hjC, hjR;
-          ijL = wii[1]-1;
+          ijL = wii[1] - 1;
           ijC = wii[1];
-          ijR = wii[1]+1;
-          hjL = hii[1]-1;
+          ijR = wii[1] + 1;
+          hjL = hii[1] - 1;
           hjC = hii[1];
-          hjR = hii[1]+1;
+          hjR = hii[1] + 1;
 
           int ikL, ikC, ikR, hkL, hkC, hkR;
-          ikL = wii[2]-1;
+          ikL = wii[2] - 1;
           ikC = wii[2];
-          ikR = wii[2]+1;
-          hkL = hii[2]-1;
+          ikR = wii[2] + 1;
+          hkL = hii[2] - 1;
           hkC = hii[2];
-          hkR = hii[2]+1;
+          hkR = hii[2] + 1;
 
 
           {
-            JXLLL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXCLL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXRLL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXLCL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXCCL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXRCL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXLRL = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXCRL = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JXRRL = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLLL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCLL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRLL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLCL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCCL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRCL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLRL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCRL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRRL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
 
-            JYLLL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYCLL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYRLL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYLCL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYCCL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYRCL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYLRL = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYCRL = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
-            JYRRL = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLLL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCLL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRLL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLCL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCCL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRCL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLRL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCRL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRRL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
 
-            JZLLL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZCLL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZRLL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZLCL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZCCL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZRCL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZLRL = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZCRL = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
-            JZRRL = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLLL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCLL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRLL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLCL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCCL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRCL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLRL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCRL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRRL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
           }
 
           {
-            JXLLC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXCLC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXRLC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXLCC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXCCC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXRCC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXLRC = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXCRC = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JXRRC = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLLC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCLC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRLC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLCC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCCC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRCC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLRC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCRC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRRC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
 
-            JYLLC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYCLC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYRLC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYLCC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYCCC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYRCC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYLRC = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYCRC = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
-            JYRRC = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLLC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCLC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRLC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLCC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCCC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRCC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLRC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCRC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRRC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
 
-            JZLLC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZCLC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZRLC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZLCC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZCCC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZRCC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZLRC = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZCRC = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
-            JZRRC = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLLC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCLC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRLC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLCC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCCC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRCC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLRC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCRC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRRC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
           }
 
           {
-            JXLLR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXCLR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXRLR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXLCR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXCCR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXRCR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXLRR = &myCurrent[my_indice(edge,1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXCRR = &myCurrent[my_indice(edge,1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JXRRR = &myCurrent[my_indice(edge,1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLLR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCLR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRLR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLCR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCCR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRCR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLRR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCRR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRRR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
 
-            JYLLR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYCLR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYRLR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYLCR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYCCR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYRCR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYLRR = &myCurrent[my_indice(edge,1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYCRR = &myCurrent[my_indice(edge,1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
-            JYRRR = &myCurrent[my_indice(edge,1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLLR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCLR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRLR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLCR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCCR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRCR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLRR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCRR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRRR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
 
-            JZLLR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZCLR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZRLR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZLCR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZCCR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZRCR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZLRR = &myCurrent[my_indice(edge,1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZCRR = &myCurrent[my_indice(edge,1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
-            JZRRR = &myCurrent[my_indice(edge,1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLLR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCLR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRLR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLCR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCCR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRCR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLRR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCRR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRRR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
           }
 
           {
 
             double WSVx, WSVy, WSVz;
-            WSVx =myweight*vv[0]*chargeSign;
-            WSVy =myweight*vv[1]*chargeSign;
-            WSVz =myweight*vv[2]*chargeSign;
+            WSVx = myweight*vv[0] * chargeSign;
+            WSVy = myweight*vv[1] * chargeSign;
+            WSVz = myweight*vv[2] * chargeSign;
 
             {
               *JXLLL += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][0];
@@ -3288,164 +3295,164 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           }
         }
 #endif
+    }
+
+
+    break;
+
+  case 2:
+    for (p = 0; p < Np; p++)
+    {
+      double ux, uy, uz;
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
+
+
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+      for (c = 0; c < 3; c++)
+      {
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        hiw[c][1] = wiw[c][1] = 1;
+        hiw[c][0] = wiw[c][0] = 0;
+        hiw[c][2] = wiw[c][2] = 0;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 2; c++)
+      {
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
       }
 
 
-      break;
-
-    case 2:
-      for (p = 0; p < Np; p++)
+      k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
       {
-        double ux, uy, uz;
-        ux = pData[pIndex( 3, p, Ncomp, Np)];
-        uy = pData[pIndex( 4, p, Ncomp, Np)];
-        uz = pData[pIndex( 5, p, Ncomp, Np)];
-
-
-        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
-        for (c = 0; c < 3; c++)
-        {
-          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
-          hiw[c][1] = wiw[c][1] = 1;
-          hiw[c][0] = wiw[c][0] = 0;
-          hiw[c][2] = wiw[c][2] = 0;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 2; c++)
-        {
-          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
-          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
-
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
-
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-
-
-        k1 = k2 = 0;
-        for (j = 0; j < 3; j++)
-        {
-          j1 = j + wii[1] - 1;
-          j2 = j + hii[1] - 1;
-          for (i = 0; i < 3; i++)
-          {
-            i1 = i + wii[0] - 1;
-            i2 = i + hii[0] - 1;
-#ifndef OLD_ACCESS
-            double weight =  pData[pIndex( 6, p, Ncomp, Np)]; //
-            double *JX, *JY, *JZ;
-            JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-            JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-            JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-
-            dvol = hiw[0][i] * wiw[1][j];
-            *JX += weight*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i] * hiw[1][j];
-            *JY += weight*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i] * wiw[1][j];
-            *JZ += weight*dvol*vv[2] * chargeSign;
-
-#else
-            dvol = hiw[0][i] * wiw[1][j],
-                current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i] * hiw[1][j],
-                current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i] * wiw[1][j],
-                current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
-#endif
-          }
-        }
-      }
-      break;
-
-    case 1:
-      for (p = 0; p < Np; p++)
-      {
-        double ux, uy, uz;
-        ux = pData[pIndex( 3, p, Ncomp, Np)];
-        uy = pData[pIndex( 4, p, Ncomp, Np)];
-        uz = pData[pIndex( 5, p, Ncomp, Np)];
-
-        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
-        for (c = 0; c < 3; c++)
-        {
-          vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
-          hiw[c][1] = wiw[c][1] = 1;
-          hiw[c][0] = wiw[c][0] = 0;
-          hiw[c][2] = wiw[c][2] = 0;
-          hii[c] = wii[c] = 0;
-        }
-        for (c = 0; c < 1; c++)
-        {
-          xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
-          pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
-
-
-          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
-          rh = rr - 0.5;
-
-          wii[c] = (int)floor(rr + 0.5); //whole integer int
-          hii[c] = (int)floor(rr);     //half integer int
-          rr -= wii[c];
-          rh -= hii[c];
-          rr2 = rr*rr;
-          rh2 = rh*rh;
-
-          wiw[c][1] = 0.75 - rr2;
-          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
-          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
-
-          hiw[c][1] = 0.75 - rh2;
-          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
-          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
-        }
-
-
-        k1 = k2 = j1 = j2 = 0;
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-
-          double weight = pData[pIndex( 6, p, Ncomp, Np)];
+          double weight = pData[pIndex(6, p, Ncomp, Np)]; //
           double *JX, *JY, *JZ;
-          JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-          JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-          JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JX = &myCurrent[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JY = &myCurrent[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JZ = &myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-          dvol = hiw[0][i];
+          dvol = hiw[0][i] * wiw[1][j];
           *JX += weight*dvol*vv[0] * chargeSign;
-          dvol = wiw[0][i];
+          dvol = wiw[0][i] * hiw[1][j];
           *JY += weight*dvol*vv[1] * chargeSign;
-          dvol = wiw[0][i];
+          dvol = wiw[0][i] * wiw[1][j];
           *JZ += weight*dvol*vv[2] * chargeSign;
-#else
 
-          dvol = hiw[0][i],
-              current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-          dvol = wiw[0][i],
-              current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-          dvol = wiw[0][i],
-              current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#else
+          dvol = hiw[0][i] * wiw[1][j],
+            current->Jx(i2, j1, k1) += w(p)*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i] * hiw[1][j],
+            current->Jy(i1, j2, k1) += w(p)*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i] * wiw[1][j],
+            current->Jz(i1, j1, k2) += w(p)*dvol*vv[2] * chargeSign;
 #endif
         }
       }
-      break;
+    }
+    break;
+
+  case 1:
+    for (p = 0; p < Np; p++)
+    {
+      double ux, uy, uz;
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
+
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+      for (c = 0; c < 3; c++)
+      {
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        hiw[c][1] = wiw[c][1] = 1;
+        hiw[c][0] = wiw[c][0] = 0;
+        hiw[c][2] = wiw[c][2] = 0;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 1; c++)
+      {
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+
+
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+
+
+      k1 = k2 = j1 = j2 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+
+        double weight = pData[pIndex(6, p, Ncomp, Np)];
+        double *JX, *JY, *JZ;
+        JX = &myCurrent[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+        JY = &myCurrent[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+        JZ = &myCurrent[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+        dvol = hiw[0][i];
+        *JX += weight*dvol*vv[0] * chargeSign;
+        dvol = wiw[0][i];
+        *JY += weight*dvol*vv[1] * chargeSign;
+        dvol = wiw[0][i];
+        *JZ += weight*dvol*vv[2] * chargeSign;
+#else
+
+        dvol = hiw[0][i],
+          current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+        dvol = wiw[0][i],
+          current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+        dvol = wiw[0][i],
+          current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#endif
+      }
+    }
+    break;
   }
 }
 
@@ -3498,8 +3505,8 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
   //int indexMaxQuadraticShape[]={1,4};
   int hii[3], wii[3];           // half integer index,   whole integer index
   double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
-  double rr, rh, rr2, rh2;          // local coordinate to integer grid point and to half integer,     local coordinate squared
-  double dvol, xx[3], vv[3];           // tensor_product,       absolute particle position
+  double rr, rh, rr2, rh2;      // local coordinate to integer grid point and to half integer,     local coordinate squared
+  double dvol, xx[3], vv[3];    // tensor_product,       absolute particle position
   double mydr[3], myweight;
   double mycsi[3];
 
@@ -3507,22 +3514,22 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
   double* myCurrent = current->getDataPointer();
   int N_grid[3];
   current->writeN_grid(N_grid);
-  int edge=mygrid->getEdge();
+  int edge = mygrid->getEdge();
   if (mygrid->withCurrent == YES && (!isTestSpecies))
   {
     for (p = 0; p < Np; p++)
     {
       //debug_warning_particle_outside_boundaries(r0(p), r1(p), r2(p), p);
       double ux, uy, uz;
-      ux = pData[pIndex( 3, p, Ncomp, Np)];
-      uy = pData[pIndex( 4, p, Ncomp, Np)];
-      uz = pData[pIndex( 5, p, Ncomp, Np)];
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
       for (c = 0; c < 3; c++)
       {
-        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
@@ -3530,8 +3537,8 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
       }
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        xx[c] = pData[pIndex( c, p, Ncomp, Np)] + 0.5*dt*vv[c];
-        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
 
         mycsi[c] = mygrid->unStretchGrid(xx[c], c);
         mydr[c] = mygrid->derivativeStretchingFunction(mycsi[c], c);
@@ -3555,53 +3562,13 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
       }
       switch (mygrid->getDimensionality())
       {
-        case 3:
-          myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
+      case 3:
+        myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
 
-          for (k = 0; k < 3; k++)
-          {
-            k1 = k + wii[2] - 1;
-            k2 = k + hii[2] - 1;
-            for (j = 0; j < 3; j++)
-            {
-              j1 = j + wii[1] - 1;
-              j2 = j + hii[1] - 1;
-              for (i = 0; i < 3; i++)
-              {
-                i1 = i + wii[0] - 1;
-                i2 = i + hii[0] - 1;
-#ifndef OLD_ACCESS
-                double weight = pData[pIndex( 6, p, Ncomp, Np)];
-                double *JX, *JY, *JZ;
-                JX = &myCurrent[my_indice(edge,1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JY = &myCurrent[my_indice(edge,1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-                JZ = &myCurrent[my_indice(edge,1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-
-                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
-                *JX += weight*dvol*vv[0] * chargeSign;
-                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
-                *JY += weight*dvol*vv[1] * chargeSign;
-                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
-                *JZ += weight*dvol*vv[2] * chargeSign;
-
-#else
-                dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
-                    current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-                dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
-                    current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-                dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
-                    current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
-#endif
-
-              }
-            }
-          }
-          break;
-
-        case 2:
-          myweight = w(p) / (mydr[0] * mydr[1]);
-
-          k1 = k2 = 0;
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
           for (j = 0; j < 3; j++)
           {
             j1 = j + wii[1] - 1;
@@ -3611,62 +3578,102 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-              double weight =  pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
+              double weight = pData[pIndex(6, p, Ncomp, Np)];
               double *JX, *JY, *JZ;
-              JX = &myCurrent[my_indice(edge,1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-              JY = &myCurrent[my_indice(edge,1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-              JZ = &myCurrent[my_indice(edge,1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JX = &myCurrent[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JY = &myCurrent[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JZ = &myCurrent[my_indice(edge, 1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-              dvol = hiw[0][i] * wiw[1][j];
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
               *JX += weight*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j];
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
               *JY += weight*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j];
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
               *JZ += weight*dvol*vv[2] * chargeSign;
+
 #else
-              dvol = hiw[0][i] * wiw[1][j],
-                  current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-              dvol = wiw[0][i] * hiw[1][j],
-                  current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-              dvol = wiw[0][i] * wiw[1][j],
-                  current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 #endif
+
             }
           }
-          break;
+        }
+        break;
 
-        case 1:
-          myweight = w(p) / mydr[0];
+      case 2:
+        myweight = w(p) / (mydr[0] * mydr[1]);
 
-          k1 = k2 = j1 = j2 = 0;
+        k1 = k2 = 0;
+        for (j = 0; j < 3; j++)
+        {
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-            double weight =  pData[pIndex( 6, p, Ncomp, Np)];
+            double weight = pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
             double *JX, *JY, *JZ;
-            JX = &myCurrent[my_indice(edge,0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-            JY = &myCurrent[my_indice(edge,0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
-            JZ = &myCurrent[my_indice(edge,0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JX = &myCurrent[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JY = &myCurrent[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+            JZ = &myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
-            dvol = hiw[0][i];
+            dvol = hiw[0][i] * wiw[1][j];
             *JX += weight*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i];
+            dvol = wiw[0][i] * hiw[1][j];
             *JY += weight*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i];
+            dvol = wiw[0][i] * wiw[1][j];
             *JZ += weight*dvol*vv[2] * chargeSign;
 #else
-
-            dvol = hiw[0][i],
-                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
-            dvol = wiw[0][i],
-                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
-            dvol = wiw[0][i],
-                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+            dvol = hiw[0][i] * wiw[1][j],
+              current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+            dvol = wiw[0][i] * hiw[1][j],
+              current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+            dvol = wiw[0][i] * wiw[1][j],
+              current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
 #endif
           }
-          break;
+        }
+        break;
+
+      case 1:
+        myweight = w(p) / mydr[0];
+
+        k1 = k2 = j1 = j2 = 0;
+        for (i = 0; i < 3; i++)
+        {
+          i1 = i + wii[0] - 1;
+          i2 = i + hii[0] - 1;
+#ifndef OLD_ACCESS
+          double weight = pData[pIndex(6, p, Ncomp, Np)];
+          double *JX, *JY, *JZ;
+          JX = &myCurrent[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JY = &myCurrent[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+          JZ = &myCurrent[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+          dvol = hiw[0][i];
+          *JX += weight*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i];
+          *JY += weight*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i];
+          *JZ += weight*dvol*vv[2] * chargeSign;
+#else
+
+          dvol = hiw[0][i],
+            current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+          dvol = wiw[0][i],
+            current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+          dvol = wiw[0][i],
+            current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+#endif
+        }
+        break;
       }
 
     }
@@ -3676,15 +3683,15 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
-      ux = pData[pIndex( 3, p, Ncomp, Np)];
-      uy = pData[pIndex( 4, p, Ncomp, Np)];
-      uz = pData[pIndex( 5, p, Ncomp, Np)];
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
-        vv[c] = gamma_i*pData[pIndex( c + 3, p, Ncomp, Np)];
-        pData[pIndex( c, p, Ncomp, Np)] += dt*vv[c];
+        vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
       }
     }
   }
@@ -3707,9 +3714,9 @@ void SPECIE::density_deposition_standard(CURRENT *current)
   int i, j, k, i1, j1, k1;
   //int indexMaxQuadraticShape[]={1,4};
   int wii[3];           // whole integer index
-  double wiw[3][3];  // whole integer weight
-  double rr, rr2;          // local coordinate to integer grid point,     local coordinate squared
-  double dvol, xx[3];           // tensor_product,       absolute particle position
+  double wiw[3][3];     // whole integer weight
+  double rr, rr2;       // local coordinate to integer grid point, local coordinate squared
+  double dvol, xx[3];   // tensor_product, absolute particle position
 
   if (mygrid->withParticles != YES)
     return;
@@ -3732,47 +3739,47 @@ void SPECIE::density_deposition_standard(CURRENT *current)
     }
     switch (mygrid->getDimensionality())
     {
-      case 3:
-        for (k = 0; k < 3; k++)
-        {
-          k1 = k + wii[2] - 1;
-          for (j = 0; j < 3; j++)
-          {
-            j1 = j + wii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-
-              dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-                  current->density(i1, j1, k1) += w(p)*dvol;
-            }
-          }
-        }
-        break;
-
-      case 2:
-        k1 = 0;
+    case 3:
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
-            dvol = wiw[0][i] * wiw[1][j],
-                current->density(i1, j1, k1) += w(p)*dvol;
+
+            dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
+              current->density(i1, j1, k1) += w(p)*dvol;
           }
         }
-        break;
+      }
+      break;
 
-      case 1:
-        k1 = j1 = 0;
+    case 2:
+      k1 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
-          dvol = wiw[0][i],
-              current->density(i1, j1, k1) += w(p)*dvol;
+          dvol = wiw[0][i] * wiw[1][j],
+            current->density(i1, j1, k1) += w(p)*dvol;
         }
-        break;
+      }
+      break;
+
+    case 1:
+      k1 = j1 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        dvol = wiw[0][i],
+          current->density(i1, j1, k1) += w(p)*dvol;
+      }
+      break;
     }
 
   }
@@ -3813,50 +3820,50 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
     }
     switch (mygrid->getDimensionality())
     {
-      case 3:
-        myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
-        for (k = 0; k < 3; k++)
-        {
-          k1 = k + wii[2] - 1;
-          for (j = 0; j < 3; j++)
-          {
-            j1 = j + wii[1] - 1;
-            for (i = 0; i < 3; i++)
-            {
-              i1 = i + wii[0] - 1;
-
-              dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-                  current->density(i1, j1, k1) += myweight*dvol;
-            }
-          }
-        }
-        break;
-
-      case 2:
-        myweight = w(p) / (mydr[0] * mydr[1]);
-        k1 = 0;
+    case 3:
+      myweight = w(p) / (mydr[0] * mydr[1] * mydr[2]);
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
         for (j = 0; j < 3; j++)
         {
           j1 = j + wii[1] - 1;
           for (i = 0; i < 3; i++)
           {
             i1 = i + wii[0] - 1;
-            dvol = wiw[0][i] * wiw[1][j],
-                current->density(i1, j1, k1) += myweight*dvol;
+
+            dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
+              current->density(i1, j1, k1) += myweight*dvol;
           }
         }
-        break;
+      }
+      break;
 
-      case 1:
-        myweight = w(p) / mydr[0];
-        k1 = j1 = 0;
+    case 2:
+      myweight = w(p) / (mydr[0] * mydr[1]);
+      k1 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
         for (i = 0; i < 3; i++)
         {
           i1 = i + wii[0] - 1;
-          dvol = wiw[0][i],
-              current->density(i1, j1, k1) += myweight*dvol;
+          dvol = wiw[0][i] * wiw[1][j],
+            current->density(i1, j1, k1) += myweight*dvol;
         }
-        break;
+      }
+      break;
+
+    case 1:
+      myweight = w(p) / mydr[0];
+      k1 = j1 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        dvol = wiw[0][i],
+          current->density(i1, j1, k1) += myweight*dvol;
+      }
+      break;
     }
 
   }

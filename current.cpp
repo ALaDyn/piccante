@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -75,7 +75,7 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
     printf("ERROR: current.setAllValuesToZero impossible\n");
     exit(17);
 #else
-  return;
+    return;
 #endif
   }
 }
@@ -101,9 +101,9 @@ double *CURRENT::getDataPointer(){
 }
 
 void CURRENT::writeN_grid(int *N_grid){
-  N_grid[0]=this->N_grid[0];
-  N_grid[1]=this->N_grid[1];
-  N_grid[2]=this->N_grid[2];
+  N_grid[0] = this->N_grid[0];
+  N_grid[1] = this->N_grid[1];
+  N_grid[2] = this->N_grid[2];
 }
 
 integer_or_halfinteger CURRENT::getJCoords(int c){
@@ -179,7 +179,7 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = JJ(c, i - edge, j - edge, (Nz - 1) - edge + k);
+            send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = JJ(c, i - edge, j - edge, (Nz - 1) - edge + k);
           }
 
     // ====== send edge to right receive from left
@@ -195,8 +195,8 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
-      send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = JJ(c, i - edge, j - edge, k - edge);
+            JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
+            send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy] = JJ(c, i - edge, j - edge, k - edge);
           }
 
     // ====== send to left receive from right
@@ -210,7 +210,7 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      JJ(c, i - edge, j - edge, (Nz - 1) - edge + k) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
+            JJ(c, i - edge, j - edge, (Nz - 1) - edge + k) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Ngy];
           }
 
     // ===== finished, now free the send  recv buffers
@@ -232,7 +232,7 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = JJ(c, i - edge, (Ny - 1) - edge + j, k - edge);
+            send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = JJ(c, i - edge, (Ny - 1) - edge + j, k - edge);
           }
 
     // ====== send edge to right receive from left
@@ -248,8 +248,8 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
-      send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = JJ(c, i - edge, j - edge, k - edge);
+            JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
+            send_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng] = JJ(c, i - edge, j - edge, k - edge);
           }
 
     // ====== send to left receive from right
@@ -263,7 +263,7 @@ void CURRENT::pbc()
         for (i = 0; i < Ngx; i++)
           for (c = 0; c < Nc; c++)
           {
-      JJ(c, i - edge, (Ny - 1) - edge + j, k - edge) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
+            JJ(c, i - edge, (Ny - 1) - edge + j, k - edge) = recv_buffer[c + i*Nc + j*Nc*Ngx + k*Nc*Ngx*Nxchng];
           }
 
     // ===== finished, now free the send  recv buffers
@@ -282,7 +282,7 @@ void CURRENT::pbc()
       for (i = 0; i < Nxchng; i++)
         for (c = 0; c < Nc; c++)
         {
-    send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = JJ(c, (Nx - 1) - edge + i, j - edge, k - edge);
+          send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = JJ(c, (Nx - 1) - edge + i, j - edge, k - edge);
         }
 
   // ====== send edge to right receive from left
@@ -298,8 +298,8 @@ void CURRENT::pbc()
       for (i = 0; i < Nxchng; i++)
         for (c = 0; c < Nc; c++)
         {
-    JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
-    send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = JJ(c, i - edge, j - edge, k - edge);
+          JJ(c, i - edge, j - edge, k - edge) += recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
+          send_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy] = JJ(c, i - edge, j - edge, k - edge);
         }
 
   // ====== send to left receive from right
@@ -314,7 +314,7 @@ void CURRENT::pbc()
       for (i = 0; i < Nxchng; i++)
         for (c = 0; c < Nc; c++)
         {
-    JJ(c, (Nx - 1) - edge + i, j - edge, k - edge) = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
+          JJ(c, (Nx - 1) - edge + i, j - edge, k - edge) = recv_buffer[c + i*Nc + j*Nc*Nxchng + k*Nc*Nxchng*Ngy];
         }
 
   // ===== finished, now free the send  recv buffers
@@ -335,7 +335,7 @@ void CURRENT::eraseDensity(){
     for (j = 0; j < Ngy; j++)
       for (i = 0; i < Ngx; i++)
       {
-    density(i - edge, j - edge, k - edge) = 0.0;
+        density(i - edge, j - edge, k - edge) = 0.0;
       }
 }
 

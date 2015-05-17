@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -111,8 +111,8 @@ inline uint64_t pIndex(int c, int p, int Ncomp, int Npart){
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 #else
-#define MAX(a,b) ((a > b)) ? (a) : (b)
-#define MIN(a,b) ((a < b)) ? (a) : (b)
+#define MAX(a,b) ((a > b) ? (a) : (b))
+#define MIN(a,b) ((a < b) ? (a) : (b))
 #endif
 
 template <class T>const T& TMIN(const T& a, const T& b){

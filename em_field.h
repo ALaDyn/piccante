@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -24,7 +24,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <mpi.h>
 #include <omp.h>
- #ifdef _USE_FFTW_FILTER
+#ifdef _USE_FFTW_FILTER
 #include <fftw3-mpi.h>
 #endif
 
@@ -104,8 +104,8 @@ enum filterDir{
 
 class EM_FIELD{
 public:
-    double *getDataPointer();
-    void writeN_grid(int *N_grid);
+  double *getDataPointer();
+  void writeN_grid(int *N_grid);
   double minima[6], maxima[8];  //14 utility values minima: Exmin Eymin, ..., Bzmin;     maxima: Exmax, Eymax, ..., Bzmax, Emax, Bmax
   double total_energy[7];  // Ex2, Ey2, Ez2, Bx2, By2, Bz2 E2+B2 (totalenergy)
   double total_momentum[3];  // pointing vector Sx Sy Sz
@@ -162,9 +162,9 @@ public:
   void fftw_filter_Efield();
 
   //PUBLIC INLINE FUNCTIONS
-//  static inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
-//    return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
-//  }
+  //  static inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+  //    return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
+  //  }
   inline double & E0(int i, int j, int k){
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       0, i, j, k,
@@ -270,7 +270,7 @@ private:
   //PRIVATE INLINE FUNCTIONS
 
 
-    bool checkIfFilterPossible();
+  bool checkIfFilterPossible();
 };
 
 

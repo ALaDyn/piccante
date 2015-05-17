@@ -1,4 +1,4 @@
-/* Copyright 2014 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
 
 /*******************************************************************************
 This file is part of piccante.
@@ -53,50 +53,50 @@ namespace jsonParser{
   extern int inputVersion;
   struct laserPulseBoolFlags{
 
-      bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
-      laserPulseBoolFlags(){
-        type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime =false;
-      }
+    bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
+    laserPulseBoolFlags(){
+      type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime = false;
+    }
   };
 
   struct outRequest{
-      bool isFrom;
-      bool isTo;
-      bool isEvery;
-      bool isAt;
-      bool isDomainName;
-      bool isSpecName;
-      double from;
-      double to;
-      double every;
-      double at;
-      std::string domainName;
-      std::string specName;
+    bool isFrom;
+    bool isTo;
+    bool isEvery;
+    bool isAt;
+    bool isDomainName;
+    bool isSpecName;
+    double from;
+    double to;
+    double every;
+    double at;
+    std::string domainName;
+    std::string specName;
   };
 
   bool checkVersion(Json::Value &document, int &version);
   void lookForInputFile(int narg, char **args, std::string *inputFileName);
 
-  std::string parseJsonInputFile(Json::Value &root,  int narg, char **args);
+  std::string parseJsonInputFile(Json::Value &root, int narg, char **args);
   int getDimensionality(Json::Value &document, int defaultDimensionality);
   void setXrange(Json::Value &parent, GRID *grid);
-  void setYrange(Json::Value &parent,GRID *grid);
-  void setZrange(Json::Value &parent,GRID *grid);
+  void setYrange(Json::Value &parent, GRID *grid);
+  void setZrange(Json::Value &parent, GRID *grid);
 
   bool setInt(int *number, Json::Value &parent, const char* name);
-  bool setDouble(double *number, Json::Value &parent,const char* name);
+  bool setDouble(double *number, Json::Value &parent, const char* name);
   bool setBool(bool *number, Json::Value &parent, const char* name);
-  bool setString(std::string * number, Json::Value  &parent,const char* name);
+  bool setString(std::string * number, Json::Value  &parent, const char* name);
 
   bool setValue(Json::Value &child, Json::Value &parent, const char* name);
-  void setRadiationFriction(Json::Value &document,GRID *grid);
+  void setRadiationFriction(Json::Value &document, GRID *grid);
   bool getLambda0(Json::Value &document, double& lambda0);
   void setNCells(Json::Value &parent, GRID *grid);
   void setNprocs(Json::Value &document, GRID *grid);
-  void setSimulationTime(Json::Value  &document,GRID *grid);
-  void setMasterProc(Json::Value  &document,GRID *grid);
-  void setCourantFactor(Json::Value  &document,GRID *grid);
-  void setBoundaryConditions(Json::Value &parent,GRID *grid);
+  void setSimulationTime(Json::Value  &document, GRID *grid);
+  void setMasterProc(Json::Value  &document, GRID *grid);
+  void setCourantFactor(Json::Value  &document, GRID *grid);
+  void setBoundaryConditions(Json::Value &parent, GRID *grid);
   void setDumpControl(Json::Value  &parent, GRID *mygrid);
   void setStretchedGrid(Json::Value &document, GRID *grid);
   void setMovingWindow(Json::Value &document, GRID *grid);
