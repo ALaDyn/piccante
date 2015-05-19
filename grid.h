@@ -24,14 +24,14 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <mpi.h>
+#include "commons.h"
+#include "structures.h"
 #include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cmath>
 #include <iomanip>
-//#include <malloc.h>
-//#include <cstring>
 #include <stdint.h>
 #include <ctime>       /* time */
 #if defined(_MSC_VER)
@@ -44,8 +44,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <gsl/gsl_randist.h>
 #endif
 
-#include"commons.h"
-#include "structures.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif

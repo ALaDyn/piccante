@@ -20,6 +20,16 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include <mpi.h>
+#include "commons.h"
+#include "grid.h"
+#include "structures.h"
+#include "current.h"
+#include "em_field.h"
+#include "particle_species.h"
+#include "output_manager.h"
+#include "utilities.h"
+#include "jsonparser.h"
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -39,15 +49,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 
-#include "commons.h"
-#include "grid.h"
-#include "structures.h"
-#include "current.h"
-#include "em_field.h"
-#include "particle_species.h"
-#include "output_manager.h"
-#include "utilities.h"
-#include "jsonparser.h"
 
 #define DEFAULT_DIMENSIONALITY 1
 

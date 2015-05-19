@@ -178,7 +178,7 @@
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="jsonparser.cpp" />
-    <ClCompile Include="main-1.cpp" />
+    <ClCompile Include="main-piccante.cpp" />
     <ClCompile Include="output_manager.cpp" />
     <ClCompile Include="particle_species.cpp" />
     <ClCompile Include="structures.cpp" />

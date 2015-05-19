@@ -23,7 +23,10 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include <mpi.h>
-//#include <malloc.h>
+#include "commons.h"
+#include "grid.h"
+#include "structures.h"
+
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -33,9 +36,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstring>
 #include <stdint.h>
 
-#include "commons.h"
-#include "grid.h"
-#include "structures.h"
 
 
 class CURRENT{

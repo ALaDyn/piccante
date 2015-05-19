@@ -23,6 +23,14 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
+#include "grid.h"
+#include "structures.h"
+#include "em_field.h"
+#include "particle_species.h"
+#include "output_manager.h"
+#include "utilities.h"
+#include "json/json.h"
+
 #include <cmath>
 #include <cstdint>
 #else
@@ -40,13 +48,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-#include "grid.h"
-#include "structures.h"
-#include "em_field.h"
-#include "particle_species.h"
-#include "output_manager.h"
-#include "utilities.h"
-#include "json/json.h"
 
 namespace jsonParser{
   extern bool isThisJsonMaster;

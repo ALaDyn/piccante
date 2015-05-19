@@ -40,6 +40,13 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define MACRO_CPUGROUP_FOR_MULTIFILE 1024
 
 #include <mpi.h>
+#include "commons.h"
+#include "grid.h"
+#include "structures.h"
+#include "current.h"
+#include "em_field.h"
+#include "particle_species.h"
+#include "utilities.h"
 #include <iomanip>
 #if defined(_MSC_VER)
 #include <cstdint>
@@ -56,19 +63,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
 #if defined(USE_HDF5)
 #include <hdf5.h>
 #endif
-#include "grid.h"
-#include "structures.h"
-#include "current.h"
-#include "em_field.h"
-#include "particle_species.h"
-#include "utilities.h"
 
 
 

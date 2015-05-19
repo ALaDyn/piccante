@@ -23,6 +23,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define _USE_MATH_DEFINES
 
 #include <mpi.h>
+
+#include "commons.h"
+#include "structures.h"
+#include "grid.h"
+#include "current.h"
+
 #include <omp.h>
 #ifdef _USE_FFTW_FILTER
 #include <fftw3-mpi.h>
@@ -78,11 +84,6 @@ typedef unsigned __int64  uint64_t; */
 
 #include <stdint.h>
 
-
-#include "commons.h"
-#include "structures.h"
-#include "grid.h"
-#include "current.h"
 
 
 enum filterOptions{

@@ -20,6 +20,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
+#include "grid.h"
+#include "structures.h"
+#include "em_field.h"
+#include "particle_species.h"
+#include "json/json.h"
+
 #if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
 #include <cstdint>
@@ -39,11 +45,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
-#include "grid.h"
-#include "structures.h"
-#include "em_field.h"
-#include "particle_species.h"
-#include "json/json.h"
 
 void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
