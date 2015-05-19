@@ -41,7 +41,11 @@
 #pragma once
 #endif
 
-#include "stdint.h"
+#if defined(_MSC_VER)
+#include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 // miloyip: VC supports inttypes.h since VC2013
 #if _MSC_VER >= 1800
