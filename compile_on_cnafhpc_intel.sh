@@ -17,7 +17,7 @@ module purge
 module load compilers/ips-xe-2013-sp1
 module load compilers/intel-mpi
 
-make boost
+make intelcnaf
 #mv piccante piccante.${EXE_NAME}
 mv piccante piccante.intel
 

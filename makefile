@@ -15,6 +15,11 @@ all : $(EXE)
 specific : $(EXE)
 specific : MAIN = main-1.cpp
 
+intelcnaf : COMPILER = mpiicpc
+intelcnaf : OPT += -DUSE_BOOST
+intelcnaf : LIB += -lboost_filesystem -lboost_system
+intelcnaf : $(EXE)
+
 boost : OPT = -O3 -DUSE_BOOST
 boost : LIB = -lgsl -lgslcblas  -lboost_filesystem -lboost_system
 boost : $(EXE)

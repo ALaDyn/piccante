@@ -30,6 +30,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 #include <stdint.h>
 
 #include "commons.h"
