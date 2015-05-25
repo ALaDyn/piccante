@@ -23,7 +23,7 @@ scal : COMPILER = scalasca -instrument mpixlcxx
 scal : EXE = piccante.scalasca
 scal : $(EXE)
 
-deb : OPT = -g -qfullpath -qcheck -qflttrap -qinitauto=FF -qkeepparm -DUSE_BOOST
+deb : OPT = -O0 -g -qfullpath -qcheck -qflttrap -qinitauto=FF -qkeepparm -DUSE_BOOST
 deb : EXE = piccante.debug
 deb : $(EXE)
 
@@ -36,7 +36,7 @@ $(EXE) : $(OBJ)
 				$(COMPILER) -o $(EXE) $(OPT) $(OBJ) -L$(GSL_LIB) -L$(BOOST_LIB) -I$(GSL_INC) -I$(BOOST_INC) $(LIB) 
 
 main-piccante.o: $(MAIN) 
-				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c $(MAIN)
+				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c $(MAIN) -o main-piccante.o
 
 grid.o : grid.cpp 
 				$(COMPILER) -I$(GSL_INC) -I$(BOOST_INC) $(OPT) -c grid.cpp
