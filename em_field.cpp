@@ -50,7 +50,12 @@ void EM_FIELD::allocate(GRID *grid){
   Ncomp = 6;
 #ifndef NO_ALLOCATION
   val = (double *)malloc(Ntot*Ncomp*sizeof(double));
-  allocated = true;
+  if(val != NULL){
+    allocated = true;
+  }
+  else{
+    allocated = false;
+  }
   EM_FIELD::setAllValuesToZero();
 #endif
   EBEnergyExtremesFlag = false;

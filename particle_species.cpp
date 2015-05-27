@@ -1402,69 +1402,82 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           }
 
           {
-            E[0] += wiw[2][0] * ((wiw[1][0] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
-              + (wiw[1][1] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
-              + (wiw[1][2] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL)))
-              + wiw[2][1] * ((wiw[1][0] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
-              + (wiw[1][1] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
-              + (wiw[1][2] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC)))
-              + wiw[2][2] * ((wiw[1][0] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR))
-              + (wiw[1][1] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR))
-              + (wiw[1][2] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR)));
+            E[0] += wiw[2][0] * ((wiw[1][0] * (hiw[0][0] * 6*EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
+                               + (wiw[1][1] * (hiw[0][0] * EXLCL + hiw[0][1] * EXCCL + hiw[0][2] * EXRCL))
+                               + (wiw[1][2] * (hiw[0][0] * EXLRL + hiw[0][1] * EXCRL + hiw[0][2] * EXRRL)))
+
+                  + wiw[2][1] * ((wiw[1][0] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
+                               + (wiw[1][1] * (hiw[0][0] * EXLCC + hiw[0][1] * EXCCC + hiw[0][2] * EXRCC))
+                               + (wiw[1][2] * (hiw[0][0] * EXLRC + hiw[0][1] * EXCRC + hiw[0][2] * EXRRC)))
+
+                  + wiw[2][2] * ((wiw[1][0] * (hiw[0][0] * EXLLR + hiw[0][1] * EXCLR + hiw[0][2] * EXRLR))
+                               + (wiw[1][1] * (hiw[0][0] * EXLCR + hiw[0][1] * EXCCR + hiw[0][2] * EXRCR))
+                               + (wiw[1][2] * (hiw[0][0] * EXLRR + hiw[0][1] * EXCRR + hiw[0][2] * EXRRR)));
 
 
+            E[1] += wiw[2][0] * ((hiw[1][0] * (wiw[0][0] * EYLLL + wiw[0][1] * EYCLL + wiw[0][2] * EYRLL))
+                               + (hiw[1][1] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL))
+                               + (hiw[1][2] * (wiw[0][0] * EYLRL + wiw[0][1] * EYCRL + wiw[0][2] * EYRRL)))
 
-            E[1] += wiw[2][0] * ((hiw[1][0] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL))
-              + (hiw[1][1] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL))
-              + (hiw[1][2] * (wiw[0][0] * EYLCL + wiw[0][1] * EYCCL + wiw[0][2] * EYRCL)))
-              + wiw[2][1] * ((hiw[1][0] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
-              + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
-              + (hiw[1][2] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC)))
-              + wiw[2][2] * ((hiw[1][0] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR))
-              + (hiw[1][1] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR))
-              + (hiw[1][2] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR)));
+                  + wiw[2][1] * ((hiw[1][0] * (wiw[0][0] * EYLLC + wiw[0][1] * EYCLC + wiw[0][2] * EYRLC))
+                               + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+                               + (hiw[1][2] * (wiw[0][0] * EYLRC + wiw[0][1] * EYCRC + wiw[0][2] * EYRRC)))
 
-            E[2] += hiw[2][0] * ((wiw[1][0] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL))
-              + (wiw[1][1] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL))
-              + (wiw[1][2] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL)))
-              + hiw[2][1] * ((wiw[1][0] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
-              + (wiw[1][1] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
-              + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)))
-              + hiw[2][2] * ((wiw[1][0] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR))
-              + (wiw[1][1] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR))
-              + (wiw[1][2] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR)));
+                  + wiw[2][2] * ((hiw[1][0] * (wiw[0][0] * EYLLR + wiw[0][1] * EYCLR + wiw[0][2] * EYRLR))
+                               + (hiw[1][1] * (wiw[0][0] * EYLCR + wiw[0][1] * EYCCR + wiw[0][2] * EYRCR))
+                               + (hiw[1][2] * (wiw[0][0] * EYLRR + wiw[0][1] * EYCRR + wiw[0][2] * EYRRR)));
+
+
+            E[2] += hiw[2][0] * ((wiw[1][0] * (wiw[0][0] * EZLLL + wiw[0][1] * EZCLL + wiw[0][2] * EZRLL))
+                               + (wiw[1][1] * (wiw[0][0] * EZLCL + wiw[0][1] * EZCCL + wiw[0][2] * EZRCL))
+                               + (wiw[1][2] * (wiw[0][0] * EZLRL + wiw[0][1] * EZCRL + wiw[0][2] * EZRRL)))
+
+                  + hiw[2][1] * ((wiw[1][0] * (wiw[0][0] * EZLLC + wiw[0][1] * EZCLC + wiw[0][2] * EZRLC))
+                               + (wiw[1][1] * (wiw[0][0] * EZLCC + wiw[0][1] * EZCCC + wiw[0][2] * EZRCC))
+                               + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)))
+
+                  + hiw[2][2] * ((wiw[1][0] * (wiw[0][0] * EZLLR + wiw[0][1] * EZCLR + wiw[0][2] * EZRLR))
+                               + (wiw[1][1] * (wiw[0][0] * EZLCR + wiw[0][1] * EZCCR + wiw[0][2] * EZRCR))
+                               + (wiw[1][2] * (wiw[0][0] * EZLRR + wiw[0][1] * EZCRR + wiw[0][2] * EZRRR)));
 
 
             B[0] += hiw[2][0] * ((hiw[1][0] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL))
-              + (hiw[1][1] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL))
-              + (hiw[1][2] * (wiw[0][0] * BXLLL + wiw[0][1] * BXCLL + wiw[0][2] * BXRLL)))
-              + hiw[2][1] * ((hiw[1][0] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
-              + (hiw[1][1] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
-              + (hiw[1][2] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC)))
-              + hiw[2][2] * ((hiw[1][0] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR))
-              + (hiw[1][1] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR))
-              + (hiw[1][2] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR)));
+                               + (hiw[1][1] * (wiw[0][0] * BXLCL + wiw[0][1] * BXCCL + wiw[0][2] * BXRCL))
+                               + (hiw[1][2] * (wiw[0][0] * BXLRL + wiw[0][1] * BXCRL + wiw[0][2] * BXRRL)))
+
+                  + hiw[2][1] * ((hiw[1][0] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
+                               + (hiw[1][1] * (wiw[0][0] * BXLCC + wiw[0][1] * BXCCC + wiw[0][2] * BXRCC))
+                               + (hiw[1][2] * (wiw[0][0] * BXLRC + wiw[0][1] * BXCRC + wiw[0][2] * BXRRC)))
+
+                  + hiw[2][2] * ((hiw[1][0] * (wiw[0][0] * BXLLR + wiw[0][1] * BXCLR + wiw[0][2] * BXRLR))
+                               + (hiw[1][1] * (wiw[0][0] * BXLCR + wiw[0][1] * BXCCR + wiw[0][2] * BXRCR))
+                               + (hiw[1][2] * (wiw[0][0] * BXLRR + wiw[0][1] * BXCRR + wiw[0][2] * BXRRR)));
 
 
-            B[1] += hiw[2][2] * ((wiw[1][0] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR))
-              + (wiw[1][1] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR))
-              + (wiw[1][2] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR)))
-              + hiw[2][0] * ((wiw[1][0] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL))
-              + (wiw[1][1] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL))
-              + (wiw[1][2] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL)))
-              + hiw[2][1] * ((wiw[1][0] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
-              + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
-              + (wiw[1][2] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC)));
+            B[1] += hiw[2][0] * ((wiw[1][0] * (hiw[0][0] * BYLLL + hiw[0][1] * BYCLL + hiw[0][2] * BYRLL))
+                               + (wiw[1][1] * (hiw[0][0] * BYLCL + hiw[0][1] * BYCCL + hiw[0][2] * BYRCL))
+                               + (wiw[1][2] * (hiw[0][0] * BYLRL + hiw[0][1] * BYCRL + hiw[0][2] * BYRRL)))
 
-            B[2] += wiw[2][0] * ((hiw[1][0] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL))
-              + (hiw[1][1] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL))
-              + (hiw[1][2] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL)))
-              + wiw[2][1] * ((hiw[1][0] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
-              + (hiw[1][1] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
-              + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)))
-              + wiw[2][2] * ((hiw[1][0] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR))
-              + (hiw[1][1] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR))
-              + (hiw[1][2] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR)));
+                  + hiw[2][1] * ((wiw[1][0] * (hiw[0][0] * BYLLC + hiw[0][1] * BYCLC + hiw[0][2] * BYRLC))
+                               + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+                               + (wiw[1][2] * (hiw[0][0] * BYLRC + hiw[0][1] * BYCRC + hiw[0][2] * BYRRC)))
+
+                  + hiw[2][2] * ((wiw[1][0] * (hiw[0][0] * BYLLR + hiw[0][1] * BYCLR + hiw[0][2] * BYRLR))
+                               + (wiw[1][1] * (hiw[0][0] * BYLCR + hiw[0][1] * BYCCR + hiw[0][2] * BYRCR))
+                               + (wiw[1][2] * (hiw[0][0] * BYLRR + hiw[0][1] * BYCRR + hiw[0][2] * BYRRR)));
+
+
+            B[2] += wiw[2][0] * ((hiw[1][0] * (hiw[0][0] * BZLLL + hiw[0][1] * BZCLL + hiw[0][2] * BZRLL))
+                               + (hiw[1][1] * (hiw[0][0] * BZLCL + hiw[0][1] * BZCCL + hiw[0][2] * BZRCL))
+                               + (hiw[1][2] * (hiw[0][0] * BZLRL + hiw[0][1] * BZCRL + hiw[0][2] * BZRRL)))
+
+                  + wiw[2][1] * ((hiw[1][0] * (hiw[0][0] * BZLLC + hiw[0][1] * BZCLC + hiw[0][2] * BZRLC))
+                               + (hiw[1][1] * (hiw[0][0] * BZLCC + hiw[0][1] * BZCCC + hiw[0][2] * BZRCC))
+                               + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)))
+
+                  + wiw[2][2] * ((hiw[1][0] * (hiw[0][0] * BZLLR + hiw[0][1] * BZCLR + hiw[0][2] * BZRLR))
+                               + (hiw[1][1] * (hiw[0][0] * BZLCR + hiw[0][1] * BZCCR + hiw[0][2] * BZRCR))
+                               + (hiw[1][2] * (hiw[0][0] * BZLRR + hiw[0][1] * BZCRR + hiw[0][2] * BZRRR)));
           }
 
         }
@@ -1680,29 +1693,29 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
           {
             E[0] += ((wiw[1][0] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
-              + (wiw[1][1] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC))
-              + (wiw[1][2] * (hiw[0][0] * EXLLC + hiw[0][1] * EXCLC + hiw[0][2] * EXRLC)));
+                   + (wiw[1][1] * (hiw[0][0] * EXLCC + hiw[0][1] * EXCCC + hiw[0][2] * EXRCC))
+                   + (wiw[1][2] * (hiw[0][0] * EXLRC + hiw[0][1] * EXCRC + hiw[0][2] * EXRRC)));
 
-            E[1] += ((hiw[1][0] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
-              + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
-              + (hiw[1][2] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC)));
+            E[1] += ((hiw[1][0] * (wiw[0][0] * EYLLC + wiw[0][1] * EYCLC + wiw[0][2] * EYRLC))
+                   + (hiw[1][1] * (wiw[0][0] * EYLCC + wiw[0][1] * EYCCC + wiw[0][2] * EYRCC))
+                   + (hiw[1][2] * (wiw[0][0] * EYLRC + wiw[0][1] * EYCRC + wiw[0][2] * EYRRC)));
 
-            E[2] += ((wiw[1][0] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
-              + (wiw[1][1] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC))
-              + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)));
+            E[2] += ((wiw[1][0] * (wiw[0][0] * EZLLC + wiw[0][1] * EZCLC + wiw[0][2] * EZRLC))
+                   + (wiw[1][1] * (wiw[0][0] * EZLCC + wiw[0][1] * EZCCC + wiw[0][2] * EZRCC))
+                   + (wiw[1][2] * (wiw[0][0] * EZLRC + wiw[0][1] * EZCRC + wiw[0][2] * EZRRC)));
 
 
             B[0] += ((hiw[1][0] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
-              + (hiw[1][1] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC))
-              + (hiw[1][2] * (wiw[0][0] * BXLLC + wiw[0][1] * BXCLC + wiw[0][2] * BXRLC)));
+                   + (hiw[1][1] * (wiw[0][0] * BXLCC + wiw[0][1] * BXCCC + wiw[0][2] * BXRCC))
+                   + (hiw[1][2] * (wiw[0][0] * BXLRC + wiw[0][1] * BXCRC + wiw[0][2] * BXRRC)));
 
-            B[1] += ((wiw[1][0] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
-              + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
-              + (wiw[1][2] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC)));
+            B[1] += ((wiw[1][0] * (hiw[0][0] * BYLLC + hiw[0][1] * BYCLC + hiw[0][2] * BYRLC))
+                   + (wiw[1][1] * (hiw[0][0] * BYLCC + hiw[0][1] * BYCCC + hiw[0][2] * BYRCC))
+                   + (wiw[1][2] * (hiw[0][0] * BYLRC + hiw[0][1] * BYCRC + hiw[0][2] * BYRRC)));
 
-            B[2] += ((hiw[1][0] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
-              + (hiw[1][1] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC))
-              + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)));
+            B[2] += ((hiw[1][0] * (hiw[0][0] * BZLLC + hiw[0][1] * BZCLC + hiw[0][2] * BZRLC))
+                   + (hiw[1][1] * (hiw[0][0] * BZLCC + hiw[0][1] * BZCCC + hiw[0][2] * BZRCC))
+                   + (hiw[1][2] * (hiw[0][0] * BZLRC + hiw[0][1] * BZCRC + hiw[0][2] * BZRRC)));
           }
 
         }
