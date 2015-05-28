@@ -3241,67 +3241,67 @@ void SPECIE::current_deposition_standard(CURRENT *current)
             }
 
             {
-              *JYLLL += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][0];
-              *JYCLL += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][0];
-              *JYRLL += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][0];
-              *JYLCL += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][0];
-              *JYCCL += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][0];
-              *JYRCL += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][0];
-              *JYLRL += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][0];
-              *JYCRL += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][0];
-              *JYRRL += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][0];
+              *JYLLL += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][0];
+              *JYCLL += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][0];
+              *JYRLL += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][0];
+              *JYLCL += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][0];
+              *JYCCL += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][0];
+              *JYRCL += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][0];
+              *JYLRL += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][0];
+              *JYCRL += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][0];
+              *JYRRL += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][0];
 
-              *JYLLC += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][1];
-              *JYCLC += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][1];
-              *JYRLC += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][1];
-              *JYLCC += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][1];
-              *JYCCC += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][1];
-              *JYRCC += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][1];
-              *JYLRC += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][1];
-              *JYCRC += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][1];
-              *JYRRC += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][1];
+              *JYLLC += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][1];
+              *JYCLC += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][1];
+              *JYRLC += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][1];
+              *JYLCC += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][1];
+              *JYCCC += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][1];
+              *JYRCC += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][1];
+              *JYLRC += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][1];
+              *JYCRC += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][1];
+              *JYRRC += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][1];
 
-              *JYLLR += WSVy*hiw[0][0] * wiw[1][0] * wiw[2][2];
-              *JYCLR += WSVy*hiw[0][1] * wiw[1][0] * wiw[2][2];
-              *JYRLR += WSVy*hiw[0][2] * wiw[1][0] * wiw[2][2];
-              *JYLCR += WSVy*hiw[0][0] * wiw[1][1] * wiw[2][2];
-              *JYCCR += WSVy*hiw[0][1] * wiw[1][1] * wiw[2][2];
-              *JYRCR += WSVy*hiw[0][2] * wiw[1][1] * wiw[2][2];
-              *JYLRR += WSVy*hiw[0][0] * wiw[1][2] * wiw[2][2];
-              *JYCRR += WSVy*hiw[0][1] * wiw[1][2] * wiw[2][2];
-              *JYRRR += WSVy*hiw[0][2] * wiw[1][2] * wiw[2][2];
+              *JYLLR += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][2];
+              *JYCLR += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][2];
+              *JYRLR += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][2];
+              *JYLCR += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][2];
+              *JYCCR += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][2];
+              *JYRCR += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][2];
+              *JYLRR += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][2];
+              *JYCRR += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][2];
+              *JYRRR += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][2];
             }
 
             {
-              *JZLLL += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][0];
-              *JZCLL += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][0];
-              *JZRLL += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][0];
-              *JZLCL += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][0];
-              *JZCCL += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][0];
-              *JZRCL += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][0];
-              *JZLRL += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][0];
-              *JZCRL += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][0];
-              *JZRRL += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][0];
+              *JZLLL += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][0];
+              *JZCLL += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][0];
+              *JZRLL += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][0];
+              *JZLCL += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][0];
+              *JZCCL += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][0];
+              *JZRCL += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][0];
+              *JZLRL += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][0];
+              *JZCRL += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][0];
+              *JZRRL += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][0];
 
-              *JZLLC += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][1];
-              *JZCLC += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][1];
-              *JZRLC += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][1];
-              *JZLCC += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][1];
-              *JZCCC += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][1];
-              *JZRCC += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][1];
-              *JZLRC += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][1];
-              *JZCRC += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][1];
-              *JZRRC += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][1];
+              *JZLLC += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][1];
+              *JZCLC += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][1];
+              *JZRLC += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][1];
+              *JZLCC += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][1];
+              *JZCCC += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][1];
+              *JZRCC += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][1];
+              *JZLRC += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][1];
+              *JZCRC += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][1];
+              *JZRRC += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][1];
 
-              *JZLLR += WSVz*hiw[0][0] * wiw[1][0] * wiw[2][2];
-              *JZCLR += WSVz*hiw[0][1] * wiw[1][0] * wiw[2][2];
-              *JZRLR += WSVz*hiw[0][2] * wiw[1][0] * wiw[2][2];
-              *JZLCR += WSVz*hiw[0][0] * wiw[1][1] * wiw[2][2];
-              *JZCCR += WSVz*hiw[0][1] * wiw[1][1] * wiw[2][2];
-              *JZRCR += WSVz*hiw[0][2] * wiw[1][1] * wiw[2][2];
-              *JZLRR += WSVz*hiw[0][0] * wiw[1][2] * wiw[2][2];
-              *JZCRR += WSVz*hiw[0][1] * wiw[1][2] * wiw[2][2];
-              *JZRRR += WSVz*hiw[0][2] * wiw[1][2] * wiw[2][2];
+              *JZLLR += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][2];
+              *JZCLR += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][2];
+              *JZRLR += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][2];
+              *JZLCR += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][2];
+              *JZCCR += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][2];
+              *JZRCR += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][2];
+              *JZLRR += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][2];
+              *JZCRR += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][2];
+              *JZRRR += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][2];
             }
 
 
