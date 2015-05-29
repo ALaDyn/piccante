@@ -20,6 +20,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "particle_species.h"
 //#define OLD_ACCESS
 //#define OLDPUSHER
+//#define OLDCURRENT
 
 
 SPECIE::SPECIE()
@@ -1402,7 +1403,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
           }
 
           {
-            E[0] += wiw[2][0] * ((wiw[1][0] * (hiw[0][0] * 6*EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
+            E[0] += wiw[2][0] * ((wiw[1][0] * (hiw[0][0] * EXLLL + hiw[0][1] * EXCLL + hiw[0][2] * EXRLL))
                                + (wiw[1][1] * (hiw[0][0] * EXLCL + hiw[0][1] * EXCCL + hiw[0][2] * EXRCL))
                                + (wiw[1][2] * (hiw[0][0] * EXLRL + hiw[0][1] * EXCRL + hiw[0][2] * EXRRL)))
 
@@ -3307,8 +3308,9 @@ void SPECIE::current_deposition_standard(CURRENT *current)
 
           }
         }
-#endif
     }
+#endif
+
 
 
     break;
