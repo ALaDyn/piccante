@@ -81,6 +81,60 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
 
 }
 
+bool isSphereInside(SPHERES& spheres, int index, GRID grid){
+    float x = spheres.coords[index*4];
+    float y = spheres.coords[index*4+1];
+    float z = spheres.coords[index*4+2];
+    float r = spheres.coords[index*4+3];
+
+    double xl = grid.rminloc[0] - r;
+    double yl = grid.rminloc[1] - r;
+    double zl = grid.rminloc[2] - r;
+
+    double xr = grid.rmaxloc[0] + r;
+    double yr = grid.rmaxloc[1] + r;
+    double zr = grid.rmaxloc[2] + r;
+
+    if (grid.getDimensionality() == 1){
+        return ( (x> xl) && (x < xr));
+    }
+    else if (grid.getDimensionality() == 2){
+        return ( (x> xl) && (x < xr) && (y > yl) && (y < yr));
+    }
+    else{
+        return ( (x> xl) && (x < xr) && (y > yl) && (y < yr) && (z > zl) && (z < zr) );
+    }
+
+}
+
+void swapSpheres(SPHERES &spheres, int i, int j){
+    float dummyCoords[4];
+    dummyCoords[0] = spheres.coords[i*4];
+    dummyCoords[1] = spheres.coords[i*4+1];
+    dummyCoords[2] = spheres.coords[i*4+2];
+    dummyCoords[3] = spheres.coords[i*4+3];
+
+    spheres.coords[i*4] = spheres.coords[j*4];
+    spheres.coords[i*4+1] = spheres.coords[j*4+1];
+    spheres.coords[i*4+2] = spheres.coords[j*4+2];
+    spheres.coords[i*4+3] = spheres.coords[j*4+3];
+
+    spheres.coords[j*4] = dummyCoords[0];
+    spheres.coords[j*4+1] = dummyCoords[1];
+    spheres.coords[j*4+2] = dummyCoords[2];
+    spheres.coords[j*4+3] = dummyCoords[3];
+}
+
+void selectSpheres(SPHERES &spheres, GRID grid){
+    int counter = 0;
+    for (int i = 0; i < spheres.NSpheres; i++){
+        if(isSphereInside(spheres, i, grid)){
+            swapSpheres(spheres,i,counter);
+            counter++;
+        }
+    }
+}
+
 
 int main(int narg, char **args)
 {
@@ -147,6 +201,7 @@ int main(int narg, char **args)
   if(isThereSpecial=jsonParser::setValue(special,root,"special")){
     if(areThereSpheres = jsonParser::setString( &fileSpheresName, special, "spheresFile")){
      readAndAllocateSpheres(myspheres, fileSpheresName);
+     selectSpheres(myspheres, grid);
     }
   }
   std::map<std::string, PLASMA*>::iterator pIterator;
