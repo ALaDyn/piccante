@@ -81,7 +81,7 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
 
 }
 
-bool isSphereInside(SPHERES& spheres, int index, GRID grid){
+bool isSphereInside(SPHERES& spheres, int index, GRID &grid){
     float x = spheres.coords[index*4];
     float y = spheres.coords[index*4+1];
     float z = spheres.coords[index*4+2];
@@ -125,7 +125,7 @@ void swapSpheres(SPHERES &spheres, int i, int j){
     spheres.coords[j*4+3] = dummyCoords[3];
 }
 
-void selectSpheres(SPHERES &spheres, GRID grid){
+void selectSpheres(SPHERES &spheres, GRID &grid){
     int counter = 0;
     for (int i = 0; i < spheres.NSpheres; i++){
         if(isSphereInside(spheres, i, grid)){
