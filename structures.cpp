@@ -102,7 +102,7 @@ const distrib_function PLASMA::dFPoint[] = {
 };
 
 bool PLASMA::isGrating(int dfIndex){
-  if (dfIndex == 13 || dfIndex == 14)
+  if (dfIndex == 13 || dfIndex == 14 || dfIndex == 19)
     return true;
   else
     return false;
@@ -571,11 +571,25 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
 double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A){
   double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
   double* paramlist = (double*)plist.additional_params;
-  double g_depth = 0.571;
-  double g_lambda = 1.35;
-  double g_phase = paramlist[2];
+  double g_depth = paramlist[0];
+  double g_lambda = paramlist[1];
+  double g_phase = 0.0;
+  double blazAngle = 35.0 / 180.0 * M_PI;
 
-  double xminbound = plist.rminbox[0] + (fabs((y - g_y0) / g_lambda - floor((y - g_y0) / g_lambda)))*g_depth;
+  double yt = g_depth/tan(blazAngle);
+  double ytt = g_lambda - yt;
+
+  double yy = (y - g_y0)/g_lambda;
+  yy = (yy - floor(yy))*g_lambda;
+
+  double xminbound;
+
+  if(yy < ytt){
+    xminbound = plist.rminbox[0]+g_depth*(yy/ytt);
+  }
+  else{
+    xminbound = plist.rminbox[0]+g_depth*((g_lambda - yy)/yt);
+  }
 
   if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
     (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
