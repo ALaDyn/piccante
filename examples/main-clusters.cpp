@@ -81,6 +81,16 @@ void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
 
 }
 
+void fromCoordsToSpheresCoords(double &x, double min, double max){
+  double box = max - min;
+  if (x < min){
+    x += box * ((int)((max - x) / box));
+  }
+  if (x > max){
+    x -= box* ((int)((x - min) / box));
+  }
+}
+
 bool isSphereInside(SPHERES& spheres, int index, GRID &grid){
     float x = spheres.coords[index*4];
     float y = spheres.coords[index*4+1];
@@ -95,15 +105,38 @@ bool isSphereInside(SPHERES& spheres, int index, GRID &grid){
     double yr = grid.rmaxloc[1] + r;
     double zr = grid.rmaxloc[2] + r;
 
-    if (grid.getDimensionality() == 1){
-        return ( (x> xl) && (x < xr));
+    fromCoordsToSpheresCoords(yl, spheres.rmin[1], spheres.rmax[1]);
+    fromCoordsToSpheresCoords(zl, spheres.rmin[2], spheres.rmax[2]);
+    fromCoordsToSpheresCoords(yr, spheres.rmin[1], spheres.rmax[1]);
+    fromCoordsToSpheresCoords(zr, spheres.rmin[2], spheres.rmax[2]);
+
+    bool chkX, chkY, chkZ;
+    chkX=chkY=chkZ=true;
+
+    if (grid.getDimensionality() >= 2){
+      if((grid.rmaxloc[1]-grid.rminloc[1]) >= (spheres.rmax[1] - spheres.rmin[1]))
+        chkY = true;
+      else{
+        if(yl <= yr)
+          chkY = ((y >= yl) && (y <= yr));
+        else
+          chkY = ((y >= yr) || (y <= yl));
+      }
     }
-    else if (grid.getDimensionality() == 2){
-        return ( (x> xl) && (x < xr) && (y > yl) && (y < yr));
+
+    if (grid.getDimensionality() == 3){
+      if((grid.rmaxloc[2]-grid.rminloc[2]) >= (spheres.rmax[2] - spheres.rmin[2]))
+        chkZ=true;
+      else{
+
+        if(zl <= zr)
+          chkZ = ((z >= zl) && (z <= zr));
+        else
+          chkZ = ((z >= zr) || (z <= zl));
+      }
     }
-    else{
-        return ( (x> xl) && (x < xr) && (y > yl) && (y < yr) && (z > zl) && (z < zr) );
-    }
+
+    return chkX && chkY && chkZ;
 
 }
 
@@ -133,6 +166,8 @@ void selectSpheres(SPHERES &spheres, GRID &grid){
             counter++;
         }
     }
+    spheres.NSpheres = counter;
+    spheres.coords = (float*)realloc(spheres.coords, counter*4*sizeof(float));
 }
 
 
