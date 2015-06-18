@@ -59,25 +59,38 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
-void readAndAllocateSpheres(SPHERES &spheres, std::string filename){
+void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid){
 
-  std::ifstream myfile;
-  myfile.open(filename.c_str());
-  if (!myfile.good()){
-    std::cout << "     spheres file: \"" << filename << "\" does not exists" << std::endl;
+  if(grid.myid == grid.master_proc){
+    std::ifstream myfile;
+    myfile.open(filename.c_str());
+    if (!myfile.good()){
+      std::cout << "     spheres file: \"" << filename << "\" does not exists" << std::endl;
+    }
+    int Nsph=0;
+
+    myfile.read((char*)&Nsph, sizeof(int));
+
+    spheres.NSpheres = Nsph;
+    spheres.coords = new float[spheres.NSpheres*4];
+
+    myfile.read((char*)&(spheres.fillingFactor), sizeof(float));
+    myfile.read((char*)spheres.rmin, sizeof(float)*3);
+    myfile.read((char*)spheres.rmax, sizeof(float)*3);
+    myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres*4);
+    myfile.close();
   }
-  int Nsph=0;
 
-  myfile.read((char*)&Nsph, sizeof(int));
 
-  spheres.NSpheres = Nsph;
-  spheres.coords = new float[spheres.NSpheres*4];
+  MPI_Bcast(&(spheres.NSpheres), 1, MPI_INT, grid.master_proc, MPI_COMM_WORLD);
 
-  myfile.read((char*)&(spheres.fillingFactor), sizeof(float));
-  myfile.read((char*)spheres.rmin, sizeof(float)*3);
-  myfile.read((char*)spheres.rmax, sizeof(float)*3);
-  myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres*4);
-  myfile.close();
+  if(grid.myid != grid.master_proc)
+    spheres.coords = new float[spheres.NSpheres*4]; 
+
+  MPI_Bcast(&(spheres.fillingFactor), 1, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
+  MPI_Bcast(spheres.rmin, 3, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
+  MPI_Bcast(spheres.rmax, 3, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
+  MPI_Bcast(spheres.coords, 4*spheres.NSpheres, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
 
 }
 
@@ -235,7 +248,7 @@ int main(int narg, char **args)
   SPHERES myspheres;
   if(isThereSpecial=jsonParser::setValue(special,root,"special")){
     if(areThereSpheres = jsonParser::setString( &fileSpheresName, special, "spheresFile")){
-     readAndAllocateSpheres(myspheres, fileSpheresName);
+     readAndAllocateSpheres(myspheres, fileSpheresName, grid);
      selectSpheres(myspheres, grid);
     }
   }
@@ -265,7 +278,7 @@ int main(int narg, char **args)
 
 
   if(areThereSpheres){
-    delete [] myspheres.coords;
+    delete[] myspheres.coords;
   }
   //*******************************************END SPECIES DEFINITION***********************************************************
 
