@@ -29,7 +29,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "grid.h"
 #include "current.h"
 
-#include <omp.h>
+//#include <omp.h>
 #ifdef _USE_FFTW_FILTER
 #include <fftw3-mpi.h>
 #endif
