@@ -1,10 +1,14 @@
+sudo: false
 language: c++
-before_install:
-  - sudo apt-get install libopenmpi-dev 
-  - sudo apt-get install libboost-system-dev libboost-filesystem-dev
-  - sudo apt-get install libgsl0-dev
+addons:
+  apt:
+    packages:
+    - libopenmpi-dev
+    - libboost-system-dev
+    - libboost-system-dev
+    - libboost-filesystem-dev
+    - libgsl0-dev
 compiler:
   - gcc
 script:
   - make all
-  
