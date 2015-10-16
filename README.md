@@ -19,7 +19,7 @@ A technical paper describing optimizations performed during a Preparatory PRACE 
 
 ### Papers containing simulations done with piccante ###
 
-1) A. Sgattoni, S. Sinigardi, L. Fedeli, F. Pegoraro, A. Macchi, Laser-Driven Rayleigh-Taylor Instability: Plasmonics Effects and Three-Dimensional Structures, [arXiv:1404.1260](http://arxiv.org/pdf/1404.1260.pdf), Phys. Rev. E, 91, 013106 (2015), DOI:http://dx.doi.org/10.1103/PhysRevE.91.013106
+1) A. Sgattoni, S. Sinigardi, L. Fedeli, F. Pegoraro, A. Macchi, Laser-Driven Rayleigh-Taylor Instability: Plasmonics Effects and Three-Dimensional Structures, [arXiv:1404.1260](http://arxiv.org/pdf/1404.1260.pdf), [Phys. Rev. E, 91, 013106 (2015)](http://dx.doi.org/10.1103/PhysRevE.91.013106)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.10587.svg)](http://dx.doi.org/10.5281/zenodo.10587)
 
-2) A. Sgattoni, S. Sinigardi, A. Macchi,  High Energy Gain in Three-Dimensional Simulations of Light Sail Acceleration, [arXiv:1403.2709](http://arxiv.org/pdf/1403.2709.pdf), Appl. Phys. Lett., 105, 084105 (2014), DOI:http://dx.doi.org/10.1063/1.4894092
+2) A. Sgattoni, S. Sinigardi, A. Macchi,  High Energy Gain in Three-Dimensional Simulations of Light Sail Acceleration, [arXiv:1403.2709](http://arxiv.org/pdf/1403.2709.pdf), [Appl. Phys. Lett., 105, 084105 (2014)](http://dx.doi.org/10.1063/1.4894092)
