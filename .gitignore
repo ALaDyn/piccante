@@ -16,6 +16,15 @@ packages/
 *.suo
 *.user
 *.sln.docstates
+*.synctex.gz
+doc/src/*.pdf
+doc/src/*.asy
+doc/src/*.aux
+doc/src/*.fdb
+doc/src/*.fdb_latexmk
+doc/src/*.fls
+doc/src/*.pre
+
 
 # Build results
 
