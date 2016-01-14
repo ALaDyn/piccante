@@ -70,6 +70,7 @@ galileo: GSL_INC = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/inc
 galileo: GSL_LIB = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/lib
 galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/include
 galileo: BOOST_LIB = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/lib
+galileo: all
 
 fermi: boost
 fermi: COMPILER = mpixlcxx
@@ -80,6 +81,7 @@ fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
 fermi: GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
 fermi: BOOST_LIB = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/lib/
 fermi: BOOST_INC = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/include/
+fermi: all
 
 juqueen: fermi
 juqueen: LIB = -lgsl -lgslcblas -lboost_system-1_47 -lboost_filesystem-1_47
@@ -87,6 +89,7 @@ juqueen: GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
 juqueen: GSL_INC = /bgsys/local/gsl/1.15_O3g/include
 juqueen: BOOST_LIB = /bgsys/local/boost/1.47.0/lib
 juqueen: BOOST_INC = /bgsys/local/boost/1.47.0
+juqueen: all
 
 
 fermi-scalasca: fermi
