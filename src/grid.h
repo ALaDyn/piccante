@@ -33,15 +33,13 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <iomanip>
 #include <stdint.h>
-#include <ctime>       /* time */
+#include <ctime>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #if defined(_MSC_VER)
 #include <cstdlib>
-#include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
-#include "gsl/gsl_randist.h"
 #else
 #include <stdlib.h>
-#include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
-#include <gsl/gsl_randist.h>
 #endif
 
 #if defined(USE_BOOST)

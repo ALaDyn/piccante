@@ -38,13 +38,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
-#else
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#endif
 #include <cstdarg>
 #include <vector>
 #include <map>

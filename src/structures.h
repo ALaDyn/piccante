@@ -27,13 +27,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "commons.h"
 #include <cstdio>
 #include <iostream>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h" // gnu scientific linux per generatore di numeri casuali
-#include "gsl/gsl_randist.h"
-#else
 #include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
 #include <gsl/gsl_randist.h>
-#endif
 
 struct SPHERES{
   float *coords;
