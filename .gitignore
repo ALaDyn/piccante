@@ -488,3 +488,4 @@ main-1.cpp
 # ignore QT creator files
 piccante.files
 piccante.includes
+*.opendb
