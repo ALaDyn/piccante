@@ -1852,7 +1852,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
   rprofile = exp(-r2 / (waist*waist));      //radial profile
   tprofile01 = cossin_profile((tt - xx) / fwhm); //long. profile order1
   xx = xx / zra;                            //normalized x
-  dimensions = 3;
+  //dimensions = 3;
   //CORREZIONE DA CONTROLLARE !!
   if (dimensions == 3){
     phig00 = phi + atan(xx) - xx*r2 / (waist*waist) - phi0; //phase order ZERO
