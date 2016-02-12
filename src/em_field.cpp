@@ -116,6 +116,8 @@ int EM_FIELD::getNcomp(){
   return Ncomp;
 }
 
+
+
 double* EM_FIELD::getDataPointer(){
   return val;
 }

@@ -1,4 +1,5 @@
 
+
 /*******************************************************************************
 This file is part of piccante.
 
@@ -60,6 +61,43 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
+void moveParticles(SPECIE* specie, double amplitude,double lambda){
+  int Npart=specie->Np;
+  double kdx=2*M_PI/lambda;
+  double density=specie->plasma.params.density_coefficient;
+  double deltaX = amplitude;
+  double deltaV = amplitude*2*M_PI*sqrt(density);
+  double oldX;
+
+  std::cout<< "sposto le particelle che sono" << Npart << std::endl;
+  for(int n=0;n<Npart;n++){
+    oldX = specie->r0(n);
+    specie->r0(n) += deltaX*cos(kdx*oldX);
+    specie->u0(n) += deltaV*sin(kdx*oldX);
+  }
+
+}
+
+void deformEx(GRID grid, EM_FIELD* field, double amplitude, double lambda){
+  double kdx=2*M_PI/lambda;
+  int Ngrid[3];
+ Ngrid[0] = grid.NGridNodes[0];
+
+ double x;
+
+ std::cout<< "deformo Ex che ha " << Ngrid[0] << " punti" << std::endl;
+
+  for(int k=0; k<Ngrid[0]; k++){
+    for(int j=0; j<Ngrid[0]; j++){
+      for(int i=0; i<Ngrid[0]; i++){
+
+        x = grid.rmin[0] + grid.dr[0]*i;
+        field->E0(i,j,k)+=amplitude*cos(kdx*x);
+      }
+    }
+  }
+}
+
 int main(int narg, char **args)
 {
   MPI_Init(&narg, &args);
@@ -117,17 +155,23 @@ int main(int narg, char **args)
   //*******************************************END FIELD DEFINITION***********************************************************
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
   bool isThereSpecial=false;
-  bool areThereSpheres=false;
+  bool isThereAmpli=false;
+  bool isThereLambda=false;
+  bool isWaveOK = false;
+  double amplitude;
+  double lambda;
 
-  std::string fileSpheresName;
   Json::Value special;
-  SPHERES myspheres;
   if(isThereSpecial=jsonParser::setValue(special,root,"special")){
-    if(areThereSpheres = jsonParser::set ( &fileSpheresName, special, "spheresFile")){
-     readAndAllocateSpheres(myspheres, fileSpheresName, grid);
-     selectSpheres(myspheres, grid);
-    }
+    isThereAmpli  = jsonParser::setDouble(&amplitude, special, "amplitude");
+    isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
+    isWaveOK = isThereAmpli&&isThereLambda;
   }
+  std::cout << "siamo sicuri sia tutto OK? " << " isThereSpecial=" << isThereSpecial << std::endl;
+  std::cout << "siamo sicuri sia tutto OK? " << " amplitude=" << amplitude << std::endl;
+  std::cout << "siamo sicuri sia tutto OK? " << " lambda=" << lambda << std::endl;
+  std::cout << "siamo sicuri sia tutto OK? " << " isWaveOK=" << isWaveOK << std::endl;
+
   std::map<std::string, PLASMA*>::iterator pIterator;
 
   //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
@@ -137,12 +181,18 @@ int main(int narg, char **args)
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
 
-  if(areThereSpheres){
-    for(pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++){
-       (pIterator)->second->params.spheres = &myspheres;
-     }
-  }
+
  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+
+ if(isWaveOK){
+   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+     moveParticles((*spec_iterator),amplitude,lambda);
+     (*spec_iterator)->position_parallel_pbc();
+     double ampliEx;
+     ampliEx = 4*M_PI*(*spec_iterator)->chargeSign*(*spec_iterator)->Z*(*spec_iterator)->plasma.params.density_coefficient*amplitude;
+     deformEx(grid,&myfield,ampliEx,lambda);
+   }
+ }
 
   uint64_t totPartNum = 0;
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -153,9 +203,6 @@ int main(int narg, char **args)
   }
 
 
-  if(areThereSpheres){
-    delete[] myspheres.coords;
-  }
   //*******************************************END SPECIES DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
