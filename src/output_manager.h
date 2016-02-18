@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __OUTPUT_MANAGER_H__
 #define __OUTPUT_MANAGER_H__
@@ -79,7 +79,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 //#define DEBUG_NO_MPI_FILE_WRITE
 
-enum diagType{
+enum diagType {
   OUT_E_FIELD,
   OUT_B_FIELD,
   OUT_SPEC_PHASE_SPACE,
@@ -89,14 +89,14 @@ enum diagType{
   OUT_SPEC_DENSITY
 };
 
-enum whichFieldOut{
+enum whichFieldOut {
   WHICH_E_ONLY,
   WHICH_B_ONLY,
   WHICH_E_AND_B
 };
 
 
-struct request{
+struct request {
   double dtime;
   int itime;
   diagType type;
@@ -104,7 +104,7 @@ struct request{
   int domain;
 };
 
-struct emProbe{
+struct emProbe {
   double coordinates[3];
   std::string name;
   std::string fileName;
@@ -114,13 +114,13 @@ struct emProbe{
   void setName(std::string iname);
 };
 
-struct reqOutput{
+struct reqOutput {
   int task;
   int p;
   int packageSize;
 };
 
-struct outDomain{
+struct outDomain {
   double coordinates[3];
   bool remainingCoord[3], subselection;
   double rmin[3], rmax[3];

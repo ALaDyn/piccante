@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __CURRENT_H__
 #define __CURRENT_H__
@@ -38,7 +38,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
-class CURRENT{
+class CURRENT {
 public:
   double *getDataPointer();
   void writeN_grid(int *N_grid);
@@ -61,11 +61,11 @@ public:
 
   //PUBLIC INLINE FUNCTIONS
 
-  inline double & Jx(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & Jy(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & Jz(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & density(int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
-  inline double & JJ(int c, int i, int j, int k){ return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jx(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jy(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & Jz(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & density(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & JJ(int c, int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
 
 
 

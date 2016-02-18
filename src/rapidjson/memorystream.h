@@ -38,28 +38,28 @@ RAPIDJSON_NAMESPACE_BEGIN
     \note implements Stream concept
 */
 struct MemoryStream {
-    typedef char Ch; // byte
+  typedef char Ch; // byte
 
-    MemoryStream(const Ch *src, size_t size) : src_(src), begin_(src), end_(src + size), size_(size) {}
+  MemoryStream(const Ch *src, size_t size) : src_(src), begin_(src), end_(src + size), size_(size) {}
 
-    Ch Peek() const { return (src_ == end_) ? '\0' : *src_; }
-    Ch Take() { return (src_ == end_) ? '\0' : *src_++; }
-    size_t Tell() const { return static_cast<size_t>(src_ - begin_); }
+  Ch Peek() const { return (src_ == end_) ? '\0' : *src_; }
+  Ch Take() { return (src_ == end_) ? '\0' : *src_++; }
+  size_t Tell() const { return static_cast<size_t>(src_ - begin_); }
 
-    Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
-    void Put(Ch) { RAPIDJSON_ASSERT(false); }
-    void Flush() { RAPIDJSON_ASSERT(false); }
-    size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
+  Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
+  void Put(Ch) { RAPIDJSON_ASSERT(false); }
+  void Flush() { RAPIDJSON_ASSERT(false); }
+  size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
 
-    // For encoding detection only.
-    const Ch* Peek4() const {
-        return Tell() + 4 <= size_ ? src_ : 0;
-    }
+  // For encoding detection only.
+  const Ch* Peek4() const {
+    return Tell() + 4 <= size_ ? src_ : 0;
+  }
 
-    const Ch* src_;     //!< Current read position.
-    const Ch* begin_;   //!< Original head of the string.
-    const Ch* end_;     //!< End of stream.
-    size_t size_;       //!< Size of the stream.
+  const Ch* src_;     //!< Current read position.
+  const Ch* begin_;   //!< Original head of the string.
+  const Ch* end_;     //!< End of stream.
+  size_t size_;       //!< Size of the stream.
 };
 
 RAPIDJSON_NAMESPACE_END

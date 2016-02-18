@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __STRUCTURES_H__
 #define __STRUCTURES_H__
@@ -30,14 +30,14 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <gsl/gsl_rng.h> // gnu scientific linux per generatore di numeri casuali
 #include <gsl/gsl_randist.h>
 
-struct SPHERES{
+struct SPHERES {
   float *coords;
   int NSpheres;
   float rmin[3], rmax[3];
   float fillingFactor;
 };
 
-struct PLASMAparams{
+struct PLASMAparams {
   double rminbox[3];
   double rmaxbox[3];
   double left_ramp_length;
@@ -53,14 +53,14 @@ struct PLASMAparams{
 
 };
 #define NBIN_SPECTRUM 1000;
-struct SPECIEspectrum{
+struct SPECIEspectrum {
   double Kmax;
   double Dk;
   int Nbin;
   double *values;
 };
 
-struct DUMP_CONTROL{
+struct DUMP_CONTROL {
   bool doRestart, doDump;
   int restartFromDump;
   double dumpEvery;
@@ -141,8 +141,8 @@ double modGrat(double x, double y, double z, PLASMAparams plist, double Z, doubl
 double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double spheres(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
-enum laserPulseType{ DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
-enum pulsePolarization{ P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
+enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
+enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 
 class laserPulse
 {
@@ -194,16 +194,16 @@ public:
 #define _HALF_CRD 1;
 #define _NULL_CRD -1;
 
-struct integer_or_halfinteger{
+struct integer_or_halfinteger {
   char x;
   char y;
   char z;
 };
 
 //************** PARTICLES DISTRIBUTION FUNCTION *******
-enum tempDistribType{ WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER, SPECIAL };
+enum tempDistribType { WATERBAG, WATERBAG_3TEMP, UNIF_SPHERE, SUPERGAUSSIAN, MAXWELL, JUTTNER, SPECIAL };
 
-class tempDistrib{
+class tempDistrib {
 public:
 
   tempDistribType type;

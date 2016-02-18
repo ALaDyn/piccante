@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __COMMONS_H__
 #define __COMMONS_H__
@@ -89,7 +89,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 //enum fieldType {DUMMY, ELECTRO_MAGNETIC_FIELD,DENSITY_CURRENT_FIELD };
 
 // ************** PARTICLES TYPE ***************
-enum particlesType{ ELECTRON, POSITRON, ION };
+enum particlesType { ELECTRON, POSITRON, ION };
 
 
 
@@ -97,10 +97,10 @@ enum particlesType{ ELECTRON, POSITRON, ION };
 //inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
 //  return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
 //}
-inline uint64_t my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
+inline uint64_t my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc) {
   return (c + Nc*(i + edge) + YGrid_factor*Nc*Nx*(j + edge) + ZGrid_factor*Nc*Nx*Ny*(k + edge));
 }
-inline uint64_t pIndex(int c, int p, int Ncomp, int Npart){
+inline uint64_t pIndex(int c, int p, int Ncomp, int Npart) {
   return c + p*Ncomp;
 }
 
@@ -119,11 +119,11 @@ inline uint64_t pIndex(int c, int p, int Ncomp, int Npart){
 #define MIN(a,b) ((a < b) ? (a) : (b))
 #endif
 
-template <class T>const T& TMIN(const T& a, const T& b){
+template <class T>const T& TMIN(const T& a, const T& b) {
   return (a < b) ? a : b;
 }
 
-template <class T>const T& TMAX(const T& a, const T& b){
+template <class T>const T& TMAX(const T& a, const T& b) {
   return (a > b) ? a : b;
 }
 

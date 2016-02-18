@@ -1,21 +1,21 @@
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #define _USE_MATH_DEFINES
 
@@ -60,7 +60,7 @@ int main(int narg, char **args)
   MPI_Init(&narg, &args);
 
   Json::Value root;
-  std::string inputFileName = jsonParser::parseJsonInputFile(root,narg, args);
+  std::string inputFileName = jsonParser::parseJsonInputFile(root, narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
@@ -71,12 +71,12 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  jsonParser::setXrange(root,&grid);
-  jsonParser::setYrange(root,&grid);
-  jsonParser::setZrange(root,&grid);
-  jsonParser::setNCells(root,&grid);
-  jsonParser::setNprocs(root,&grid);
-  jsonParser::setStretchedGrid(root,&grid);
+  jsonParser::setXrange(root, &grid);
+  jsonParser::setYrange(root, &grid);
+  jsonParser::setZrange(root, &grid);
+  jsonParser::setNCells(root, &grid);
+  jsonParser::setNprocs(root, &grid);
+  jsonParser::setStretchedGrid(root, &grid);
   jsonParser::setBoundaryConditions(root, &grid);
 
   jsonParser::setRadiationFriction(root, &grid);
@@ -85,8 +85,8 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
 
   jsonParser::setCourantFactor(root, &grid);
-  jsonParser::setSimulationTime(root,&grid);
-  jsonParser::setMovingWindow(root,&grid);
+  jsonParser::setSimulationTime(root, &grid);
+  jsonParser::setMovingWindow(root, &grid);
 
   srand(time(NULL));
   grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -98,18 +98,18 @@ int main(int narg, char **args)
 
   //********************************************END GRID DEFINITION********************************************************
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
-int myIntVariable=0;
-  double myDoubleVariable=0;
-  bool isThereSpecial=false;
+  int myIntVariable = 0;
+  double myDoubleVariable = 0;
+  bool isThereSpecial = false;
   Json::Value special;
-  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
-    jsonParser::setInt( &myIntVariable, special, "variabile1");
-    jsonParser::setDouble( &myDoubleVariable, special, "variabile2");
-   }
+  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
+    jsonParser::setInt(&myIntVariable, special, "variabile1");
+    jsonParser::setDouble(&myDoubleVariable, special, "variabile2");
+  }
 
 
-//********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
-  //*******************************************BEGIN FIELD DEFINITION*********************************************************
+  //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
+    //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
 
@@ -129,10 +129,10 @@ int myIntVariable=0;
   jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
   uint64_t totPartNum = 0;
-  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-    totPartNum+=(*spec_iterator)->printParticleNumber();
+  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+    totPartNum += (*spec_iterator)->printParticleNumber();
   }
-  if(grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     std::cout << "Total particle number: " << totPartNum << std::endl;
   }
 
@@ -143,8 +143,8 @@ int myIntVariable=0;
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
-  jsonParser::setOutputDirPath(root,manager);
-  jsonParser::setOutputParameters(root,manager);
+  jsonParser::setOutputDirPath(root, manager);
+  jsonParser::setOutputParameters(root, manager);
 
   manager.initialize();
   manager.copyInputFileInOutDir(inputFileName);
@@ -152,14 +152,14 @@ int myIntVariable=0;
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  if (grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     printf("----- START temporal cicle -----\n");
     fflush(stdout);
   }
 
   int dumpID = 1;
   grid.istep = 0;
-  if (grid.dumpControl.doRestart){
+  if (grid.dumpControl.doRestart) {
     dumpID = grid.dumpControl.restartFromDump;
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
@@ -176,12 +176,12 @@ int myIntVariable=0;
     myfield.boundary_conditions();
 
     current.setAllValuesToZero();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->current_deposition_standard(&current);
     }
     current.pbc();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->position_parallel_pbc();
     }
 
@@ -193,11 +193,11 @@ int myIntVariable=0;
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      if(grid.isRadiationFrictionEnabled()){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      if (grid.isRadiationFrictionEnabled()) {
         (*spec_iterator)->momenta_advance_with_friction(&myfield, grid.getLambda0());
       }
-      else{
+      else {
         (*spec_iterator)->momenta_advance(&myfield);
       }
     }
@@ -207,7 +207,7 @@ int myIntVariable=0;
     moveWindow(&grid, &myfield, species);
 
     grid.istep++;
-    if (grid.dumpControl.doDump){
+    if (grid.dumpControl.doDump) {
       if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
         dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }

@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __EMFIELD_H__
 #define __EMFIELD_H__
@@ -86,7 +86,7 @@ typedef unsigned __int64  uint64_t; */
 
 
 
-enum filterOptions{
+enum filterOptions {
   fltr_Ex = 1 << 0,
   fltr_Ey = 1 << 1,
   fltr_Ez = 1 << 2,
@@ -95,7 +95,7 @@ enum filterOptions{
   fltr_Bz = 1 << 5
 };
 
-enum filterDir{
+enum filterDir {
   dir_x = 1 << 0,
   dir_y = 1 << 1,
   dir_z = 1 << 2
@@ -103,7 +103,7 @@ enum filterDir{
 
 
 
-class EM_FIELD{
+class EM_FIELD {
 public:
   double *getDataPointer();
   void writeN_grid(int *N_grid);
@@ -166,37 +166,37 @@ public:
   //  static inline int my_indice(int edge, int YGrid_factor, int ZGrid_factor, int c, int i, int j, int k, int Nx, int Ny, int Nz, int Nc){
   //    return (Nx*Ny*Nz*c + (i + edge) + YGrid_factor*Nx*(j + edge) + ZGrid_factor*Nx*Ny*(k + edge));
   //  }
-  inline double & E0(int i, int j, int k){
+  inline double & E0(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       0, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline double & E1(int i, int j, int k){
+  inline double & E1(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       1, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline double & E2(int i, int j, int k){
+  inline double & E2(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       2, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline double & B0(int i, int j, int k){
+  inline double & B0(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       3, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline  double & B1(int i, int j, int k){
+  inline  double & B1(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       4, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline double & B2(int i, int j, int k){
+  inline double & B2(int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       5, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];
   }
-  inline double & VEB(int c, int i, int j, int k){
+  inline double & VEB(int c, int i, int j, int k) {
     return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor,
       c, i, j, k,
       N_grid[0], N_grid[1], N_grid[2], Ncomp)];

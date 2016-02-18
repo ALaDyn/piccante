@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #include "em_field.h"
 //#define OLD_ACCESS
@@ -23,7 +23,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 EM_FIELD::EM_FIELD()
 {
   allocated = false;
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     minima[c] = minima[c + 3] = 0;
     maxima[c] = maxima[c + 3] = 0;
     total_momentum[c] = 0;
@@ -34,11 +34,11 @@ EM_FIELD::EM_FIELD()
   EBEnergyExtremesFlag = false;
 }
 
-EM_FIELD::~EM_FIELD(){
+EM_FIELD::~EM_FIELD() {
   free(val);
 }
 
-void EM_FIELD::allocate(GRID *grid){
+void EM_FIELD::allocate(GRID *grid) {
   mygrid = grid;
   mygrid->alloc_number(N_grid, mygrid->Nloc);
   if (N_grid[2] == 1)
@@ -50,10 +50,10 @@ void EM_FIELD::allocate(GRID *grid){
   Ncomp = 6;
 #ifndef NO_ALLOCATION
   val = (double *)malloc(Ntot*Ncomp*sizeof(double));
-  if(val != NULL){
+  if (val != NULL) {
     allocated = true;
   }
-  else{
+  else {
     allocated = false;
   }
   EM_FIELD::setAllValuesToZero();
@@ -61,8 +61,8 @@ void EM_FIELD::allocate(GRID *grid){
   EBEnergyExtremesFlag = false;
 }
 
-void EM_FIELD::reallocate(){
-  if (!allocated){
+void EM_FIELD::reallocate() {
+  if (!allocated) {
     printf("ERROR: reallocate\n");
     exit(17);
   }
@@ -84,7 +84,7 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
 {
   if (allocated)
     memset((void*)val, 0, Ntot*Ncomp*sizeof(double));
-  else    {
+  else {
 #ifndef NO_ALLOCATION
     printf("ERROR: erase_field\n");
     exit(17);
@@ -97,13 +97,13 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
 
 EM_FIELD EM_FIELD::operator = (EM_FIELD &destro)
 {
-  if (!destro.allocated){
+  if (!destro.allocated) {
     printf("---ERROR---\noperation not permitted\nEM_FIELD=EM_FIELD\nnot allocated\n");
     exit(17);
   }
   Ncomp = destro.Ncomp;
   mygrid = destro.mygrid;
-  if (!allocated){
+  if (!allocated) {
     allocate(destro.mygrid);
   }
   else reallocate();
@@ -112,23 +112,23 @@ EM_FIELD EM_FIELD::operator = (EM_FIELD &destro)
 }
 
 
-int EM_FIELD::getNcomp(){
+int EM_FIELD::getNcomp() {
   return Ncomp;
 }
 
-double* EM_FIELD::getDataPointer(){
+double* EM_FIELD::getDataPointer() {
   return val;
 }
-void EM_FIELD::writeN_grid(int *N_grid){
+void EM_FIELD::writeN_grid(int *N_grid) {
   N_grid[0] = this->N_grid[0];
   N_grid[1] = this->N_grid[1];
   N_grid[2] = this->N_grid[2];
 }
 
-integer_or_halfinteger EM_FIELD::getCompCoords(int c){
+integer_or_halfinteger EM_FIELD::getCompCoords(int c) {
   integer_or_halfinteger crd;
 
-  switch (c){
+  switch (c) {
   case 0: //Ex
     crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
     break;
@@ -154,15 +154,15 @@ integer_or_halfinteger EM_FIELD::getCompCoords(int c){
   return crd;
 }
 
-bool EM_FIELD::amIAllocated(){
+bool EM_FIELD::amIAllocated() {
   return allocated;
 }
 
-bool EM_FIELD::areEnergyExtremesAvailable(){
+bool EM_FIELD::areEnergyExtremesAvailable() {
   return EBEnergyExtremesFlag;
 }
 
-int EM_FIELD::pbc_compute_alloc_size(){
+int EM_FIELD::pbc_compute_alloc_size() {
   int dimensions = mygrid->getDimensionality();
   int allocated_size;
   int Ngx, Ngy, Ngz, Nc = Ncomp;
@@ -171,23 +171,23 @@ int EM_FIELD::pbc_compute_alloc_size(){
   Ngy = N_grid[1];
   Ngz = N_grid[2];
 
-  if (dimensions == 3){
+  if (dimensions == 3) {
     allocated_size = Nc*Ngy*Ngz*mygrid->getNexchange();
     allocated_size = MAX(allocated_size, Nc*Ngx*Ngz*mygrid->getNexchange());
     allocated_size = MAX(allocated_size, Nc*Ngx*Ngy*mygrid->getNexchange());
   }
-  else if (dimensions == 2){
+  else if (dimensions == 2) {
     allocated_size = Nc*Ngy*mygrid->getNexchange();
     allocated_size = MAX(allocated_size, Nc*Ngx*mygrid->getNexchange());
   }
-  else{
+  else {
     allocated_size = Nc*mygrid->getNexchange();
   }
   return allocated_size;
 }
 
 
-void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
+void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer) {
   int Nx, Ny, Nz;
   int Ngx, Ngy, Ngz, Nc = Ncomp;
 
@@ -231,7 +231,7 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 
 
   // ====== add recv_buffer to left_edge and send back to left the result
-  if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != 0)){
+  if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != 0)) {
 
     for (int k = 0; k < Ngz; k++)
       for (int j = 0; j < Ngy; j++)
@@ -257,7 +257,7 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
     recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
     MPI_COMM_WORLD, &status);
 
-  if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))){
+  if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))) {
 
     for (int k = 0; k < Ngz; k++)
       for (int j = 0; j < Ngy; j++)
@@ -277,7 +277,7 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer){
 
 
 }
-void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
+void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer) {
   int Nx, Ny, Nz;
   int Ngx, Ngy, Ngz, Nc = Ncomp;
 
@@ -319,7 +319,7 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
     recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
     MPI_COMM_WORLD, &status);
   // ======   send right: send_buff=right_edge
-  if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != 0)){
+  if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != 0)) {
 
     for (int k = 0; k < Ngz; k++)
       for (int j = 0; j < Nxchng; j++)
@@ -344,7 +344,7 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
     recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
     MPI_COMM_WORLD, &status);
   // ====== copy recv_buffer to the right edge
-  if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != (mygrid->rnproc[1] - 1))){
+  if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != (mygrid->rnproc[1] - 1))) {
 
     for (int k = 0; k < Ngz; k++)
       for (int j = 0; j < Nxchng; j++)
@@ -362,7 +362,7 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer){
   }
 }
 
-void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer){
+void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer) {
   int Nx, Ny, Nz;
   int Ngx, Ngy, Ngz, Nc = Ncomp;
 
@@ -481,7 +481,7 @@ void EM_FIELD::pbc_EB()  // set on the ghost cells the boundary values
 }
 
 //TODO CORREGGERE PER GRIGLIA STRETCHATA
-void EM_FIELD::openBoundariesE_1(){
+void EM_FIELD::openBoundariesE_1() {
   EBEnergyExtremesFlag = false;
   axisBoundaryConditions xBoundaryConditions = mygrid->getXBoundaryConditions();
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
@@ -531,7 +531,7 @@ void EM_FIELD::openBoundariesE_1(){
   }
 }
 
-void EM_FIELD::openBoundariesE_2(){
+void EM_FIELD::openBoundariesE_2() {
   EBEnergyExtremesFlag = false;
   axisBoundaryConditions xBoundaryConditions = mygrid->getXBoundaryConditions();
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
@@ -594,7 +594,7 @@ void EM_FIELD::openBoundariesE_2(){
 }
 
 //TODO CORREGGERE PER GRIGLIA STRETCHATA
-void EM_FIELD::openBoundariesB(){
+void EM_FIELD::openBoundariesB() {
 
   axisBoundaryConditions xBoundaryConditions = mygrid->getXBoundaryConditions();
   axisBoundaryConditions yBoundaryConditions = mygrid->getYBoundaryConditions();
@@ -657,7 +657,7 @@ void EM_FIELD::openBoundariesB(){
 
 void EM_FIELD::boundary_conditions()  // set on the ghost cells the boundary values
 {
-  if (!allocated){
+  if (!allocated) {
     return;
   }
   EBEnergyExtremesFlag = false;
@@ -682,14 +682,14 @@ void EM_FIELD::new_halfadvance_B()
 
   int edge = mygrid->getEdge();
 
-  if (dimensions == 3){
+  if (dimensions == 3) {
     //#pragma omp parallel for private(i,j)
 
-    for (k = 0; k < Nz; k++){
+    for (k = 0; k < Nz; k++) {
       dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
-      for (j = 0; j < Ny; j++){
+      for (j = 0; j < Ny; j++) {
         dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-        for (i = 0; i < Nx; i++){
+        for (i = 0; i < Nx; i++) {
           dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 #ifndef OLD_ACCESS
           double EZ, EZ_XP, EZ_YP;
@@ -723,12 +723,12 @@ void EM_FIELD::new_halfadvance_B()
       }
     }
   }
-  else if (dimensions == 2){
+  else if (dimensions == 2) {
     //#pragma omp parallel for private(i)
 
-    for (j = 0; j < Ny; j++){
+    for (j = 0; j < Ny; j++) {
       dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-      for (i = 0; i < Nx; i++){
+      for (i = 0; i < Nx; i++) {
         k = 0;
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 #ifndef OLD_ACCESS
@@ -762,7 +762,7 @@ void EM_FIELD::new_halfadvance_B()
   }
   else if (dimensions == 1)
     //#pragma omp parallel for
-    for (i = 0; i < Nx; i++){
+    for (i = 0; i < Nx; i++) {
       j = 0;
       k = 0;
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
@@ -805,11 +805,11 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 
   int edge = mygrid->getEdge();
   if (dimensions == 3)
-    for (k = 0; k < Nz; k++){
+    for (k = 0; k < Nz; k++) {
       dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
-      for (j = 0; j < Ny; j++){
+      for (j = 0; j < Ny; j++) {
         dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
-        for (i = 0; i < Nx; i++){
+        for (i = 0; i < Nx; i++) {
           dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 #ifndef OLD_ACCESS
           double BZ, BZ_XM, BZ_YM;
@@ -841,9 +841,9 @@ void EM_FIELD::new_advance_E(CURRENT *current)
       }
     }
   else if (dimensions == 2)
-    for (j = 0; j < Ny; j++){
+    for (j = 0; j < Ny; j++) {
       dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
-      for (i = 0; i < Nx; i++){
+      for (i = 0; i < Nx; i++) {
         k = 0;
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
@@ -875,7 +875,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
       }
     }
   else if (dimensions == 1)
-    for (i = 0; i < Nx; i++){
+    for (i = 0; i < Nx; i++) {
       j = 0;
       k = 0;
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
@@ -906,7 +906,7 @@ void EM_FIELD::new_advance_E(CURRENT *current)
 
 void EM_FIELD::init_output_diag(std::ofstream &ff)
 {
-  if (mygrid->myid == mygrid->master_proc){
+  if (mygrid->myid == mygrid->master_proc) {
     ff << std::setw(myNarrowWidth) << "#step"
       << " " << std::setw(myWidth) << "time"
       << " " << std::setw(myWidth) << "Etot"
@@ -926,13 +926,13 @@ void EM_FIELD::output_diag(int istep, std::ofstream &ff)
 {
   computeEnergyAndExtremes();
 
-  if (mygrid->myid == mygrid->master_proc){
+  if (mygrid->myid == mygrid->master_proc) {
     ff << std::setw(myNarrowWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << total_energy[6];
 
-    for (int c = 0; c < 6; c++){
+    for (int c = 0; c < 6; c++) {
       ff << " " << std::setw(myWidth) << total_energy[c];
     }
-    for (int c = 0; c < 3; c++){
+    for (int c = 0; c < 3; c++) {
       ff << " " << std::setw(myWidth) << total_momentum[c];
     }
     ff << std::endl;
@@ -940,7 +940,7 @@ void EM_FIELD::output_diag(int istep, std::ofstream &ff)
 }
 void EM_FIELD::init_output_extrems(std::ofstream &ff)
 {
-  if (mygrid->myid == mygrid->master_proc){
+  if (mygrid->myid == mygrid->master_proc) {
     ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time";
     ff << " " << std::setw(myWidth) << "Exmin" << " " << std::setw(myWidth) << "Exmax";
     ff << " " << std::setw(myWidth) << "Eymin" << " " << std::setw(myWidth) << "Eymax";
@@ -955,7 +955,7 @@ void EM_FIELD::init_output_extrems(std::ofstream &ff)
 void EM_FIELD::output_extrems(int istep, std::ofstream &ff)
 {
   computeEnergyAndExtremes();
-  if (mygrid->myid == mygrid->master_proc){
+  if (mygrid->myid == mygrid->master_proc) {
     ff << " " << std::setw(myNarrowWidth) << istep << " " << std::setw(myNarrowWidth) << mygrid->time;
     for (int c = 0; c < 6; c++)
     {
@@ -979,7 +979,7 @@ void EM_FIELD::difference(EM_FIELD *right)
 }
 
 //Filtro per i campi. Lascia tutto inalterato, tranne filter_points punti dai bordi, su cui c'è smorzamento con cos^2 
-void EM_FIELD::smooth_filter(int filter_points){
+void EM_FIELD::smooth_filter(int filter_points) {
 
   if (filter_points == 0) return;
 
@@ -991,24 +991,24 @@ void EM_FIELD::smooth_filter(int filter_points){
 
   double* temp;
 
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     temp = cfilter[c];
-    for (int i = 0; i < mygrid->Nloc[c]; i++){
+    for (int i = 0; i < mygrid->Nloc[c]; i++) {
       temp[i] = 1.0;
     }
   }
 
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     temp = cfilter[c];
-    if (mygrid->NGridNodes[c] > 2 * filter_points){
-      if (mygrid->rproc_imin[c][mygrid->rmyid[c]] < filter_points){
-        for (int i = 0; i < MIN(filter_points - mygrid->rproc_imin[c][mygrid->rmyid[c]], mygrid->Nloc[c]); i++){
+    if (mygrid->NGridNodes[c] > 2 * filter_points) {
+      if (mygrid->rproc_imin[c][mygrid->rmyid[c]] < filter_points) {
+        for (int i = 0; i < MIN(filter_points - mygrid->rproc_imin[c][mygrid->rmyid[c]], mygrid->Nloc[c]); i++) {
           double arg = 0.5*M_PI*((i + mygrid->rproc_imin[c][mygrid->rmyid[c]])*1.0) / filter_points;
           temp[i] = sin(arg)*sin(arg);
         }
       }
-      if (((mygrid->NGridNodes[c] - 1) - mygrid->rproc_imax[c][mygrid->rmyid[c]]) < filter_points){
-        for (int i = MAX(mygrid->Nloc[c] - (filter_points - ((mygrid->NGridNodes[c] - 1) - mygrid->rproc_imax[c][mygrid->rmyid[c]])), 0); i < mygrid->Nloc[c]; i++){
+      if (((mygrid->NGridNodes[c] - 1) - mygrid->rproc_imax[c][mygrid->rmyid[c]]) < filter_points) {
+        for (int i = MAX(mygrid->Nloc[c] - (filter_points - ((mygrid->NGridNodes[c] - 1) - mygrid->rproc_imax[c][mygrid->rmyid[c]])), 0); i < mygrid->Nloc[c]; i++) {
           double arg = 0.5*M_PI*((mygrid->NGridNodes[c] - 1) - (i + mygrid->rproc_imin[c][mygrid->rmyid[c]])*1.0) / filter_points;
           temp[i] = sin(arg)*sin(arg);
         }
@@ -1016,10 +1016,10 @@ void EM_FIELD::smooth_filter(int filter_points){
     }
   }
 
-  for (int itcomp = 0; itcomp < Ncomp; itcomp++){
-    for (int i = 0; i < mygrid->Nloc[0]; i++){
-      for (int j = 0; j < mygrid->Nloc[1]; j++){
-        for (int k = 0; k < mygrid->Nloc[2]; k++){
+  for (int itcomp = 0; itcomp < Ncomp; itcomp++) {
+    for (int i = 0; i < mygrid->Nloc[0]; i++) {
+      for (int j = 0; j < mygrid->Nloc[1]; j++) {
+        for (int k = 0; k < mygrid->Nloc[2]; k++) {
           VEB(itcomp, i, j, k) *= xfilter[i] * yfilter[j] * zfilter[k];
         }
       }
@@ -1031,10 +1031,10 @@ void EM_FIELD::smooth_filter(int filter_points){
   delete[] zfilter;
 }
 
-void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
-  if (mygrid->myid == mygrid->master_proc){
+void EM_FIELD::writeNewPulseInformation(laserPulse* pulse) {
+  if (mygrid->myid == mygrid->master_proc) {
     std::string pulseType;
-    switch (pulse->type){
+    switch (pulse->type) {
     case GAUSSIAN:
       pulseType = "GAUSSIAN PULSE";
       break;
@@ -1052,7 +1052,7 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
       break;
     }
     std::string pulsePolarization;
-    switch (pulse->polarization){
+    switch (pulse->polarization) {
     case P_POLARIZATION:
       pulsePolarization = "P";
       break;
@@ -1081,16 +1081,16 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse){
   }
 }
 
-void EM_FIELD::addPulse(laserPulse* pulse){
-  if (!allocated){
+void EM_FIELD::addPulse(laserPulse* pulse) {
+  if (!allocated) {
     return;
   }
   EBEnergyExtremesFlag = false;
   writeNewPulseInformation(pulse);
-  switch (pulse->type){
+  switch (pulse->type) {
   case GAUSSIAN:
   {
-    if (pulse->rotation){
+    if (pulse->rotation) {
       initialize_gaussian_pulse_angle(pulse->lambda0,
         pulse->normalized_amplitude,
         pulse->laser_pulse_initial_position,
@@ -1101,7 +1101,7 @@ void EM_FIELD::addPulse(laserPulse* pulse){
         pulse->angle,
         pulse->polarization);
     }
-    else{
+    else {
       initialize_gaussian_pulse_angle(pulse->lambda0,
         pulse->normalized_amplitude,
         pulse->laser_pulse_initial_position,
@@ -1114,20 +1114,20 @@ void EM_FIELD::addPulse(laserPulse* pulse){
     }
     break;
   }
-  case PLANE_WAVE:{
+  case PLANE_WAVE: {
     if (pulse->rotation) {
       initialize_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->angle,
-        pulse->polarization);
+          pulse->normalized_amplitude,
+          pulse->angle,
+          pulse->polarization);
     }
-    else{
+    else {
       initialize_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        0.0,
-        pulse->polarization);
+          pulse->normalized_amplitude,
+          0.0,
+          pulse->polarization);
     }
     break;
   }
@@ -1136,24 +1136,24 @@ void EM_FIELD::addPulse(laserPulse* pulse){
     if (pulse->rotation) {
       initialize_cos2_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        pulse->rotation_center_along_x,
-        pulse->angle,
-        pulse->polarization,
-        pulse->t_FWHM);
+          pulse->normalized_amplitude,
+          pulse->laser_pulse_initial_position,
+          pulse->t_FWHM,
+          pulse->rotation_center_along_x,
+          pulse->angle,
+          pulse->polarization,
+          pulse->t_FWHM);
     }
-    else{
+    else {
       initialize_cos2_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        0.0,
-        0.0,
-        pulse->polarization,
-        pulse->t_FWHM);
+          pulse->normalized_amplitude,
+          pulse->laser_pulse_initial_position,
+          pulse->t_FWHM,
+          0.0,
+          0.0,
+          pulse->polarization,
+          pulse->t_FWHM);
     }
     break;
   }
@@ -1163,29 +1163,29 @@ void EM_FIELD::addPulse(laserPulse* pulse){
     if (pulse->rotation) {
       initialize_cos2_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        pulse->rotation_center_along_x,
-        pulse->angle,
-        pulse->polarization,
-        pulse->rise_time);
+          pulse->normalized_amplitude,
+          pulse->laser_pulse_initial_position,
+          pulse->t_FWHM,
+          pulse->rotation_center_along_x,
+          pulse->angle,
+          pulse->polarization,
+          pulse->rise_time);
     }
-    else{
+    else {
       initialize_cos2_plane_wave_angle
         (pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        0.0,
-        0.0,
-        pulse->polarization,
-        pulse->rise_time);
+          pulse->normalized_amplitude,
+          pulse->laser_pulse_initial_position,
+          pulse->t_FWHM,
+          0.0,
+          0.0,
+          pulse->polarization,
+          pulse->rise_time);
     }
     break;
   }
 
-  default:{}
+  default: {}
   }
 }
 
@@ -1210,17 +1210,17 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
   double mycos, mysin;
   mycos = cos(angle);
   mysin = sin(angle);
-  if (fabs(mysin) < 0.001){
+  if (fabs(mysin) < 0.001) {
     mysin = 0;
     mycos = (mycos > 0) ? (1) : (-1);
   }
-  if (fabs(mycos) < 0.001){
+  if (fabs(mycos) < 0.001) {
     mycos = 0;
     mysin = (mysin > 0) ? (1) : (-1);
   }
 
   x0 = laser_pulse_initial_position;
-  if (polarization == P_POLARIZATION){
+  if (polarization == P_POLARIZATION) {
 
     for (k = 0; k < Nz; k++)
       for (j = 0; j < Ny; j++)
@@ -1252,7 +1252,7 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
 
         }
   }
-  else if (polarization == S_POLARIZATION){
+  else if (polarization == S_POLARIZATION) {
 
     for (k = 0; k < Nz; k++)
       for (j = 0; j < Ny; j++)
@@ -1285,7 +1285,7 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
         }
 
   }
-  else if (polarization == CIRCULAR_POLARIZATION){
+  else if (polarization == CIRCULAR_POLARIZATION) {
     for (k = 0; k < Nz; k++)
       for (j = 0; j < Ny; j++)
         for (i = 0; i < Nx; i++)
@@ -1359,18 +1359,18 @@ void EM_FIELD::initialize_plane_wave_angle(double lambda0, double amplitude,
   double mycos, mysin;
   mycos = cos(angle);
   mysin = sin(angle);
-  if (fabs(mysin) < 0.001){
+  if (fabs(mysin) < 0.001) {
     mysin = 0;
     mycos = (mycos > 0) ? (1) : (-1);
   }
-  if (fabs(mycos) < 0.001){
+  if (fabs(mycos) < 0.001) {
     mycos = 0;
     mysin = (mysin > 0) ? (1) : (-1);
   }
 
   for (k = 0; k < Nz; k++)
     for (j = 0; j < Ny; j++)
-      for (i = 0; i < Nx; i++){
+      for (i = 0; i < Nx; i++) {
         x = mygrid->cirloc[0][i];
         y = mygrid->chrloc[1][j];
         rx = x*mycos + y*mysin;
@@ -1426,11 +1426,11 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
   double mycos, mysin;
   mycos = cos(angle);
   mysin = sin(angle);
-  if (fabs(mysin) < 0.001){
+  if (fabs(mysin) < 0.001) {
     mysin = 0;
     mycos = (mycos > 0) ? (1) : (-1);
   }
-  if (fabs(mycos) < 0.001){
+  if (fabs(mycos) < 0.001) {
     mycos = 0;
     mysin = (mysin > 0) ? (1) : (-1);
   }
@@ -1441,10 +1441,10 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
   tc = -focus_position + laser_pulse_initial_position;
 
   tt = +tc;
-  if (mygrid->getDimensionality() == 2){
+  if (mygrid->getDimensionality() == 2) {
     dim_factorZ = 0;
   }
-  else if (mygrid->getDimensionality() == 1){
+  else if (mygrid->getDimensionality() == 1) {
     dim_factorY = dim_factorZ = 0;
   }
 
@@ -1529,7 +1529,7 @@ B2(i, j, k) += amplitude*cos_plane_wave_angle(xh, yh, zw, t, lambda, sigma_z, X0
 }
 */
 
-void EM_FIELD::addFieldsFromFile(std::string name){
+void EM_FIELD::addFieldsFromFile(std::string name) {
   std::ifstream fileEMField(name.c_str(), std::ifstream::in);
   int Nx_in;
   int Nx = mygrid->Nloc[0];
@@ -1545,7 +1545,7 @@ void EM_FIELD::addFieldsFromFile(std::string name){
   Bz = (double*)malloc(sizeof(double)*Nx_in);
   myx = (double*)malloc(sizeof(double)*Nx_in);
 
-  for (int i = 0; i < Nx_in; i++){
+  for (int i = 0; i < Nx_in; i++) {
     fileEMField >> myx[i];
     fileEMField >> Ex[i];
     fileEMField >> Ey[i];
@@ -1564,7 +1564,7 @@ void EM_FIELD::addFieldsFromFile(std::string name){
   double axi, axh;
   double wi[2], wh[2];
   int ii, ih, iileft, iiright, ihleft, ihright;
-  for (int i = 0; i < Nx; i++){
+  for (int i = 0; i < Nx; i++) {
     xi = mygrid->cirloc[0][i];
     xh = mygrid->chrloc[0][i];
 
@@ -1617,7 +1617,7 @@ void EM_FIELD::moveWindow()
   static double *send_buffer = NULL, *recv_buffer = NULL;
   static int shiftCellNumber = 0;
   static int exchangeCellNumber = 0;
-  if (shiftCellNumber != mygrid->imove_mw){
+  if (shiftCellNumber != mygrid->imove_mw) {
     shiftCellNumber = mygrid->imove_mw;
     exchangeCellNumber = shiftCellNumber + 1;
     int sendcount;
@@ -1625,10 +1625,10 @@ void EM_FIELD::moveWindow()
     send_buffer = (double *)realloc((void*)send_buffer, sendcount*sizeof(double));
     recv_buffer = (double *)realloc((void*)recv_buffer, sendcount*sizeof(double));
   }
-  for (int k = 0; k < Ngz; k++){
-    for (int j = 0; j < Ngy; j++){
-      for (int i = 0; i < (exchangeCellNumber); i++){
-        for (int c = 0; c < Ncomp; c++){
+  for (int k = 0; k < Ngz; k++) {
+    for (int j = 0; j < Ngy; j++) {
+      for (int i = 0; i < (exchangeCellNumber); i++) {
+        for (int c = 0; c < Ncomp; c++) {
           send_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy] = VEB(c, i + 1, j - edge, k - edge);
         }
       }
@@ -1643,19 +1643,19 @@ void EM_FIELD::moveWindow()
     recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
     MPI_COMM_WORLD, &status);
 
-  if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)){
+  if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)) {
     memset((void*)recv_buffer, 0, sendcount*sizeof(double));
     fflush(stdout);
   }
 
   for (int k = 0; k < Ngz; k++)
-    for (int j = 0; j < Ngy; j++){
+    for (int j = 0; j < Ngy; j++) {
       for (int i = -Nexchange; i < (Nx - shiftCellNumber); i++)
-        for (int c = 0; c < Ncomp; c++){
+        for (int c = 0; c < Ncomp; c++) {
           VEB(c, i, j - edge, k - edge) = VEB(c, i + shiftCellNumber, j - edge, k - edge);
         }
-      for (int i = 0; i < (shiftCellNumber + 1); i++){
-        for (int c = 0; c < Ncomp; c++){
+      for (int i = 0; i < (shiftCellNumber + 1); i++) {
+        for (int c = 0; c < Ncomp; c++) {
           VEB(c, i + (Nx - shiftCellNumber), j - edge, k - edge) = recv_buffer[c + i*Ncomp + j*Ncomp*exchangeCellNumber + k*Ncomp*exchangeCellNumber*Ngy];
         }
       }
@@ -1665,19 +1665,19 @@ void EM_FIELD::moveWindow()
   EM_FIELD::boundary_conditions();
 }
 
-double EM_FIELD::getEBenergy(double* EEnergy, double* BEnergy){
+double EM_FIELD::getEBenergy(double* EEnergy, double* BEnergy) {
 
   EEnergy[0] = 0.0; EEnergy[1] = 0.0; EEnergy[2] = 0.0;
   BEnergy[0] = 0.0; BEnergy[1] = 0.0; BEnergy[2] = 0.0;
   double dxICorr, dyICorr, dzICorr;
   double dxHCorr, dyHCorr, dzHCorr;
-  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++){
+  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
     dzICorr = 1. / mygrid->iStretchingDerivativeCorrection[2][k];
     dzHCorr = 1. / mygrid->hStretchingDerivativeCorrection[2][k];
-    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++){
+    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
       dyICorr = 1. / mygrid->iStretchingDerivativeCorrection[1][j];
       dyHCorr = 1. / mygrid->hStretchingDerivativeCorrection[1][j];
-      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++){
+      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
         dxICorr = 1. / mygrid->iStretchingDerivativeCorrection[0][i];
         dxHCorr = 1. / mygrid->hStretchingDerivativeCorrection[0][i];
 
@@ -1691,7 +1691,7 @@ double EM_FIELD::getEBenergy(double* EEnergy, double* BEnergy){
     }
   }
 
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     EEnergy[c] *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] / (8.0*M_PI);
     BEnergy[c] *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] / (8.0*M_PI);
   }
@@ -1700,9 +1700,9 @@ double EM_FIELD::getEBenergy(double* EEnergy, double* BEnergy){
 }
 
 //exmim,eymin, ezmin, bxmin, bymin, bzmin, exmax, eymax, ezmax, bxmax, bymax, bzmax,etmax,btmax
-void EM_FIELD::computeEnergyAndExtremes(){
+void EM_FIELD::computeEnergyAndExtremes() {
 
-  if (EBEnergyExtremesFlag){
+  if (EBEnergyExtremesFlag) {
     return;
   }
   const double VERY_BIG_NUM_POS = 1.0e30;
@@ -1712,31 +1712,31 @@ void EM_FIELD::computeEnergyAndExtremes(){
 
   double extrema[14];
 
-  for (int i = 0; i < 6; i++){
+  for (int i = 0; i < 6; i++) {
     minima[i] = (VERY_BIG_NUM_POS);
     extrema[i] = 0.0;
   }
-  for (int i = 0; i < 8; i++){
+  for (int i = 0; i < 8; i++) {
     maxima[i] = (VERY_BIG_NUM_NEG);
     extrema[i + 6] = 0.0;
   }
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++) {
     total_momentum[i] = 0.0;
   }
-  for (int i = 0; i < 7; i++){
+  for (int i = 0; i < 7; i++) {
     total_energy[i] = 0.0;
   }
   double tval;
 
 
 
-  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++){
+  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
     dzICorr = 1. / mygrid->iStretchingDerivativeCorrection[2][k];
     dzHCorr = 1. / mygrid->hStretchingDerivativeCorrection[2][k];
-    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++){
+    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
       dyICorr = 1. / mygrid->iStretchingDerivativeCorrection[1][j];
       dyHCorr = 1. / mygrid->hStretchingDerivativeCorrection[1][j];
-      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++){
+      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
         dxICorr = 1. / mygrid->iStretchingDerivativeCorrection[0][i];
         dxHCorr = 1. / mygrid->hStretchingDerivativeCorrection[0][i];
 
@@ -1782,7 +1782,7 @@ void EM_FIELD::computeEnergyAndExtremes(){
     }
   }
 
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     total_energy[c] *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] / (8.0*M_PI);
     total_energy[3 + c] *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] / (8.0*M_PI);
     total_momentum[c] *= mygrid->dr[0] * mygrid->dr[1] * mygrid->dr[2] / (8.0*M_PI);
@@ -1854,11 +1854,11 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
   xx = xx / zra;                            //normalized x
   //dimensions = 3;
   //CORREZIONE DA CONTROLLARE !!
-  if (dimensions == 3){
+  if (dimensions == 3) {
     phig00 = phi + atan(xx) - xx*r2 / (waist*waist) - phi0; //phase order ZERO
     amp00 = (w0 / waist)*rprofile*tprofile;
   }
-  else{
+  else {
     phig00 = phi + atan(xx)*0.5 - xx*r2 / (waist*waist) - phi0; //phase order ZERO
     amp00 = sqrt(w0 / waist)*rprofile*tprofile;
   }
@@ -1872,7 +1872,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 
   amp01 = 0.5*sigma*(w0 / waist)*(w0 / waist)*(w0 / waist);
   amp01 *= rprofile*sqrt((1 - uu)*(1 - uu) + xx*xx)*tprofile01;
-  if (dimensions == 2){
+  if (dimensions == 2) {
     amp10 /= sqrt(w0 / waist);
     amp01 /= sqrt(w0 / waist);
   }
@@ -1883,7 +1883,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
   Samp10 = amp10*cos(phig10 + M_PI*0.5); //S-polarisation order 1,0
   Samp01 = amp01*cos(phig01 + M_PI*0.5); //S-polarisation order 0,1
 
-  if (polarization == P_POLARIZATION){
+  if (polarization == P_POLARIZATION) {
     field[0] = (yy*Pamp10);           //Ex
     field[1] = (Pamp00 - xx*Pamp01);  //Ey
     field[2] = 0;                     //Ez
@@ -1891,7 +1891,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
     field[4] = 0;                     //By
     field[5] = (Pamp00 - xx*Pamp01);  //Bz
   }
-  else if (polarization == S_POLARIZATION){
+  else if (polarization == S_POLARIZATION) {
     field[0] = (zz*Pamp10);           //Ex
     field[1] = 0;                     //Ey
     field[2] = (Pamp00 - xx*Pamp01);  //Ez
@@ -1899,7 +1899,7 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
     field[4] = -(Pamp00 - xx*Pamp01); //By
     field[5] = 0;                     //Bz
   }
-  else if (polarization == CIRCULAR_POLARIZATION){
+  else if (polarization == CIRCULAR_POLARIZATION) {
     field[0] = (yy*Pamp10 + zz*Samp10); //Ex
     field[1] = (Pamp00 - xx*Pamp01); //Ey
     field[2] = (Samp00 - xx*Samp01); //Ez
@@ -1910,16 +1910,16 @@ void EM_FIELD::gaussian_pulse(int dimensions, double xx, double yy, double zz, d
 
 }
 
-void EM_FIELD::dump(std::ofstream &ff){
+void EM_FIELD::dump(std::ofstream &ff) {
   ff.write((char*)val, Ntot*Ncomp*sizeof(double));
 
 }
 
-void EM_FIELD::reloadDump(std::ifstream &ff){
+void EM_FIELD::reloadDump(std::ifstream &ff) {
   ff.read((char*)val, Ntot*Ncomp*sizeof(double));
 }
 
-void EM_FIELD::filterCompAlongX(int comp){
+void EM_FIELD::filterCompAlongX(int comp) {
   int Nx = mygrid->Nloc[0];
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
@@ -1927,17 +1927,17 @@ void EM_FIELD::filterCompAlongX(int comp){
   double alpha = 5.0 / 8.0;
   double beta = 0.5;
   double gamma = -1.0 / 8.0;
-  if ((mygrid->getNexchange() == 1)){
+  if ((mygrid->getNexchange() == 1)) {
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
   }
 
-  for (int k = 0; k < Nz; k++){
-    for (int j = 0; j < Ny; j++){
+  for (int k = 0; k < Nz; k++) {
+    for (int j = 0; j < Ny; j++) {
       double minus1 = VEB(comp, -1, j, k);
       double minus2 = VEB(comp, -2, j, k);
-      for (int i = 0; i < Nx; i++){
+      for (int i = 0; i < Nx; i++) {
         double ttemp = VEB(comp, i, j, k);
         VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i + 1, j, k) + minus1) + gamma*0.5*(VEB(comp, i + 2, j, k) + minus2);
         minus2 = minus1;
@@ -1948,7 +1948,7 @@ void EM_FIELD::filterCompAlongX(int comp){
   }
 }
 
-void EM_FIELD::filterCompAlongY(int comp){
+void EM_FIELD::filterCompAlongY(int comp) {
   int Nx = mygrid->Nloc[0];
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
@@ -1956,17 +1956,17 @@ void EM_FIELD::filterCompAlongY(int comp){
   double alpha = 5.0 / 8.0;
   double beta = 0.5;
   double gamma = -1.0 / 8.0;
-  if ((mygrid->getNexchange() == 1)){
+  if ((mygrid->getNexchange() == 1)) {
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
   }
 
-  for (int k = 0; k < Nz; k++){
-    for (int i = 0; i < Nx; i++){
+  for (int k = 0; k < Nz; k++) {
+    for (int i = 0; i < Nx; i++) {
       double minus1 = VEB(comp, i, -1, k);
       double minus2 = VEB(comp, i, -2, k);
-      for (int j = 0; j < Ny; j++){
+      for (int j = 0; j < Ny; j++) {
         double ttemp = VEB(comp, i, j, k);
         VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i, j + 1, k) + minus1) + gamma*0.5*(VEB(comp, i, j + 2, k) + minus2);
         minus2 = minus1;
@@ -1977,7 +1977,7 @@ void EM_FIELD::filterCompAlongY(int comp){
   }
 }
 
-void EM_FIELD::filterCompAlongZ(int comp){
+void EM_FIELD::filterCompAlongZ(int comp) {
   int Nx = mygrid->Nloc[0];
   int Ny = mygrid->Nloc[1];
   int Nz = mygrid->Nloc[2];
@@ -1985,17 +1985,17 @@ void EM_FIELD::filterCompAlongZ(int comp){
   double alpha = 5.0 / 8.0;
   double beta = 0.5;
   double gamma = -1.0 / 8.0;
-  if ((mygrid->getNexchange() == 1)){
+  if ((mygrid->getNexchange() == 1)) {
     alpha = 0.5;
     beta = 0.5;
     gamma = 0;
   }
 
-  for (int j = 0; j < Ny; j++){
-    for (int i = 0; i < Nx; i++){
+  for (int j = 0; j < Ny; j++) {
+    for (int i = 0; i < Nx; i++) {
       double minus1 = VEB(comp, i, j, -1);
       double minus2 = VEB(comp, i, j, -2);
-      for (int k = 0; k < Nz; k++){
+      for (int k = 0; k < Nz; k++) {
         double ttemp = VEB(comp, i, j, k);
         VEB(comp, i, j, k) = alpha*VEB(comp, i, j, k) + beta*0.5*(VEB(comp, i, j, k + 1) + minus1) + gamma*0.5*(VEB(comp, i, j, k + 2) + minus2);
         minus2 = minus1;
@@ -2008,7 +2008,7 @@ void EM_FIELD::filterCompAlongZ(int comp){
 
 
 
-void EM_FIELD::filterDirSelect(int comp, int dirflags){
+void EM_FIELD::filterDirSelect(int comp, int dirflags) {
   if (dirflags & dir_x)
     filterCompAlongX(comp);
   if (dirflags & dir_y && mygrid->getDimensionality() >= 2)
@@ -2018,8 +2018,8 @@ void EM_FIELD::filterDirSelect(int comp, int dirflags){
 }
 
 
-void EM_FIELD::applyFilter(int flags, int dirflags){
-  if (mygrid->isStretched() && (mygrid->myid == mygrid->master_proc)){
+void EM_FIELD::applyFilter(int flags, int dirflags) {
+  if (mygrid->isStretched() && (mygrid->myid == mygrid->master_proc)) {
     std::cout << "WARNING: filtering and stretched grid are not compatible. Proceed at your own risk." << std::endl;
   }
   if (flags & fltr_Ex)
@@ -2037,7 +2037,7 @@ void EM_FIELD::applyFilter(int flags, int dirflags){
 
 }
 
-bool EM_FIELD::checkIfFilterPossible(){
+bool EM_FIELD::checkIfFilterPossible() {
 
   if (mygrid->uniquePoints[0] % mygrid->rnproc[0] != 0)
     return false;
@@ -2056,7 +2056,7 @@ bool EM_FIELD::checkIfFilterPossible(){
 }
 
 #ifdef _USE_FFTW_FILTER
-void EM_FIELD::fftw_filter_Efield(){
+void EM_FIELD::fftw_filter_Efield() {
   // if (!checkIfFilterPossible())
   //   return;
   //std::cout << checkIfFilterPossible() << std::endl;
@@ -2078,19 +2078,19 @@ void EM_FIELD::fftw_filter_Efield(){
 
   {
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] = E0(i, j, 0);
         data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] /= norm;
         data[i*N1 + j][1] /= norm;
         int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
         int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
-        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2) {
           data[i*N1 + j][0] = 0;
           data[i*N1 + j][1] = 0;
         }
@@ -2098,26 +2098,26 @@ void EM_FIELD::fftw_filter_Efield(){
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         E0(i, j, 0) = data[i*N1 + j][0];
       }
   }
 
   {
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] = E1(i, j, 0);
         data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] /= norm;
         data[i*N1 + j][1] /= norm;
         int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
         int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
-        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2) {
           data[i*N1 + j][0] = 0;
           data[i*N1 + j][1] = 0;
         }
@@ -2125,7 +2125,7 @@ void EM_FIELD::fftw_filter_Efield(){
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         E1(i, j, 0) = data[i*N1 + j][0];
       }
   }
@@ -2133,19 +2133,19 @@ void EM_FIELD::fftw_filter_Efield(){
 
   {
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] = E2(i, j, 0);
         data[i*N1 + j][1] = 0;
       }
     fftw_execute(planFW);
     double norm = N0*N1;
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         data[i*N1 + j][0] /= norm;
         data[i*N1 + j][1] /= norm;
         int ri = (local_0_start + i < N0 / 2) ? (local_0_start + i) : (-(N0 - local_0_start + 1));
         int rj = (j < N1 / 2) ? (j) : (-(N1 - j));
-        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2){
+        if (abs(ri) > 0.8*N0 / 2 && abs(rj) > 0.8*N1 / 2) {
           data[i*N1 + j][0] = 0;
           data[i*N1 + j][1] = 0;
         }
@@ -2153,7 +2153,7 @@ void EM_FIELD::fftw_filter_Efield(){
       }
     fftw_execute(planBW);
     for (i = 0; i < local_n0; ++i)
-      for (j = 0; j < N1; ++j){
+      for (j = 0; j < N1; ++j) {
         E2(i, j, 0) = data[i*N1 + j][0];
       }
   }

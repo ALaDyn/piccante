@@ -36,130 +36,130 @@ RAPIDJSON_NAMESPACE_BEGIN
 namespace internal {
 
 #ifdef __GNUC__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(effc++)
+  RAPIDJSON_DIAG_PUSH
+    RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
-struct DiyFp {
+  struct DiyFp {
     DiyFp() {}
 
     DiyFp(uint64_t fp, int exp) : f(fp), e(exp) {}
 
     explicit DiyFp(double d) {
-        union {
-            double d;
-            uint64_t u64;
-        } u = { d };
+      union {
+        double d;
+        uint64_t u64;
+      } u = { d };
 
-        int biased_e = (u.u64 & kDpExponentMask) >> kDpSignificandSize;
-        uint64_t significand = (u.u64 & kDpSignificandMask);
-        if (biased_e != 0) {
-            f = significand + kDpHiddenBit;
-            e = biased_e - kDpExponentBias;
-        } 
-        else {
-            f = significand;
-            e = kDpMinExponent + 1;
-        }
+      int biased_e = (u.u64 & kDpExponentMask) >> kDpSignificandSize;
+      uint64_t significand = (u.u64 & kDpSignificandMask);
+      if (biased_e != 0) {
+        f = significand + kDpHiddenBit;
+        e = biased_e - kDpExponentBias;
+      }
+      else {
+        f = significand;
+        e = kDpMinExponent + 1;
+      }
     }
 
     DiyFp operator-(const DiyFp& rhs) const {
-        return DiyFp(f - rhs.f, e);
+      return DiyFp(f - rhs.f, e);
     }
 
     DiyFp operator*(const DiyFp& rhs) const {
 #if defined(_MSC_VER) && defined(_M_AMD64)
-        uint64_t h;
-        uint64_t l = _umul128(f, rhs.f, &h);
-        if (l & (uint64_t(1) << 63)) // rounding
-            h++;
-        return DiyFp(h, e + rhs.e + 64);
+      uint64_t h;
+      uint64_t l = _umul128(f, rhs.f, &h);
+      if (l & (uint64_t(1) << 63)) // rounding
+        h++;
+      return DiyFp(h, e + rhs.e + 64);
 #elif (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) && defined(__x86_64__)
-        unsigned __int128 p = static_cast<unsigned __int128>(f) * static_cast<unsigned __int128>(rhs.f);
-        uint64_t h = p >> 64;
-        uint64_t l = static_cast<uint64_t>(p);
-        if (l & (uint64_t(1) << 63)) // rounding
-            h++;
-        return DiyFp(h, e + rhs.e + 64);
+      unsigned __int128 p = static_cast<unsigned __int128>(f) * static_cast<unsigned __int128>(rhs.f);
+      uint64_t h = p >> 64;
+      uint64_t l = static_cast<uint64_t>(p);
+      if (l & (uint64_t(1) << 63)) // rounding
+        h++;
+      return DiyFp(h, e + rhs.e + 64);
 #else
-        const uint64_t M32 = 0xFFFFFFFF;
-        const uint64_t a = f >> 32;
-        const uint64_t b = f & M32;
-        const uint64_t c = rhs.f >> 32;
-        const uint64_t d = rhs.f & M32;
-        const uint64_t ac = a * c;
-        const uint64_t bc = b * c;
-        const uint64_t ad = a * d;
-        const uint64_t bd = b * d;
-        uint64_t tmp = (bd >> 32) + (ad & M32) + (bc & M32);
-        tmp += 1U << 31;  /// mult_round
-        return DiyFp(ac + (ad >> 32) + (bc >> 32) + (tmp >> 32), e + rhs.e + 64);
+      const uint64_t M32 = 0xFFFFFFFF;
+      const uint64_t a = f >> 32;
+      const uint64_t b = f & M32;
+      const uint64_t c = rhs.f >> 32;
+      const uint64_t d = rhs.f & M32;
+      const uint64_t ac = a * c;
+      const uint64_t bc = b * c;
+      const uint64_t ad = a * d;
+      const uint64_t bd = b * d;
+      uint64_t tmp = (bd >> 32) + (ad & M32) + (bc & M32);
+      tmp += 1U << 31;  /// mult_round
+      return DiyFp(ac + (ad >> 32) + (bc >> 32) + (tmp >> 32), e + rhs.e + 64);
 #endif
     }
 
     DiyFp Normalize() const {
 #if defined(_MSC_VER) && defined(_M_AMD64)
-        unsigned long index;
-        _BitScanReverse64(&index, f);
-        return DiyFp(f << (63 - index), e - (63 - index));
+      unsigned long index;
+      _BitScanReverse64(&index, f);
+      return DiyFp(f << (63 - index), e - (63 - index));
 #elif defined(__GNUC__) && __GNUC__ >= 4
-        int s = __builtin_clzll(f);
-        return DiyFp(f << s, e - s);
+      int s = __builtin_clzll(f);
+      return DiyFp(f << s, e - s);
 #else
-        DiyFp res = *this;
-        while (!(res.f & (static_cast<uint64_t>(1) << 63))) {
-            res.f <<= 1;
-            res.e--;
-        }
-        return res;
+      DiyFp res = *this;
+      while (!(res.f & (static_cast<uint64_t>(1) << 63))) {
+        res.f <<= 1;
+        res.e--;
+      }
+      return res;
 #endif
     }
 
     DiyFp NormalizeBoundary() const {
-        DiyFp res = *this;
-        while (!(res.f & (kDpHiddenBit << 1))) {
-            res.f <<= 1;
-            res.e--;
-        }
-        res.f <<= (kDiySignificandSize - kDpSignificandSize - 2);
-        res.e = res.e - (kDiySignificandSize - kDpSignificandSize - 2);
-        return res;
+      DiyFp res = *this;
+      while (!(res.f & (kDpHiddenBit << 1))) {
+        res.f <<= 1;
+        res.e--;
+      }
+      res.f <<= (kDiySignificandSize - kDpSignificandSize - 2);
+      res.e = res.e - (kDiySignificandSize - kDpSignificandSize - 2);
+      return res;
     }
 
     void NormalizedBoundaries(DiyFp* minus, DiyFp* plus) const {
-        DiyFp pl = DiyFp((f << 1) + 1, e - 1).NormalizeBoundary();
-        DiyFp mi = (f == kDpHiddenBit) ? DiyFp((f << 2) - 1, e - 2) : DiyFp((f << 1) - 1, e - 1);
-        mi.f <<= mi.e - pl.e;
-        mi.e = pl.e;
-        *plus = pl;
-        *minus = mi;
+      DiyFp pl = DiyFp((f << 1) + 1, e - 1).NormalizeBoundary();
+      DiyFp mi = (f == kDpHiddenBit) ? DiyFp((f << 2) - 1, e - 2) : DiyFp((f << 1) - 1, e - 1);
+      mi.f <<= mi.e - pl.e;
+      mi.e = pl.e;
+      *plus = pl;
+      *minus = mi;
     }
 
     double ToDouble() const {
-        union {
-            double d;
-            uint64_t u64;
-        }u;
-        uint64_t significand = f;
-        int exponent = e;
-        while (significand > kDpHiddenBit + kDpSignificandMask) {
-            significand >>= 1;
-            exponent++;
-        }
-        while (exponent > kDpDenormalExponent && (significand & kDpHiddenBit) == 0) {
-            significand <<= 1;
-            exponent--;
-        }
-        if (exponent >= kDpMaxExponent) {
-            u.u64 = kDpExponentMask;    // Infinity
-            return u.d;
-        }
-        else if (exponent < kDpDenormalExponent)
-            return 0.0;
-        const uint64_t be = (exponent == kDpDenormalExponent && (significand & kDpHiddenBit) == 0) ? 0 : 
-            static_cast<uint64_t>(exponent + kDpExponentBias);
-        u.u64 = (significand & kDpSignificandMask) | (be << kDpSignificandSize);
+      union {
+        double d;
+        uint64_t u64;
+      }u;
+      uint64_t significand = f;
+      int exponent = e;
+      while (significand > kDpHiddenBit + kDpSignificandMask) {
+        significand >>= 1;
+        exponent++;
+      }
+      while (exponent > kDpDenormalExponent && (significand & kDpHiddenBit) == 0) {
+        significand <<= 1;
+        exponent--;
+      }
+      if (exponent >= kDpMaxExponent) {
+        u.u64 = kDpExponentMask;    // Infinity
         return u.d;
+      }
+      else if (exponent < kDpDenormalExponent)
+        return 0.0;
+      const uint64_t be = (exponent == kDpDenormalExponent && (significand & kDpHiddenBit) == 0) ? 0 :
+        static_cast<uint64_t>(exponent + kDpExponentBias);
+      u.u64 = (significand & kDpSignificandMask) | (be << kDpSignificandSize);
+      return u.d;
     }
 
     static const int kDiySignificandSize = 64;
@@ -174,9 +174,9 @@ struct DiyFp {
 
     uint64_t f;
     int e;
-};
+  };
 
-inline DiyFp GetCachedPowerByIndex(size_t index) {
+  inline DiyFp GetCachedPowerByIndex(size_t index) {
     // 10^-348, 10^-340, ..., 10^340
     static const uint64_t kCachedPowers_F[] = {
         RAPIDJSON_UINT64_C2(0xfa8fd5a0, 0x081c0288), RAPIDJSON_UINT64_C2(0xbaaee17f, 0xa23ebf76),
@@ -236,30 +236,30 @@ inline DiyFp GetCachedPowerByIndex(size_t index) {
         907,   933,   960,   986,  1013,  1039,  1066
     };
     return DiyFp(kCachedPowers_F[index], kCachedPowers_E[index]);
-}
-    
-inline DiyFp GetCachedPower(int e, int* K) {
+  }
+
+  inline DiyFp GetCachedPower(int e, int* K) {
 
     //int k = static_cast<int>(ceil((-61 - e) * 0.30102999566398114)) + 374;
     double dk = (-61 - e) * 0.30102999566398114 + 347;  // dk must be positive, so can do ceiling in positive
     int k = static_cast<int>(dk);
     if (k != dk)
-        k++;
+      k++;
 
     unsigned index = static_cast<unsigned>((k >> 3) + 1);
     *K = -(-348 + static_cast<int>(index << 3));    // decimal exponent no need lookup table
 
     return GetCachedPowerByIndex(index);
-}
+  }
 
-inline DiyFp GetCachedPower10(int exp, int *outExp) {
-     unsigned index = (exp + 348) / 8;
-     *outExp = -348 + index * 8;
-     return GetCachedPowerByIndex(index);
- }
+  inline DiyFp GetCachedPower10(int exp, int *outExp) {
+    unsigned index = (exp + 348) / 8;
+    *outExp = -348 + index * 8;
+    return GetCachedPowerByIndex(index);
+  }
 
 #ifdef __GNUC__
-RAPIDJSON_DIAG_POP
+  RAPIDJSON_DIAG_POP
 #endif
 
 } // namespace internal

@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef __GRID_H__
 #define __GRID_H__
@@ -46,14 +46,14 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 #endif
 
-enum axisBoundaryConditions{
+enum axisBoundaryConditions {
   _notAssigned,
   _PBC,
   _Open,
   _PML
 };
 
-enum boundaryConditions{
+enum boundaryConditions {
   xPBC = 1 << 0,
   yPBC = 1 << 1,
   zPBC = 1 << 2,
@@ -66,7 +66,7 @@ enum boundaryConditions{
 };
 
 
-class GRID{
+class GRID {
 public:
   int NGridNodes[3], Nloc[3], istep;   //number of total grid points , number of local gridpoints
   int uniquePointsloc[3];

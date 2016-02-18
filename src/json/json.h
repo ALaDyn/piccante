@@ -1260,11 +1260,11 @@ namespace Json {
      */
     virtual void
       reallocateArrayPageIndex(Value**& indexes,
-      ValueInternalArray::PageIndex& indexCount,
-      ValueInternalArray::PageIndex minNewIndexCount) = 0;
+        ValueInternalArray::PageIndex& indexCount,
+        ValueInternalArray::PageIndex minNewIndexCount) = 0;
     virtual void
       releaseArrayPageIndex(Value** indexes,
-      ValueInternalArray::PageIndex indexCount) = 0;
+        ValueInternalArray::PageIndex indexCount) = 0;
     virtual Value* allocateArrayPage() = 0;
     virtual void releaseArrayPage(Value* value) = 0;
   };
