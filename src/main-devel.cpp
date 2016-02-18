@@ -61,7 +61,7 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
-void moveParticles(SPECIE* specie, double amplitude,double lambda){
+void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
   int Npart=specie->Np;
   double kdx=2*M_PI/lambda;
   double density=specie->plasma.params.density_coefficient;
@@ -70,32 +70,95 @@ void moveParticles(SPECIE* specie, double amplitude,double lambda){
   double oldX;
 
   std::cout<< "sposto le particelle che sono" << Npart << std::endl;
+  std::cout<< "density = " << density << std::endl;
+  std::cout<< " ===================== "<< std::endl;
+
   for(int n=0;n<Npart;n++){
     oldX = specie->r0(n);
     specie->r0(n) += deltaX*cos(kdx*oldX);
-    specie->u0(n) += deltaV*sin(kdx*oldX);
+    //specie->u0(n) += deltaV*sin(kdx*oldX-2*M_PI*sqrt(density)*grid->dt*0.5);
   }
 
 }
 
-void deformEx(GRID grid, EM_FIELD* field, double amplitude, double lambda){
+void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
   double kdx=2*M_PI/lambda;
   int Ngrid[3];
- Ngrid[0] = grid.NGridNodes[0];
+ Ngrid[0] = grid->NGridNodes[0];
+ Ngrid[1] = grid->NGridNodes[1];
+ Ngrid[2] = grid->NGridNodes[2];
 
  double x;
 
  std::cout<< "deformo Ex che ha " << Ngrid[0] << " punti" << std::endl;
+ std::cout<< "Ny = " << Ngrid[1] << " " << std::endl;
+ std::cout<< "Nz = " << Ngrid[2] << " " << std::endl;
+ std::cout<< "amplitude = " << amplitude << " " << std::endl;
+ std::cout<< "lambda = " << lambda << " " << std::endl;
 
-  for(int k=0; k<Ngrid[0]; k++){
-    for(int j=0; j<Ngrid[0]; j++){
+  for(int k=0; k<Ngrid[2]; k++){
+    for(int j=0; j<Ngrid[1]; j++){
       for(int i=0; i<Ngrid[0]; i++){
 
-        x = grid.rmin[0] + grid.dr[0]*i;
-        field->E0(i,j,k)+=amplitude*cos(kdx*x);
+        x = grid->rminloc[0] + grid->dr[0]*i;
+        //std::cout<< i << ":  x = " << x << "    dE = " << amplitude*cos(kdx*x) << std::endl;
+
+        field->E0(i,j,k)+=amplitude*M_PI*cos(kdx*x);
       }
     }
   }
+}
+
+void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
+  int Ngrid[3];
+  Ngrid[0] = grid->NGridNodes[0];
+  Ngrid[1] = grid->NGridNodes[1];
+  Ngrid[2] = grid->NGridNodes[2];
+
+  double x;
+  std::ofstream density("density_0.txt");
+  std::ofstream ExBefore("Ex-before.txt");
+  std::ofstream ExAfter("Ex-after.txt");
+  double totalSum=0;
+
+  for(int k=0; k<Ngrid[2]; k++){
+    for(int j=0; j<Ngrid[1]; j++){
+      for(int i=0; i<Ngrid[0]; i++){
+        x = grid->rmin[0] + grid->dr[0]*i;
+        density << x << "   " << (1-current->density(i,j,k)) << std::endl;
+        ExBefore << x << "   " << field->E0(i,j,k) << std::endl;
+      }
+    }
+  }
+
+  for(int k=0; k<Ngrid[2]; k++){
+    for(int j=0; j<Ngrid[1]; j++){
+      totalSum=0;
+      int i=0;
+      totalSum += field->E0(i,j,k) = 0;
+      for(i=1; i<Ngrid[0]; i++){
+        field->E0(i,j,k) = grid->dr[0]*grid->den_factor*(1-current->density(i,j,k)) + field->E0(i-1,j,k);
+        totalSum += field->E0(i,j,k);
+      }
+      totalSum /= (Ngrid[0]-1);
+      for(i=0; i<Ngrid[0]; i++){
+        field->E0(i,j,k) -= totalSum;
+      }
+    }
+  }
+
+  for(int k=0; k<Ngrid[2]; k++){
+    for(int j=0; j<Ngrid[1]; j++){
+      for(int i=0; i<Ngrid[0]; i++){
+        x = grid->rmin[0] + grid->dr[0]*i;
+        ExAfter << x << "   " << field->E0(i,j,k) << std::endl;
+
+      }
+    }
+  }
+  density.close();
+  ExBefore.close();
+  ExAfter.close();
 }
 
 int main(int narg, char **args)
@@ -184,13 +247,24 @@ int main(int narg, char **args)
 
  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
+ int counter=0;
  if(isWaveOK){
    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-     moveParticles((*spec_iterator),amplitude,lambda);
+     moveParticles(&grid,(*spec_iterator),amplitude,lambda);
      (*spec_iterator)->position_parallel_pbc();
      double ampliEx;
      ampliEx = 4*M_PI*(*spec_iterator)->chargeSign*(*spec_iterator)->Z*(*spec_iterator)->plasma.params.density_coefficient*amplitude;
-     deformEx(grid,&myfield,ampliEx,lambda);
+
+      //current.eraseDensity();
+       //(*spec_iterator)->density_deposition_standard(&current);
+     //current.pbc();
+
+     //poissonTest(&grid,&myfield,&current);
+
+     std::cout << "counter= " << counter<< "  ampliEx = " << ampliEx << "  lambda = " << lambda << std::endl;
+     deformEx(&grid,&myfield,ampliEx,lambda);
+     myfield.boundary_conditions();
+     counter++;
    }
  }
 
