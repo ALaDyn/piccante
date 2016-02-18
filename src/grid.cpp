@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #include"grid.h"
 
@@ -48,9 +48,9 @@ GRID::GRID(int dimensions)
   dumpControl.restartFromDump = 1;
 }
 
-GRID::~GRID(){
+GRID::~GRID() {
   delete[] proc_totUniquePoints;
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     free(iStretchingDerivativeCorrection[c]);
     free(hStretchingDerivativeCorrection[c]);
     free(rproc_rmin[c]);
@@ -68,84 +68,84 @@ GRID::~GRID(){
   }
 }
 
-void GRID::initializeStretchParameters(){
+void GRID::initializeStretchParameters() {
   flagStretched = false;
   flagStretchedAlong[0] = flagStretchedAlong[1] = flagStretchedAlong[2] = false;
   flagLeftStretchedAlong[0] = flagLeftStretchedAlong[1] = flagLeftStretchedAlong[2] = false;
   flagRightStretchedAlong[0] = flagRightStretchedAlong[1] = flagRightStretchedAlong[2] = false;
 }
 
-void GRID::setMasterProc(int idMasterProc){
+void GRID::setMasterProc(int idMasterProc) {
   master_proc = idMasterProc;
 }
 
-void GRID::setXrange(double min, double max){
+void GRID::setXrange(double min, double max) {
   rmin[0] = min;
   rmax[0] = max;
 }
-void GRID::setYrange(double min, double max){
+void GRID::setYrange(double min, double max) {
   rmin[1] = min;
   rmax[1] = max;
-  if (dimensions < 2){
+  if (dimensions < 2) {
     rmin[1] = -1;
     rmax[1] = +1;
   }
 }
-void GRID::setZrange(double min, double max){
+void GRID::setZrange(double min, double max) {
   rmin[2] = min;
   rmax[2] = max;
-  if (dimensions < 3){
+  if (dimensions < 3) {
     rmin[2] = -1;
     rmax[2] = +1;
   }
 }
 
-void GRID::setNCells(int xcells, int ycells, int zcells){
+void GRID::setNCells(int xcells, int ycells, int zcells) {
   NGridNodes[0] = 1 + xcells;
   NGridNodes[1] = 1 + ycells;
   NGridNodes[2] = 1 + zcells;
 }
 
-void GRID::setNProcsAlongY(int nprocy){
+void GRID::setNProcsAlongY(int nprocy) {
   rnproc[1] = nprocy;
   if (dimensions < 2)
     rnproc[1] = 1;
 }
-void GRID::setNProcsAlongZ(int nprocz){
+void GRID::setNProcsAlongZ(int nprocz) {
   rnproc[2] = nprocz;
   if (dimensions < 3)
     rnproc[2] = 1;
 }
 
-void GRID::checkDimensionality(){
+void GRID::checkDimensionality() {
   if ((dimensions >= 1) && (dimensions <= 3))
     return;
-  else{
-    if (myid == master_proc){
+  else {
+    if (myid == master_proc) {
       std::cout << "ERROR: invalid dimensionality!" << std::endl;
     }
     exit(19);
   }
 }
 
-int GRID::getDimensionality(){
+int GRID::getDimensionality() {
   if (isDimensionalitySet)
     return dimensions;
   else
     return -1;
 }
 
-int GRID::getEdge(){
+int GRID::getEdge() {
   return edge;
 }
 
-int GRID::getNexchange(){
+int GRID::getNexchange() {
   return Nexchange;
 }
 
-int GRID::alloc_number(int *N_grid, int *N_loc){
-  if (isDimensionalitySet){
-    switch (dimensions){
+int GRID::alloc_number(int *N_grid, int *N_loc) {
+  if (isDimensionalitySet) {
+    switch (dimensions) {
     case 1:
       N_grid[0] = N_loc[0] + 2 * edge;
       N_grid[1] = N_loc[1];
@@ -171,9 +171,9 @@ int GRID::alloc_number(int *N_grid, int *N_loc){
     return -1;
 }
 
-void GRID::setCourantFactor(double courant_factor){
+void GRID::setCourantFactor(double courant_factor) {
   courantFactor = courant_factor;
-  switch (dimensions){
+  switch (dimensions) {
   case 1:
     dt = courant_factor*(1 / (sqrt(dri[0] * dri[0])));
     break;
@@ -189,16 +189,16 @@ void GRID::setCourantFactor(double courant_factor){
     break;
   }
 }
-void GRID::setSimulationTime(double tot_time){
+void GRID::setSimulationTime(double tot_time) {
   totalTime = tot_time;
   totalNumberOfTimesteps = (int)(tot_time / dt) + 10;
 }
 
-double GRID::getTotalTime(){
+double GRID::getTotalTime() {
   return totalTime;
 }
 
-void GRID::setMovingWindow(double start, double beta, int frequency_mw){
+void GRID::setMovingWindow(double start, double beta, int frequency_mw) {
   withMovingWindow = true;
   shouldIMove = false;
   beta_mw = beta;
@@ -209,7 +209,7 @@ void GRID::setMovingWindow(double start, double beta, int frequency_mw){
   fmove_mw = 0;
 }
 
-void GRID::setStartMovingWindow(double start){
+void GRID::setStartMovingWindow(double start) {
   withMovingWindow = true;
   shouldIMove = false;
   beta_mw = 1.0;
@@ -219,18 +219,18 @@ void GRID::setStartMovingWindow(double start){
   imove_mw = 0;
   fmove_mw = 0;
 }
-void GRID::setBetaMovingWindow(double beta){
+void GRID::setBetaMovingWindow(double beta) {
   beta_mw = beta;
 }
 
-void GRID::setFrequencyMovingWindow(int frequency_mw){
+void GRID::setFrequencyMovingWindow(int frequency_mw) {
   frequency_mw_shifts = frequency_mw;
 }
 
-int GRID::getTotalNumberOfTimesteps(){
+int GRID::getTotalNumberOfTimesteps() {
   return totalNumberOfTimesteps;
 }
-void GRID::moveWindow(){
+void GRID::moveWindow() {
   int cell_num;
   double buff, move;
 
@@ -241,7 +241,7 @@ void GRID::moveWindow(){
   if (!withMovingWindow)
     return;
 
-  if (time > t_start_moving_mw){
+  if (time > t_start_moving_mw) {
 
     if (!(istep % frequency_mw_shifts))
     {
@@ -252,7 +252,7 @@ void GRID::moveWindow(){
       fmove_mw = move;
       imove_mw = cell_num;
 
-      if (imove_mw > 0){
+      if (imove_mw > 0) {
         shouldIMove = true;
 
         rmin[0] += move;
@@ -265,15 +265,15 @@ void GRID::moveWindow(){
         csiminloc[0] += move;
         csimaxloc[0] += move;
 
-        for (int pp = 0; pp < rnproc[0]; pp++){
+        for (int pp = 0; pp < rnproc[0]; pp++) {
           rproc_rmin[0][pp] += move;
           rproc_rmax[0][pp] += move;
         }
-        for (int i = 0; i < NGridNodes[0]; i++){
+        for (int i = 0; i < NGridNodes[0]; i++) {
           cir[0][i] += move;
           chr[0][i] += move;
         }
-        for (int i = 0; i < Nloc[0]; i++){
+        for (int i = 0; i < Nloc[0]; i++) {
           cirloc[0][i] += move;
           chrloc[0][i] += move;
         }
@@ -283,11 +283,11 @@ void GRID::moveWindow(){
   }
 }
 
-void GRID::printTStepEvery(int every){
+void GRID::printTStepEvery(int every) {
   int Nstep = totalNumberOfTimesteps;
   if (!(istep % (every)))
   {
-    if (myid == master_proc){
+    if (myid == master_proc) {
       time_t timer;
       std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
 
@@ -299,7 +299,7 @@ void GRID::printTStepEvery(int every){
   }
 }
 
-void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed){
+void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed) {
   //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
   //Seeding del generatore di numeri casuali.
   //Strategia: con il generatore Mersenne Twister di GSL (inizializzato allo stesso modo per tutti)
@@ -317,27 +317,27 @@ void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed){
   gsl_rng_set(rng_aux, auxiliary_seed);
   seeds = new uint32_t[myid + 1];
 
-  for (int i = 0; i <= myid; i++){
+  for (int i = 0; i <= myid; i++) {
     seeds[i] = gsl_rng_get(rng_aux);
     //Questo controllo potrebbe essere superfluo...
-    for (int j = 0; j < i; j++){
-      if (seeds[j] == seeds[i]){ i--; break; }
+    for (int j = 0; j < i; j++) {
+      if (seeds[j] == seeds[i]) { i--; break; }
     }
   }
   gsl_rng_set(rng, seeds[myid]);
   delete[] seeds;
 }
 
-void GRID::setGridDeltar(){
-  if (flagStretched){
+void GRID::setGridDeltar() {
+  if (flagStretched) {
     GRID::setGridDeltarStretched();
   }
-  else{
+  else {
     GRID::setGridDeltarNormal();
   }
 }
 
-void GRID::setGridDeltarNormal(){
+void GRID::setGridDeltarNormal() {
   switch (dimensions)
   {
     //ALERT GRIGLIA
@@ -376,7 +376,7 @@ void GRID::setGridDeltarNormal(){
     break;
   }
 }
-void GRID::setGridDeltarStretched(){
+void GRID::setGridDeltarStretched() {
   switch (dimensions)
   {
   case 3:
@@ -415,7 +415,7 @@ void GRID::setGridDeltarStretched(){
   }
 }
 
-void GRID::visualDiag(){
+void GRID::visualDiag() {
   int Nstep = totalNumberOfTimesteps;
   MPI_Barrier(MPI_COMM_WORLD);
 
@@ -426,7 +426,7 @@ void GRID::visualDiag(){
 
   const char* s_x, *s_y, *s_z;
 
-  switch (xBoundaryConditions){
+  switch (xBoundaryConditions) {
   case _PBC:
     s_x = s_pbc;
     break;
@@ -443,7 +443,7 @@ void GRID::visualDiag(){
     s_x = s_err;
   }
 
-  switch (yBoundaryConditions){
+  switch (yBoundaryConditions) {
   case _PBC:
     s_y = s_pbc;
     break;
@@ -460,7 +460,7 @@ void GRID::visualDiag(){
     s_y = s_err;
   }
 
-  switch (zBoundaryConditions){
+  switch (zBoundaryConditions) {
   case _PBC:
     s_z = s_pbc;
     break;
@@ -477,7 +477,7 @@ void GRID::visualDiag(){
     s_z = s_err;
   }
 
-  if (myid == master_proc){
+  if (myid == master_proc) {
     GRID::printLogo();
     GRID::printProcInformations();
     GRID::printGridProcessorInformation();
@@ -490,7 +490,7 @@ void GRID::visualDiag(){
     printf("SIMULATION TIME  = %g\n", totalTime);
     printf("Nstep            = %i\n", totalNumberOfTimesteps);
     printf("Boundaries       = ( %s , %s , %s )\n", s_x, s_y, s_z);
-    if (radiationFrictionFlag){
+    if (radiationFrictionFlag) {
       printf("RR enabled. Lambda0: %e \n", lambda0);
     }
     printf("==================== %19s ====================\n", " Restart  Settings ");
@@ -498,7 +498,7 @@ void GRID::visualDiag(){
     printf("Do Dump          = %i\n", dumpControl.doDump);
     printf("Restart From     = %i\n", dumpControl.restartFromDump);
     printf("Dump Every       = %g\n", dumpControl.dumpEvery);
-    if (withMovingWindow){
+    if (withMovingWindow) {
       printf("==================== %19s ====================\n", "   Moving Window   ");
       printf("start            = %g\n", t_start_moving_mw);
       printf("beta             = %g\n", beta_mw);
@@ -533,7 +533,7 @@ void GRID::printProcInformations()
   printf("single proc id and 3D coordinates:\n");
   printf("%6s = (%4s,%4s,%4s)\n", "id", "idx", "idy", "idz");
 
-  for (int id = 0; id < nproc; id++){
+  for (int id = 0; id < nproc; id++) {
     int rid[3];
     MPI_Cart_coords(cart_comm, id, 3, rid);
     printf("%6i = (%4i,%4i,%4i)\n", id, rid[0], rid[1], rid[2]);
@@ -541,7 +541,7 @@ void GRID::printProcInformations()
 #endif
 }
 
-void GRID::printGridProcessorInformation(){
+void GRID::printGridProcessorInformation() {
 #ifdef _FLAG_DEBUG
   printf("==========         grid         ==========\n");
   printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "rmin", "rmax");
@@ -562,12 +562,12 @@ void GRID::printGridProcessorInformation(){
     printf("%16i: %5i = [ %6g : %6g ]\n", pp, rproc_Nloc[c][pp], rproc_rmin[c][pp], rproc_rmax[c][pp]);
 
 #endif
-  if (flagStretched){
+  if (flagStretched) {
     printf("==================== %19s ====================\n", "Sretched Grid");
 
     printf("\t%4s: %5s = [ %6s : %6s ]\n", "id", "Nloc", "Ximin", "Ximax");
     int c = 0;
-    if (flagStretchedAlong[c]){
+    if (flagStretchedAlong[c]) {
       printf("Stretched Grid along X enabled\n");
       printf("%20s = %i \n", "NUniformGrid", NUniformGrid[c]);
       printf("%20s = %i\n", "NLeftStretcheGrid", NLeftStretcheGrid[c]);
@@ -581,7 +581,7 @@ void GRID::printGridProcessorInformation(){
 
     }
     c = 1;
-    if (flagStretchedAlong[c]){
+    if (flagStretchedAlong[c]) {
       printf("Stretched Grid along Y enabled\n");
       printf("%20s = %i \n", "NUniformGrid", NUniformGrid[c]);
       printf("%20s = %i\n", "NLeftStretcheGrid", NLeftStretcheGrid[c]);
@@ -595,7 +595,7 @@ void GRID::printGridProcessorInformation(){
 
     }
     c = 2;
-    if (flagStretchedAlong[c]){
+    if (flagStretchedAlong[c]) {
       printf("Stretched Grid along Z enabled\n");
       printf("%20s = %i \n", "NUniformGrid", NUniformGrid[c]);
       printf("%20s = %i\n", "NLeftStretcheGrid", NLeftStretcheGrid[c]);
@@ -611,13 +611,13 @@ void GRID::printGridProcessorInformation(){
     printf("==================== %19s ====================\n", "");
 
   }
-  else{
+  else {
     printf("===================== %17s =====================\n", "NO Sretched Grid");
 
   }
 
 }
-void GRID::checkProcNumber(){
+void GRID::checkProcNumber() {
   rnproc[0] = nproc / (rnproc[1] * rnproc[2]);
   if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
   {
@@ -640,20 +640,20 @@ void GRID::checkProcNumber(){
     exit(18);
   }
 
-  if (rnproc[0] * 5 > NGridNodes[0]){
+  if (rnproc[0] * 5 > NGridNodes[0]) {
     if (myid == master_proc)
       std::cout << "Too many MPI tasks along x (" << rnproc[0] << ")" << " for " << NGridNodes[0] << " grid points !!!" << std::endl;
     emergencyStop();
   }
-  if (dimensions >= 2){
-    if (rnproc[1] * 5 > NGridNodes[1]){
+  if (dimensions >= 2) {
+    if (rnproc[1] * 5 > NGridNodes[1]) {
       if (myid == master_proc)
         std::cout << "Too many MPI tasks along y (" << rnproc[1] << ")" << " for " << NGridNodes[1] << " grid points !!!" << std::endl;
       emergencyStop();
     }
   }
-  if (dimensions == 3){
-    if (rnproc[2] * 5 > NGridNodes[2]){
+  if (dimensions == 3) {
+    if (rnproc[2] * 5 > NGridNodes[2]) {
       if (myid == master_proc)
         std::cout << "Too many MPI tasks along z (" << rnproc[2] << ")" << " for " << NGridNodes[2] << " grid points !!!" << std::endl;
       emergencyStop();
@@ -661,9 +661,9 @@ void GRID::checkProcNumber(){
   }
 
 }
-void GRID::allocateRProcQuantities(){
+void GRID::allocateRProcQuantities() {
 
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     rproc_rmin[c] = (double*)malloc(rnproc[c] * sizeof(double));
     rproc_rmax[c] = (double*)malloc(rnproc[c] * sizeof(double));
     rproc_csimin[c] = (double*)malloc(rnproc[c] * sizeof(double));
@@ -674,7 +674,7 @@ void GRID::allocateRProcQuantities(){
     rproc_NuniquePointsloc[c] = (int*)malloc(rnproc[c] * sizeof(int));
   }
 }
-void GRID::computeRProcNloc(){
+void GRID::computeRProcNloc() {
 
   int ibuffer1[3], ibuffer2[3];
 
@@ -687,14 +687,14 @@ void GRID::computeRProcNloc(){
   //============= then I consider the rest... ibuffer2[c] = (N[c]-1)- ibuffer1[c]*rnproc[c]
 
   for (int c = 0; c < 3; c++) {
-    for (int pp = 0; pp < rnproc[c]; pp++){
-      if (pp < ibuffer2[c]){ // Nloc= N/nproc + 1 + rest
+    for (int pp = 0; pp < rnproc[c]; pp++) {
+      if (pp < ibuffer2[c]) { // Nloc= N/nproc + 1 + rest
         rproc_Nloc[c][pp] = ibuffer1[c] + 2;
         rproc_NuniquePointsloc[c][pp] = rproc_Nloc[c][pp] - 1;
         if (rproc_NuniquePointsloc[c][pp] == 0)
           rproc_NuniquePointsloc[c][pp] = 1;
       }
-      else{ // Nloc= N/nproc + 1
+      else { // Nloc= N/nproc + 1
         rproc_Nloc[c][pp] = ibuffer1[c] + 1;
         rproc_NuniquePointsloc[c][pp] = rproc_Nloc[c][pp] - 1;
         if (rproc_NuniquePointsloc[c][pp] == 0)
@@ -703,21 +703,21 @@ void GRID::computeRProcNloc(){
     }
   }
 }
-void GRID::computeRProcNuniquePointsLoc(){
+void GRID::computeRProcNuniquePointsLoc() {
 
   for (int c = 0; c < 3; c++) {
-    for (int pp = 0; pp < rnproc[c]; pp++){
+    for (int pp = 0; pp < rnproc[c]; pp++) {
       if (rproc_NuniquePointsloc[c][pp] == 0)
         rproc_NuniquePointsloc[c][pp] = 1;
     }
   }
 }
-void GRID::setRminRmax(){
-  for (int c = 0; c < 3; c++){
+void GRID::setRminRmax() {
+  for (int c = 0; c < 3; c++) {
 
     // =========== definition of local minima maxima for integer indexes and real extrems
     rproc_rmin[c][0] = rmin[c];
-    for (int pp = 1; pp < rnproc[c]; pp++){
+    for (int pp = 1; pp < rnproc[c]; pp++) {
       double prevRmin = rproc_rmin[c][pp - 1];
       int prevNloc = rproc_Nloc[c][pp - 1];
       double prevRmax;
@@ -729,24 +729,24 @@ void GRID::setRminRmax(){
   }
 }
 
-void GRID::setRminRmaxStretched(){
+void GRID::setRminRmaxStretched() {
   GRID::setCsiminCsimax();
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
 
     // =========== definition of local minima maxima for integer indexes and real extrems
-    for (int pp = 0; pp < rnproc[c]; pp++){
+    for (int pp = 0; pp < rnproc[c]; pp++) {
       rproc_rmin[c][pp] = stretchGrid(rproc_csimin[c][pp], c);
       rproc_rmax[c][pp] = stretchGrid(rproc_csimax[c][pp], c);
     }
   }
 }
 
-void GRID::setCsiminCsimax(){
-  for (int c = 0; c < 3; c++){
+void GRID::setCsiminCsimax() {
+  for (int c = 0; c < 3; c++) {
 
     // =========== definition of local minima maxima for integer indexes and real extrems
     rproc_csimin[c][0] = csimin[c];
-    for (int pp = 1; pp < rnproc[c]; pp++){
+    for (int pp = 1; pp < rnproc[c]; pp++) {
       double prevRmin = rproc_csimin[c][pp - 1];
       int prevNloc = rproc_Nloc[c][pp - 1];
       double prevRmax;
@@ -758,11 +758,11 @@ void GRID::setCsiminCsimax(){
   }
 }
 
-void GRID::setIminImax(){
-  for (int c = 0; c < 3; c++){
+void GRID::setIminImax() {
+  for (int c = 0; c < 3; c++) {
 
     rproc_imin[c][0] = 0;
-    for (int pp = 1; pp < rnproc[c]; pp++){
+    for (int pp = 1; pp < rnproc[c]; pp++) {
       int prevImin = rproc_imin[c][pp - 1];
       int prevNloc = rproc_Nloc[c][pp - 1];
       int prevImax;
@@ -773,20 +773,20 @@ void GRID::setIminImax(){
     rproc_imax[c][rnproc[c] - 1] = (NGridNodes[c] - 1);
   }
 }
-void GRID::checkProcNumberInitialization(){
-  for (int c = 0; c < 3; c++){
+void GRID::checkProcNumberInitialization() {
+  for (int c = 0; c < 3; c++) {
     int check = 0;
     for (int pp = 0; pp < rnproc[c]; pp++)
       check += (rproc_Nloc[c][pp] - 1);
 
-    if ((check != (NGridNodes[c] - 1))){
+    if ((check != (NGridNodes[c] - 1))) {
       printf("ERROR BAD PROC INITIALIZATION at dimension number %i  !!!\n %i - %i \n", c, check, NGridNodes[c] - 1);
       exit(18);
     }
   }
 }
-void GRID::setLocalExtrems(){
-  for (int c = 0; c < 3; c++){
+void GRID::setLocalExtrems() {
+  for (int c = 0; c < 3; c++) {
     rminloc[c] = rproc_rmin[c][rmyid[c]];
     rmaxloc[c] = rproc_rmax[c][rmyid[c]];
     Nloc[c] = rproc_Nloc[c][rmyid[c]];
@@ -808,16 +808,16 @@ void GRID::mpi_grid_initialize(int *narg, char **args)
   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
   GRID::checkStretchedGridInitialization();
-  if (flagStretched){
-    for (int c = 0; c < dimensions; c++){
+  if (flagStretched) {
+    for (int c = 0; c < dimensions; c++) {
       GRID::checkStretchedGridNpointsAlong(c);
       GRID::computeNStretchedPointsAlong(c);
     }
   }
   GRID::setGridDeltar();
 
-  if (flagStretched){
-    for (int c = 0; c < dimensions; c++){
+  if (flagStretched) {
+    for (int c = 0; c < dimensions; c++) {
       GRID::checkStretchedGridExtensionAlong(c);
       GRID::computeAlphaStretchAlong(c);
       GRID::computeExtremsStretchedGrid(c);
@@ -852,22 +852,22 @@ void GRID::finalize()
     chr[c] = (double*)malloc(NGridNodes[c] * sizeof(double));
     cirloc[c] = (double*)malloc(Nloc[c] * sizeof(double));
     chrloc[c] = (double*)malloc(Nloc[c] * sizeof(double));
-    if (flagStretchedAlong[c]){
-      for (int i = 0; i < NGridNodes[c]; i++){
+    if (flagStretchedAlong[c]) {
+      for (int i = 0; i < NGridNodes[c]; i++) {
         cir[c][i] = stretchGrid((csimin[c] + dr[c] * i), c);
         chr[c][i] = stretchGrid((csimin[c] + dr[c] * (i + 0.5)), c);
       }
-      for (int i = 0; i < Nloc[c]; i++){
+      for (int i = 0; i < Nloc[c]; i++) {
         cirloc[c][i] = stretchGrid((csiminloc[c] + dr[c] * i), c);
         chrloc[c][i] = stretchGrid((csiminloc[c] + dr[c] * (i + 0.5)), c);
       }
     }
-    else{
-      for (int i = 0; i < NGridNodes[c]; i++){
+    else {
+      for (int i = 0; i < NGridNodes[c]; i++) {
         cir[c][i] = rmin[c] + dr[c] * i;
         chr[c][i] = cir[c][i] + 0.5*dr[c];
       }
-      for (int i = 0; i < Nloc[c]; i++){
+      for (int i = 0; i < Nloc[c]; i++) {
         cirloc[c][i] = rminloc[c] + dr[c] * i;
         chrloc[c][i] = cirloc[c][i] + 0.5*dr[c];
       }
@@ -891,7 +891,7 @@ void GRID::computeTotUniquePoints()
 {
   proc_totUniquePoints = new int[nproc];
 
-  for (int rank = 0; rank < nproc; rank++){
+  for (int rank = 0; rank < nproc; rank++) {
     int rid[3];
     MPI_Cart_coords(cart_comm, rank, 3, rid);
     proc_totUniquePoints[rank] = rproc_NuniquePointsloc[0][rid[0]];
@@ -906,25 +906,25 @@ void GRID::computeTotUniquePoints()
 
 }
 /* ********* STRETCHED GRID ************* */
-bool GRID::isStretched(){
+bool GRID::isStretched() {
   return flagStretched;
 }
 
-bool GRID::isStretchedAlong(int c){
+bool GRID::isStretchedAlong(int c) {
   return flagStretchedAlong[c];
 }
-bool GRID::isLeftStretchedAlong(int c){
+bool GRID::isLeftStretchedAlong(int c) {
   return flagLeftStretchedAlong[c];
 }
-bool GRID::isRightStretchedAlong(int c){
+bool GRID::isRightStretchedAlong(int c) {
   return flagRightStretchedAlong[c];
 }
 
-void GRID::checkStretchedGridInitialization(){
+void GRID::checkStretchedGridInitialization() {
   if (!flagStretched)
     return;
-  if (withMovingWindow && isStretchedAlong(0)){
-    if (myid == 0){
+  if (withMovingWindow && isStretchedAlong(0)) {
+    if (myid == 0) {
       std::cout << "ERROR: moving window is incompatible with stretching along x!" << std::endl;
       std::cout.flush();
 
@@ -933,9 +933,9 @@ void GRID::checkStretchedGridInitialization(){
   }
 }
 
-void GRID::enableStretchedGrid(){
+void GRID::enableStretchedGrid() {
   flagStretched = true;
-  for (int c = 0; c < 3; c++){
+  for (int c = 0; c < 3; c++) {
     rminUniformGrid[c] = rmin[c];
     rmaxUniformGrid[c] = rmax[c];
     csimin[c] = rmin[c];
@@ -947,7 +947,7 @@ void GRID::enableStretchedGrid(){
   }
 }
 
-void GRID::setXandNxLeftStretchedGrid(double min, int N){
+void GRID::setXandNxLeftStretchedGrid(double min, int N) {
   if (!flagStretched)
     return;
   flagStretchedAlong[0] = true;
@@ -959,7 +959,7 @@ void GRID::setXandNxLeftStretchedGrid(double min, int N){
   }
   NLeftStretcheGrid[0] = N;
 }
-void GRID::setYandNyLeftStretchedGrid(double min, int N){
+void GRID::setYandNyLeftStretchedGrid(double min, int N) {
   if (!flagStretched)
     return;
   if (dimensions < 2)
@@ -973,7 +973,7 @@ void GRID::setYandNyLeftStretchedGrid(double min, int N){
   }
   NLeftStretcheGrid[1] = N;
 }
-void GRID::setZandNzLeftStretchedGrid(double min, int N){
+void GRID::setZandNzLeftStretchedGrid(double min, int N) {
   if (!flagStretched)
     return;
   if (dimensions < 3)
@@ -987,7 +987,7 @@ void GRID::setZandNzLeftStretchedGrid(double min, int N){
   }
   NLeftStretcheGrid[2] = N;
 }
-void GRID::setXandNxRightStretchedGrid(double max, int N){
+void GRID::setXandNxRightStretchedGrid(double max, int N) {
   if (!flagStretched)
     return;
   flagStretchedAlong[0] = true;
@@ -999,7 +999,7 @@ void GRID::setXandNxRightStretchedGrid(double max, int N){
   }
   NRightStretcheGrid[0] = N;
 }
-void GRID::setYandNyRightStretchedGrid(double max, int N){
+void GRID::setYandNyRightStretchedGrid(double max, int N) {
   if (!flagStretched)
     return;
   if (dimensions < 2)
@@ -1013,7 +1013,7 @@ void GRID::setYandNyRightStretchedGrid(double max, int N){
   }
   NRightStretcheGrid[1] = N;
 }
-void GRID::setZandNzRightStretchedGrid(double max, int N){
+void GRID::setZandNzRightStretchedGrid(double max, int N) {
   if (!flagStretched)
     return;
   if (dimensions < 3)
@@ -1074,7 +1074,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N){
 //    NUniformGrid[2]=N+1;
 //}
 
-void GRID::checkStretchedGridNpointsAlong(int c){
+void GRID::checkStretchedGridNpointsAlong(int c) {
   if (!flagStretched)
     return;
   if (!flagStretchedAlong[c])
@@ -1092,7 +1092,7 @@ void GRID::checkStretchedGridNpointsAlong(int c){
 
   fflush(stdout);
 }
-void GRID::computeNStretchedPointsAlong(int c){
+void GRID::computeNStretchedPointsAlong(int c) {
   //if ((flagLeftStretchedAlong[c]) && (flagRightStretchedAlong[c])) {
   NUniformGrid[c] = NGridNodes[c] - NRightStretcheGrid[c] - NLeftStretcheGrid[c];
   //}
@@ -1118,14 +1118,14 @@ void GRID::computeNStretchedPointsAlong(int c){
 }
 
 
-void GRID::checkStretchedGridExtensionAlong(int c){
+void GRID::checkStretchedGridExtensionAlong(int c) {
   if (!flagStretched)
     return;
   if (!flagStretchedAlong[c])
     return;
   //    printf("Stretched Grid along %i enabled\n",c);
   //    printf("\tNUniformGrid[%i]=%i \n",c,NUniformGrid[c]);
-  if (flagLeftStretchedAlong[c]){
+  if (flagLeftStretchedAlong[c]) {
     double Dx = rminUniformGrid[c] - rmin[c];
     double Dxi = NLeftStretcheGrid[c] * dr[c];
 
@@ -1134,7 +1134,7 @@ void GRID::checkStretchedGridExtensionAlong(int c){
     //        printf("\tleft layer unstretched thickness = %g\n", Dxi);
     //        printf("\tNLeftStretcheGrid[%i]=%i \n",c,NLeftStretcheGrid[c]);
 
-    if (Dxi >= Dx){
+    if (Dxi >= Dx) {
       printf("ERROR!!! LEFT stretched Grid along %i enabled\n", c);
       printf("\tleft layer physical    thickness = %g\n", Dx);
       printf("\tleft layer unstretched thickness = %g\n", Dxi);
@@ -1149,7 +1149,7 @@ void GRID::checkStretchedGridExtensionAlong(int c){
     //        printf("\tright layer physical    thickness = %g\n", Dx);
     //        printf("\tright layer unstretched thickness = %g\n", Dxi);
     //        printf("\tNRightStretcheGrid[%i]=%i \n",c,NRightStretcheGrid[c]);
-    if (Dxi >= Dx){
+    if (Dxi >= Dx) {
       printf("ERROR!!! RIGHT stretched Grid along %i enabled\n", c);
       printf("\tright layer physical    thickness = %g\n", Dx);
       printf("\tright layer unstretched thickness = %g\n", Dxi);
@@ -1163,14 +1163,14 @@ void GRID::checkStretchedGridExtensionAlong(int c){
 double myHelpFunction(double Dx, double Dxi, double alpha) {
   return Dx - alpha*tan(Dxi / alpha);
 }
-double computeAlpha(double Dx, double Dxi){
+double computeAlpha(double Dx, double Dxi) {
   double alphaMin = 1.01*2.0*Dxi / M_PI; //1% more than minimum
   double alphaMax = 20 * alphaMin;
   double difference = 2 * Dx;
   double guess = 0.0;
   double result = 0.0;
 
-  while (fabs(difference) > (Dx*0.00001)){
+  while (fabs(difference) > (Dx*0.00001)) {
     guess = 0.5*(alphaMin + alphaMax);
     result = myHelpFunction(Dx, Dxi, guess);
     if (result < 0)
@@ -1182,28 +1182,28 @@ double computeAlpha(double Dx, double Dxi){
   return guess;
 }
 
-void GRID::computeAlphaStretchLeft(int c){
+void GRID::computeAlphaStretchLeft(int c) {
   double Dx = rminUniformGrid[c] - rmin[c];
   double Dxi = NLeftStretcheGrid[c] * dr[c];
   leftAlphaStretch[c] = computeAlpha(Dx, Dxi);
 }
-void GRID::computeAlphaStretchRight(int c){
+void GRID::computeAlphaStretchRight(int c) {
   double Dx = rmax[c] - rmaxUniformGrid[c];
   double Dxi = NRightStretcheGrid[c] * dr[c];
   rightAlphaStretch[c] = computeAlpha(Dx, Dxi);
 }
 
-void GRID::computeAlphaStretchAlong(int c){
+void GRID::computeAlphaStretchAlong(int c) {
   if (flagLeftStretchedAlong[c]) {
     GRID::computeAlphaStretchLeft(c);
   }
-  if (flagRightStretchedAlong[c]){
+  if (flagRightStretchedAlong[c]) {
     GRID::computeAlphaStretchRight(c);
   }
   //printf("alphastretch along %i are L:%g   R:%g\n", c, leftAlphaStretch[c],rightAlphaStretch[c]);
 }
 
-void GRID::computeExtremsStretchedGrid(int c){
+void GRID::computeExtremsStretchedGrid(int c) {
   if (!flagStretchedAlong[c])
     return;
 
@@ -1265,13 +1265,13 @@ double GRID::derivativeStretchingFunction(double csi, int c)
   double x0pos = rmaxUniformGrid[c];
   double buf;
 
-  if (csi < x0neg){
+  if (csi < x0neg) {
     buf = cos((csi - x0neg) / alphaL);
     return 1.0 / (buf*buf);
   }
   else if (csi < x0pos)
     return 1.0;
-  else{
+  else {
     buf = cos((csi - x0pos) / alphaR);
     return 1.0 / (buf*buf);
   }
@@ -1313,12 +1313,12 @@ void GRID::computeDerivativeCorrection()
 
     for (int i = 0; i < Nloc[c]; i++)
     {
-      if (flagStretchedAlong[c]){
+      if (flagStretchedAlong[c]) {
         csi = csiminloc[c] + i*dr[c];
         iStretchingDerivativeCorrection[c][i] = 1. / derivativeStretchingFunction(csi, c);
         hStretchingDerivativeCorrection[c][i] = 1. / derivativeStretchingFunction(csi + dr[c] * 0.5, c);
       }
-      else{
+      else {
         iStretchingDerivativeCorrection[c][i] = 1.0;
         hStretchingDerivativeCorrection[c][i] = 1.0;
       }
@@ -1327,20 +1327,20 @@ void GRID::computeDerivativeCorrection()
 
 }
 
-bool GRID::checkAssignBoundary(axisBoundaryConditions cond, axisBoundaryConditions* axisCond){
+bool GRID::checkAssignBoundary(axisBoundaryConditions cond, axisBoundaryConditions* axisCond) {
   bool isOk = false;
-  if (*axisCond == _notAssigned){
+  if (*axisCond == _notAssigned) {
     *axisCond = cond;
     isOk = true;
   }
-  else{
+  else {
     *axisCond = cond;
     isOk = false;
   }
   return isOk;
 }
 
-void GRID::setBoundaries(int flags){
+void GRID::setBoundaries(int flags) {
   xBoundaryConditions = yBoundaryConditions = zBoundaryConditions = _notAssigned;
   bool global_isOk = true;
 
@@ -1372,11 +1372,11 @@ void GRID::setBoundaries(int flags){
   if (zBoundaryConditions == _notAssigned)
     zBoundaryConditions = _PBC;
 
-  if (dimensions == 1){
+  if (dimensions == 1) {
     yBoundaryConditions = _PBC;
     zBoundaryConditions = _PBC;
   }
-  else if (dimensions == 2){
+  else if (dimensions == 2) {
     zBoundaryConditions = _PBC;
   }
 
@@ -1391,30 +1391,30 @@ void GRID::setBoundaries(int flags){
     cyclic[2] = 0;
 
 
-  if (!global_isOk && myid == master_proc){
+  if (!global_isOk && myid == master_proc) {
     std::cout << "Warning! Incompatible boundary conditions! PML overrides Open and PBC, Open overrides PBC." << std::endl;
   }
 
 }
 
-axisBoundaryConditions GRID::getXBoundaryConditions(){
+axisBoundaryConditions GRID::getXBoundaryConditions() {
   return xBoundaryConditions;
 }
 
-axisBoundaryConditions GRID::getYBoundaryConditions(){
+axisBoundaryConditions GRID::getYBoundaryConditions() {
   return yBoundaryConditions;
 }
 
-axisBoundaryConditions GRID::getZBoundaryConditions(){
+axisBoundaryConditions GRID::getZBoundaryConditions() {
   return zBoundaryConditions;
 }
 
-void GRID::emergencyStop(){
+void GRID::emergencyStop() {
   MPI_Finalize();
   exit(17);
 }
 
-void GRID::dump(std::ofstream &ff){
+void GRID::dump(std::ofstream &ff) {
   ff.write((char*)&istep, sizeof(int));
   ff.write((char*)&time, sizeof(double));
   ff.write((char*)&mark_mw, sizeof(double));
@@ -1431,21 +1431,21 @@ void GRID::dump(std::ofstream &ff){
   ff.write((char*)&csiminloc[0], sizeof(double));
   ff.write((char*)&csimaxloc[0], sizeof(double));
 
-  for (int pp = 0; pp < rnproc[0]; pp++){
+  for (int pp = 0; pp < rnproc[0]; pp++) {
     ff.write((char*)&rproc_rmin[0][pp], sizeof(double));
     ff.write((char*)&rproc_rmax[0][pp], sizeof(double));
   }
-  for (int i = 0; i < NGridNodes[0]; i++){
+  for (int i = 0; i < NGridNodes[0]; i++) {
     ff.write((char*)&cir[0][i], sizeof(double));
     ff.write((char*)&chr[0][i], sizeof(double));
   }
-  for (int i = 0; i < Nloc[0]; i++){
+  for (int i = 0; i < Nloc[0]; i++) {
     ff.write((char*)&cirloc[0][i], sizeof(double));
     ff.write((char*)&chrloc[0][i], sizeof(double));
   }
 }
 
-void GRID::debugDump(std::ofstream &ff){
+void GRID::debugDump(std::ofstream &ff) {
   ff << "istep " << istep << std::endl;
   ff << "time " << time << std::endl;
   ff << "mark_mw " << mark_mw << std::endl;
@@ -1462,28 +1462,28 @@ void GRID::debugDump(std::ofstream &ff){
   ff << "csiminloc[0] " << csiminloc[0] << std::endl;
   ff << "csimaxloc[0] " << csimaxloc[0] << std::endl;
 
-  for (int pp = 0; pp < rnproc[0]; pp++){
+  for (int pp = 0; pp < rnproc[0]; pp++) {
     ff << "rproc_rmin[0][" << pp << "] " << rproc_rmin[0][pp] << std::endl;
     ff << "rproc_rmax[0][" << pp << "] " << rproc_rmax[0][pp] << std::endl;
   }
-  for (int i = 0; i < NGridNodes[0]; i++){
+  for (int i = 0; i < NGridNodes[0]; i++) {
     ff << "cir[0][" << i << "] " << cir[0][i] << std::endl;
     ff << "chr[0][" << i << "] " << chr[0][i] << std::endl;
   }
-  for (int i = 0; i < Nloc[0]; i++){
+  for (int i = 0; i < Nloc[0]; i++) {
     ff << "cirloc[0][" << i << "] " << cirloc[0][i] << std::endl;
     ff << "chrloc[0][" << i << "] " << chrloc[0][i] << std::endl;
   }
 }
 
-void GRID::reloadDump(std::ifstream &ff){
+void GRID::reloadDump(std::ifstream &ff) {
   ff.read((char*)&istep, sizeof(int));
   ff.read((char*)&time, sizeof(double));
   ff.read((char*)&mark_mw, sizeof(double));
 
   if (!withMovingWindow)
     return;
-  if (1){
+  if (1) {
     ff.read((char*)&rmin[0], sizeof(double));
     ff.read((char*)&rmax[0], sizeof(double));
     ff.read((char*)&rminloc[0], sizeof(double));
@@ -1494,20 +1494,20 @@ void GRID::reloadDump(std::ifstream &ff){
     ff.read((char*)&csiminloc[0], sizeof(double));
     ff.read((char*)&csimaxloc[0], sizeof(double));
 
-    for (int pp = 0; pp < rnproc[0]; pp++){
+    for (int pp = 0; pp < rnproc[0]; pp++) {
       ff.read((char*)&rproc_rmin[0][pp], sizeof(double));
       ff.read((char*)&rproc_rmax[0][pp], sizeof(double));
     }
-    for (int i = 0; i < NGridNodes[0]; i++){
+    for (int i = 0; i < NGridNodes[0]; i++) {
       ff.read((char*)&cir[0][i], sizeof(double));
       ff.read((char*)&chr[0][i], sizeof(double));
     }
-    for (int i = 0; i < Nloc[0]; i++){
+    for (int i = 0; i < Nloc[0]; i++) {
       ff.read((char*)&cirloc[0][i], sizeof(double));
       ff.read((char*)&chrloc[0][i], sizeof(double));
     }
   }
-  else{
+  else {
 
     rmin[0] += mark_mw;
     rmax[0] += mark_mw;
@@ -1519,58 +1519,58 @@ void GRID::reloadDump(std::ifstream &ff){
     csiminloc[0] += mark_mw;
     csimaxloc[0] += mark_mw;
 
-    for (int pp = 0; pp < rnproc[0]; pp++){
+    for (int pp = 0; pp < rnproc[0]; pp++) {
       rproc_rmin[0][pp] += mark_mw;
       rproc_rmax[0][pp] += mark_mw;
     }
-    for (int i = 0; i < NGridNodes[0]; i++){
+    for (int i = 0; i < NGridNodes[0]; i++) {
       cir[0][i] += mark_mw;
       chr[0][i] += mark_mw;
     }
-    for (int i = 0; i < Nloc[0]; i++){
+    for (int i = 0; i < Nloc[0]; i++) {
       cirloc[0][i] += mark_mw;
       chrloc[0][i] += mark_mw;
     }
   }
 }
-double GRID::getMarkMW(){
+double GRID::getMarkMW() {
   return mark_mw;
 }
 
-void GRID::setDumpPath(std::string _dumpDir){
+void GRID::setDumpPath(std::string _dumpDir) {
 #if defined (USE_BOOST)
-  if (myid == master_proc){
-    if (!boost::filesystem::exists(_dumpDir)){
+  if (myid == master_proc) {
+    if (!boost::filesystem::exists(_dumpDir)) {
       boost::filesystem::create_directories(_dumpDir);
     }
   }
 #endif
   dumpPath = _dumpDir;
 }
-std::string GRID::composeDumpFileName(int dumpID){
+std::string GRID::composeDumpFileName(int dumpID) {
   std::stringstream dumpName;
   dumpName << dumpPath << "/DUMP_";
   dumpName << std::setw(2) << std::setfill('0') << std::fixed << dumpID << "_";
   dumpName << std::setw(5) << std::setfill('0') << std::fixed << myid << ".bin";
   return dumpName.str();
 }
-void GRID::setLambda0(double lambda0){
+void GRID::setLambda0(double lambda0) {
   this->lambda0 = lambda0;
 }
 
-double GRID::getLambda0(){
+double GRID::getLambda0() {
   return lambda0;
 }
 
-void GRID::enableRadiationFriction(){
+void GRID::enableRadiationFriction() {
   radiationFrictionFlag = true;
 }
 
-void GRID::disableRadiationFriction(){
+void GRID::disableRadiationFriction() {
   radiationFrictionFlag = false;
 }
 
-bool GRID::isRadiationFrictionEnabled(){
+bool GRID::isRadiationFrictionEnabled() {
   return radiationFrictionFlag;
 }
 

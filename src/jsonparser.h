@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
@@ -51,18 +51,18 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 #endif
 
-namespace jsonParser{
+namespace jsonParser {
   extern bool isThisJsonMaster;
   extern int inputVersion;
-  struct laserPulseBoolFlags{
+  struct laserPulseBoolFlags {
 
     bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
-    laserPulseBoolFlags(){
+    laserPulseBoolFlags() {
       type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime = false;
     }
   };
 
-  struct outRequest{
+  struct outRequest {
     bool isFrom;
     bool isTo;
     bool isEvery;

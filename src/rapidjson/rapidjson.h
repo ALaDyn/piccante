@@ -30,60 +30,60 @@
     \see RAPIDJSON_CONFIG
  */
 
-/*! \defgroup RAPIDJSON_CONFIG RapidJSON configuration
-    \brief Configuration macros for library features
+ /*! \defgroup RAPIDJSON_CONFIG RapidJSON configuration
+     \brief Configuration macros for library features
 
-    Some RapidJSON features are configurable to adapt the library to a wide
-    variety of platforms, environments and usage scenarios.  Most of the
-    features can be configured in terms of overriden or predefined
-    preprocessor macros at compile-time.
+     Some RapidJSON features are configurable to adapt the library to a wide
+     variety of platforms, environments and usage scenarios.  Most of the
+     features can be configured in terms of overriden or predefined
+     preprocessor macros at compile-time.
 
-    Some additional customization is available in the \ref RAPIDJSON_ERRORS APIs.
+     Some additional customization is available in the \ref RAPIDJSON_ERRORS APIs.
 
-    \note These macros should be given on the compiler command-line
-          (where applicable)  to avoid inconsistent values when compiling
-          different translation units of a single application.
- */
+     \note These macros should be given on the compiler command-line
+           (where applicable)  to avoid inconsistent values when compiling
+           different translation units of a single application.
+  */
 
 #include <cstdlib>  // malloc(), realloc(), free(), size_t
 #include <cstring>  // memset(), memcpy(), memmove(), memcmp()
 
-///////////////////////////////////////////////////////////////////////////////
-// RAPIDJSON_NAMESPACE_(BEGIN|END)
-/*! \def RAPIDJSON_NAMESPACE
-    \ingroup RAPIDJSON_CONFIG
-    \brief   provide custom rapidjson namespace
+  ///////////////////////////////////////////////////////////////////////////////
+  // RAPIDJSON_NAMESPACE_(BEGIN|END)
+  /*! \def RAPIDJSON_NAMESPACE
+      \ingroup RAPIDJSON_CONFIG
+      \brief   provide custom rapidjson namespace
 
-    In order to avoid symbol clashes and/or "One Definition Rule" errors
-    between multiple inclusions of (different versions of) RapidJSON in
-    a single binary, users can customize the name of the main RapidJSON
-    namespace.
+      In order to avoid symbol clashes and/or "One Definition Rule" errors
+      between multiple inclusions of (different versions of) RapidJSON in
+      a single binary, users can customize the name of the main RapidJSON
+      namespace.
 
-    In case of a single nesting level, defining \c RAPIDJSON_NAMESPACE
-    to a custom name (e.g. \c MyRapidJSON) is sufficient.  If multiple
-    levels are needed, both \ref RAPIDJSON_NAMESPACE_BEGIN and \ref
-    RAPIDJSON_NAMESPACE_END need to be defined as well:
+      In case of a single nesting level, defining \c RAPIDJSON_NAMESPACE
+      to a custom name (e.g. \c MyRapidJSON) is sufficient.  If multiple
+      levels are needed, both \ref RAPIDJSON_NAMESPACE_BEGIN and \ref
+      RAPIDJSON_NAMESPACE_END need to be defined as well:
 
-    \code
-    // in some .cpp file
-    #define RAPIDJSON_NAMESPACE my::rapidjson
-    #define RAPIDJSON_NAMESPACE_BEGIN namespace my { namespace rapidjson {
-    #define RAPIDJSON_NAMESPACE_END   } }
-    #include "rapidjson/..."
-    \endcode
+      \code
+      // in some .cpp file
+      #define RAPIDJSON_NAMESPACE my::rapidjson
+      #define RAPIDJSON_NAMESPACE_BEGIN namespace my { namespace rapidjson {
+      #define RAPIDJSON_NAMESPACE_END   } }
+      #include "rapidjson/..."
+      \endcode
 
-    \see rapidjson
- */
-/*! \def RAPIDJSON_NAMESPACE_BEGIN
-    \ingroup RAPIDJSON_CONFIG
-    \brief   provide custom rapidjson namespace (opening expression)
-    \see RAPIDJSON_NAMESPACE
-*/
-/*! \def RAPIDJSON_NAMESPACE_END
-    \ingroup RAPIDJSON_CONFIG
-    \brief   provide custom rapidjson namespace (closing expression)
-    \see RAPIDJSON_NAMESPACE
-*/
+      \see rapidjson
+   */
+   /*! \def RAPIDJSON_NAMESPACE_BEGIN
+       \ingroup RAPIDJSON_CONFIG
+       \brief   provide custom rapidjson namespace (opening expression)
+       \see RAPIDJSON_NAMESPACE
+   */
+   /*! \def RAPIDJSON_NAMESPACE_END
+       \ingroup RAPIDJSON_CONFIG
+       \brief   provide custom rapidjson namespace (closing expression)
+       \see RAPIDJSON_NAMESPACE
+   */
 #ifndef RAPIDJSON_NAMESPACE
 #define RAPIDJSON_NAMESPACE rapidjson
 #endif
@@ -94,21 +94,21 @@
 #define RAPIDJSON_NAMESPACE_END }
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-// RAPIDJSON_NO_INT64DEFINE
+   ///////////////////////////////////////////////////////////////////////////////
+   // RAPIDJSON_NO_INT64DEFINE
 
-/*! \def RAPIDJSON_NO_INT64DEFINE
-    \ingroup RAPIDJSON_CONFIG
-    \brief Use external 64-bit integer types.
+   /*! \def RAPIDJSON_NO_INT64DEFINE
+       \ingroup RAPIDJSON_CONFIG
+       \brief Use external 64-bit integer types.
 
-    RapidJSON requires the 64-bit integer types \c int64_t and  \c uint64_t types
-    to be available at global scope.
+       RapidJSON requires the 64-bit integer types \c int64_t and  \c uint64_t types
+       to be available at global scope.
 
-    If users have their own definition, define RAPIDJSON_NO_INT64DEFINE to
-    prevent RapidJSON from defining its own types.
-*/
+       If users have their own definition, define RAPIDJSON_NO_INT64DEFINE to
+       prevent RapidJSON from defining its own types.
+   */
 #ifndef RAPIDJSON_NO_INT64DEFINE
-//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+   //!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
 #ifdef _MSC_VER
 #include "msinttypes/stdint.h"
 #include "msinttypes/inttypes.h"
@@ -349,10 +349,10 @@ RAPIDJSON_NAMESPACE_END
     RAPIDJSON_JOIN(StaticAssertTypedef, __LINE__) RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-// Helpers
+ ///////////////////////////////////////////////////////////////////////////////
+ // Helpers
 
-//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+ //!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
 
 #define RAPIDJSON_MULTILINEMACRO_BEGIN do {  
 #define RAPIDJSON_MULTILINEMACRO_END \
@@ -520,19 +520,19 @@ concept Stream {
 */
 template<typename Stream>
 struct StreamTraits {
-    //! Whether to make local copy of stream for optimization during parsing.
-    /*!
-        By default, for safety, streams do not use local copy optimization.
-        Stream that can be copied fast should specialize this, like StreamTraits<StringStream>.
-    */
-    enum { copyOptimization = 0 };
+  //! Whether to make local copy of stream for optimization during parsing.
+  /*!
+      By default, for safety, streams do not use local copy optimization.
+      Stream that can be copied fast should specialize this, like StreamTraits<StringStream>.
+  */
+  enum { copyOptimization = 0 };
 };
 
 //! Put N copies of a character to a stream.
 template<typename Stream, typename Ch>
 inline void PutN(Stream& stream, Ch c, size_t n) {
-    for (size_t i = 0; i < n; i++)
-        stream.Put(c);
+  for (size_t i = 0; i < n; i++)
+    stream.Put(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -543,26 +543,26 @@ inline void PutN(Stream& stream, Ch c, size_t n) {
 */
 template <typename Encoding>
 struct GenericStringStream {
-    typedef typename Encoding::Ch Ch;
+  typedef typename Encoding::Ch Ch;
 
-    GenericStringStream(const Ch *src) : src_(src), head_(src) {}
+  GenericStringStream(const Ch *src) : src_(src), head_(src) {}
 
-    Ch Peek() const { return *src_; }
-    Ch Take() { return *src_++; }
-    size_t Tell() const { return static_cast<size_t>(src_ - head_); }
+  Ch Peek() const { return *src_; }
+  Ch Take() { return *src_++; }
+  size_t Tell() const { return static_cast<size_t>(src_ - head_); }
 
-    Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
-    void Put(Ch) { RAPIDJSON_ASSERT(false); }
-    void Flush() { RAPIDJSON_ASSERT(false); }
-    size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
+  Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
+  void Put(Ch) { RAPIDJSON_ASSERT(false); }
+  void Flush() { RAPIDJSON_ASSERT(false); }
+  size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
 
-    const Ch* src_;     //!< Current read position.
-    const Ch* head_;    //!< Original head of the string.
+  const Ch* src_;     //!< Current read position.
+  const Ch* head_;    //!< Original head of the string.
 };
 
 template <typename Encoding>
 struct StreamTraits<GenericStringStream<Encoding> > {
-    enum { copyOptimization = 1 };
+  enum { copyOptimization = 1 };
 };
 
 //! String stream with UTF8 encoding.
@@ -577,33 +577,33 @@ typedef GenericStringStream<UTF8<> > StringStream;
 */
 template <typename Encoding>
 struct GenericInsituStringStream {
-    typedef typename Encoding::Ch Ch;
+  typedef typename Encoding::Ch Ch;
 
-    GenericInsituStringStream(Ch *src) : src_(src), dst_(0), head_(src) {}
+  GenericInsituStringStream(Ch *src) : src_(src), dst_(0), head_(src) {}
 
-    // Read
-    Ch Peek() { return *src_; }
-    Ch Take() { return *src_++; }
-    size_t Tell() { return static_cast<size_t>(src_ - head_); }
+  // Read
+  Ch Peek() { return *src_; }
+  Ch Take() { return *src_++; }
+  size_t Tell() { return static_cast<size_t>(src_ - head_); }
 
-    // Write
-    void Put(Ch c) { RAPIDJSON_ASSERT(dst_ != 0); *dst_++ = c; }
+  // Write
+  void Put(Ch c) { RAPIDJSON_ASSERT(dst_ != 0); *dst_++ = c; }
 
-    Ch* PutBegin() { return dst_ = src_; }
-    size_t PutEnd(Ch* begin) { return static_cast<size_t>(dst_ - begin); }
-    void Flush() {}
+  Ch* PutBegin() { return dst_ = src_; }
+  size_t PutEnd(Ch* begin) { return static_cast<size_t>(dst_ - begin); }
+  void Flush() {}
 
-    Ch* Push(size_t count) { Ch* begin = dst_; dst_ += count; return begin; }
-    void Pop(size_t count) { dst_ -= count; }
+  Ch* Push(size_t count) { Ch* begin = dst_; dst_ += count; return begin; }
+  void Pop(size_t count) { dst_ -= count; }
 
-    Ch* src_;
-    Ch* dst_;
-    Ch* head_;
+  Ch* src_;
+  Ch* dst_;
+  Ch* head_;
 };
 
 template <typename Encoding>
 struct StreamTraits<GenericInsituStringStream<Encoding> > {
-    enum { copyOptimization = 1 };
+  enum { copyOptimization = 1 };
 };
 
 //! Insitu string stream with UTF8 encoding.
@@ -614,13 +614,13 @@ typedef GenericInsituStringStream<UTF8<> > InsituStringStream;
 
 //! Type of JSON value
 enum Type {
-    kNullType = 0,      //!< null
-    kFalseType = 1,     //!< false
-    kTrueType = 2,      //!< true
-    kObjectType = 3,    //!< object
-    kArrayType = 4,     //!< array 
-    kStringType = 5,    //!< string
-    kNumberType = 6     //!< number
+  kNullType = 0,      //!< null
+  kFalseType = 1,     //!< false
+  kTrueType = 2,      //!< true
+  kObjectType = 3,    //!< object
+  kArrayType = 4,     //!< array 
+  kStringType = 5,    //!< string
+  kNumberType = 6     //!< number
 };
 
 RAPIDJSON_NAMESPACE_END

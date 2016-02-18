@@ -1,21 +1,21 @@
-/* Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi */
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-/*******************************************************************************
-This file is part of piccante.
-
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #include "current.h"
 
@@ -50,7 +50,7 @@ void CURRENT::allocate(GRID *grid) //field allocation
 //REALLOCATION only if load balancing is introduced
 void CURRENT::reallocate()
 {
-  if (!allocated){
+  if (!allocated) {
     printf("ERROR: reallocate\n");
     exit(17);
   }
@@ -82,13 +82,13 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
 
 CURRENT CURRENT::operator = (CURRENT &destro)
 {
-  if (!destro.allocated){
+  if (!destro.allocated) {
     printf("---ERROR---\noperation not permitted\nCURRENT=CURRENT\nnot allocated\n");
     exit(17);
   }
   Ncomp = destro.Ncomp;
   mygrid = destro.mygrid;
-  if (!allocated){
+  if (!allocated) {
     allocate(destro.mygrid);
   }
   else reallocate();
@@ -96,20 +96,20 @@ CURRENT CURRENT::operator = (CURRENT &destro)
   return *this;
 }
 
-double *CURRENT::getDataPointer(){
+double *CURRENT::getDataPointer() {
   return val;
 }
 
-void CURRENT::writeN_grid(int *N_grid){
+void CURRENT::writeN_grid(int *N_grid) {
   N_grid[0] = this->N_grid[0];
   N_grid[1] = this->N_grid[1];
   N_grid[2] = this->N_grid[2];
 }
 
-integer_or_halfinteger CURRENT::getJCoords(int c){
+integer_or_halfinteger CURRENT::getJCoords(int c) {
   integer_or_halfinteger crd;
 
-  switch (c){
+  switch (c) {
   case 0: //Jx
     crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
     break;
@@ -126,7 +126,7 @@ integer_or_halfinteger CURRENT::getJCoords(int c){
   return crd;
 }
 
-integer_or_halfinteger CURRENT::getDensityCoords(){
+integer_or_halfinteger CURRENT::getDensityCoords() {
   integer_or_halfinteger crd;
   crd.x = _INTG_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
   return crd;
@@ -323,7 +323,7 @@ void CURRENT::pbc()
 
 }
 
-void CURRENT::eraseDensity(){
+void CURRENT::eraseDensity() {
   int i, j, k;
   int Ngx = N_grid[0];
   int Ngy = N_grid[1];

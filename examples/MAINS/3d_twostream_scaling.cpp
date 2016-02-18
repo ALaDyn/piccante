@@ -1,19 +1,21 @@
-/*******************************************************************************
-This file is part of piccante.
+/*   Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi   */
 
-piccante is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-piccante is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with piccante.  If not, see <http://www.gnu.org/licenses/>.
-*******************************************************************************/
+/******************************************************************************
+* This file is part of piccante.                                              *
+*                                                                             *
+* piccante is free software: you can redistribute it and/or modify            *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation, either version 3 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* piccante is distributed in the hope that it will be useful,                 *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
+******************************************************************************/
 
 #define _USE_MATH_DEFINES
 
@@ -26,13 +28,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
-#else
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#endif
 #include <cstdarg>
 #include <vector>
 
@@ -47,6 +44,12 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include "utilities.h"
 
 #define DIMENSIONALITY 3
+#define NPROC_ALONG_Y 16
+#define NPROC_ALONG_Z 8
+#define Xfactor 1.0
+#define Yfactor 1.0
+#define Zfactor 1.0
+
 //TODO
 
 #define _RESTART_FROM_DUMP 1
@@ -75,9 +78,9 @@ int main(int narg, char **args)
   grid.setYrange(-2.0*Yfactor, +2.0*Yfactor);
   grid.setZrange(-0.5*Zfactor, +0.5*Zfactor);
 
-  int Nxcell=(int)(Xfactor*512);
-  int Nycell=(int)(Yfactor*512);
-  int Nzcell=(int)(Zfactor*128);
+  int Nxcell = (int)(Xfactor * 512);
+  int Nycell = (int)(Yfactor * 512);
+  int Nzcell = (int)(Zfactor * 128);
   grid.setNCells(Nxcell, Nycell, Nzcell);
   grid.setNProcsAlongY(NPROC_ALONG_Y);
   grid.setNProcsAlongZ(NPROC_ALONG_Z);
@@ -155,7 +158,7 @@ int main(int narg, char **args)
   electrons1.add_momenta(rng, 0.0, 0.0, -1.0, distribution);
   electrons2.add_momenta(rng, 0.0, 0.0, 1.0, distribution);
 
-  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
     (*spec_iterator)->printParticleNumber();
   }
   //*******************************************END SPECIES DEFINITION***********************************************************
@@ -163,9 +166,9 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
 
-  double startOutputA=0.1, freqOutputA=1.0;
-  double startOutputB=0.3, freqOutputB=1.0;
-  double startOutputC=0.5, freqOutputC=1.0;
+  double startOutputA = 0.1, freqOutputA = 1.0;
+  double startOutputB = 0.3, freqOutputB = 1.0;
+  double startOutputC = 0.5, freqOutputC = 1.0;
 
   manager.addDiagFrom(startOutputA, freqOutputA);
 
@@ -185,18 +188,18 @@ int main(int narg, char **args)
   //*******************************************END DIAG DEFINITION**************************************************
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  if (grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     printf("----- START temporal cicle -----\n");
     fflush(stdout);
   }
 
   int Nstep = grid.getTotalNumberOfTimesteps();
   int dumpID = 1, dumpEvery;
-  if (DO_DUMP){
+  if (DO_DUMP) {
     dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
   grid.istep = 0;
-  if (_DO_RESTART){
+  if (_DO_RESTART) {
     dumpID = _RESTART_FROM_DUMP;
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
@@ -210,7 +213,7 @@ int main(int narg, char **args)
     myfield.boundary_conditions();
 
     current.setAllValuesToZero();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
 #ifdef ESIRKEPOV
       (*spec_iterator)->current_deposition(&current);
 #else
@@ -220,7 +223,7 @@ int main(int narg, char **args)
     }
     current.pbc();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->position_parallel_pbc();
     }
 
@@ -232,7 +235,7 @@ int main(int narg, char **args)
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
 #ifdef RADIATION_FRICTION
       (*spec_iterator)->momenta_advance_with_friction(&myfield, lambda);
 #else
@@ -250,7 +253,7 @@ int main(int narg, char **args)
     moveWindow(&grid, &myfield, species);
 
     grid.istep++;
-    if (DO_DUMP){
+    if (DO_DUMP) {
       if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
         dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
