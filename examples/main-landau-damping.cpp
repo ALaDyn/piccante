@@ -27,13 +27,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
-#else
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#endif
 #include <cstdarg>
 #include <vector>
 #include <map>
@@ -53,135 +48,134 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULT_DIMENSIONALITY 1
 
-
 #define DIRECTORY_OUTPUT "OUTPUT"
 #define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
-void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid){
+void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid) {
 
-  if(grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     std::ifstream myfile;
     myfile.open(filename.c_str());
-    if (!myfile.good()){
+    if (!myfile.good()) {
       std::cout << "     spheres file: \"" << filename << "\" does not exists" << std::endl;
     }
-    int Nsph=0;
+    int Nsph = 0;
 
     myfile.read((char*)&Nsph, sizeof(int));
 
     spheres.NSpheres = Nsph;
-    spheres.coords = new float[spheres.NSpheres*4];
+    spheres.coords = new float[spheres.NSpheres * 4];
 
     myfile.read((char*)&(spheres.fillingFactor), sizeof(float));
-    myfile.read((char*)spheres.rmin, sizeof(float)*3);
-    myfile.read((char*)spheres.rmax, sizeof(float)*3);
-    myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres*4);
+    myfile.read((char*)spheres.rmin, sizeof(float) * 3);
+    myfile.read((char*)spheres.rmax, sizeof(float) * 3);
+    myfile.read((char*)spheres.coords, sizeof(float)*spheres.NSpheres * 4);
     myfile.close();
   }
 
 
   MPI_Bcast(&(spheres.NSpheres), 1, MPI_INT, grid.master_proc, MPI_COMM_WORLD);
 
-  if(grid.myid != grid.master_proc)
-    spheres.coords = new float[spheres.NSpheres*4];
+  if (grid.myid != grid.master_proc)
+    spheres.coords = new float[spheres.NSpheres * 4];
 
   MPI_Bcast(&(spheres.fillingFactor), 1, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
   MPI_Bcast(spheres.rmin, 3, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
   MPI_Bcast(spheres.rmax, 3, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
-  MPI_Bcast(spheres.coords, 4*spheres.NSpheres, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
+  MPI_Bcast(spheres.coords, 4 * spheres.NSpheres, MPI_FLOAT, grid.master_proc, MPI_COMM_WORLD);
 
 }
 
-void fromCoordsToSpheresCoords(double &x, double min, double max){
+void fromCoordsToSpheresCoords(double &x, double min, double max) {
   double box = max - min;
-  if (x < min){
+  if (x < min) {
     x += box * ((int)((max - x) / box));
   }
-  if (x > max){
+  if (x > max) {
     x -= box* ((int)((x - min) / box));
   }
 }
 
-bool isSphereInside(SPHERES& spheres, int index, GRID &grid){
-    float x = spheres.coords[index*4];
-    float y = spheres.coords[index*4+1];
-    float z = spheres.coords[index*4+2];
-    float r = spheres.coords[index*4+3];
+bool isSphereInside(SPHERES& spheres, int index, GRID &grid) {
+  float x = spheres.coords[index * 4];
+  float y = spheres.coords[index * 4 + 1];
+  float z = spheres.coords[index * 4 + 2];
+  float r = spheres.coords[index * 4 + 3];
 
-    double xl = grid.rminloc[0] - r;
-    double yl = grid.rminloc[1] - r;
-    double zl = grid.rminloc[2] - r;
+  double xl = grid.rminloc[0] - r;
+  double yl = grid.rminloc[1] - r;
+  double zl = grid.rminloc[2] - r;
 
-    double xr = grid.rmaxloc[0] + r;
-    double yr = grid.rmaxloc[1] + r;
-    double zr = grid.rmaxloc[2] + r;
+  double xr = grid.rmaxloc[0] + r;
+  double yr = grid.rmaxloc[1] + r;
+  double zr = grid.rmaxloc[2] + r;
 
-    fromCoordsToSpheresCoords(yl, spheres.rmin[1], spheres.rmax[1]);
-    fromCoordsToSpheresCoords(zl, spheres.rmin[2], spheres.rmax[2]);
-    fromCoordsToSpheresCoords(yr, spheres.rmin[1], spheres.rmax[1]);
-    fromCoordsToSpheresCoords(zr, spheres.rmin[2], spheres.rmax[2]);
+  fromCoordsToSpheresCoords(yl, spheres.rmin[1], spheres.rmax[1]);
+  fromCoordsToSpheresCoords(zl, spheres.rmin[2], spheres.rmax[2]);
+  fromCoordsToSpheresCoords(yr, spheres.rmin[1], spheres.rmax[1]);
+  fromCoordsToSpheresCoords(zr, spheres.rmin[2], spheres.rmax[2]);
 
-    bool chkX, chkY, chkZ;
-    chkX=chkY=chkZ=true;
+  bool chkX, chkY, chkZ;
+  chkX = chkY = chkZ = true;
 
-    if (grid.getDimensionality() >= 2){
-      if((grid.rmaxloc[1]-grid.rminloc[1]) >= (spheres.rmax[1] - spheres.rmin[1]))
-        chkY = true;
-      else{
-        if(yl <= yr)
-          chkY = ((y >= yl) && (y <= yr));
-        else
-          chkY = ((y >= yr) || (y <= yl));
-      }
+  if (grid.getDimensionality() >= 2) {
+    if ((grid.rmaxloc[1] - grid.rminloc[1]) >= (spheres.rmax[1] - spheres.rmin[1]))
+      chkY = true;
+    else {
+      if (yl <= yr)
+        chkY = ((y >= yl) && (y <= yr));
+      else
+        chkY = ((y >= yr) || (y <= yl));
     }
+  }
 
-    if (grid.getDimensionality() == 3){
-      if((grid.rmaxloc[2]-grid.rminloc[2]) >= (spheres.rmax[2] - spheres.rmin[2]))
-        chkZ=true;
-      else{
+  if (grid.getDimensionality() == 3) {
+    if ((grid.rmaxloc[2] - grid.rminloc[2]) >= (spheres.rmax[2] - spheres.rmin[2]))
+      chkZ = true;
+    else {
 
-        if(zl <= zr)
-          chkZ = ((z >= zl) && (z <= zr));
-        else
-          chkZ = ((z >= zr) || (z <= zl));
-      }
+      if (zl <= zr)
+        chkZ = ((z >= zl) && (z <= zr));
+      else
+        chkZ = ((z >= zr) || (z <= zl));
     }
+  }
 
-    return chkX && chkY && chkZ;
+  return chkX && chkY && chkZ;
 
 }
 
-void swapSpheres(SPHERES &spheres, int i, int j){
-    float dummyCoords[4];
-    dummyCoords[0] = spheres.coords[i*4];
-    dummyCoords[1] = spheres.coords[i*4+1];
-    dummyCoords[2] = spheres.coords[i*4+2];
-    dummyCoords[3] = spheres.coords[i*4+3];
+void swapSpheres(SPHERES &spheres, int i, int j) {
+  float dummyCoords[4];
+  dummyCoords[0] = spheres.coords[i * 4];
+  dummyCoords[1] = spheres.coords[i * 4 + 1];
+  dummyCoords[2] = spheres.coords[i * 4 + 2];
+  dummyCoords[3] = spheres.coords[i * 4 + 3];
 
-    spheres.coords[i*4] = spheres.coords[j*4];
-    spheres.coords[i*4+1] = spheres.coords[j*4+1];
-    spheres.coords[i*4+2] = spheres.coords[j*4+2];
-    spheres.coords[i*4+3] = spheres.coords[j*4+3];
+  spheres.coords[i * 4] = spheres.coords[j * 4];
+  spheres.coords[i * 4 + 1] = spheres.coords[j * 4 + 1];
+  spheres.coords[i * 4 + 2] = spheres.coords[j * 4 + 2];
+  spheres.coords[i * 4 + 3] = spheres.coords[j * 4 + 3];
 
-    spheres.coords[j*4] = dummyCoords[0];
-    spheres.coords[j*4+1] = dummyCoords[1];
-    spheres.coords[j*4+2] = dummyCoords[2];
-    spheres.coords[j*4+3] = dummyCoords[3];
+  spheres.coords[j * 4] = dummyCoords[0];
+  spheres.coords[j * 4 + 1] = dummyCoords[1];
+  spheres.coords[j * 4 + 2] = dummyCoords[2];
+  spheres.coords[j * 4 + 3] = dummyCoords[3];
 }
 
-void selectSpheres(SPHERES &spheres, GRID &grid){
-    int counter = 0;
-    for (int i = 0; i < spheres.NSpheres; i++){
-        if(isSphereInside(spheres, i, grid)){
-            swapSpheres(spheres,i,counter);
-            counter++;
-        }
+void selectSpheres(SPHERES &spheres, GRID &grid) {
+  int counter = 0;
+  for (int i = 0; i < spheres.NSpheres; i++) {
+    if (isSphereInside(spheres, i, grid)) {
+      swapSpheres(spheres, i, counter);
+      counter++;
     }
-    spheres.NSpheres = counter;
-    spheres.coords = (float*)realloc(spheres.coords, counter*4*sizeof(float));
+  }
+  spheres.NSpheres = counter;
+  spheres.coords = (float*)realloc(spheres.coords, counter * 4 * sizeof(float));
 }
 
 
@@ -192,7 +186,7 @@ int main(int narg, char **args)
   fftw_mpi_init();
 #endif
   Json::Value root;
-  jsonParser::parseJsonInputFile(root,narg, args);
+  jsonParser::parseJsonInputFile(root, narg, args);
   int dim = jsonParser::getDimensionality(root, DEFAULT_DIMENSIONALITY);
 
   GRID grid(dim);
@@ -203,12 +197,12 @@ int main(int narg, char **args)
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  jsonParser::setXrange(root,&grid);
-  jsonParser::setYrange(root,&grid);
-  jsonParser::setZrange(root,&grid);
-  jsonParser::setNCells(root,&grid);
-  jsonParser::setNprocs(root,&grid);
-  jsonParser::setStretchedGrid(root,&grid);
+  jsonParser::setXrange(root, &grid);
+  jsonParser::setYrange(root, &grid);
+  jsonParser::setZrange(root, &grid);
+  jsonParser::setNCells(root, &grid);
+  jsonParser::setNprocs(root, &grid);
+  jsonParser::setStretchedGrid(root, &grid);
   jsonParser::setBoundaryConditions(root, &grid);
 
   jsonParser::setRadiationFriction(root, &grid);
@@ -217,8 +211,8 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
 
   jsonParser::setCourantFactor(root, &grid);
-  jsonParser::setSimulationTime(root,&grid);
-  jsonParser::setMovingWindow(root,&grid);
+  jsonParser::setSimulationTime(root, &grid);
+  jsonParser::setMovingWindow(root, &grid);
 
   srand(time(NULL));
   grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -241,16 +235,16 @@ int main(int narg, char **args)
   current.setAllValuesToZero();
   //*******************************************END FIELD DEFINITION***********************************************************
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
-  bool isThereSpecial=false;
-  bool areThereSpheres=false;
+  bool isThereSpecial = false;
+  bool areThereSpheres = false;
 
   std::string fileSpheresName;
   Json::Value special;
   SPHERES myspheres;
-  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
-    if(areThereSpheres = jsonParser::setString( &fileSpheresName, special, "spheresFile")){
-     readAndAllocateSpheres(myspheres, fileSpheresName, grid);
-     selectSpheres(myspheres, grid);
+  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
+    if (areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile")) {
+      readAndAllocateSpheres(myspheres, fileSpheresName, grid);
+      selectSpheres(myspheres, grid);
     }
   }
   std::map<std::string, PLASMA*>::iterator pIterator;
@@ -262,23 +256,23 @@ int main(int narg, char **args)
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
 
-  if(areThereSpheres){
-    for(pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++){
-       (pIterator)->second->params.spheres = &myspheres;
-     }
+  if (areThereSpheres) {
+    for (pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++) {
+      (pIterator)->second->params.spheres = &myspheres;
+    }
   }
- jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
 
   uint64_t totPartNum = 0;
-  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-    totPartNum+=(*spec_iterator)->printParticleNumber();
+  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+    totPartNum += (*spec_iterator)->printParticleNumber();
   }
-  if(grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     std::cout << "Total particle number: " << totPartNum << std::endl;
   }
 
 
-  if(areThereSpheres){
+  if (areThereSpheres) {
     delete[] myspheres.coords;
   }
   //*******************************************END SPECIES DEFINITION***********************************************************
@@ -288,21 +282,21 @@ int main(int narg, char **args)
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
-  jsonParser::setOutputDirPath(root,manager);
+  jsonParser::setOutputDirPath(root, manager);
 
   manager.initialize();
   //*******************************************END DIAG DEFINITION**************************************************
   grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  if (grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     printf("----- START temporal cicle -----\n");
     fflush(stdout);
   }
 
   int dumpID = 1;
   grid.istep = 0;
-  if (grid.dumpControl.doRestart){
+  if (grid.dumpControl.doRestart) {
     dumpID = grid.dumpControl.restartFromDump;
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
@@ -324,12 +318,12 @@ int main(int narg, char **args)
     myfield.boundary_conditions();
 
     current.setAllValuesToZero();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->current_deposition_standard(&current);
     }
     current.pbc();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->position_parallel_pbc();
     }
 
@@ -338,25 +332,25 @@ int main(int narg, char **args)
 
     myfield.boundary_conditions();
 
-    #ifdef _USE_FFTW_FILTER
+#ifdef _USE_FFTW_FILTER
     myfield.fftw_filter_Efield();
     myfield.boundary_conditions();
-    #endif
+#endif
 
     myfield.openBoundariesE_2();
 
-    if(!(grid.istep%20)){
+    if (!(grid.istep % 20)) {
       //myfield.applyFilter(fltr_Ex|fltr_Ey, dir_x|dir_y);
     }
 
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      if(grid.isRadiationFrictionEnabled()){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      if (grid.isRadiationFrictionEnabled()) {
         (*spec_iterator)->momenta_advance_with_friction(&myfield, grid.getLambda0());
       }
-      else{
+      else {
         (*spec_iterator)->momenta_advance(&myfield);
       }
     }
@@ -366,7 +360,7 @@ int main(int narg, char **args)
     moveWindow(&grid, &myfield, species);
 
     grid.istep++;
-    if (grid.dumpControl.doDump){
+    if (grid.dumpControl.doDump) {
       if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
         dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }

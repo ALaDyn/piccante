@@ -1,3 +1,4 @@
+
 /*******************************************************************************
 This file is part of piccante.
 
@@ -26,13 +27,8 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
-#else
 #include <gsl/gsl_rng.h> 
 #include <gsl/gsl_randist.h>
-#endif
 #include <cstdarg>
 #include <vector>
 
@@ -194,18 +190,18 @@ int main(int narg, char **args)
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  if (grid.myid == grid.master_proc){
+  if (grid.myid == grid.master_proc) {
     printf("----- START temporal cicle -----\n");
     fflush(stdout);
   }
 
   int Nstep = grid.getTotalNumberOfTimesteps();
   int dumpID = 1, dumpEvery;
-  if (DO_DUMP){
+  if (DO_DUMP) {
     dumpEvery = (int)(TIME_BTW_DUMP / grid.dt);
   }
   grid.istep = 0;
-  if (_DO_RESTART){
+  if (_DO_RESTART) {
     dumpID = _RESTART_FROM_DUMP;
     restartFromDump(&dumpID, &grid, &myfield, species);
   }
@@ -223,13 +219,13 @@ int main(int narg, char **args)
 
     current.setAllValuesToZero();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->current_deposition_standard(&current);
     }
 
     current.pbc();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->position_parallel_pbc();
     }
 
@@ -243,7 +239,7 @@ int main(int narg, char **args)
 
     myfield.boundary_conditions();
 
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->momenta_advance(&myfield);
     }
 
@@ -253,7 +249,7 @@ int main(int narg, char **args)
     moveWindow(&grid, &myfield, species);
 
     grid.istep++;
-    if (DO_DUMP){
+    if (DO_DUMP) {
       if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
         dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
