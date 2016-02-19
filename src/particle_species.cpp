@@ -2674,7 +2674,7 @@ void SPECIE::computeLorentzMatrix(double ux, double uy, double uz, double *matr)
 }
 
 void SPECIE::callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin) {
-
+std::mt19937 mt(1177);
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
 
     for (int p = 0; p < Np; p++)
@@ -2682,6 +2682,7 @@ void SPECIE::callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_
       u0(p) = uxin + p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
       u1(p) = uyin + p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
       u2(p) = uzin + p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
+
     }
   }
   else {

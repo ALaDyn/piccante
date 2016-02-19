@@ -28,6 +28,7 @@
 #include "grid.h"
 #include "current.h"
 #include "em_field.h"
+#include <random>
 
 #define _VERY_SMALL_MOMENTUM 1.0e-5
 

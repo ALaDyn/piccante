@@ -43,7 +43,7 @@
 #include <cstdarg>
 #include <vector>
 #include <map>
-
+#include <random>
 
 #define DEFAULT_DIMENSIONALITY 1
 
@@ -69,7 +69,6 @@ int main(int narg, char **args)
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
   gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);
   jsonParser::setYrange(root, &grid);
@@ -97,6 +96,11 @@ int main(int narg, char **args)
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
+  //***************************** RANDOM NUMBER GENERATOR ****************
+  std::mt19937 mt_rng(grid.myid);
+
+
+
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
   int myIntVariable = 0;
   double myDoubleVariable = 0;
