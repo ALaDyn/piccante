@@ -34,8 +34,6 @@
 #include <iomanip>
 #include <stdint.h>
 #include <ctime>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #if defined(_MSC_VER)
 #include <cstdlib>
 #else
@@ -117,7 +115,7 @@ public:
   int getTotalNumberOfTimesteps();
   void moveWindow();
   void printTStepEvery(int every);
-  void initRNG(gsl_rng* rng, uint32_t auxiliary_seed);
+  void initRNG(std::mt19937 &rng, uint32_t auxiliary_seed);
   void visualDiag();
   void mpi_grid_initialize(int *narg, char **args);
   void finalize();

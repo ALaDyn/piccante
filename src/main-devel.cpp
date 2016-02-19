@@ -28,13 +28,6 @@ along with piccante.  If not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
-#else
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#endif
 #include <cstdarg>
 #include <vector>
 #include <map>
@@ -176,15 +169,14 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-
+  std::mt19937 mt_rng;
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  jsonParser::setXrange(root,&grid);
-  jsonParser::setYrange(root,&grid);
-  jsonParser::setZrange(root,&grid);
-  jsonParser::setNCells(root,&grid);
-  jsonParser::setNprocs(root,&grid);
-  jsonParser::setStretchedGrid(root,&grid);
+  jsonParser::setXrange(root, &grid);
+  jsonParser::setYrange(root, &grid);
+  jsonParser::setZrange(root, &grid);
+  jsonParser::setNCells(root, &grid);
+  jsonParser::setNprocs(root, &grid);
+  jsonParser::setStretchedGrid(root, &grid);
   jsonParser::setBoundaryConditions(root, &grid);
 
   jsonParser::setRadiationFriction(root, &grid);
@@ -193,11 +185,13 @@ int main(int narg, char **args)
   grid.mpi_grid_initialize(&narg, args);
 
   jsonParser::setCourantFactor(root, &grid);
-  jsonParser::setSimulationTime(root,&grid);
-  jsonParser::setMovingWindow(root,&grid);
+  jsonParser::setSimulationTime(root, &grid);
+  jsonParser::setMovingWindow(root, &grid);
 
-  srand(time(NULL));
-  grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+  std::cout<< "AIUTO!!!" << std::endl;
+
+  grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
+  std::cout<< "AIUTO!!!" << std::endl;
 
   grid.finalize();
 
@@ -245,7 +239,7 @@ int main(int narg, char **args)
   jsonParser::setPlasmas(root, plasmas);
 
 
- jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+ jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
  int counter=0;
  if(isWaveOK){

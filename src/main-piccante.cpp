@@ -38,8 +38,6 @@
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include <cstdarg>
 #include <vector>
 #include <map>
@@ -68,7 +66,7 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+  std::mt19937 mt_rng;
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);
   jsonParser::setYrange(root, &grid);
@@ -88,7 +86,7 @@ int main(int narg, char **args)
   jsonParser::setMovingWindow(root, &grid);
 
   srand(time(NULL));
-  grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+  grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.finalize();
 
@@ -97,7 +95,7 @@ int main(int narg, char **args)
 
   //********************************************END GRID DEFINITION********************************************************
   //***************************** RANDOM NUMBER GENERATOR ****************
-  std::mt19937 mt_rng(grid.myid);
+
 
 
 
@@ -130,7 +128,7 @@ int main(int narg, char **args)
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
 
-  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+  jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   uint64_t totPartNum = 0;
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {

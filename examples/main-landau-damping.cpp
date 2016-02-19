@@ -28,8 +28,6 @@
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include <cstdarg>
 #include <vector>
 #include <map>
@@ -195,7 +193,6 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);

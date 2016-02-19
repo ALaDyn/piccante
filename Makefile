@@ -18,12 +18,12 @@ SRC = $(addprefix $(SRC_FOLDER)/, $(FILES))
 MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
 OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
-LIB = -lgsl -lgslcblas
+#LIB = -lgsl -lgslcblas
+LIB =
+OPT = -O3 -std=c++11
 
-OPT = -O3 
-
-GSL_LIB = $(SRC_FOLDER)
-GSL_INC = $(SRC_FOLDER)
+#GSL_LIB = $(SRC_FOLDER)
+#GSL_INC = $(SRC_FOLDER)
 BOOST_LIB = $(SRC_FOLDER)
 BOOST_INC = $(SRC_FOLDER)
 HDF5_INC = $(SRC_FOLDER)
@@ -66,8 +66,8 @@ sse2-vec: all
 
 galileo: boost
 galileo: OPT += -xCORE-AVX2 -ipo
-galileo: GSL_INC = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/include
-galileo: GSL_LIB = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/lib
+#galileo: GSL_INC = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/include
+#galileo: GSL_LIB = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/lib
 galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/include
 galileo: BOOST_LIB = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/lib
 galileo: all
@@ -77,16 +77,16 @@ fermi: COMPILER = mpixlcxx
 fermi: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
-fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
-fermi: GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
+#fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
+#fermi: GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
 fermi: BOOST_LIB = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/lib/
 fermi: BOOST_INC = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/include/
 fermi: all
 
 juqueen: fermi
 juqueen: LIB = -lgsl -lgslcblas -lboost_system-1_47 -lboost_filesystem-1_47
-juqueen: GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
-juqueen: GSL_INC = /bgsys/local/gsl/1.15_O3g/include
+#juqueen: GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
+#juqueen: GSL_INC = /bgsys/local/gsl/1.15_O3g/include
 juqueen: BOOST_LIB = /bgsys/local/boost/1.47.0/lib
 juqueen: BOOST_INC = /bgsys/local/boost/1.47.0
 juqueen: all
@@ -109,10 +109,10 @@ fermi-debug-ipa: all
 
 
 $(EXE): $(OBJ)
-	$(COMPILER) $(OPT) -L$(GSL_LIB) -L$(BOOST_LIB) -L$(HDF5_LIB) -o $(EXE) $(OBJ) $(LIB) 
+  $(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) -o $(EXE) $(OBJ) $(LIB)
 
 $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
-	$(COMPILER) $(OPT) -I$(GSL_INC) -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
+  $(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
 
 clean:
 	rm -f $(OBJ) *~

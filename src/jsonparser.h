@@ -106,8 +106,8 @@ namespace jsonParser {
   void setLaserPulses(Json::Value &document, EM_FIELD *emfield);
   void setPlasmas(Json::Value &document, std::map<std::string, PLASMA*> &map);
   bool checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas);
-  bool addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec);
-  void setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, gsl_rng* ext_rng);
+  bool addDistribution(std::string distName, Json::Value &child, std::mt19937 &ext_rng, SPECIE* spec);
+  void setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, std::mt19937 &ext_rng);
 
 
   bool setLaserType(laserPulse*, Json::Value&);

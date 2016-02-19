@@ -2673,15 +2673,15 @@ void SPECIE::computeLorentzMatrix(double ux, double uy, double uz, double *matr)
 
 }
 
-void SPECIE::callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin) {
-std::mt19937 mt(1177);
+void SPECIE::callWaterbag(std::mt19937& ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin) {
+  std::uniform_real_distribution<double> dist(-1.0, 1.0);
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
 
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = uxin + p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
-      u1(p) = uyin + p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
-      u2(p) = uzin + p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
+      u0(p) = uxin + p0_x*dist(ext_rng);
+      u1(p) = uyin + p0_y*dist(ext_rng);
+      u2(p) = uzin + p0_z*dist(ext_rng);
 
     }
   }
@@ -2691,9 +2691,9 @@ std::mt19937 mt(1177);
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = p0_x*gsl_ran_flat(ext_rng, -1.0, 1.0);
-      u1(p) = p0_y*gsl_ran_flat(ext_rng, -1.0, 1.0);
-      u2(p) = p0_z*gsl_ran_flat(ext_rng, -1.0, 1.0);
+      u0(p) = p0_x*dist(ext_rng);
+      u1(p) = p0_y*dist(ext_rng);
+      u2(p) = p0_z*dist(ext_rng);
       Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
       u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
@@ -2708,17 +2708,21 @@ std::mt19937 mt(1177);
 
 }
 
-void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyin, double uzin) {
+void SPECIE::callUnifSphere(std::mt19937& ext_rng, double p0, double uxin, double uyin, double uzin) {
   double pmod;
   double phi;
   double cos_theta, sin_theta;
 
+  std::uniform_real_distribution<double> distR(0, 1.0);
+  std::uniform_real_distribution<double> distA(-1.0, 1.0);
+  std::uniform_real_distribution<double> distB(0, 2.0*M_PI);
+
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
-      pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-      cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
+      pmod = pow(distR(ext_rng), 1. / 3.);
+      phi = distB(ext_rng);
+      cos_theta = distB(ext_rng);
       sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = uxin + p0*pmod*sin_theta*cos(phi);
       u1(p) = uyin + p0*pmod*sin_theta*sin(phi);
@@ -2731,9 +2735,9 @@ void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyi
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
-      pmod = pow(gsl_ran_flat(ext_rng, 0.0, 1.0), 1. / 3.);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-      cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
+      pmod = pow(distR(ext_rng), 1. / 3.);
+      phi = distB(ext_rng);
+      cos_theta = distB(ext_rng);
       sin_theta = sqrt(1.0 - cos_theta*cos_theta);
       u0(p) = p0*pmod*sin_theta*cos(phi);
       u1(p) = p0*pmod*sin_theta*sin(phi);
@@ -2751,13 +2755,15 @@ void SPECIE::callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyi
   }
 }
 
-void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin) {
+void SPECIE::callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, double uxin, double uyin, double uzin) {
+
+  std::exponential_distribution<double> expDist(alpha);
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = uxin + gsl_ran_exppow(ext_rng, p0, alpha);
-      u1(p) = uyin + gsl_ran_exppow(ext_rng, p0, alpha);
-      u2(p) = uzin + gsl_ran_exppow(ext_rng, p0, alpha);
+      u0(p) = uxin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u1(p) = uyin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u2(p) = uzin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
     }
   }
   else {
@@ -2766,9 +2772,9 @@ void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = gsl_ran_exppow(ext_rng, p0, alpha);
-      u1(p) = gsl_ran_exppow(ext_rng, p0, alpha);
-      u2(p) = gsl_ran_exppow(ext_rng, p0, alpha);
+      u0(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u1(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u2(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
       Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
       u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
@@ -2784,19 +2790,16 @@ void SPECIE::callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double
 
 }
 
-void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, double uzin) {
-  double ptot;
-  double temp;
-  double phi;
-  double cos_theta, sin_theta;
-  //double theta;
+void SPECIE::callMaxwell(std::mt19937& ext_rng, double Ta, double uxin, double uyin, double uzin) {
+
+  std::normal_distribution<double> myGaussian(0,sqrt(Ta));
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = uxin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
-      u1(p) = uyin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
-      u2(p) = uzin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
 
+      u0(p) = uxin + myGaussian(ext_rng);
+      u1(p) = uyin + myGaussian(ext_rng);
+      u2(p) = uzin + myGaussian(ext_rng);
     }
   }
   else {
@@ -2805,9 +2808,9 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
-      u1(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
-      u2(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
+      u0(p) = uxin + myGaussian(ext_rng);
+      u1(p) = uyin + myGaussian(ext_rng);
+      u2(p) = uzin + myGaussian(ext_rng);
 
       Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
@@ -2821,23 +2824,26 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
     }
   }
 }
-void SPECIE::callJuttner(gsl_rng* ext_rng, double Ta, double uxin, double uyin, double uzin) {
+void SPECIE::callJuttner(std::mt19937& ext_rng, double Ta, double uxin, double uyin, double uzin) {
   //DA DEFINIRE
 }
 double densityFunctionMaxwell(double px, double alpha, double temp) {
   return exp(-(sqrt(alpha*alpha + px*px) - alpha) / temp);
 }
-void SPECIE::callSpecial(gsl_rng* ext_rng, double Ta) {
+void SPECIE::callSpecial(std::mt19937& ext_rng, double Ta) {
   //double ptot, temp, cos_theta, sin_theta, segno, phi;
   double alpha;
   double auxPX, auxDF;
+  std::uniform_real_distribution<double> distDF(0, 1.0);
+  std::uniform_real_distribution<double> distPX(-50 * sqrt(Ta), 50 * sqrt(Ta));
+
   for (int p = 0; p < Np; p++)
   {
     double uperp2 = u1(p)*u1(p) - u2(p)*u2(p);
     alpha = sqrt(1 + uperp2);
     while (1) {
-      auxDF = gsl_ran_flat(ext_rng, 0.0, 1.0);
-      auxPX = gsl_ran_flat(ext_rng, -50 * sqrt(Ta), 50 * sqrt(Ta));
+      auxDF = distDF(ext_rng);
+      auxPX = distPX(ext_rng);
       if (densityFunctionMaxwell(auxPX, alpha, Ta) > auxDF)
         break;
     }
@@ -2845,7 +2851,7 @@ void SPECIE::callSpecial(gsl_rng* ext_rng, double Ta) {
   }
 }
 
-void SPECIE::add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
+void SPECIE::add_momenta(std::mt19937& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
 {
   if (mygrid->withParticles == NO)
     return;

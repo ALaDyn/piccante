@@ -81,7 +81,7 @@ public:
   void momenta_advance_with_friction(EM_FIELD *ebfield, double lambda);
   void current_deposition(CURRENT *current);
   void add_momenta(double uxin, double uyin, double uzin);
-  void add_momenta(gsl_rng* ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution);
+  void add_momenta(std::mt19937& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution);
   void current_deposition_standard(CURRENT *current);
   void currentStretchedDepositionStandard(CURRENT *current);
   void density_deposition_standard(CURRENT *current);
@@ -146,12 +146,12 @@ private:
   double savedEnergy;
   bool energyExtremesFlag;
   bool flagWithMarker;
-  void callWaterbag(gsl_rng* ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin);
-  void callUnifSphere(gsl_rng* ext_rng, double p0, double uxin, double uyin, double uzin);
-  void callSupergaussian(gsl_rng* ext_rng, double p0, double alpha, double uxin, double uyin, double uzin);
-  void callMaxwell(gsl_rng* ext_rng, double temp, double uxin, double uyin, double uzin);
-  void callJuttner(gsl_rng* ext_rng, double a, double uxin, double uyin, double uzin);
-  void callSpecial(gsl_rng* ext_rng, double Ta);
+  void callWaterbag(std::mt19937& ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin);
+  void callUnifSphere(std::mt19937& ext_rng, double p0, double uxin, double uyin, double uzin);
+  void callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, double uxin, double uyin, double uzin);
+  void callMaxwell(std::mt19937& ext_rng, double temp, double uxin, double uyin, double uzin);
+  void callJuttner(std::mt19937& ext_rng, double a, double uxin, double uyin, double uzin);
+  void callSpecial(std::mt19937& ext_rng, double Ta);
   void computeParticleMassChargeCoupling();
   void setNumberOfParticlePerCell();
   void setLocalPlasmaMinimaAndMaxima(double *plasmarmin, double *plasmarmax);

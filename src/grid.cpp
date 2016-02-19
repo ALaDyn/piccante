@@ -299,7 +299,7 @@ void GRID::printTStepEvery(int every) {
   }
 }
 
-void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed) {
+void GRID::initRNG(std::mt19937& rng, uint32_t auxiliary_seed){
   //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
   //Seeding del generatore di numeri casuali.
   //Strategia: con il generatore Mersenne Twister di GSL (inizializzato allo stesso modo per tutti)
@@ -308,23 +308,28 @@ void GRID::initRNG(gsl_rng* rng, uint32_t auxiliary_seed) {
   //di numeri casuali di tipo differente (RANLUX).
   //Questo generatore verrà passato come argomento in add_momenta
 
-  gsl_rng* rng_aux;
+  std::minstd_rand rng_aux;
+
+  std::cout<< "2 AIUTO!!!" << std::endl;
 
   uint32_t* seeds;
 
-  rng_aux = gsl_rng_alloc(gsl_rng_mt19937);
+  //rng_aux = gsl_rng_alloc(gsl_rng_mt19937);
 
-  gsl_rng_set(rng_aux, auxiliary_seed);
+  //gsl_rng_set(rng_aux, auxiliary_seed);
   seeds = new uint32_t[myid + 1];
 
   for (int i = 0; i <= myid; i++) {
-    seeds[i] = gsl_rng_get(rng_aux);
+    seeds[i] = rng_aux();
     //Questo controllo potrebbe essere superfluo...
     for (int j = 0; j < i; j++) {
       if (seeds[j] == seeds[i]) { i--; break; }
     }
   }
-  gsl_rng_set(rng, seeds[myid]);
+  //gsl_rng_set(rng, seeds[myid]);
+  std::cout<< "333 AIUTO!!!" << std::endl;
+
+  rng.seed(seeds[myid]);
   delete[] seeds;
 }
 

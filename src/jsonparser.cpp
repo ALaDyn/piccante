@@ -775,7 +775,7 @@ bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, P
   return isEnambled&&isThereName&&isThereType&&isTherePlasma&&isTherePPC;
 }
 
-bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_rng* ext_rng, SPECIE* spec) {
+bool jsonParser::addDistribution(std::string distName, Json::Value &child, std::mt19937& ext_rng, SPECIE* spec) {
   bool isThereMomentum = false;
   bool isDistOk = false;
 
@@ -842,7 +842,7 @@ bool jsonParser::addDistribution(std::string distName, Json::Value &child, gsl_r
   return false;
 }
 
-void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* myGrid, gsl_rng* ext_rng) {
+void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* myGrid, std::mt19937& ext_rng) {
   std::cout.flush();
   Json::Value specList;
   if (setValue(specList, document, _JSON_OBJARRAY_SPECIES) && specList.isArray()) {

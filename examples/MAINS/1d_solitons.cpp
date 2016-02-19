@@ -28,8 +28,6 @@
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include <cstdarg>
 #include <vector>
 
@@ -57,7 +55,7 @@ int main(int narg, char **args)
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
   int istep;
-  gsl_rng* rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+  std::mt19937* rng;
 
   //*******************************************INIZIO DEFINIZIONE GRIGLIA*******************************************************
 
