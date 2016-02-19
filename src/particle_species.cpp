@@ -2792,15 +2792,10 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
+      u0(p) = uxin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
+      u1(p) = uyin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
+      u2(p) = uzin + gsl_ran_gaussian(ext_rng, sqrt(Ta));
 
-      temp = gsl_ran_exponential(ext_rng, Ta);
-      ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-      cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-      sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-      u0(p) = uxin + ptot*sin_theta*cos(phi);
-      u1(p) = uyin + ptot*sin_theta*sin(phi);
-      u2(p) = uzin + ptot*cos_theta;
     }
   }
   else {
@@ -2809,15 +2804,10 @@ void SPECIE::callMaxwell(gsl_rng* ext_rng, double Ta, double uxin, double uyin, 
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
+      u0(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
+      u1(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
+      u2(p) = gsl_ran_gaussian(ext_rng, sqrt(Ta));
 
-      temp = gsl_ran_exponential(ext_rng, Ta);
-      ptot = sqrt((temp + 1)*(temp + 1) - 1 * 1);
-      phi = gsl_ran_flat(ext_rng, 0.0, 2.0*M_PI);
-      cos_theta = gsl_ran_flat(ext_rng, -1.0, 1.0);
-      sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-      u0(p) = ptot*sin_theta*cos(phi);
-      u1(p) = ptot*sin_theta*sin(phi);
-      u2(p) = ptot*cos_theta;
       Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
       u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
