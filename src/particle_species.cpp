@@ -2761,9 +2761,9 @@ void SPECIE::callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, d
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = uxin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
-      u1(p) = uyin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
-      u2(p) = uzin + p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u0(p) = uxin + p0*expDist(ext_rng);
+      u1(p) = uyin + p0*expDist(ext_rng);
+      u2(p) = uzin + p0*expDist(ext_rng);
     }
   }
   else {
@@ -2772,9 +2772,9 @@ void SPECIE::callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, d
     double Ett, u0t, u1t, u2t;
     for (int p = 0; p < Np; p++)
     {
-      u0(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
-      u1(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
-      u2(p) = p0*expDist(ext_rng);// gsl_ran_exppow(ext_rng, p0, alpha);
+      u0(p) = p0*expDist(ext_rng);
+      u1(p) = p0*expDist(ext_rng);
+      u2(p) = p0*expDist(ext_rng);
       Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
       u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
