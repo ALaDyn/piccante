@@ -109,10 +109,10 @@ fermi-debug-ipa: all
 
 
 $(EXE): $(OBJ)
-  $(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) -o $(EXE) $(OBJ) $(LIB)
+	$(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) -o $(EXE) $(OBJ) $(LIB)
 
 $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
-  $(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
+	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
 
 clean:
 	rm -f $(OBJ) *~
