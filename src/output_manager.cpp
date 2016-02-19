@@ -2572,7 +2572,8 @@ void OUTPUT_MANAGER::callDiag(request req) {
     ofSpec.close();
   }
 
-  for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++) {
+  /*
+    for (spec_iterator = myspecies.begin(); spec_iterator != myspecies.end(); spec_iterator++) {
     std::string outNameSpec = composeOutputName(outputDir, "SPECTRUM", (*spec_iterator)->name, req.dtime, ".dat");
     std::ofstream ofSpec;
     if (mygrid->myid == mygrid->master_proc)
@@ -2580,7 +2581,7 @@ void OUTPUT_MANAGER::callDiag(request req) {
     (*spec_iterator)->outputSpectrum(ofSpec);
     ofSpec.close();
   }
-
+*/
   delete[] ekinSpecies;
 }
 
