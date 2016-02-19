@@ -41,6 +41,11 @@ boost: OPT += -DUSE_BOOST
 boost: LIB += -lboost_filesystem -lboost_system
 boost: all
 
+brew: boost
+brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
+brew: BOOST_INC = /usr/local/Cellar/boost/1.60.0_1/include
+brew: all
+
 hdf5: boost
 hdf5: OPT += -DUSE_HDF5
 hdf5: HDF5_INC = /usr/lib/hdf5-1.8.12/hdf5/include
