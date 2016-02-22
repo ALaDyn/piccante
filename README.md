@@ -6,15 +6,9 @@ The code is proved to run on up to 16384 MPI processes. Some preliminary scaling
 In its present state, the code could be considered in *beta status*.  
 Copyright 2014, 2015 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi
 
-To build it on linux, ``make``, a C++ compiler, ``boost``, ``MPI`` and ``gsl`` are required, after that a plain `make` should work (adapt the makefile according to your setup if needed).  
+To build it on linux, ``make``, a C++11 compiler, ``boost`` and ``MPI`` are required, after that a plain `make` should work (adapt the makefile according to your setup if needed).  
 On MacOS X you should use [homebrew](http://brew.sh/) to install the same packages and then launch `make brew`.  
-On Windows, you should use the Visual Studio solution to obtain ``boost`` as a Nuget package, while you should download [GSL for Windows](http://sourceforge.net/projects/gnuwin32/files/gsl/1.8/gsl-1.8.exe) and [Microsoft MPI (with SDK)](https://www.microsoft.com/en-us/download/details.aspx?id=49926) before building. After installing GSL you should also create its .lib files with this method:
-```
-1) open the VS Command Shell as an administrator
-2) cd "c:\Program Files (x86)\GnuWin32\lib"
-3) lib /def:libgsl.def
-4) lib /def:libgslcblas.def
-```
+On Windows, you should use the Visual Studio solution to obtain ``boost`` as a Nuget package, while you should download [Microsoft MPI (with SDK)](https://www.microsoft.com/en-us/download/details.aspx?id=49926) before building.   
 `piccante` should build cleanly after that
 
 A paper that describes the technical features of ``piccante`` is under development now, in the meantime if you want to use the code please ask the authors for a ZENODO doi linked to the release you're using.  

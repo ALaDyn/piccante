@@ -193,6 +193,7 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
+  std::mt19937 mt_rng;
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);
@@ -213,7 +214,7 @@ int main(int narg, char **args)
   jsonParser::setMovingWindow(root, &grid);
 
   srand(time(NULL));
-  grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
+  grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.finalize();
 
@@ -259,7 +260,7 @@ int main(int narg, char **args)
       (pIterator)->second->params.spheres = &myspheres;
     }
   }
-  jsonParser::setSpecies(root, species, plasmas, &grid, rng);
+  jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   uint64_t totPartNum = 0;
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
