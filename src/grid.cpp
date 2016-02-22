@@ -309,6 +309,7 @@ void GRID::initRNG(std::mt19937& rng, uint32_t auxiliary_seed){
   //Questo generatore verrà passato come argomento in add_momenta
 
   std::minstd_rand rng_aux;
+  rng_aux.seed(auxiliary_seed);
 
   std::cout<< "2 AIUTO!!!" << std::endl;
 

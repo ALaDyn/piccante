@@ -2796,7 +2796,6 @@ void SPECIE::callMaxwell(std::mt19937& ext_rng, double Ta, double uxin, double u
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
-
       u0(p) = uxin + myGaussian(ext_rng);
       u1(p) = uyin + myGaussian(ext_rng);
       u2(p) = uzin + myGaussian(ext_rng);
