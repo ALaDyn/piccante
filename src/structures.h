@@ -21,7 +21,7 @@
 #define __STRUCTURES_H__
 
 #define _USE_MATH_DEFINES
-#define NUMBER_OF_PLASMA_FUNCTIONS 21
+#define NUMBER_OF_PLASMA_FUNCTIONS 23
 
 #include <math.h>
 #include "commons.h"
@@ -103,6 +103,9 @@ public:
 
   static bool isGrating(int dfIndex);
   static bool isPillar2D(int dfIndex);
+  static bool isNanotubes2D(int dfIndex);
+  static bool isFoils2D(int dfIndex);
+
 
 };
 
@@ -140,7 +143,10 @@ double modGrat(double x, double y, double z, PLASMAparams plist, double Z, doubl
 
 double spoofGrat(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double spheres(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
 double pillars2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
+double nanotubes2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
+double foils2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
 enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };

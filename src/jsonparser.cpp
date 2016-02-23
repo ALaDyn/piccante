@@ -744,6 +744,40 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
           map[plasmaName]->setAdditionalParams(additionalParams);
         }
+        if (PLASMA::isNanotubes2D(plasmaFunctionIndex)) {
+          double n2d_width = 1.0;
+          double n2d_dist = 1.0;
+          double n2d_depth = 0.1;
+
+          double* additionalParams = new double[3];
+
+
+          setDouble(&n2d_width, myPlasma, _JSON_DOUBLE_PLASMA_NANOTUBES2D_WIDTH);
+          setDouble(&n2d_dist,  myPlasma, _JSON_DOUBLE_PLASMA_NANOTUBES2D_DIST);
+          setDouble(&n2d_depth, myPlasma, _JSON_DOUBLE_PLASMA_NANOTUBES2D_DEPTH);
+
+          additionalParams[0] = n2d_width;
+          additionalParams[1] = n2d_dist;
+          additionalParams[2] = n2d_depth;
+
+          map[plasmaName]->setAdditionalParams(additionalParams);
+        }
+
+        if (PLASMA::isFoils2D(plasmaFunctionIndex)) {
+          double f2d_width = 1.0;
+          double f2d_dist = 1.0;
+
+          double* additionalParams = new double[2];
+
+
+          setDouble(&f2d_width, myPlasma, _JSON_DOUBLE_PLASMA_FOILS2D_WIDTH);
+          setDouble(&f2d_dist, myPlasma, _JSON_DOUBLE_PLASMA_FOILS2D_DIST);
+
+          additionalParams[0] = f2d_width;
+          additionalParams[1] = f2d_dist;
+
+          map[plasmaName]->setAdditionalParams(additionalParams);
+        }
       }
       else {
         if (isThisJsonMaster)

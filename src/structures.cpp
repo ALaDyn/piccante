@@ -77,7 +77,9 @@ const std::string PLASMA::dFNames[] = {
   "spoofGrat",
   "spheres",
   "left_blazed_grating",
-  "pillars2D"
+  "pillars2D",
+  "nanotubes2D",
+  "foils2D"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -100,7 +102,9 @@ const distrib_function PLASMA::dFPoint[] = {
   spoofGrat,
   spheres,
   left_blazed_grating,
-  pillars2D
+  pillars2D,
+  nanotubes2D,
+  foils2D
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -117,6 +121,20 @@ bool PLASMA::isPillar2D(int dfIndex) {
     return false;
 }
 
+
+bool PLASMA::isNanotubes2D(int dfIndex) {
+  if (dfIndex == 21)
+    return true;
+  else
+    return false;
+}
+
+bool PLASMA::isFoils2D(int dfIndex) {
+  if (dfIndex == 22)
+    return true;
+  else
+    return false;
+}
 
 
 PLASMA::PLASMA() {
@@ -802,6 +820,53 @@ double pillars2D (double x, double y, double z, PLASMAparams plist, double Z, do
                 }
             }
         }
+    }
+    return rho;
+}
+
+
+double nanotubes2D (double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double *paramlist = (double*)plist.additional_params;
+    double width = paramlist[0];
+    double dist = paramlist[1];
+    double depth = paramlist[2];
+    double rho = -1;
+    if( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+
+        int r = (plist.rmaxbox[1] - plist.rminbox[1])/(width+dist);
+        int i = 1;
+            while ( i <= (r+1) ){
+                if( (x < plist.rminbox[0]+depth) && fabs( (y-plist.rminbox[1]) - ((2*i-1)*width*0.5+(i-1)*dist) ) <= width*0.5 ){
+                    rho = plist.density_coefficient;
+                }
+                i+=1;
+            }
+            if(x >= (plist.rminbox[0]+depth)){
+                rho = plist.density_coefficient;
+            }
+    }
+    return rho;
+}
+
+double foils2D (double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double *paramlist = (double*)plist.additional_params;
+    double width = paramlist[0];
+    double dist = paramlist[1];
+    double rho = -1;
+    if( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])  &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+
+        int r = (plist.rmaxbox[0] - plist.rminbox[0])/(width+dist);
+        int i = 1;
+            while ( i <= (r+1) ){
+                if( fabs( (x-plist.rminbox[0]) - ((2*i-1)*width*0.5+(i-1)*dist) ) <= width*0.5 ){
+                    rho = plist.density_coefficient;
+                }
+                i+=1;
+            }
     }
     return rho;
 }
