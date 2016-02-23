@@ -76,7 +76,8 @@ const std::string PLASMA::dFNames[] = {
   "modGrat",
   "spoofGrat",
   "spheres",
-  "left_blazed_grating"
+  "left_blazed_grating",
+  "pillars2D"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -98,11 +99,19 @@ const distrib_function PLASMA::dFPoint[] = {
   modGrat,
   spoofGrat,
   spheres,
-  left_blazed_grating
+  left_blazed_grating,
+  pillars2D
 };
 
 bool PLASMA::isGrating(int dfIndex) {
   if (dfIndex == 13 || dfIndex == 14 || dfIndex == 19)
+    return true;
+  else
+    return false;
+}
+
+bool PLASMA::isPillar2D(int dfIndex) {
+  if (dfIndex == 20)
     return true;
   else
     return false;
@@ -768,6 +777,34 @@ double spheres(double x, double y, double z, PLASMAparams plist, double Z, doubl
   return value;
 }
 
+
+double pillars2D (double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double *paramlist = (double*)plist.additional_params;
+    double dx = paramlist[0];
+    double dy = paramlist[1];
+    double r = paramlist[2];
+    double rho = -1;
+
+    int Nx;
+    int Ny;
+
+    Nx = (plist.rmaxbox[0]-plist.rminbox[0]-2*r+dx)/dx;
+    Ny = (plist.rmaxbox[1]-plist.rminbox[1]-2*r+dy)/dy;
+
+    if ( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+         (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+         (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+
+        for(int i=0; i<Nx; i++){
+            for(int j=0; j<Ny; j++){
+                if( fabs( pow(x-plist.rminbox[0]-r-i*dx,2) + pow(y-plist.rminbox[1]-r-j*dy,2)  ) <= r*r ){
+                    rho = plist.density_coefficient;
+                }
+            }
+        }
+    }
+    return rho;
+}
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************
 

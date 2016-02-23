@@ -725,6 +725,25 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
           map[plasmaName]->setAdditionalParams(additionalParams);
         }
+
+        if (PLASMA::isPillar2D(plasmaFunctionIndex)) {
+          double p2d_dx = 1.0;
+          double p2d_dy = 1.0;
+          double p2d_r = 0.1;
+
+          double* additionalParams = new double[3];
+
+
+          setDouble(&p2d_dx, myPlasma, _JSON_DOUBLE_PLASMA_PILLARS2D_DX);
+          setDouble(&p2d_dy, myPlasma, _JSON_DOUBLE_PLASMA_PILLARS2D_DY);
+          setDouble(&p2d_r,  myPlasma, _JSON_DOUBLE_PLASMA_PILLARS2D_R);
+
+          additionalParams[0] = p2d_dx;
+          additionalParams[1] = p2d_dy;
+          additionalParams[2] = p2d_r;
+
+          map[plasmaName]->setAdditionalParams(additionalParams);
+        }
       }
       else {
         if (isThisJsonMaster)
