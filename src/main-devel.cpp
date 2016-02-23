@@ -60,7 +60,7 @@ void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
   double deltaV = amplitude*2*M_PI*sqrt(density);
   double oldX;
 
-  if(true){
+  if(false){
     std::cout<< "sposto le particelle che sono" << Npart << std::endl;
     std::cout<< "density = " << density << std::endl;
     std::cout<< " ===================== "<< std::endl;
@@ -82,7 +82,7 @@ void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
 
   double x;
 
-  if(true){
+  if(false){
     std::cout<< "deformo Ex che ha " << Ngrid[0] << " punti" << std::endl;
     std::cout<< "Ny = " << Ngrid[1] << " " << std::endl;
     std::cout<< "Nz = " << Ngrid[2] << " " << std::endl;
@@ -219,7 +219,7 @@ int main(int narg, char **args)
     isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
     isWaveOK = isThereAmpli&&isThereLambda;
   }
-  if(true){
+  if(false){
     std::cout << "siamo sicuri sia tutto OK? " << " isThereSpecial=" << isThereSpecial << std::endl;
     std::cout << "siamo sicuri sia tutto OK? " << " amplitude=" << amplitude << std::endl;
     std::cout << "siamo sicuri sia tutto OK? " << " lambda=" << lambda << std::endl;
