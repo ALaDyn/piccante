@@ -94,11 +94,6 @@ int main(int narg, char **args)
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
-  //***************************** RANDOM NUMBER GENERATOR ****************
-
-
-
-
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
   int myIntVariable = 0;
   double myDoubleVariable = 0;
