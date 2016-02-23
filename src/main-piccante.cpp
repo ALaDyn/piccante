@@ -122,7 +122,6 @@ int main(int narg, char **args)
 
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
-
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   uint64_t totPartNum = 0;

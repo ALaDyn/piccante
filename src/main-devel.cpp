@@ -245,9 +245,7 @@ int main(int narg, char **args)
       //current.eraseDensity();
       //(*spec_iterator)->density_deposition_standard(&current);
       //current.pbc();
-
       //poissonTest(&grid,&myfield,&current);
-
       //std::cout << "counter= " << counter<< "  ampliEx = " << ampliEx << "  lambda = " << lambda << std::endl;
       deformEx(&grid,&myfield,ampliEx,lambda);
       myfield.boundary_conditions();
