@@ -6,12 +6,12 @@
   "lambda0": 1.0,
   "radiationFriction": false,
   "courantFactor": 0.98,
-  "nProcY": 2,
+  "nProcY": 1,
   "nProcZ": 1,
   "xRange": [-20, 20],
   "yRange": [-20, 20],
-  "zRange": [-20, 20],
-  "NCells": [1200, 400, 20],
+  "zRange": [-1, 1],
+  "NCells": [1000, 1000, 1],
   "simulationTime": 15,
   "boundaries": ["periodic", "periodic","periodic"],
   "StretchedGrid":{
@@ -24,7 +24,7 @@
       "right": { "limit":  15.0, "NCells": 1000 } }
   },
   "MovingWindow":{
-    "enabled": true,
+    "enabled": false,
     "start": 0,
     "NO_beta": 1,
     "NO_frequency":20
@@ -40,11 +40,11 @@
   "Plasma":[
     {
       "name": "bulk",
-      "densityFunction": "box",
-      "XRangeBox" : [0, 100],
-      "YRangeBox" : [-20, 20],
-      "ZRangeBox" : [-100, 100],
-      "DensityCoefficient" : 0.0025,
+      "densityFunction": "nanotubes2D",
+      "XRangeBox" : [-10, 10],
+      "YRangeBox" : [-10, 10],
+      "ZRangeBox" : [-1, 1],
+      "DensityCoefficient" : 1.0,
       "DensityLambda" : 1.0,
       "NORampLength" : 0.2,
       "NORampMinDensity" : 0.001,
@@ -57,7 +57,15 @@
       "NORightRampMinDensity" : 0.0,
       "NOGratingDepth" : 0.0,
       "NOGratingPeriod" : 0.0,
-      "NOGratingPhase" : 0.0
+      "NOGratingPhase" : 0.0,
+      "Pillars2Ddx" : 1.0,
+      "Pillars2Ddy" : 0.7,
+      "Pillars2Dr" : 0.1,
+      "Foils2DWidth" : 0.1,
+      "Foils2DDist" : 1.0,
+      "Nanotubes2DDist" : 1.0,
+      "Nanotubes2DDepth" : 5.0,
+      "Nanotubes2DWidth" : 0.1	
     }
   ],
   "Species":[
@@ -65,7 +73,7 @@
       "enabled": true,
       "name": "ELE1",
       "plasma": "bulk",
-      "ParticlesPerCell": [2,2,2],
+      "ParticlesPerCell": [2,2,1],
       "type": "ELECTRON",
       "isMarker": false,
       "isTest": false,
@@ -92,7 +100,7 @@
   ],
   "Laser":[
     {
-      "enabled": true,
+      "enabled": false,
       "type": "GAUSSIAN",
       "polarization": "S",
       "durationFWHM": 5.0,
@@ -140,7 +148,7 @@
   "particleBufferSize": 1000000,
   "Output":[
     {"type": "EB", "from":0.0, "to": 10.0, "every": 10.0},
-    {"type": "Density", "spec": "ELE1", "at": 5.0, "every":10.0},
+    {"type": "Density", "spec": "ELE1", "every":10.0},
     {"type": "PhSp", "spec": "ELE1", "at": 5.0, "every":10.0},
     {"type": "Diag", "every": 0.5, "at": 13.75}
 

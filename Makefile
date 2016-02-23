@@ -31,15 +31,17 @@ HDF5_LIB = $(SRC_FOLDER)
 
 all: $(EXE)
 
+boost: OPT += -DUSE_BOOST
+boost: LIB += -lboost_filesystem -lboost_system
+boost: all
+
+cnaf: all
+
 cnaf-intel: boost
 cnaf-intel: COMPILER = mpiicpc
 cnaf-intel: OPT += -axSSE4.2,AVX -ipo
 cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
 cnaf-intel: all
-
-boost: OPT += -DUSE_BOOST
-boost: LIB += -lboost_filesystem -lboost_system
-boost: all
 
 brew: boost
 brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
