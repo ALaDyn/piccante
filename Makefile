@@ -1,19 +1,3 @@
-Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @sgatto
- Unwatch 13
-  Star 12
- Fork 6 ALaDyn/piccante
- Code  Issues 1  Pull requests 0  Wiki  Pulse  Graphs  Settings
-Branch: master Find file Copy pathpiccante/Makefile
-6160972  13 hours ago
-@cenit cenit update scripts for fermi. Still broken on BGQ architectures due to po…
-2 contributors @cenit @sgatto
-RawBlameHistory     130 lines (102 sloc)  3.65 KBCOMPILER = mpicxx
 EXE = piccante.exe
 MAINFILE = main-piccante.cpp
 
@@ -146,7 +130,3 @@ clean:
 
 cleanall:
 	rm -f $(OBJ) $(EXE) $(EXE).debug *~
-
-
-Status API Training Shop Blog About Pricing
-© 2016 GitHub, Inc. Terms Privacy Security Contact Help
