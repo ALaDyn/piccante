@@ -7,4 +7,4 @@ module load intelmpi/5.0.2--binary
 module load boost/1.57.0--intel--cs-xe-2015--binary
 module load gsl/1.16--intel--cs-xe-2015--binary
 
-make -f makefile.galileo
+make galileo
