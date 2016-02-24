@@ -27,7 +27,6 @@
 #include "commons.h"
 #include <cstdio>
 #include <iostream>
-#include <random>
 
 struct SPHERES {
   float *coords;
@@ -125,7 +124,7 @@ double left_right_free_exp_ramp(double x, double y, double z, PLASMAparams plist
 
 double left_soft_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
-double* rough_box_prepareAdditionalParams(std::mt19937* rng, double roughness, double shift);
+double* rough_box_prepareAdditionalParams(my_rng_generator* rng, double roughness, double shift);
 double rough_box(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double rough_box_edgeCalc(double x0, double y0, double x, double y, int order, double* FFT_params, double roughness);
 

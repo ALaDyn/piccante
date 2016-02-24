@@ -194,7 +194,7 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  std::mt19937 rng;
+  my_rng_generator rng;
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);

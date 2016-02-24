@@ -115,7 +115,7 @@ public:
   int getTotalNumberOfTimesteps();
   void moveWindow();
   void printTStepEvery(int every);
-  void initRNG(std::mt19937 &rng, uint32_t auxiliary_seed);
+  void initRNG(my_rng_generator &rng, uint32_t auxiliary_seed);
   void visualDiag();
   void mpi_grid_initialize(int *narg, char **args);
   void finalize();

@@ -299,7 +299,7 @@ void GRID::printTStepEvery(int every) {
   }
 }
 
-void GRID::initRNG(std::mt19937& rng, uint32_t auxiliary_seed){
+void GRID::initRNG(my_rng_generator& rng, uint32_t auxiliary_seed){
   //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
   //Seeding del generatore di numeri casuali.
   //Strategia: con il generatore std::random (inizializzato allo stesso modo per tutti)
@@ -308,7 +308,7 @@ void GRID::initRNG(std::mt19937& rng, uint32_t auxiliary_seed){
   //di numeri casuali di tipo differente (RANLUX).
   //Questo generatore verrà passato come argomento in add_momenta
 
-  std::minstd_rand rng_aux;
+  aux_rnd_generator rng_aux;
   rng_aux.seed(auxiliary_seed);
 
   uint32_t* seeds;

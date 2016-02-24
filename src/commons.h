@@ -26,6 +26,28 @@
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
+#ifdef NO_CXX11
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/exponential_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
+
+
+typedef boost::random::mt19937 my_rng_generator;
+typedef boost::random::minstd_rand  aux_rnd_generator;
+typedef boost::random::uniform_real_distribution<double> my_uniform_real_distribution
+typedef boost::random::exponential_distribution<double>  my_exponential_distribution;
+typedef boost::random::normal_distribution<double>  my_normal_distribution;
+#else
+#include <random>
+typedef std::mt19937 my_rng_generator;
+typedef std::minstd_rand  aux_rnd_generator;
+typedef std::uniform_real_distribution<double> my_uniform_real_distribution;
+typedef std::exponential_distribution<double>  my_exponential_distribution;
+typedef std::normal_distribution<double>  my_normal_distribution;
+#endif
+
 #include <string>
 #if defined(_MSC_VER)
 #include <cstdint>

@@ -2673,8 +2673,8 @@ void SPECIE::computeLorentzMatrix(double ux, double uy, double uz, double *matr)
 
 }
 
-void SPECIE::callWaterbag(std::mt19937& ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin) {
-  std::uniform_real_distribution<double> dist(-1.0, 1.0);
+void SPECIE::callWaterbag(my_rng_generator& ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin) {
+  my_uniform_real_distribution dist(-1.0, 1.0);
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
 
     for (int p = 0; p < Np; p++)
@@ -2708,14 +2708,14 @@ void SPECIE::callWaterbag(std::mt19937& ext_rng, double p0_x, double p0_y, doubl
 
 }
 
-void SPECIE::callUnifSphere(std::mt19937& ext_rng, double p0, double uxin, double uyin, double uzin) {
+void SPECIE::callUnifSphere(my_rng_generator& ext_rng, double p0, double uxin, double uyin, double uzin) {
   double pmod;
   double phi;
   double cos_theta, sin_theta;
 
-  std::uniform_real_distribution<double> distR(0, 1.0);
-  std::uniform_real_distribution<double> distA(-1.0, 1.0);
-  std::uniform_real_distribution<double> distB(0, 2.0*M_PI);
+  my_uniform_real_distribution distR(0, 1.0);
+  my_uniform_real_distribution distA(-1.0, 1.0);
+  my_uniform_real_distribution distB(0, 2.0*M_PI);
 
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
@@ -2755,9 +2755,9 @@ void SPECIE::callUnifSphere(std::mt19937& ext_rng, double p0, double uxin, doubl
   }
 }
 
-void SPECIE::callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, double uxin, double uyin, double uzin) {
+void SPECIE::callSupergaussian(my_rng_generator& ext_rng, double p0, double alpha, double uxin, double uyin, double uzin) {
 
-  std::exponential_distribution<double> expDist(alpha);
+  my_exponential_distribution expDist(alpha);
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
@@ -2790,9 +2790,9 @@ void SPECIE::callSupergaussian(std::mt19937& ext_rng, double p0, double alpha, d
 
 }
 
-void SPECIE::callMaxwell(std::mt19937& ext_rng, double Ta, double uxin, double uyin, double uzin) {
+void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
 
-  std::normal_distribution<double> myGaussian(0,sqrt(Ta));
+  my_normal_distribution myGaussian(0,sqrt(Ta));
   if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
     for (int p = 0; p < Np; p++)
     {
@@ -2823,18 +2823,18 @@ void SPECIE::callMaxwell(std::mt19937& ext_rng, double Ta, double uxin, double u
     }
   }
 }
-void SPECIE::callJuttner(std::mt19937& ext_rng, double Ta, double uxin, double uyin, double uzin) {
+void SPECIE::callJuttner(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
   //DA DEFINIRE
 }
 double densityFunctionMaxwell(double px, double alpha, double temp) {
   return exp(-(sqrt(alpha*alpha + px*px) - alpha) / temp);
 }
-void SPECIE::callSpecial(std::mt19937& ext_rng, double Ta) {
+void SPECIE::callSpecial(my_rng_generator& ext_rng, double Ta) {
   //double ptot, temp, cos_theta, sin_theta, segno, phi;
   double alpha;
   double auxPX, auxDF;
-  std::uniform_real_distribution<double> distDF(0, 1.0);
-  std::uniform_real_distribution<double> distPX(-50 * sqrt(Ta), 50 * sqrt(Ta));
+  my_uniform_real_distribution distDF(0, 1.0);
+  my_uniform_real_distribution distPX(-50 * sqrt(Ta), 50 * sqrt(Ta));
 
   for (int p = 0; p < Np; p++)
   {
@@ -2850,7 +2850,7 @@ void SPECIE::callSpecial(std::mt19937& ext_rng, double Ta) {
   }
 }
 
-void SPECIE::add_momenta(std::mt19937& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
+void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
 {
   if (mygrid->withParticles == NO)
     return;

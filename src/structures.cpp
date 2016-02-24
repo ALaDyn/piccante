@@ -629,12 +629,12 @@ double left_blazed_grating(double x, double y, double z, PLASMAparams plist, dou
 }
 
 
-double* rough_box_prepareAdditionalParams(std::mt19937* rng, double roughness, double shift) {
+double* rough_box_prepareAdditionalParams(my_rng_generator& rng, double roughness, double shift) {
   const int order = 20;
   double* res = new double[order * 2 + 2];
   std::uniform_real_distribution<double> dist(0.0, 2.0*M_PI);
   for (int i = 0; i < 2 * order; i++) {
-    res[i] = dist(*rng);
+    res[i] = dist(rng);
   }
   res[2 * order] = roughness;
   res[2 * order + 1] = shift;

@@ -41,7 +41,6 @@
 #include <cstdarg>
 #include <vector>
 #include <map>
-#include <random>
 
 #define DEFAULT_DIMENSIONALITY 1
 
@@ -66,7 +65,7 @@ int main(int narg, char **args)
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
-  std::mt19937 mt_rng;
+  my_rng_generator mt_rng;
   //*******************************************BEGIN GRID DEFINITION*******************************************************
   jsonParser::setXrange(root, &grid);
   jsonParser::setYrange(root, &grid);

@@ -61,7 +61,7 @@ int main(int narg, char **args)
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
   int istep;
-  std::mt19937 rng;
+  my_rng_generator rng;
 
   //*******************************************BEGIN GRID DEFINITION*******************************************************
 

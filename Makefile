@@ -35,6 +35,11 @@ boost: OPT += -DUSE_BOOST
 boost: LIB += -lboost_filesystem -lboost_system
 boost: all
 
+nocpp11: boost
+nocpp11: OPT += -DUSE_NO_CXX11
+nocpp11: LIB += -lboost_filesystem -lboost_system -lboost_random
+nocpp11: all
+
 cnaf: all
 
 cnaf-intel: boost
@@ -43,7 +48,7 @@ cnaf-intel: OPT += -axSSE4.2,AVX -ipo
 cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
 cnaf-intel: all
 
-brew: boost
+brew: nocpp11
 brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
 brew: BOOST_INC = /usr/local/Cellar/boost/1.60.0_1/include
 brew: all
@@ -79,7 +84,7 @@ galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--bina
 galileo: BOOST_LIB = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/lib
 galileo: all
 
-fermi: boost
+fermi: nocpp11
 fermi: COMPILER = mpixlcxx
 fermi: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
