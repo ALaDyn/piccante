@@ -33,10 +33,9 @@
 #include <boost/random/exponential_distribution.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-
 typedef boost::random::mt19937 my_rng_generator;
 typedef boost::random::minstd_rand  aux_rnd_generator;
-typedef boost::random::uniform_real_distribution<double> my_uniform_real_distribution
+typedef boost::random::uniform_real_distribution<double> my_uniform_real_distribution;
 typedef boost::random::exponential_distribution<double>  my_exponential_distribution;
 typedef boost::random::normal_distribution<double>  my_normal_distribution;
 #else
