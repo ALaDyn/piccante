@@ -1,3 +1,4 @@
+COMPILER = mpicxx
 EXE = piccante.exe
 MAINFILE = main-piccante.cpp
 
