@@ -36,7 +36,7 @@ boost: LIB += -lboost_filesystem -lboost_system
 boost: all
 
 nocpp11: boost
-nocpp11: OPT += -DUSE_NO_CXX11
+nocpp11: OPT = -O3 -DNO_CXX11
 nocpp11: LIB += -lboost_filesystem -lboost_system -lboost_random
 nocpp11: all
 
