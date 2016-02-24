@@ -86,7 +86,7 @@ galileo: all
 
 fermi: nocpp11
 fermi: COMPILER = mpixlcxx
-fermi: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
+fermi: OPT = -qlanglvl=extended0x -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
