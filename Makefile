@@ -1,4 +1,19 @@
-COMPILER = mpicxx
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Gist
+ @sgatto
+ Unwatch 13
+  Star 12
+ Fork 6 ALaDyn/piccante
+ Code  Issues 1  Pull requests 0  Wiki  Pulse  Graphs  Settings
+Branch: master Find file Copy pathpiccante/Makefile
+6160972  13 hours ago
+@cenit cenit update scripts for fermi. Still broken on BGQ architectures due to po…
+2 contributors @cenit @sgatto
+RawBlameHistory     130 lines (102 sloc)  3.65 KBCOMPILER = mpicxx
 EXE = piccante.exe
 MAINFILE = main-piccante.cpp
 
@@ -86,7 +101,7 @@ galileo: all
 
 fermi: nocpp11
 fermi: COMPILER = mpixlcxx
-fermi: OPT = -qlanglvl=extended0x -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
+fermi: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
 #fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
@@ -132,3 +147,6 @@ clean:
 cleanall:
 	rm -f $(OBJ) $(EXE) $(EXE).debug *~
 
+
+Status API Training Shop Blog About Pricing
+© 2016 GitHub, Inc. Terms Privacy Security Contact Help
