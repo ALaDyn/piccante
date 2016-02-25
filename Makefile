@@ -18,12 +18,9 @@ SRC = $(addprefix $(SRC_FOLDER)/, $(FILES))
 MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
 OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
-#LIB = -lgsl -lgslcblas
 LIB =
 OPT = -O3 -std=c++11
 
-#GSL_LIB = $(SRC_FOLDER)
-#GSL_INC = $(SRC_FOLDER)
 BOOST_LIB = $(SRC_FOLDER)
 BOOST_INC = $(SRC_FOLDER)
 HDF5_INC = $(SRC_FOLDER)
@@ -32,15 +29,12 @@ HDF5_LIB = $(SRC_FOLDER)
 all: $(EXE)
 
 boost: OPT += -DUSE_BOOST
-boost: LIB += -lboost_filesystem -lboost_system
+boost: LIB += -lboost_filesystem -lboost_system -lboost_random
 boost: all
 
 nocpp11: boost
 nocpp11: OPT = -O3 -DNO_CXX11
-nocpp11: LIB += -lboost_filesystem -lboost_system -lboost_random
 nocpp11: all
-
-cnaf: all
 
 cnaf-intel: boost
 cnaf-intel: COMPILER = mpiicpc
@@ -78,31 +72,21 @@ sse2-vec: all
 
 galileo: boost
 galileo: OPT += -xCORE-AVX2 -ipo
-#galileo: GSL_INC = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/include
-#galileo: GSL_LIB = /cineca/prod/libraries/gsl/1.16/intel--cs-xe-2015--binary/lib
 galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/include
 galileo: BOOST_LIB = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/lib
 galileo: all
 
 fermi: nocpp11
 fermi: COMPILER = mpixlcxx
-fermi: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
-#fermi: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
-#fermi: OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
-#fermi: GSL_LIB = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/lib/
-#fermi: GSL_INC = /cineca/prod/libraries/gsl/1.15/bgq-xl--1.0/include/
 fermi: BOOST_LIB = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/lib/
 fermi: BOOST_INC = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/include/
 fermi: all
 
-juqueen: fermi
-juqueen: LIB = -lgsl -lgslcblas -lboost_system-1_47 -lboost_filesystem-1_47
-#juqueen: GSL_LIB = /bgsys/local/gsl/1.15_O3g/lib
-#juqueen: GSL_INC = /bgsys/local/gsl/1.15_O3g/include
-juqueen: BOOST_LIB = /bgsys/local/boost/1.47.0/lib
-juqueen: BOOST_INC = /bgsys/local/boost/1.47.0
-juqueen: all
-
+fermi-perf: fermi
+fermi-perf: OPT = -qstrict -O5 -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1
+#fermi-perf: OPT = -qipa=level=2 -qipa=partition=large -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
+#fermi-perf: OPT = -O5 -qstrict -qinline -qhot -qlibmpi -qarch=qp -qtune=qp -qmaxmem=-1
+fermi-perf: all
 
 fermi-scalasca: fermi
 fermi-scalasca: COMPILER = scalasca -instrument mpixlcxx
@@ -118,6 +102,13 @@ fermi-debug-ipa: fermi
 fermi-debug-ipa: OPT = -qipa=partition=large -qarch=qp -qtune=qp -qmaxmem=-1 -g -qfullpath -qcheck -qflttrap -qinitauto=FF
 fermi-debug-ipa: EXE = piccante.debug
 fermi-debug-ipa: all
+
+juqueen: nocpp11
+juqueen: COMPILER = mpixlcxx
+juqueen: LIB = -lboost_system-1_47 -lboost_filesystem-1_47
+juqueen: BOOST_LIB = /bgsys/local/boost/1.47.0/lib
+juqueen: BOOST_INC = /bgsys/local/boost/1.47.0
+juqueen: all
 
 
 $(EXE): $(OBJ)
