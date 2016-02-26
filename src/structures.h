@@ -21,7 +21,7 @@
 #define __STRUCTURES_H__
 
 #define _USE_MATH_DEFINES
-#define NUMBER_OF_PLASMA_FUNCTIONS 23
+#define NUMBER_OF_PLASMA_FUNCTIONS 24
 
 #include <math.h>
 #include "commons.h"
@@ -146,6 +146,8 @@ double spheres(double x, double y, double z, PLASMAparams plist, double Z, doubl
 double pillars2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
 double nanotubes2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
 double foils2D (double x, double y, double z, PLASMAparams plist, double Z, double A);
+
+double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
 enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
