@@ -29,11 +29,11 @@ HDF5_LIB = $(SRC_FOLDER)
 all: $(EXE)
 
 boost: OPT += -DUSE_BOOST
-boost: LIB += -lboost_filesystem -lboost_system -lboost_random
+boost: LIB += -lboost_filesystem -lboost_system
 boost: all
 
 nocpp11: boost
-nocpp11: OPT = -O3 -DNO_CXX11
+nocpp11: OPT = -O3 -DNO_CXX11 -lboost_random
 nocpp11: all
 
 cnaf-intel: boost
