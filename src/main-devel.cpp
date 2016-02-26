@@ -75,9 +75,10 @@ void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
 void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
   double kdx=2*M_PI/lambda;
   int Ngrid[3];
-  Ngrid[0] = grid->NGridNodes[0];
-  Ngrid[1] = grid->NGridNodes[1];
-  Ngrid[2] = grid->NGridNodes[2];
+
+  Ngrid[0] = grid->Nloc[0];
+  Ngrid[1] = grid->Nloc[1];
+  Ngrid[2] = grid->Nloc[2];
 
   double x;
 
@@ -102,9 +103,9 @@ void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
 
 void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
   int Ngrid[3];
-  Ngrid[0] = grid->NGridNodes[0];
-  Ngrid[1] = grid->NGridNodes[1];
-  Ngrid[2] = grid->NGridNodes[2];
+  Ngrid[0] = grid->Nloc[0];
+  Ngrid[1] = grid->Nloc[1];
+  Ngrid[2] = grid->Nloc[2];
 
   double x;
   std::ofstream density("density_0.txt");
@@ -237,6 +238,7 @@ int main(int narg, char **args)
     int counter=0;
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       moveParticles(&grid,(*spec_iterator),amplitude,lambda);
+      (*spec_iterator)->position_parallel_pbc();
       (*spec_iterator)->position_parallel_pbc();
       double ampliEx;
       ampliEx = 4*M_PI*(*spec_iterator)->chargeSign*(*spec_iterator)->Z*(*spec_iterator)->plasma.params.density_coefficient*amplitude;
