@@ -108,20 +108,9 @@ void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
   Ngrid[2] = grid->Nloc[2];
 
   double x;
-  std::ofstream density("density_0.txt");
-  std::ofstream ExBefore("Ex-before.txt");
-  std::ofstream ExAfter("Ex-after.txt");
+
   double totalSum=0;
 
-  for(int k=0; k<Ngrid[2]; k++){
-    for(int j=0; j<Ngrid[1]; j++){
-      for(int i=0; i<Ngrid[0]; i++){
-        x = grid->rmin[0] + grid->dr[0]*i;
-        density << x << "   " << (1-current->density(i,j,k)) << std::endl;
-        ExBefore << x << "   " << field->E0(i,j,k) << std::endl;
-      }
-    }
-  }
 
   for(int k=0; k<Ngrid[2]; k++){
     for(int j=0; j<Ngrid[1]; j++){
@@ -139,18 +128,6 @@ void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
     }
   }
 
-  for(int k=0; k<Ngrid[2]; k++){
-    for(int j=0; j<Ngrid[1]; j++){
-      for(int i=0; i<Ngrid[0]; i++){
-        x = grid->rmin[0] + grid->dr[0]*i;
-        ExAfter << x << "   " << field->E0(i,j,k) << std::endl;
-
-      }
-    }
-  }
-  density.close();
-  ExBefore.close();
-  ExAfter.close();
 }
 
 int main(int narg, char **args)
