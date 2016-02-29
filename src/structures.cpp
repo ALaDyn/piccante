@@ -79,7 +79,8 @@ const std::string PLASMA::dFNames[] = {
   "left_blazed_grating",
   "pillars2D",
   "nanotubes2D",
-  "foils2D"
+  "foils2D",
+  "res2D"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -104,7 +105,8 @@ const distrib_function PLASMA::dFPoint[] = {
   left_blazed_grating,
   pillars2D,
   nanotubes2D,
-  foils2D
+  foils2D,
+  demo_2D_resonator
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -870,6 +872,32 @@ double foils2D (double x, double y, double z, PLASMAparams plist, double Z, doub
     }
     return rho;
 }
+
+double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double rho = -1;
+    if( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+        (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])  &&
+        (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+
+        if(x> 0.0 && x < 0.6 && y < 1 && y > -1){
+            rho = -1;
+        }
+        else if( ( (x-3.25)*(x-3.25)+y*y < 3*3 ) && x < 3.25){
+            rho = -1;
+        }
+        else if (x> 3.25 && x < 6.25 && y < 3 && y > -3 ){
+            rho = -1;
+        }
+        else if (x > 6.25 && ( (x-6.25)*(x-6.25)+y*y < 3*3) ){
+            rho = -1;
+        }
+        else{
+            rho = plist.density_coefficient;
+        }
+    }
+    return rho;
+}
+
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************
 
