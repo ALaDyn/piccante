@@ -54,7 +54,7 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 #include <stdint.h>
 #endif
 //*****VERSION*****
-#define CURRENT_VERSION "version 1.4.2"
+#define CURRENT_VERSION "version 1.5.0"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2
