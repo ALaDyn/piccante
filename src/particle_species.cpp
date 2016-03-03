@@ -3709,7 +3709,7 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 
 
 }
-void SPECIE::density_deposition_standard(CURRENT *current)
+void SPECIE::density_deposition_standard(CURRENT *current, bool withSign)
 {
   if (mygrid->withParticles == NO) {
     return;
@@ -3717,7 +3717,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
 
 
   if (mygrid->isStretched()) {
-    SPECIE::densityStretchedDepositionStandard(current);
+    SPECIE::densityStretchedDepositionStandard(current, withSign);
     return;
   }
 
@@ -3728,8 +3728,13 @@ void SPECIE::density_deposition_standard(CURRENT *current)
   double wiw[3][3];     // whole integer weight
   double rr, rr2;       // local coordinate to integer grid point, local coordinate squared
   double dvol, xx[3];   // tensor_product, absolute particle position
+  double _chargeSign;
+  if(withSign)
+    _chargeSign = chargeSign;
+  else
+    _chargeSign = 1;
 
-  if (mygrid->withParticles != YES)
+    if (mygrid->withParticles != YES)
     return;
 
   for (p = 0; p < Np; p++)
@@ -3762,7 +3767,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
             i1 = i + wii[0] - 1;
 
             dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-              current->density(i1, j1, k1) += w(p)*dvol;
+              current->density(i1, j1, k1) += _chargeSign*w(p)*dvol;
           }
         }
       }
@@ -3777,7 +3782,7 @@ void SPECIE::density_deposition_standard(CURRENT *current)
         {
           i1 = i + wii[0] - 1;
           dvol = wiw[0][i] * wiw[1][j],
-            current->density(i1, j1, k1) += w(p)*dvol;
+            current->density(i1, j1, k1) += _chargeSign*w(p)*dvol;
         }
       }
       break;
@@ -3788,14 +3793,14 @@ void SPECIE::density_deposition_standard(CURRENT *current)
       {
         i1 = i + wii[0] - 1;
         dvol = wiw[0][i],
-          current->density(i1, j1, k1) += w(p)*dvol;
+          current->density(i1, j1, k1) += _chargeSign*w(p)*dvol;
       }
       break;
     }
 
   }
 }
-void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
+void SPECIE::densityStretchedDepositionStandard(CURRENT *current, bool withSign)
 {
   if (mygrid->withParticles == NO)
     return;
@@ -3810,6 +3815,11 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
   double mydr[3], myweight;
   double mycsi[3];
 
+  double _chargeSign;
+  if(withSign)
+    _chargeSign = chargeSign;
+  else
+    _chargeSign = 1;
 
   for (p = 0; p < Np; p++)
   {
@@ -3844,7 +3854,7 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
             i1 = i + wii[0] - 1;
 
             dvol = wiw[0][i] * wiw[1][j] * wiw[2][k],
-              current->density(i1, j1, k1) += myweight*dvol;
+              current->density(i1, j1, k1) += _chargeSign*myweight*dvol;
           }
         }
       }
@@ -3860,7 +3870,7 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
         {
           i1 = i + wii[0] - 1;
           dvol = wiw[0][i] * wiw[1][j],
-            current->density(i1, j1, k1) += myweight*dvol;
+            current->density(i1, j1, k1) += _chargeSign*myweight*dvol;
         }
       }
       break;
@@ -3872,7 +3882,7 @@ void SPECIE::densityStretchedDepositionStandard(CURRENT *current)
       {
         i1 = i + wii[0] - 1;
         dvol = wiw[0][i],
-          current->density(i1, j1, k1) += myweight*dvol;
+          current->density(i1, j1, k1) += _chargeSign*myweight*dvol;
       }
       break;
     }

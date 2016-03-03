@@ -65,6 +65,7 @@ public:
   inline double & Jy(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 1, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
   inline double & Jz(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 2, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
   inline double & density(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 3, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
+  inline double & aux(int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, 0, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
   inline double & JJ(int c, int i, int j, int k) { return val[my_indice(mygrid->getEdge(), YGrid_factor, ZGrid_factor, c, i, j*YGrid_factor, k*ZGrid_factor, N_grid[0], N_grid[1], N_grid[2], Ncomp)]; }
 
 

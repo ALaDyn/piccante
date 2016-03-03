@@ -118,7 +118,7 @@ void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
       int i=0;
       totalSum += field->E0(i,j,k) = 0;
       for(i=1; i<Ngrid[0]; i++){
-        field->E0(i,j,k) = grid->dr[0]*grid->den_factor*(1-current->density(i,j,k)) + field->E0(i-1,j,k);
+        field->E0(i,j,k) = grid->dr[0]*grid->den_factor*(1+current->density(i,j,k)) + field->E0(i-1,j,k);
         totalSum += field->E0(i,j,k);
       }
       totalSum /= (Ngrid[0]-1);
@@ -171,17 +171,6 @@ int main(int narg, char **args)
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
-  //*******************************************BEGIN FIELD DEFINITION*********************************************************
-  myfield.allocate(&grid);
-  myfield.setAllValuesToZero();
-
-
-  jsonParser::setLaserPulses(root, &myfield);
-  myfield.boundary_conditions();
-
-  current.allocate(&grid);
-  current.setAllValuesToZero();
-  //*******************************************END FIELD DEFINITION***********************************************************
   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
   bool isThereSpecial=false;
   bool isThereAmpli=false;
@@ -221,11 +210,12 @@ int main(int narg, char **args)
       ampliEx = 4*M_PI*(*spec_iterator)->chargeSign*(*spec_iterator)->Z*(*spec_iterator)->plasma.params.density_coefficient*amplitude;
 
       //current.eraseDensity();
-      //(*spec_iterator)->density_deposition_standard(&current);
+      //bool withSign = true;
+      //(*spec_iterator)->density_deposition_standard(&current, withSign);
       //current.pbc();
       //poissonTest(&grid,&myfield,&current);
       //std::cout << "counter= " << counter<< "  ampliEx = " << ampliEx << "  lambda = " << lambda << std::endl;
-      deformEx(&grid,&myfield,ampliEx,lambda);
+      //deformEx(&grid,&myfield,ampliEx,lambda);
       myfield.boundary_conditions();
       counter++;
     }
@@ -240,6 +230,27 @@ int main(int narg, char **args)
   }
 
   //*******************************************END SPECIES DEFINITION***********************************************************
+  //*******************************************BEGIN FIELD DEFINITION*********************************************************
+  myfield.allocate(&grid);
+  myfield.setAllValuesToZero();
+  current.allocate(&grid);
+  bool withSign = true;
+  std::cout << "voglio calcolare la densita'" << std::endl;
+
+  current.setAllValuesToZero();
+  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+    (*spec_iterator)->density_deposition_standard(&current, withSign);
+  }
+  current.pbc();
+  std::cout << "ho calcolato la densita'... ora sara' un casino" << std::endl;
+  myfield.poissonSolver(&current);
+
+  jsonParser::setLaserPulses(root, &myfield);
+  myfield.boundary_conditions();
+
+
+  current.setAllValuesToZero();
+  //*******************************************END FIELD DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   std::map<std::string, outDomain*> outDomains;

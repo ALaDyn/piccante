@@ -1792,7 +1792,8 @@ void OUTPUT_MANAGER::callEMFieldProbe(request req) {
 
 void OUTPUT_MANAGER::callSpecDensity(request req) {
   mycurrent->eraseDensity();
-  myspecies[req.target]->density_deposition_standard(mycurrent);
+  bool withSign=false;
+  myspecies[req.target]->density_deposition_standard(mycurrent, withSign);
   mycurrent->pbc();
 
   std::string nameBin = composeOutputName(outputDir, "DENS", myspecies[req.target]->name, myDomains[req.domain]->name, req.domain, req.dtime, ".bin");

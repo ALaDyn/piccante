@@ -125,6 +125,9 @@ public:
   bool amIAllocated();
 
   void difference(EM_FIELD *right);
+  void poissonSolver(CURRENT *current);
+  void putNabla2ofB1inCurrentAux(CURRENT *current);
+  double getErrorInPoissonEquation(CURRENT *current);
 
   void boundary_conditions();  // set on the ghost cells the boundary values  
 

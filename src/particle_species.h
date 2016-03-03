@@ -83,8 +83,8 @@ public:
   void add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution);
   void current_deposition_standard(CURRENT *current);
   void currentStretchedDepositionStandard(CURRENT *current);
-  void density_deposition_standard(CURRENT *current);
-  void densityStretchedDepositionStandard(CURRENT *current);
+  void density_deposition_standard(CURRENT *current, bool withSign);
+  void densityStretchedDepositionStandard(CURRENT *current, bool withSign);
   void setParticlesPerCellXYZ(int numX, int numY, int numZ);
   void setName(std::string iname);
   double getKineticEnergy();

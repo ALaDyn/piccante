@@ -105,17 +105,6 @@ int main(int narg, char **args)
 
 
   //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
-    //*******************************************BEGIN FIELD DEFINITION*********************************************************
-  myfield.allocate(&grid);
-  myfield.setAllValuesToZero();
-
-
-  jsonParser::setLaserPulses(root, &myfield);
-  myfield.boundary_conditions();
-
-  current.allocate(&grid);
-  current.setAllValuesToZero();
-  //*******************************************END FIELD DEFINITION***********************************************************
 
   //*******************************************BEGIN SPECIES DEFINITION*********************************************************
 
@@ -132,6 +121,20 @@ int main(int narg, char **args)
   }
 
   //*******************************************END SPECIES DEFINITION***********************************************************
+
+  //*******************************************BEGIN FIELD DEFINITION*********************************************************
+  myfield.allocate(&grid);
+  myfield.setAllValuesToZero();
+
+
+  myfield.boundary_conditions();
+
+  jsonParser::setLaserPulses(root, &myfield);
+  myfield.boundary_conditions();
+
+  current.allocate(&grid);
+  current.setAllValuesToZero();
+  //*******************************************END FIELD DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   std::map<std::string, outDomain*> outDomains;

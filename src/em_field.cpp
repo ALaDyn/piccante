@@ -129,27 +129,27 @@ integer_or_halfinteger EM_FIELD::getCompCoords(int c) {
   integer_or_halfinteger crd;
 
   switch (c) {
-  case 0: //Ex
-    crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
-    break;
-  case 1://Ey
-    crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
-    break;
-  case 2://Ez
-    crd.x = _INTG_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
-    break;
-  case 3://Bx
-    crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _HALF_CRD;
-    break;
-  case 4://By
-    crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
-    break;
-  case 5://Bz
-    crd.x = _HALF_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
-    break;
-  default:
-    crd.x = _NULL_CRD; crd.y = _NULL_CRD; crd.z = _NULL_CRD;
-    break;
+    case 0: //Ex
+      crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _INTG_CRD;
+      break;
+    case 1://Ey
+      crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
+      break;
+    case 2://Ez
+      crd.x = _INTG_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
+      break;
+    case 3://Bx
+      crd.x = _INTG_CRD; crd.y = _HALF_CRD; crd.z = _HALF_CRD;
+      break;
+    case 4://By
+      crd.x = _HALF_CRD; crd.y = _INTG_CRD; crd.z = _HALF_CRD;
+      break;
+    case 5://Bz
+      crd.x = _HALF_CRD; crd.y = _HALF_CRD; crd.z = _INTG_CRD;
+      break;
+    default:
+      crd.x = _NULL_CRD; crd.y = _NULL_CRD; crd.z = _NULL_CRD;
+      break;
   }
   return crd;
 }
@@ -225,8 +225,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer) {
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 0, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+               MPI_COMM_WORLD, &status);
 
 
 
@@ -254,8 +254,8 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer) {
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+               MPI_COMM_WORLD, &status);
 
   if (mygrid->getXBoundaryConditions() == _PBC || (mygrid->rmyid[0] != (mygrid->rnproc[0] - 1))) {
 
@@ -316,8 +316,8 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer) {
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 1, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+               MPI_COMM_WORLD, &status);
   // ======   send right: send_buff=right_edge
   if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != 0)) {
 
@@ -341,8 +341,8 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer) {
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+               MPI_COMM_WORLD, &status);
   // ====== copy recv_buffer to the right edge
   if (mygrid->getYBoundaryConditions() == _PBC || (mygrid->rmyid[1] != (mygrid->rnproc[1] - 1))) {
 
@@ -400,8 +400,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer) {
   // ====== send edge to right receive from left
   MPI_Cart_shift(mygrid->cart_comm, 2, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, ileft, 13,
+               MPI_COMM_WORLD, &status);
 
   // ====== update left boundary and send edge to left receive from right
 
@@ -425,8 +425,8 @@ void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer) {
 
   // ====== send to left receive from right
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+               MPI_COMM_WORLD, &status);
   // ====== update right edge
 
   for (int k = 0; k < Nxchng; k++)
@@ -651,6 +651,256 @@ void EM_FIELD::openBoundariesB() {
         B1(ii, jj, -1) = -c1*(2.0*E0(ii, jj, 0) + c2*B1(ii, jj, 0));
         B0(ii, jj, -1) = c1*(2.0*E1(ii, jj, 0) - c2*B0(ii, jj, 0));
       }
+  }
+}
+
+void EM_FIELD::poissonSolver(CURRENT *current){
+  int i, j, k;
+  int Nx, Ny, Nz;
+  double dxi, dyi, dzi;
+  Nx = mygrid->Nloc[0];
+  Ny = mygrid->Nloc[1];
+  Nz = mygrid->Nloc[2];
+  int dimensions = mygrid->getDimensionality();
+
+  int edge = mygrid->getEdge();
+
+  double alpha, const1, const2, beta, const3;
+  //#pragma omp parallel for private(i,j)
+
+  const1 = 0;
+  for (k = 0; k < Nz; k++) {
+    for (j = 0; j < Ny; j++) {
+      for (i = 0; i < Nx; i++) {
+        B2(i, j, k) = 0;     // phi
+        B0(i, j, k) = -mygrid->den_factor*(1+current->density(i,j,k)); //res
+        B1(i, j, k) = B0(i, j, k);   // p
+        const1 += B0(i, j, k)*B0(i, j, k);
+      }
+    }
+  }
+
+
+  double bigNumber, smallNumber=1e-1;
+  bool nonMiPiace = true;
+  int iteration=0;
+
+  boundary_conditions();
+  while(nonMiPiace){
+    putNabla2ofB1inCurrentAux(current);  //current->aux(i,j,k) = A.p
+
+    const2 = const3 = 0;
+
+    for (k = 0; k < Nz; k++) {
+      for (j = 0; j < Ny; j++) {
+        for (i = 0; i < Nx; i++) {
+
+          const2 += B1(i, j, k)*current->aux(i,j,k);
+        }
+      }
+    }
+    alpha = const1/const2;
+    for (k = 0; k < Nz; k++) {
+      for (j = 0; j < Ny; j++) {
+        for (i = 0; i < Nx; i++) {
+          B2(i, j, k)  = B2(i, j, k) + alpha*B1(i,j,k);
+          B0(i, j, k) = B0(i, j, k) - alpha*current->aux(i,j,k);
+          const3 += B0(i, j, k)*B0(i, j, k);
+        }
+      }
+    }
+    beta = const3/const1;
+    const1=const3;
+    for (k = 0; k < Nz; k++) {
+      for (j = 0; j < Ny; j++) {
+        for (i = 0; i < Nx; i++) {
+          B1(i, j, k) = B0(i, j, k) + beta*B1(i, j, k);
+        }
+      }
+    }
+
+    boundary_conditions();
+    iteration++;
+    //bigNumber=getErrorInPoissonEquation(current);
+    bigNumber=const3;
+    std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << std::endl;
+    if(bigNumber<smallNumber || iteration >100 ){
+      nonMiPiace =false;
+    }
+  }
+
+
+  if (dimensions == 3) {
+    //#pragma omp parallel for private(i,j)
+    for (k = 0; k < Nz; k++) {
+      dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
+      for (j = 0; j < Ny; j++) {
+        dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
+        for (i = 0; i < Nx; i++) {
+          dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+
+          double ddx, ddy, ddz;
+          ddx = dxi*(B2(i+1, j, k)-B2(i, j, k));
+          ddy = dyi*(B2(i, j+1, k)-B2(i, j, k));
+          ddz = dzi*(B2(i, j, k+1)-B2(i, j, k));
+          E0(i,j,k) = -ddx;
+          E1(i,j,k) = -ddy;
+          E2(i,j,k) = -ddz;
+        }
+      }
+    }
+  }
+  else if (dimensions == 2) {
+    for (j = 0; j < Ny; j++) {
+      dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
+      for (i = 0; i < Nx; i++) {
+        dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+        double ddx, ddy;
+        ddx = dxi*(B2(i+1, j, k)-B2(i, j, k));
+        ddy = dyi*(B2(i, j+1, k)-B2(i, j, k));
+        E0(i,j,k) = -ddx;
+        E1(i,j,k) = -ddy;
+        E2(i,j,k) = 0;
+      }
+    }
+  }
+  else if (dimensions == 1){
+    for (i = 0; i < Nx; i++) {
+      dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
+      double ddx;
+      ddx = dxi*(B2(i+1, j, k)-B2(i, j, k));
+      E0(i,j,k) = -ddx;
+      E1(i,j,k) = 0;
+      E2(i,j,k) = 0;
+    }
+  }
+}
+
+
+
+double EM_FIELD::getErrorInPoissonEquation(CURRENT *current){
+  int i, j, k;
+  int Nx, Ny, Nz;
+  double dxi, dyi, dzi;
+  double dxiR, dyiR, dziR;
+  double dxiL, dyiL, dziL;
+  int dimensions = mygrid->getDimensionality();
+
+  double globalError=0;
+  Nx = mygrid->Nloc[0];
+  Ny = mygrid->Nloc[1];
+  Nz = mygrid->Nloc[2];
+
+  if (dimensions == 3) {
+    //#pragma omp parallel for private(i,j)
+    for (k = 0; k < Nz; k++) {
+      dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
+      dziR = dziL = dzi;
+      for (j = 0; j < Ny; j++) {
+        dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
+        dyiR = dyiL = dyi;
+        for (i = 0; i < Nx; i++) {
+          dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+          dxiR = dxiL = dxi;
+
+          double ddx, ddy, ddz;
+          ddx = dxi*( dxiR*(B2(i+1, j, k)-B2(i, j, k)) - dxiL*(B2(i, j, k) -B2(i-1, j, k)) );
+          ddy = dyi*( dyiR*(B2(1, j+1, k)-B2(i, j, k)) - dyiL*(B2(i, j, k) -B2(i, j-1, k)) );
+          ddz = dzi*( dziR*(B2(i, j, k+1)-B2(i, j, k)) - dziL*(B2(i, j, k) -B2(i, j, k-1)) );
+          globalError += fabs( (ddx + ddy +ddz) + mygrid->den_factor*current->density(i,j,k));
+        }
+      }
+    }
+    globalError /= Nx*Ny*Nz;
+  }
+  else if (dimensions == 2){
+    for (j = 0; j < Ny; j++) {
+      dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
+      dyiR = dyiL = dyi;
+      for (i = 0; i < Nx; i++) {
+        dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+        dxiR = dxiL = dxi;
+
+        double ddx, ddy;
+        ddx = dxi*( dxiR*(B2(i+1, j, k)-B2(i, j, k)) - dxiL*(B2(i, j, k) -B2(i-1, j, k)) );
+        ddy = dyi*( dyiR*(B2(1, j+1, k)-B2(i, j, k)) - dyiL*(B2(i, j, k) -B2(i, j-1, k)) );
+        globalError += fabs( (ddx + ddy) + mygrid->den_factor*current->density(i,j,k));
+      }
+    }
+    globalError /= Nx*Ny;
+  }
+  else if (dimensions == 1){
+    for (i = 0; i < Nx; i++) {
+      dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+      dxiR = dxiL = dxi;
+
+      double ddx;
+      ddx = dxi*( dxiR*(B2(i+1, j, k)-B2(i, j, k)) - dxiL*(B2(i, j, k) -B2(i-1, j, k)) );
+      globalError += fabs( (ddx) + mygrid->den_factor*current->density(i,j,k));
+    }
+
+    globalError /= Nx;
+  }
+  return globalError;
+}
+
+void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
+  int i, j, k;
+  int Nx, Ny, Nz;
+  double dxi, dyi, dzi;
+  double dxiR, dyiR, dziR;
+  double dxiL, dyiL, dziL;
+  int dimensions = mygrid->getDimensionality();
+
+  Nx = mygrid->Nloc[0];
+  Ny = mygrid->Nloc[1];
+  Nz = mygrid->Nloc[2];
+
+  if (dimensions == 3) {
+    //#pragma omp parallel for private(i,j)
+    for (k = 0; k < Nz; k++) {
+      dzi = mygrid->dri[2] * mygrid->iStretchingDerivativeCorrection[2][k];
+      dziR = dziL = dzi;
+      for (j = 0; j < Ny; j++) {
+        dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
+        dyiR = dyiL = dyi;
+        for (i = 0; i < Nx; i++) {
+          dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+          dxiR = dxiL = dxi;
+
+          double ddx, ddy, ddz;
+          ddx = dxi*( dxiR*(B1(i+1, j, k)-B1(i, j, k)) - dxiL*(B1(i, j, k) -B1(i-1, j, k)) );
+          ddy = dyi*( dyiR*(B1(1, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
+          ddz = dzi*( dziR*(B1(i, j, k+1)-B1(i, j, k)) - dziL*(B1(i, j, k) -B1(i, j, k-1)) );
+          current->aux(i,j,k) = ddx + ddy +ddz;
+        }
+      }
+    }
+  }
+  else if (dimensions == 2) {
+    for (j = 0; j < Ny; j++) {
+      dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
+      dyiR = dyiL = dyi;
+      for (i = 0; i < Nx; i++) {
+        dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+        dxiR = dxiL = dxi;
+
+        double ddx, ddy;
+        ddx = dxi*( dxiR*(B1(i+1, j, k)-B1(i, j, k)) - dxiL*(B1(i, j, k) -B1(i-1, j, k)) );
+        ddy = dyi*( dyiR*(B1(1, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
+        current->aux(i,j,k) = ddx + ddy;
+      }
+    }
+  }
+  else if (dimensions == 1){
+    for (i = 0; i < Nx; i++) {
+      dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
+      dxiR = dxiL = dxi;
+
+      double ddx;
+      ddx = dxi*( dxiR*(B1(i+1, j, k)-B1(i, j, k)) - dxiL*(B1(i, j, k) -B1(i-1, j, k)) );
+      current->aux(i,j,k) = ddx;
+    }
   }
 }
 
@@ -908,18 +1158,18 @@ void EM_FIELD::init_output_diag(std::ofstream &ff)
 {
   if (mygrid->myid == mygrid->master_proc) {
     ff << std::setw(myNarrowWidth) << "#step"
-      << " " << std::setw(myWidth) << "time"
-      << " " << std::setw(myWidth) << "Etot"
-      << " " << std::setw(myWidth) << "Ex2"
-      << " " << std::setw(myWidth) << "Ey2"
-      << " " << std::setw(myWidth) << "Ez2"
-      << " " << std::setw(myWidth) << "Bx2"
-      << " " << std::setw(myWidth) << "By2"
-      << " " << std::setw(myWidth) << "Bz2"
-      << " " << std::setw(myWidth) << "Sx"
-      << " " << std::setw(myWidth) << "Sy"
-      << " " << std::setw(myWidth) << "Sz"
-      << std::endl;
+       << " " << std::setw(myWidth) << "time"
+       << " " << std::setw(myWidth) << "Etot"
+       << " " << std::setw(myWidth) << "Ex2"
+       << " " << std::setw(myWidth) << "Ey2"
+       << " " << std::setw(myWidth) << "Ez2"
+       << " " << std::setw(myWidth) << "Bx2"
+       << " " << std::setw(myWidth) << "By2"
+       << " " << std::setw(myWidth) << "Bz2"
+       << " " << std::setw(myWidth) << "Sx"
+       << " " << std::setw(myWidth) << "Sy"
+       << " " << std::setw(myWidth) << "Sz"
+       << std::endl;
   }
 }
 void EM_FIELD::output_diag(int istep, std::ofstream &ff)
@@ -978,7 +1228,7 @@ void EM_FIELD::difference(EM_FIELD *right)
       }
 }
 
-//Filtro per i campi. Lascia tutto inalterato, tranne filter_points punti dai bordi, su cui c'è smorzamento con cos^2 
+//Filtro per i campi. Lascia tutto inalterato, tranne filter_points punti dai bordi, su cui c'è smorzamento con cos^2
 void EM_FIELD::smooth_filter(int filter_points) {
 
   if (filter_points == 0) return;
@@ -1035,36 +1285,36 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse) {
   if (mygrid->myid == mygrid->master_proc) {
     std::string pulseType;
     switch (pulse->type) {
-    case GAUSSIAN:
-      pulseType = "GAUSSIAN PULSE";
-      break;
-    case PLANE_WAVE:
-      pulseType = "PLANE WAVE";
-      break;
-    case COS2_PLANE_WAVE:
-      pulseType = "COS2 PLANE WAVE";
-      break;
-    case COS2_PLATEAU_PLANE_WAVE:
-      pulseType = "COS2 PLATEAU PLANE WAVE";
-      break;
-    default:
-      pulseType = "";
-      break;
+      case GAUSSIAN:
+        pulseType = "GAUSSIAN PULSE";
+        break;
+      case PLANE_WAVE:
+        pulseType = "PLANE WAVE";
+        break;
+      case COS2_PLANE_WAVE:
+        pulseType = "COS2 PLANE WAVE";
+        break;
+      case COS2_PLATEAU_PLANE_WAVE:
+        pulseType = "COS2 PLATEAU PLANE WAVE";
+        break;
+      default:
+        pulseType = "";
+        break;
     }
     std::string pulsePolarization;
     switch (pulse->polarization) {
-    case P_POLARIZATION:
-      pulsePolarization = "P";
-      break;
-    case S_POLARIZATION:
-      pulsePolarization = "S";
-      break;
-    case CIRCULAR_POLARIZATION:
-      pulsePolarization = "Circular";
-      break;
-    default:
-      pulsePolarization = "";
-      break;
+      case P_POLARIZATION:
+        pulsePolarization = "P";
+        break;
+      case S_POLARIZATION:
+        pulsePolarization = "S";
+        break;
+      case CIRCULAR_POLARIZATION:
+        pulsePolarization = "Circular";
+        break;
+      default:
+        pulsePolarization = "";
+        break;
     }
 
     printf("==================== %19s ====================\n", pulseType.c_str());
@@ -1088,111 +1338,111 @@ void EM_FIELD::addPulse(laserPulse* pulse) {
   EBEnergyExtremesFlag = false;
   writeNewPulseInformation(pulse);
   switch (pulse->type) {
-  case GAUSSIAN:
-  {
-    if (pulse->rotation) {
-      initialize_gaussian_pulse_angle(pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        pulse->waist,
-        pulse->focus_position,
-        pulse->rotation_center_along_x,
-        pulse->angle,
-        pulse->polarization);
-    }
-    else {
-      initialize_gaussian_pulse_angle(pulse->lambda0,
-        pulse->normalized_amplitude,
-        pulse->laser_pulse_initial_position,
-        pulse->t_FWHM,
-        pulse->waist,
-        pulse->focus_position,
-        0.0,
-        0.0,
-        pulse->polarization);
-    }
-    break;
-  }
-  case PLANE_WAVE: {
-    if (pulse->rotation) {
-      initialize_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          pulse->angle,
-          pulse->polarization);
-    }
-    else {
-      initialize_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          0.0,
-          pulse->polarization);
-    }
-    break;
-  }
-  case COS2_PLANE_WAVE:
-  {
-    if (pulse->rotation) {
-      initialize_cos2_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          pulse->laser_pulse_initial_position,
-          pulse->t_FWHM,
-          pulse->rotation_center_along_x,
-          pulse->angle,
-          pulse->polarization,
-          pulse->t_FWHM);
-    }
-    else {
-      initialize_cos2_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          pulse->laser_pulse_initial_position,
-          pulse->t_FWHM,
-          0.0,
-          0.0,
-          pulse->polarization,
-          pulse->t_FWHM);
-    }
-    break;
-  }
+    case GAUSSIAN:
+      {
+        if (pulse->rotation) {
+          initialize_gaussian_pulse_angle(pulse->lambda0,
+                                          pulse->normalized_amplitude,
+                                          pulse->laser_pulse_initial_position,
+                                          pulse->t_FWHM,
+                                          pulse->waist,
+                                          pulse->focus_position,
+                                          pulse->rotation_center_along_x,
+                                          pulse->angle,
+                                          pulse->polarization);
+        }
+        else {
+          initialize_gaussian_pulse_angle(pulse->lambda0,
+                                          pulse->normalized_amplitude,
+                                          pulse->laser_pulse_initial_position,
+                                          pulse->t_FWHM,
+                                          pulse->waist,
+                                          pulse->focus_position,
+                                          0.0,
+                                          0.0,
+                                          pulse->polarization);
+        }
+        break;
+      }
+    case PLANE_WAVE: {
+        if (pulse->rotation) {
+          initialize_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->angle,
+               pulse->polarization);
+        }
+        else {
+          initialize_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               0.0,
+               pulse->polarization);
+        }
+        break;
+      }
+    case COS2_PLANE_WAVE:
+      {
+        if (pulse->rotation) {
+          initialize_cos2_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               pulse->rotation_center_along_x,
+               pulse->angle,
+               pulse->polarization,
+               pulse->t_FWHM);
+        }
+        else {
+          initialize_cos2_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               0.0,
+               0.0,
+               pulse->polarization,
+               pulse->t_FWHM);
+        }
+        break;
+      }
 
-  case COS2_PLATEAU_PLANE_WAVE:
-  {
-    if (pulse->rotation) {
-      initialize_cos2_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          pulse->laser_pulse_initial_position,
-          pulse->t_FWHM,
-          pulse->rotation_center_along_x,
-          pulse->angle,
-          pulse->polarization,
-          pulse->rise_time);
-    }
-    else {
-      initialize_cos2_plane_wave_angle
-        (pulse->lambda0,
-          pulse->normalized_amplitude,
-          pulse->laser_pulse_initial_position,
-          pulse->t_FWHM,
-          0.0,
-          0.0,
-          pulse->polarization,
-          pulse->rise_time);
-    }
-    break;
-  }
+    case COS2_PLATEAU_PLANE_WAVE:
+      {
+        if (pulse->rotation) {
+          initialize_cos2_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               pulse->rotation_center_along_x,
+               pulse->angle,
+               pulse->polarization,
+               pulse->rise_time);
+        }
+        else {
+          initialize_cos2_plane_wave_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               0.0,
+               0.0,
+               pulse->polarization,
+               pulse->rise_time);
+        }
+        break;
+      }
 
-  default: {}
+    default: {}
   }
 }
 
 void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
-  double laser_pulse_initial_position,
-  double t_FWHM, double xcenter, double angle,
-  pulsePolarization polarization, double rise_time)
+                                                double laser_pulse_initial_position,
+                                                double t_FWHM, double xcenter, double angle,
+                                                pulsePolarization polarization, double rise_time)
 {
 
   //DA USARE laser_pulse_initial_position !
@@ -1345,7 +1595,7 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
 }
 
 void EM_FIELD::initialize_plane_wave_angle(double lambda0, double amplitude,
-  double angle, pulsePolarization polarization)
+                                           double angle, pulsePolarization polarization)
 {
   int i, j, k;
   int Nx, Ny, Nz;
@@ -1402,8 +1652,8 @@ void EM_FIELD::auxiliary_rotation(double xin, double yin, double &xp, double &yp
   //rotation of vector (0,0,theta) centered in (xcenter,0,0)
 }
 void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude, double laser_pulse_initial_position,
-  double t_FWHM, double waist, double focus_position, double xcenter,
-  double angle, pulsePolarization polarization)
+                                               double t_FWHM, double waist, double focus_position, double xcenter,
+                                               double angle, pulsePolarization polarization)
 {
   int i, j, k;
   int Nx, Ny, Nz;
@@ -1640,8 +1890,8 @@ void EM_FIELD::moveWindow()
   MPI_Status status;
   MPI_Cart_shift(mygrid->cart_comm, 0, 1, &ileft, &iright);
   MPI_Sendrecv(send_buffer, sendcount, MPI_DOUBLE, ileft, 13,
-    recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
-    MPI_COMM_WORLD, &status);
+               recv_buffer, sendcount, MPI_DOUBLE, iright, 13,
+               MPI_COMM_WORLD, &status);
 
   if (mygrid->rmyid[0] == (mygrid->rnproc[0] - 1)) {
     memset((void*)recv_buffer, 0, sendcount*sizeof(double));
@@ -2072,9 +2322,9 @@ void EM_FIELD::fftw_filter_Efield() {
   data = fftw_alloc_complex(alloc_local);
 
   planFW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
-    FFTW_FORWARD, FFTW_ESTIMATE);
+                                FFTW_FORWARD, FFTW_ESTIMATE);
   planBW = fftw_mpi_plan_dft_2d(N0, N1, data, data, mygrid->cart_comm,
-    FFTW_BACKWARD, FFTW_ESTIMATE);
+                                FFTW_BACKWARD, FFTW_ESTIMATE);
 
   {
     for (i = 0; i < local_n0; ++i)
