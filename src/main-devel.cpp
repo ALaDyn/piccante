@@ -234,16 +234,21 @@ int main(int narg, char **args)
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
   current.allocate(&grid);
-  bool withSign = true;
-  std::cout << "voglio calcolare la densita'" << std::endl;
 
-  current.setAllValuesToZero();
-  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
-    (*spec_iterator)->density_deposition_standard(&current, withSign);
+  jsonParser::setPoissonSolver(root, &grid);
+
+  if(grid.isWithPoisson()){
+    bool withSign = true;
+    std::cout << "voglio calcolare la densita'" << std::endl;
+
+    current.setAllValuesToZero();
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      (*spec_iterator)->density_deposition_standard(&current, withSign);
+    }
+    current.pbc();
+    std::cout << "ho calcolato la densita'... ora sara' un casino" << std::endl;
+    myfield.poissonSolver(&current);
   }
-  current.pbc();
-  std::cout << "ho calcolato la densita'... ora sara' un casino" << std::endl;
-  myfield.poissonSolver(&current);
 
   jsonParser::setLaserPulses(root, &myfield);
   myfield.boundary_conditions();

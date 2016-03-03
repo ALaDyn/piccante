@@ -29,6 +29,7 @@ SPECIE::SPECIE()
   allocated = false;
   Z = A = 0;
   isTestSpecies = false;
+  isFrozen = false;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -41,6 +42,7 @@ SPECIE::SPECIE(GRID *grid)
   Z = A = 0;
   mygrid = grid;
   isTestSpecies = false;
+  isFrozen = false;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -145,6 +147,7 @@ SPECIE SPECIE::operator = (SPECIE &destro)
   mass = destro.mass;
   plasma = destro.plasma;
   isTestSpecies = destro.isTestSpecies;
+  isFrozen = destro.isFrozen;
   for (int i = 0; i < 3; i++)
   {
     particlePerCellXYZ[i] = destro.particlePerCellXYZ[i];
@@ -182,6 +185,10 @@ void SPECIE::addMarker() {
   flagWithMarker = true;
 }
 void SPECIE::setTestSpecies() {
+  isTestSpecies = true;
+}
+void SPECIE::setFrozenSpecies() {
+  isFrozen = true;
   isTestSpecies = true;
 }
 
@@ -914,7 +921,7 @@ void SPECIE::outputSpectrum(std::ofstream &fspectrum) {
 
 void SPECIE::position_parallel_pbc()
 {
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
 
   int p, c;
@@ -1009,7 +1016,7 @@ void SPECIE::position_parallel_pbc()
 }
 void SPECIE::position_obc()
 {
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
 
   int p, c;
@@ -1057,7 +1064,7 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
   energyExtremesFlag = false;
 
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
   if (mygrid->isStretched()) {
     SPECIE::momentaStretchedAdvance(ebfield);
@@ -1849,7 +1856,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 {
   energyExtremesFlag = false;
 
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
   if (mygrid->isStretched()) {
     //SPECIE::momentaStretchedAdvance(ebfield);
@@ -2227,7 +2234,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 {
   energyExtremesFlag = false;
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
 
   double dt, gamma_i;
@@ -2391,9 +2398,9 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 
 void SPECIE::current_deposition(CURRENT *current)
 {
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
-  if (mygrid->withCurrent == NO)
+  if (mygrid->withCurrent == NO||isTestSpecies)
     return;
 
   double dt, gamma_i;
@@ -2852,7 +2859,7 @@ void SPECIE::callSpecial(my_rng_generator& ext_rng, double Ta) {
 
 void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution)
 {
-  if (mygrid->withParticles == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
 
   if (!allocated) {
@@ -2928,9 +2935,7 @@ void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, do
 
 void SPECIE::current_deposition_standard(CURRENT *current)
 {
-  if (mygrid->withParticles == NO)
-    return;
-  if (mygrid->withCurrent == NO)
+  if (mygrid->withParticles == NO||isFrozen)
     return;
   if (mygrid->isStretched()) {
     SPECIE::currentStretchedDepositionStandard(current);
@@ -3506,9 +3511,6 @@ void SPECIE::debug_warning_particle_outside_boundaries(double x, double y, doubl
 
 void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
 {
-
-  if (mygrid->withParticles == NO)
-    return;
 
   double dt, gamma_i;
   int p, c;  // particle_int, component_int

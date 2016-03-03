@@ -130,6 +130,7 @@
 #define _JSON_DOUBLE_IONS_Z "Z"
 #define _JSON_BOOL_IS_MARKER "isMarker"
 #define _JSON_BOOL_IS_TEST "isTest"
+#define _JSON_BOOL_IS_FROZEN "isFrozen"
 
 #define _JSON_STRING_SPECIES_TYPE "type"
 #define SPECIES_TYPEVALUE_ELECTRON "ELECTRON"
@@ -180,8 +181,8 @@
 #define _JSON_STRING_IN_OUTPUT_DOMAIN_NAME "in"
 #define _JSON_STRING_OUTPUT_SPECIES_NAME "spec"
 
-
-
+#define _JSON_BOOL_WITH_POISSON "withPoissonSolver"
+#define _JSON_BOOL_NEUTRALISE_DENSITY_FOR_POISSON "autoNeutraliseDensity"
 
 
 #endif // JSONNAMES_H

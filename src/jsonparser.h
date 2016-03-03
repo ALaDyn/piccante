@@ -104,11 +104,13 @@ namespace jsonParser {
   void setStretchedGrid(Json::Value &document, GRID *grid);
   void setMovingWindow(Json::Value &document, GRID *grid);
   void setLaserPulses(Json::Value &document, EM_FIELD *emfield);
+
+  void setPoissonSolver(Json::Value &document, GRID *grid);
+
   void setPlasmas(Json::Value &document, std::map<std::string, PLASMA*> &map);
   bool checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas);
   bool addDistribution(std::string distName, Json::Value &child, my_rng_generator &ext_rng, SPECIE* spec);
   void setSpecies(Json::Value &document, std::vector<SPECIE*> &species, std::map<std::string, PLASMA*> plasmas, GRID* mygrid, my_rng_generator &ext_rng);
-
 
   bool setLaserType(laserPulse*, Json::Value&);
   bool setLaserPolarization(laserPulse*, Json::Value&);

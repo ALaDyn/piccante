@@ -80,7 +80,8 @@ const std::string PLASMA::dFNames[] = {
   "pillars2D",
   "nanotubes2D",
   "foils2D",
-  "res2D"
+  "res2D",
+  "user"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -106,7 +107,8 @@ const distrib_function PLASMA::dFPoint[] = {
   pillars2D,
   nanotubes2D,
   foils2D,
-  demo_2D_resonator
+  demo_2D_resonator,
+  user,
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -896,6 +898,11 @@ double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, doub
         }
     }
     return rho;
+}
+
+double user(double x, double y, double z, PLASMAparams plist, double Z, double A){
+
+  return plist.density_coefficient;
 }
 
 //*************************END_PLASMA*****************************

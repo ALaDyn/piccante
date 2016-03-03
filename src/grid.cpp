@@ -33,6 +33,9 @@ GRID::GRID(int dimensions)
   withParticles = YES;
   withCurrent = YES;
   withMovingWindow = false;
+  withPoisson = false;
+  autoNeutraliseDensity = false;
+
   proc_totUniquePoints = NULL;
   cyclic[0] = cyclic[1] = cyclic[2] = 1;
   lambda0 = 1.0;   //set lenght of the normalization
@@ -903,6 +906,24 @@ void GRID::computeTotUniquePoints()
     uniquePoints[c] = NGridNodes[c];
 
 }
+
+void GRID::setWithPoisson(){
+  withPoisson = true;
+}
+
+void GRID::setAutoNeutraliseDensity(){
+  autoNeutraliseDensity = true;
+}
+
+bool GRID::isWithPoisson(){
+  return withPoisson;
+}
+
+bool GRID::isAutoNeutraliseDensity(){
+  return autoNeutraliseDensity;
+}
+
+
 /* ********* STRETCHED GRID ************* */
 bool GRID::isStretched() {
   return flagStretched;

@@ -120,6 +120,11 @@ public:
   void mpi_grid_initialize(int *narg, char **args);
   void finalize();
   void computeTotUniquePoints();
+  void setWithPoisson();
+  void setAutoNeutraliseDensity();
+  bool isWithPoisson();
+  bool isAutoNeutraliseDensity();
+
   void setXandNxLeftStretchedGrid(double min, int N);
   void setYandNyLeftStretchedGrid(double min, int N);
   void setZandNzLeftStretchedGrid(double min, int N);
@@ -132,6 +137,7 @@ public:
   void setNxUniformGrid(int N);
   void setNyUniformGrid(int N);
   void setNzUniformGrid(int N);
+
   //void setNxRightStretcheGrid(int N);
   //void setNyRightStretcheGrid(int N);
   //void setNzRightStretcheGrid(int N);
@@ -194,6 +200,9 @@ private:
   axisBoundaryConditions xBoundaryConditions, yBoundaryConditions, zBoundaryConditions;
 
   bool checkAssignBoundary(axisBoundaryConditions cond, axisBoundaryConditions* axisCond);
+
+  bool withPoisson;
+  bool autoNeutraliseDensity;
 
   time_t unix_time_start;
   std::string dumpPath;

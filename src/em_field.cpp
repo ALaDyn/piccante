@@ -668,12 +668,36 @@ void EM_FIELD::poissonSolver(CURRENT *current){
   double alpha, const1, const2, beta, const3;
   //#pragma omp parallel for private(i,j)
 
+  double totalCharge=0;
+  for (k = 0; k < Nz; k++) {
+    for (j = 0; j < Ny; j++) {
+      for (i = 0; i < Nx; i++) {
+        totalCharge += current->density(i,j,k);
+      }
+    }
+  }
+
+  if(mygrid->myid==mygrid->master_proc){
+    std::cout<< "totalCharge = " << totalCharge << std::endl;
+  }
+
+  if(fabs(totalCharge) > 0.1 && !mygrid->isAutoNeutraliseDensity()){
+    if(mygrid->myid==mygrid->master_proc){
+      std::cout<< "ERROR!!! Total charge is NOT neutral!" << std::endl;
+      std::cout<< "ERROR!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
+      std::cout<< "ERROR!!! I cannot solve the Poisson equation: I STOP!" << std::endl;
+    }
+    exit(17);
+  }
+
+  double partialCharge = totalCharge / (Nx*Ny*Nz);
+
   const1 = 0;
   for (k = 0; k < Nz; k++) {
     for (j = 0; j < Ny; j++) {
       for (i = 0; i < Nx; i++) {
         B2(i, j, k) = 0;     // phi
-        B0(i, j, k) = -mygrid->den_factor*(1+current->density(i,j,k)); //res
+        B0(i, j, k) = -mygrid->den_factor*(current->density(i,j,k)-partialCharge); //res
         B1(i, j, k) = B0(i, j, k);   // p
         const1 += B0(i, j, k)*B0(i, j, k);
       }

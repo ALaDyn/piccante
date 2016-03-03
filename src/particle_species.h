@@ -63,6 +63,7 @@ public:
   void move_window();
   void addMarker();
   void setTestSpecies();
+  void setFrozenSpecies();
   bool amIWithMarker();
   void output(std::ofstream &ff);
   static const int myWidth = 12;
@@ -136,6 +137,7 @@ private:
   double **val;
 #endif
   bool isTestSpecies;
+  bool isFrozen;
   double dummy;
   int valSize;
   int particlePerCell;

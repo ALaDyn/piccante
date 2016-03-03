@@ -308,6 +308,7 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid) {
   }
 }
 
+
 void jsonParser::setStretchedGrid(Json::Value &document, GRID *grid) {
   Json::Value  stretching;
   bool isEnabled;
@@ -620,6 +621,21 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
     }
   }
 }
+
+void jsonParser::setPoissonSolver(Json::Value &document, GRID *grid){
+
+  bool withPoissonSolver = false;
+  setBool(&withPoissonSolver, document, _JSON_BOOL_WITH_POISSON);
+  if (withPoissonSolver)
+    grid->setWithPoisson();
+
+  bool neutraliseDensity = false;
+  setBool(&neutraliseDensity, document, _JSON_BOOL_NEUTRALISE_DENSITY_FOR_POISSON);
+  if (neutraliseDensity)
+    grid->setAutoNeutraliseDensity();
+
+}
+
 
 int jsonParser::findPlasmaFunction(std::string plasmaFunction) {
   for (int i = 0; i < PLASMA::maxdF; i++) {
@@ -942,6 +958,11 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
         setBool(&isTest, mySpecies, _JSON_BOOL_IS_TEST);
         if (isTest)
           newSpec->setTestSpecies();
+
+        bool isFrozen = false;
+        setBool(&isTest, mySpecies, _JSON_BOOL_IS_FROZEN);
+        if (isTest)
+          newSpec->setFrozenSpecies();
 
         newSpec->creation();
 
