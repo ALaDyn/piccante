@@ -179,8 +179,8 @@ int main(int narg, char **args)
   double amplitude;
   double lambda;
 
-  Json::Value special;
-  if(isThereSpecial=jsonParser::setValue(special,root,"special")){
+  Json::Value special=jsonParser::setValue(special,root,"special");
+  if(isThereSpecial){
     isThereAmpli  = jsonParser::setDouble(&amplitude, special, "amplitude");
     isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
     isWaveOK = isThereAmpli&&isThereLambda;
@@ -239,14 +239,14 @@ int main(int narg, char **args)
 
   if(grid.isWithPoisson()){
     bool withSign = true;
-    std::cout << "voglio calcolare la densita'" << std::endl;
+    std::cout << " evaluating density..." << std::endl;
 
     current.setAllValuesToZero();
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->density_deposition_standard(&current, withSign);
     }
     current.pbc();
-    std::cout << "ho calcolato la densita'... ora sara' un casino" << std::endl;
+    std::cout << "   done... now into Poisson solver" << std::endl;
     myfield.poissonSolver(&current);
   }
 

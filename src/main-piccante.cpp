@@ -97,8 +97,8 @@ int main(int narg, char **args)
   int myIntVariable = 0;
   double myDoubleVariable = 0;
   bool isThereSpecial = false;
-  Json::Value special;
-  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
+  Json::Value special= jsonParser::setValue(special, root, "special");
+  if (isThereSpecial) {
     jsonParser::setInt(&myIntVariable, special, "variabile1");
     jsonParser::setDouble(&myDoubleVariable, special, "variabile2");
   }
