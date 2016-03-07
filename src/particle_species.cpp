@@ -30,6 +30,7 @@ SPECIE::SPECIE()
   Z = A = 0;
   isTestSpecies = false;
   isFrozen = false;
+  isQuiet = false;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -43,6 +44,7 @@ SPECIE::SPECIE(GRID *grid)
   mygrid = grid;
   isTestSpecies = false;
   isFrozen = false;
+  isQuiet = false;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -148,6 +150,7 @@ SPECIE SPECIE::operator = (SPECIE &destro)
   plasma = destro.plasma;
   isTestSpecies = destro.isTestSpecies;
   isFrozen = destro.isFrozen;
+  isQuiet = destro.isQuiet;
   for (int i = 0; i < 3; i++)
   {
     particlePerCellXYZ[i] = destro.particlePerCellXYZ[i];
@@ -190,6 +193,10 @@ void SPECIE::setTestSpecies() {
 void SPECIE::setFrozenSpecies() {
   isFrozen = true;
   isTestSpecies = true;
+}
+void SPECIE::setQuietStart(){
+  isQuiet = true;
+  std::cout<< "setQuietStart()!!!" << std::endl;
 }
 
 bool SPECIE::amIWithMarker() {
@@ -358,6 +365,29 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                 xloc -= 0.5*dx;
                 yloc -= 0.5*dy;
                 zloc -= 0.5*dz;
+
+                if(isQuiet){
+                  int dim_num = 3;
+                  double randomU[dim_num];
+                  long long int seed=111111*(mygrid->myid+1);//myUniform(ext_rng);
+                  for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                    for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                      for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
+                      {
+                        i8_sobol ( dim_num, &seed, randomU );
+                        r0(counter) = xloc + dx*randomU[0];
+                        r1(counter) = yloc + dy*randomU[1];
+                        r2(counter) = zloc + dz*randomU[2];
+                        u0(counter) = u1(counter) = u2(counter) = 0;
+                        w(counter) = weight;
+                        if (flagWithMarker)
+                          marker(counter) = (counter + disp);
+                        if (isTestSpecies)
+                          w(counter) = (double)(counter + disp);
+                        counter++;
+                      }
+                }
+                else{
                 for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
                   for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
                     for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
@@ -373,6 +403,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                         w(counter) = (double)(counter + disp);
                       counter++;
                     }
+                }
               }
             }
       }
@@ -2797,38 +2828,103 @@ void SPECIE::callSupergaussian(my_rng_generator& ext_rng, double p0, double alph
 
 }
 
+//#define USE_BOOST
 void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
 
   my_normal_distribution myGaussian(0,sqrt(Ta));
-  if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
-    for (int p = 0; p < Np; p++)
-    {
-      u0(p) = uxin + myGaussian(ext_rng);
-      u1(p) = uyin + myGaussian(ext_rng);
-      u2(p) = uzin + myGaussian(ext_rng);
+
+#if defined(USE_BOOST)
+  if(isQuiet){
+    boost::math::normal dist(0.0, sqrt(Ta));
+    my_uniform_longlongint_distribution myUniform(1,2147483647);
+
+    int dim_num = 6;
+    double randomU[dim_num];
+    long long int seed=111111*(mygrid->myid+1);//myUniform(ext_rng);
+    long long int seed_in;
+    long long int seed_out;
+
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
+      std::cout<< "cou cou\n";
+      for (int p = 0; p < Np; p++)
+      {
+        //seed_in = seed;
+        i8_sobol ( dim_num, &seed, randomU );
+        //seed_out = seed;
+        randomU[3] = quantile(dist, randomU[3]);
+        randomU[4] = quantile(dist, randomU[4]);
+        randomU[5] = quantile(dist, randomU[5]);
+
+
+        u0(p) = uxin + randomU[3];
+        u1(p) = uyin + randomU[4];
+        u2(p) = uzin + randomU[5];
+      }
+    }
+    else {
+      double L[16];
+      computeLorentzMatrix(uxin, uyin, uzin, L);
+      double Ett, u0t, u1t, u2t;
+      for (int p = 0; p < Np; p++)
+      {
+        seed_in = seed;
+        i8_sobol ( dim_num, &seed, randomU );
+        seed_out = seed;
+        randomU[3] = quantile(dist, randomU[3]);
+        randomU[4] = quantile(dist, randomU[4]);
+        randomU[5] = quantile(dist, randomU[5]);
+
+        u0(p) = uxin + randomU[3];
+        u1(p) = uyin + randomU[4];
+        u2(p) = uzin + randomU[5];
+
+        Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+        u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
+        u1t = L[2 * 4 + 0] * Ett + L[2 * 4 + 1] * u0(p) + L[2 * 4 + 2] * u1(p) + L[2 * 4 + 3] * u2(p);
+        u2t = L[3 * 4 + 0] * Ett + L[3 * 4 + 1] * u0(p) + L[3 * 4 + 2] * u1(p) + L[3 * 4 + 3] * u2(p);
+
+        u0(p) = u0t;
+        u1(p) = u1t;
+        u2(p) = u2t;
+      }
     }
   }
-  else {
-    double L[16];
-    computeLorentzMatrix(uxin, uyin, uzin, L);
-    double Ett, u0t, u1t, u2t;
-    for (int p = 0; p < Np; p++)
-    {
-      u0(p) = uxin + myGaussian(ext_rng);
-      u1(p) = uyin + myGaussian(ext_rng);
-      u2(p) = uzin + myGaussian(ext_rng);
+  else{
+#endif
 
-      Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
-
-      u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
-      u1t = L[2 * 4 + 0] * Ett + L[2 * 4 + 1] * u0(p) + L[2 * 4 + 2] * u1(p) + L[2 * 4 + 3] * u2(p);
-      u2t = L[3 * 4 + 0] * Ett + L[3 * 4 + 1] * u0(p) + L[3 * 4 + 2] * u1(p) + L[3 * 4 + 3] * u2(p);
-
-      u0(p) = u0t;
-      u1(p) = u1t;
-      u2(p) = u2t;
+    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
+      for (int p = 0; p < Np; p++)
+      {
+        u0(p) = uxin + myGaussian(ext_rng);
+        u1(p) = uyin + myGaussian(ext_rng);
+        u2(p) = uzin + myGaussian(ext_rng);
+      }
     }
+    else {
+      double L[16];
+      computeLorentzMatrix(uxin, uyin, uzin, L);
+      double Ett, u0t, u1t, u2t;
+      for (int p = 0; p < Np; p++)
+      {
+        u0(p) = uxin + myGaussian(ext_rng);
+        u1(p) = uyin + myGaussian(ext_rng);
+        u2(p) = uzin + myGaussian(ext_rng);
+
+        Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+        u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
+        u1t = L[2 * 4 + 0] * Ett + L[2 * 4 + 1] * u0(p) + L[2 * 4 + 2] * u1(p) + L[2 * 4 + 3] * u2(p);
+        u2t = L[3 * 4 + 0] * Ett + L[3 * 4 + 1] * u0(p) + L[3 * 4 + 2] * u1(p) + L[3 * 4 + 3] * u2(p);
+
+        u0(p) = u0t;
+        u1(p) = u1t;
+        u2(p) = u2t;
+      }
+    }
+#if defined(USE_BOOST)
   }
+#endif
 }
 void SPECIE::callJuttner(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
   //DA DEFINIRE

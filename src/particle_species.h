@@ -28,6 +28,11 @@
 #include "grid.h"
 #include "current.h"
 #include "em_field.h"
+#include "sobol.hpp"
+
+#if defined(USE_BOOST)
+#include <boost/math/distributions/normal.hpp>
+#endif
 
 #define _VERY_SMALL_MOMENTUM 1.0e-5
 
@@ -64,7 +69,9 @@ public:
   void addMarker();
   void setTestSpecies();
   void setFrozenSpecies();
+  void setQuietStart();
   bool amIWithMarker();
+  bool amIQuietStart();
   void output(std::ofstream &ff);
   static const int myWidth = 12;
   static const int myNarrowWidth = 6;
@@ -138,6 +145,7 @@ private:
 #endif
   bool isTestSpecies;
   bool isFrozen;
+  bool isQuiet;
   double dummy;
   int valSize;
   int particlePerCell;

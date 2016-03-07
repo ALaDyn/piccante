@@ -30,12 +30,14 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/exponential_distribution.hpp>
 #include <boost/random/normal_distribution.hpp>
 
 typedef boost::random::mt19937 my_rng_generator;
 typedef boost::random::minstd_rand  aux_rnd_generator;
 typedef boost::random::uniform_real_distribution<double> my_uniform_real_distribution;
+typedef boost::random::uniform_int_distribution<long long int> my_uniform_longlongint_distribution;
 typedef boost::random::exponential_distribution<double>  my_exponential_distribution;
 typedef boost::random::normal_distribution<double>  my_normal_distribution;
 #else
@@ -43,6 +45,7 @@ typedef boost::random::normal_distribution<double>  my_normal_distribution;
 typedef std::mt19937 my_rng_generator;
 typedef std::minstd_rand  aux_rnd_generator;
 typedef std::uniform_real_distribution<double> my_uniform_real_distribution;
+typedef std::uniform_int_distribution<long long int> my_uniform_longlongint_distribution;
 typedef std::exponential_distribution<double>  my_exponential_distribution;
 typedef std::normal_distribution<double>  my_normal_distribution;
 #endif

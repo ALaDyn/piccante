@@ -102,8 +102,8 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
 
 
 bool jsonParser::setInt(int *number, Json::Value &parent, const char* name) {
-  bool outFlag;
-  if (outFlag = (!parent[name].isNull())) {
+  bool outFlag= (!parent[name].isNull());
+  if (outFlag) {
     if (parent[name].isInt())
       *number = parent[name].asInt();
   }
@@ -112,16 +112,16 @@ bool jsonParser::setInt(int *number, Json::Value &parent, const char* name) {
 
 
 bool jsonParser::setDouble(double *number, Json::Value  &parent, const char* name) {
-  bool outFlag;
-  if (outFlag = (!parent[name].isNull())) {
+  bool outFlag= (!parent[name].isNull());
+  if (outFlag) {
     if (parent[name].isDouble())
       *number = parent[name].asDouble();
   }
   return outFlag;
 }
 bool jsonParser::setBool(bool * number, Json::Value  &parent, const char* name) {
-  bool outFlag;
-  if (outFlag = (!parent[name].isNull())) {
+  bool outFlag= (!parent[name].isNull());
+  if (outFlag) {
     if (parent[name].isBool())
       *number = parent[name].asBool();
   }
@@ -129,8 +129,8 @@ bool jsonParser::setBool(bool * number, Json::Value  &parent, const char* name) 
 }
 
 bool jsonParser::setString(std::string * number, Json::Value  &parent, const char* name) {
-  bool outFlag;
-  if (outFlag = (!parent[name].isNull())) {
+  bool outFlag= (!parent[name].isNull());
+  if (outFlag) {
     if (parent[name].isString())
       *number = parent[name].asString();
   }
@@ -139,8 +139,8 @@ bool jsonParser::setString(std::string * number, Json::Value  &parent, const cha
 
 
 bool jsonParser::setValue(Json::Value &child, Json::Value &parent, const char* name) {
-  bool outFlag;
-  if (outFlag = (!parent[name].isNull())) {
+  bool outFlag= (!parent[name].isNull());
+  if (outFlag) {
     child = parent[name];
   }
   return outFlag;
@@ -420,8 +420,8 @@ void jsonParser::setMovingWindow(Json::Value  &document, GRID *grid) {
 bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_STRING_TYPE_;
   std::string type;
-  bool flag = false;
-  if (flag = setString(&type, mylaser, name2.c_str())) {
+  bool flag  = setString(&type, mylaser, name2.c_str());
+  if (flag) {
     if (type == _LASERTYPEVALUE_COS_PLANE_WAVE_) {
       pulse1->type = COS2_PLANE_WAVE;
     }
@@ -443,8 +443,8 @@ bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser) {
 bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_STRING_POLARIZATION_;
   std::string polarization;
-  bool flag = false;
-  if (flag = setString(&polarization, mylaser, name2.c_str())) {
+  bool flag = setString(&polarization, mylaser, name2.c_str());
+  if (flag ) {
     if (polarization == _LASERPOLARIZATIONVALUE_P_) {
       pulse1->setPPolarization();
     }
@@ -463,8 +463,8 @@ bool jsonParser::setLaserPolarization(laserPulse *pulse1, Json::Value  &mylaser)
 bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_DURATION_FWHM_;
   double durationFWHM;
-  bool flag = false;
-  if (flag = setDouble(&durationFWHM, mylaser, name2.c_str())) {
+  bool flag = setDouble(&durationFWHM, mylaser, name2.c_str());
+  if (flag ) {
     pulse1->setDurationFWHM(durationFWHM);
   }
   return flag;
@@ -473,8 +473,8 @@ bool jsonParser::setLaserDurationFWHM(laserPulse *pulse1, Json::Value  &mylaser)
 bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_INITIAL_POSITION_;
   double initialPosition;
-  bool flag = false;
-  if (flag = setDouble(&initialPosition, mylaser, name2.c_str())) {
+  bool flag  = setDouble(&initialPosition, mylaser, name2.c_str());
+  if (flag) {
     pulse1->setPulseInitialPosition(initialPosition);
   }
   return flag;
@@ -483,8 +483,8 @@ bool jsonParser::setLaserInitialPosition(laserPulse *pulse1, Json::Value  &mylas
 bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_A_;
   double amplitude;
-  bool flag = false;
-  if (flag = setDouble(&amplitude, mylaser, name2.c_str())) {
+  bool flag = setDouble(&amplitude, mylaser, name2.c_str());
+  if (flag ) {
     pulse1->setNormalizedAmplitude(amplitude);
   }
   return flag;
@@ -493,8 +493,8 @@ bool jsonParser::setLaserAmplitude(laserPulse *pulse1, Json::Value  &mylaser) {
 bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_WAIST_;
   double waist;
-  bool flag = false;
-  if (flag = setDouble(&waist, mylaser, name2.c_str())) {
+  bool flag = setDouble(&waist, mylaser, name2.c_str());
+  if (flag ) {
     pulse1->setWaist(waist);
   }
   return flag;
@@ -502,8 +502,8 @@ bool jsonParser::setLaserWaist(laserPulse *pulse1, Json::Value  &mylaser) {
 bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_FOCUS_POSITION_;
   double focusPosition;
-  bool flag = false;
-  if (flag = setDouble(&focusPosition, mylaser, name2.c_str())) {
+  bool flag = setDouble(&focusPosition, mylaser, name2.c_str());
+  if (flag ) {
     pulse1->setFocusPosition(focusPosition);
   }
   return flag;
@@ -511,8 +511,8 @@ bool jsonParser::setLaserFocusPosition(laserPulse *pulse1, Json::Value  &mylaser
 bool jsonParser::setLaserLambda(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_LAMBDA_;
   double lambda;
-  bool flag = false;
-  if (flag = setDouble(&lambda, mylaser, name2.c_str())) {
+  bool flag = setDouble(&lambda, mylaser, name2.c_str());
+  if (flag ) {
     pulse1->setLambda(lambda);
   }
   return flag;
@@ -980,9 +980,15 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
           newSpec->setTestSpecies();
 
         bool isFrozen = false;
-        setBool(&isTest, mySpecies, _JSON_BOOL_IS_FROZEN);
-        if (isTest)
+        setBool(&isFrozen, mySpecies, _JSON_BOOL_IS_FROZEN);
+        if (isFrozen)
           newSpec->setFrozenSpecies();
+
+        bool isQuiet = false;
+        setBool(&isQuiet, mySpecies, _JSON_BOOL_IS_QUIET);
+        if (isQuiet)
+          newSpec->setQuietStart();
+
 
         newSpec->creation();
 

@@ -72,6 +72,7 @@
       "isMarker": false,
       "isTest": false,
       "isFrozen": false,
+      "quietStart": false,
       "NOdistribution": "Maxwell",
       "NOdistributionParams": [1.0e-5],
       "NOdistributionAddMomentum": [0.0,0.0,0.0]

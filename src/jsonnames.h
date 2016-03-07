@@ -136,6 +136,7 @@
 #define _JSON_BOOL_IS_MARKER "isMarker"
 #define _JSON_BOOL_IS_TEST "isTest"
 #define _JSON_BOOL_IS_FROZEN "isFrozen"
+#define _JSON_BOOL_IS_QUIET "quietStart"
 
 #define _JSON_STRING_SPECIES_TYPE "type"
 #define SPECIES_TYPEVALUE_ELECTRON "ELECTRON"
