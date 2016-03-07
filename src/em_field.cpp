@@ -705,10 +705,10 @@ void EM_FIELD::poissonSolver(CURRENT *current){
   }
 
 
-  double bigNumber, smallNumber=1e-1;
+  double bigNumber, smallNumber=1e-6;
   bool nonMiPiace = true;
   int iteration=0;
-
+  int MAX_NUMBER_OF_ITERATIONS=10000;
   boundary_conditions();
   while(nonMiPiace){
     putNabla2ofB1inCurrentAux(current);  //current->aux(i,j,k) = A.p
@@ -748,7 +748,7 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     //bigNumber=getErrorInPoissonEquation(current);
     bigNumber=const3;
     std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << std::endl;
-    if(bigNumber<smallNumber || iteration >100 ){
+    if(bigNumber<smallNumber || iteration >MAX_NUMBER_OF_ITERATIONS ){
       nonMiPiace =false;
     }
   }

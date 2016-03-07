@@ -540,8 +540,8 @@ bool jsonParser::setLaserRotation(laserPulse *pulse1, Json::Value  &mylaser) {
 bool jsonParser::setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser) {
   std::string name2 = _JSON_DOUBLE_LASER_RISE_TIME_;
   double riseTime;
-  bool flag = false;
-  if (flag = setDouble(&riseTime, mylaser, name2.c_str())) {
+  bool flag = setDouble(&riseTime, mylaser, name2.c_str());
+  if (flag) {
     pulse1->setRiseTime(riseTime);
   }
   return flag;
@@ -791,6 +791,26 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
           additionalParams[0] = f2d_width;
           additionalParams[1] = f2d_dist;
+
+          map[plasmaName]->setAdditionalParams(additionalParams);
+        }
+        if (PLASMA::isUser1(plasmaFunctionIndex)) {
+          double width = 0;
+          double depth = 0;
+          double position = 0;
+          double temperature = 0;
+
+          double* additionalParams = new double[4];
+
+          setDouble(&width, myPlasma, _JSON_DOUBLE_PLASMA_USER1_WIDTH);
+          setDouble(&depth, myPlasma, _JSON_DOUBLE_PLASMA_USER1_DEPTH);
+          setDouble(&position, myPlasma, _JSON_DOUBLE_PLASMA_USER1_POSITION);
+          setDouble(&temperature, myPlasma, _JSON_DOUBLE_PLASMA_USER1_TEMPERATURE);
+
+          additionalParams[0] = width;
+          additionalParams[1] = depth;
+          additionalParams[2] = position;
+          additionalParams[3] = temperature;
 
           map[plasmaName]->setAdditionalParams(additionalParams);
         }

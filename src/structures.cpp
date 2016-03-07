@@ -81,7 +81,8 @@ const std::string PLASMA::dFNames[] = {
   "nanotubes2D",
   "foils2D",
   "res2D",
-  "user"
+  "user1",
+  "user2"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -108,7 +109,8 @@ const distrib_function PLASMA::dFPoint[] = {
   nanotubes2D,
   foils2D,
   demo_2D_resonator,
-  user,
+  user1,
+  user2
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -135,6 +137,20 @@ bool PLASMA::isNanotubes2D(int dfIndex) {
 
 bool PLASMA::isFoils2D(int dfIndex) {
   if (dfIndex == 22)
+    return true;
+  else
+    return false;
+}
+
+bool PLASMA::isUser1(int dfIndex) {
+  if (dfIndex == 24)
+    return true;
+  else
+    return false;
+}
+
+bool PLASMA::isUser2(int dfIndex) {
+  if (dfIndex == 25)
     return true;
   else
     return false;
@@ -900,7 +916,37 @@ double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, doub
     return rho;
 }
 
-double user(double x, double y, double z, PLASMAparams plist, double Z, double A){
+double user1(double x, double y, double z, PLASMAparams plist, double Z, double A){
+
+  double rho = -1;
+  double *paramlist = (double*)plist.additional_params;
+  double width = paramlist[0];
+  double depth = paramlist[1];
+  double position = paramlist[2];
+  double temperature = paramlist[3];
+
+
+  if( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])  &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+    if(Z==-1){
+      double XX = (x-position);
+      double myexp = depth*exp(-XX*XX/(width*width));
+      rho = plist.density_coefficient*(1-myexp);
+    }
+    else{
+      double XX = (x-position);
+      double myexp = depth*exp(-XX*XX/(width*width));
+      double ne = plist.density_coefficient*(1-myexp);
+      double dne = plist.density_coefficient*2*XX/(width*width)*myexp;
+      double d2ne = plist.density_coefficient*2/(width*width)*( 1 - 2*XX*XX/(width*width) )*myexp;
+      rho = ne + temperature/((2 * M_PI)*(2 * M_PI))*( (dne*dne)/(ne*ne) - d2ne/ne );
+    }
+  }
+  return rho;
+}
+
+double user2(double x, double y, double z, PLASMAparams plist, double Z, double A){
 
   return plist.density_coefficient;
 }
