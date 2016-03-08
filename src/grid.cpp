@@ -82,6 +82,13 @@ void GRID::setMasterProc(int idMasterProc) {
   master_proc = idMasterProc;
 }
 
+void GRID::printMessage(std::string message){
+  if(myid==master_proc){
+    std::cout << message<< std::endl;
+  }
+  return;
+}
+
 void GRID::setXrange(double min, double max) {
   rmin[0] = min;
   rmax[0] = max;

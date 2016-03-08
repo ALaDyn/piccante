@@ -200,6 +200,7 @@ int main(int narg, char **args)
   jsonParser::setPlasmas(root, plasmas);
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
+  //*******************************************  START LANGMUIR WAVE  *********************************************************
   if(isWaveOK){
     int counter=0;
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
@@ -209,17 +210,11 @@ int main(int narg, char **args)
       double ampliEx;
       ampliEx = 4*M_PI*(*spec_iterator)->chargeSign*(*spec_iterator)->Z*(*spec_iterator)->plasma.params.density_coefficient*amplitude;
 
-      //current.eraseDensity();
-      //bool withSign = true;
-      //(*spec_iterator)->density_deposition_standard(&current, withSign);
-      //current.pbc();
-      //poissonTest(&grid,&myfield,&current);
-      //std::cout << "counter= " << counter<< "  ampliEx = " << ampliEx << "  lambda = " << lambda << std::endl;
-      //deformEx(&grid,&myfield,ampliEx,lambda);
       myfield.boundary_conditions();
       counter++;
     }
   }
+  //*******************************************   END  LANGMUIR WAVE  *********************************************************
 
   uint64_t totPartNum = 0;
   for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
@@ -235,6 +230,7 @@ int main(int narg, char **args)
   myfield.setAllValuesToZero();
   current.allocate(&grid);
 
+  //*******************************************    POISSON SOLVER    *********************************************************
   jsonParser::setPoissonSolver(root, &grid);
 
   if(grid.isWithPoisson()){

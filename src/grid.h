@@ -95,6 +95,8 @@ public:
   GRID(int dimensions);
   ~GRID();
 
+  void printMessage(std::string message);
+
   void setXrange(double min, double max);
   void setYrange(double min, double max);
   void setZrange(double min, double max);

@@ -654,8 +654,66 @@ void EM_FIELD::openBoundariesB() {
   }
 }
 
+//*******************************************  POISSON SOLVER  *********************************************************
+
+double EM_FIELD::getTotalCharge(CURRENT *current){
+  double totalCharge=0;
+  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+        totalCharge += current->density(i,j,k);
+      }
+    }
+  }
+  std::cout << "ID: " << mygrid->myid << " totalCharge = " << totalCharge << std::endl;
+  MPI_Allreduce(MPI_IN_PLACE, &totalCharge, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  std::stringstream message, filename;
+  message << " totalCharge = " << totalCharge;
+  mygrid->printMessage(message.str());
+
+  filename << "density_loc_" << mygrid->myid << ".txt";
+  std::ofstream densityFile(filename.str().c_str() );
+
+  int j=0;
+  int k=0;
+  for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+    double x= mygrid->rminloc[0] + i* mygrid->dr[0];
+    densityFile << x << " " <<  current->density(i,j,k) << std::endl;
+  }
+  densityFile.close();
+  return totalCharge;
+}
+
+double EM_FIELD::getChargeCorrection(double  totalCharge){
+  int NNN=mygrid->uniquePoints[0]*mygrid->uniquePoints[1]*mygrid->uniquePoints[2];
+  double partialCharge = totalCharge / (NNN);
+
+  if(fabs(totalCharge) > 1e-7){
+    if(!mygrid->isAutoNeutraliseDensity()){
+      if(mygrid->myid==mygrid->master_proc){
+        std::cout<< "ERROR!!! Total charge is NOT neutral!" << std::endl;
+        std::cout<< "ERROR!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
+        std::cout<< "ERROR!!! I cannot solve the Poisson equation: I STOP!" << std::endl;
+      }
+      exit(17);
+    }
+    else{
+      if(mygrid->myid==mygrid->master_proc){
+
+        std::cout<< "WARNING!!! Total charge is NOT neutral" << std::endl;
+        std::cout<< "WARNING!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
+        std::cout<< "WARNING!!! I'm setting an overall neutral charge" << std::endl;
+      }
+    }
+  }
+  else{
+    partialCharge = 0;
+  }
+  return partialCharge;
+}
+
 void EM_FIELD::poissonSolver(CURRENT *current){
-  int i, j, k;
+  //int i, j, k;
   int Nx, Ny, Nz;
   double dxi, dyi, dzi;
   Nx = mygrid->Nloc[0];
@@ -663,50 +721,17 @@ void EM_FIELD::poissonSolver(CURRENT *current){
   Nz = mygrid->Nloc[2];
   int dimensions = mygrid->getDimensionality();
 
-  int edge = mygrid->getEdge();
-
-  double alpha, const1, const2, beta, const3;
   //#pragma omp parallel for private(i,j)
 
   double totalCharge=0;
-  for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
-    for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
-      for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
-        totalCharge += current->density(i,j,k);
-      }
-    }
-  }
-  MPI_Allreduce(MPI_IN_PLACE, &totalCharge, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-  int NNN=mygrid->uniquePoints[0]*mygrid->uniquePoints[1]*mygrid->uniquePoints[2];
-  double partialCharge = totalCharge / (NNN);
+  totalCharge = getTotalCharge(current);
 
-  if(mygrid->myid==mygrid->master_proc){
-    std::cout<< "totalCharge = " << totalCharge << std::endl;
-  }
+  double partialCharge=getChargeCorrection(totalCharge);
 
-  if(fabs(totalCharge) > 1e-7){
-   if(!mygrid->isAutoNeutraliseDensity()){
-    if(mygrid->myid==mygrid->master_proc){
-      std::cout<< "ERROR!!! Total charge is NOT neutral!" << std::endl;
-      std::cout<< "ERROR!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
-      std::cout<< "ERROR!!! I cannot solve the Poisson equation: I STOP!" << std::endl;
-    }
-    exit(17);
-    }
-   else{
-     std::cout<< "WARNING!!! Total charge is NOT neutral" << std::endl;
-     std::cout<< "WARNING!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
-     std::cout<< "WARNING!!! I'm setting an overall neutral charge" << std::endl;
-   }
-  }
-  else{
-    partialCharge = 0;
-  }
-
-  const1 = 0;
-  for (k = 0; k < Nz; k++) {
-    for (j = 0; j < Ny; j++) {
-      for (i = 0; i < Nx; i++) {
+  double const1 = 0;
+  for (int k = 0; k < Nz; k++) {
+    for (int j = 0; j < Ny; j++) {
+      for (int i = 0; i < Nx; i++) {
         B2(i, j, k) = 0;     // phi
         B0(i, j, k) = -mygrid->den_factor*(current->density(i,j,k)-partialCharge); //res
         B1(i, j, k) = B0(i, j, k);   // p
@@ -714,9 +739,9 @@ void EM_FIELD::poissonSolver(CURRENT *current){
       }
     }
   }
-  for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
-    for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
-      for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+  for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+    for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+      for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
         const1 += B0(i, j, k)*B0(i, j, k);
       }
     }
@@ -733,41 +758,42 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     boundary_conditions();
     putNabla2ofB1inCurrentAux(current);  //current->aux(i,j,k) = A.p
 
-    const2 = const3 = 0;
+    double const2 = 0;
 
-    for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
-      for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
-        for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+    for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+      for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+        for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
           const2 += B1(i, j, k)*current->aux(i,j,k);
         }
       }
     }
     MPI_Allreduce(MPI_IN_PLACE, &const2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    alpha = const1/const2;
-    for (k = 0; k < Nz; k++) {
-      for (j = 0; j < Ny; j++) {
-        for (i = 0; i < Nx; i++) {
+    double alpha = const1/const2;
+    for (int k = 0; k < Nz; k++) {
+      for (int j = 0; j < Ny; j++) {
+        for (int i = 0; i < Nx; i++) {
           B2(i, j, k)  = B2(i, j, k) + alpha*B1(i,j,k);
           B0(i, j, k) = B0(i, j, k) - alpha*current->aux(i,j,k);
 
         }
       }
     }
-    for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
-      for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
-        for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+    double const3 = 0;
+    for (int k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+      for (int j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+        for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
           const3 += B0(i, j, k)*B0(i, j, k);
         }
       }
     }
     MPI_Allreduce(MPI_IN_PLACE, &const3, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    beta = const3/const1;
+    double beta = const3/const1;
     const1=const3;
-    for (k = 0; k < Nz; k++) {
-      for (j = 0; j < Ny; j++) {
-        for (i = 0; i < Nx; i++) {
+    for (int k = 0; k < Nz; k++) {
+      for (int j = 0; j < Ny; j++) {
+        for (int i = 0; i < Nx; i++) {
           B1(i, j, k) = B0(i, j, k) + beta*B1(i, j, k);
         }
       }
@@ -775,7 +801,6 @@ void EM_FIELD::poissonSolver(CURRENT *current){
 
 
     iteration++;
-    //bigNumber=getErrorInPoissonEquation(current);
     bigNumber=const3;
     if(!(iteration%100)&&mygrid->myid==mygrid->master_proc){
       std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << "/" << smallNumber <<std::endl;
@@ -788,11 +813,11 @@ void EM_FIELD::poissonSolver(CURRENT *current){
 
   if (dimensions == 3) {
     //#pragma omp parallel for private(i,j)
-    for (k = 0; k < Nz; k++) {
+    for (int k = 0; k < Nz; k++) {
       dzi = mygrid->dri[2] * mygrid->hStretchingDerivativeCorrection[2][k];
-      for (j = 0; j < Ny; j++) {
+      for (int j = 0; j < Ny; j++) {
         dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-        for (i = 0; i < Nx; i++) {
+        for (int i = 0; i < Nx; i++) {
           dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
 
           double ddx, ddy, ddz;
@@ -807,9 +832,10 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     }
   }
   else if (dimensions == 2) {
-    for (j = 0; j < Ny; j++) {
+    int k = 0;
+    for (int j = 0; j < Ny; j++) {
       dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
-      for (i = 0; i < Nx; i++) {
+      for (int i = 0; i < Nx; i++) {
         dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
         double ddx, ddy;
         ddx = dxi*(B2(i+1, j, k)-B2(i, j, k));
@@ -821,7 +847,9 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     }
   }
   else if (dimensions == 1){
-    for (i = 0; i < Nx; i++) {
+    int k = 0;
+    int j = 0;
+    for (int i = 0; i < Nx; i++) {
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
       double ddx;
       ddx = dxi*(B2(i+1, j, k)-B2(i, j, k));

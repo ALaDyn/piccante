@@ -125,6 +125,9 @@ public:
   bool amIAllocated();
 
   void difference(EM_FIELD *right);
+
+  double getTotalCharge(CURRENT *current);
+  double getChargeCorrection(double  totalCharge);
   void poissonSolver(CURRENT *current);
   void putNabla2ofB1inCurrentAux(CURRENT *current);
   double getErrorInPoissonEquation(CURRENT *current);
