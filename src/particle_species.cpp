@@ -366,30 +366,8 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                 yloc -= 0.5*dy;
                 zloc -= 0.5*dz;
 
-                if(isQuiet){
-                  int dim_num = 3;
-                  double randomU[dim_num];
-                  long long int seed=111111*(mygrid->myid+1);//myUniform(ext_rng);
-                  for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
-                    for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
-                      for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
-                      {
-                        i8_sobol ( dim_num, &seed, randomU );
-                        r0(counter) = xloc + dx*randomU[0];
-                        r1(counter) = yloc + dy*randomU[1];
-                        r2(counter) = zloc + dz*randomU[2];
-                        u0(counter) = u1(counter) = u2(counter) = 0;
-                        w(counter) = weight;
-                        if (flagWithMarker)
-                          marker(counter) = (counter + disp);
-                        if (isTestSpecies)
-                          w(counter) = (double)(counter + disp);
-                        counter++;
-                      }
-                }
-                else{
-                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
-                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++){
+                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++){
                     for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
                     {
                       r0(counter) = xloc + dxp*(ip + 0.5);
@@ -403,6 +381,7 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
                         w(counter) = (double)(counter + disp);
                       counter++;
                     }
+                  }
                 }
               }
             }
@@ -2838,7 +2817,7 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
     boost::math::normal dist(0.0, sqrt(Ta));
     my_uniform_longlongint_distribution myUniform(1,2147483647);
 
-    int dim_num = 6;
+    int dim_num = 3;
     double randomU[dim_num];
     long long int seed=111111*(mygrid->myid+1);//myUniform(ext_rng);
     long long int seed_in;
@@ -2851,14 +2830,12 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
         //seed_in = seed;
         i8_sobol ( dim_num, &seed, randomU );
         //seed_out = seed;
-        randomU[3] = quantile(dist, randomU[3]);
-        randomU[4] = quantile(dist, randomU[4]);
-        randomU[5] = quantile(dist, randomU[5]);
-
-
-        u0(p) = uxin + randomU[3];
-        u1(p) = uyin + randomU[4];
-        u2(p) = uzin + randomU[5];
+        randomU[0] = quantile(dist, randomU[0]);
+        randomU[1] = quantile(dist, randomU[1]);
+        randomU[2] = quantile(dist, randomU[2]);
+        u0(p) = uxin + randomU[0];
+        u1(p) = uyin + randomU[1];
+        u2(p) = uzin + randomU[2];
       }
     }
     else {
@@ -2870,13 +2847,12 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
         seed_in = seed;
         i8_sobol ( dim_num, &seed, randomU );
         seed_out = seed;
-        randomU[3] = quantile(dist, randomU[3]);
-        randomU[4] = quantile(dist, randomU[4]);
-        randomU[5] = quantile(dist, randomU[5]);
-
-        u0(p) = uxin + randomU[3];
-        u1(p) = uyin + randomU[4];
-        u2(p) = uzin + randomU[5];
+        randomU[0] = quantile(dist, randomU[0]);
+        randomU[1] = quantile(dist, randomU[1]);
+        randomU[2] = quantile(dist, randomU[2]);
+        u0(p) = uxin + randomU[0];
+        u1(p) = uyin + randomU[1];
+        u2(p) = uzin + randomU[2];
 
         Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
