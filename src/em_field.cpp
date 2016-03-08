@@ -669,28 +669,39 @@ void EM_FIELD::poissonSolver(CURRENT *current){
   //#pragma omp parallel for private(i,j)
 
   double totalCharge=0;
-  for (k = 0; k < Nz; k++) {
-    for (j = 0; j < Ny; j++) {
-      for (i = 0; i < Nx; i++) {
+  for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+    for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+      for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
         totalCharge += current->density(i,j,k);
       }
     }
   }
+  MPI_Allreduce(MPI_IN_PLACE, &totalCharge, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  int NNN=mygrid->uniquePoints[0]*mygrid->uniquePoints[1]*mygrid->uniquePoints[2];
+  double partialCharge = totalCharge / (NNN);
 
   if(mygrid->myid==mygrid->master_proc){
     std::cout<< "totalCharge = " << totalCharge << std::endl;
   }
 
-  if(fabs(totalCharge) > 0.1 && !mygrid->isAutoNeutraliseDensity()){
+  if(fabs(totalCharge) > 1e-7){
+   if(!mygrid->isAutoNeutraliseDensity()){
     if(mygrid->myid==mygrid->master_proc){
       std::cout<< "ERROR!!! Total charge is NOT neutral!" << std::endl;
       std::cout<< "ERROR!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
       std::cout<< "ERROR!!! I cannot solve the Poisson equation: I STOP!" << std::endl;
     }
     exit(17);
+    }
+   else{
+     std::cout<< "WARNING!!! Total charge is NOT neutral" << std::endl;
+     std::cout<< "WARNING!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
+     std::cout<< "WARNING!!! I'm setting an overall neutral charge" << std::endl;
+   }
   }
-
-  double partialCharge = totalCharge / (Nx*Ny*Nz);
+  else{
+    partialCharge = 0;
+  }
 
   const1 = 0;
   for (k = 0; k < Nz; k++) {
@@ -699,40 +710,59 @@ void EM_FIELD::poissonSolver(CURRENT *current){
         B2(i, j, k) = 0;     // phi
         B0(i, j, k) = -mygrid->den_factor*(current->density(i,j,k)-partialCharge); //res
         B1(i, j, k) = B0(i, j, k);   // p
+
+      }
+    }
+  }
+  for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+    for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+      for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
         const1 += B0(i, j, k)*B0(i, j, k);
       }
     }
   }
+  MPI_Allreduce(MPI_IN_PLACE, &const1, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 
-  double bigNumber, smallNumber=1e-6;
+  double bigNumber, smallNumber=1e-6*const1;
   bool nonMiPiace = true;
   int iteration=0;
-  int MAX_NUMBER_OF_ITERATIONS=10000;
-  boundary_conditions();
+  int MAX_NUMBER_OF_ITERATIONS=100000;
+
   while(nonMiPiace){
+    boundary_conditions();
     putNabla2ofB1inCurrentAux(current);  //current->aux(i,j,k) = A.p
 
     const2 = const3 = 0;
 
-    for (k = 0; k < Nz; k++) {
-      for (j = 0; j < Ny; j++) {
-        for (i = 0; i < Nx; i++) {
-
+    for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+      for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+        for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
           const2 += B1(i, j, k)*current->aux(i,j,k);
         }
       }
     }
+    MPI_Allreduce(MPI_IN_PLACE, &const2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
     alpha = const1/const2;
     for (k = 0; k < Nz; k++) {
       for (j = 0; j < Ny; j++) {
         for (i = 0; i < Nx; i++) {
           B2(i, j, k)  = B2(i, j, k) + alpha*B1(i,j,k);
           B0(i, j, k) = B0(i, j, k) - alpha*current->aux(i,j,k);
+
+        }
+      }
+    }
+    for (k = 0; k < mygrid->uniquePointsloc[2]; k++) {
+      for (j = 0; j < mygrid->uniquePointsloc[1]; j++) {
+        for (i = 0; i < mygrid->uniquePointsloc[0]; i++) {
           const3 += B0(i, j, k)*B0(i, j, k);
         }
       }
     }
+    MPI_Allreduce(MPI_IN_PLACE, &const3, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
     beta = const3/const1;
     const1=const3;
     for (k = 0; k < Nz; k++) {
@@ -743,11 +773,13 @@ void EM_FIELD::poissonSolver(CURRENT *current){
       }
     }
 
-    boundary_conditions();
+
     iteration++;
     //bigNumber=getErrorInPoissonEquation(current);
     bigNumber=const3;
-    std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << std::endl;
+    if(!(iteration%100)&&mygrid->myid==mygrid->master_proc){
+      std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << "/" << smallNumber <<std::endl;
+    }
     if(bigNumber<smallNumber || iteration >MAX_NUMBER_OF_ITERATIONS ){
       nonMiPiace =false;
     }
