@@ -931,6 +931,37 @@ double user1(double x, double y, double z, PLASMAparams plist, double Z, double 
       (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
     if(Z==-1){
       double XX = (x-position);
+      double myexp = depth*exp(-(XX*XX)/(width*width));
+      rho = plist.density_coefficient*(1-myexp);
+    }
+    else{
+      double XX = (x-position);
+      double myexp = depth*exp(-(XX*XX)/(width*width));
+      double ne = plist.density_coefficient*(1-myexp);
+      double dne = plist.density_coefficient*2*XX/(width*width)*myexp;
+      double d2ne = plist.density_coefficient*2/(width*width)*( 1 - 2*XX*XX/(width*width) )*myexp;
+
+      rho = ne + temperature/((2 * M_PI)*(2 * M_PI))*( (dne*dne)/(ne*ne) - d2ne/ne );
+    }
+  }
+  return rho;
+}
+
+double user2(double x, double y, double z, PLASMAparams plist, double Z, double A){
+
+  double rho = -1;
+  double *paramlist = (double*)plist.additional_params;
+  double width = paramlist[0];
+  double depth = paramlist[1];
+  double position = paramlist[2];
+  double temperature = paramlist[3];
+
+
+  if( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+      (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])  &&
+      (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+    if(Z==-1){
+      double XX = (x-position);
       double YY = y;
       double myexp = depth*exp(-(XX*XX+YY*YY)/(width*width));
       rho = plist.density_coefficient*(1-myexp);
@@ -949,11 +980,6 @@ double user1(double x, double y, double z, PLASMAparams plist, double Z, double 
     }
   }
   return rho;
-}
-
-double user2(double x, double y, double z, PLASMAparams plist, double Z, double A){
-
-  return plist.density_coefficient;
 }
 
 //*************************END_PLASMA*****************************

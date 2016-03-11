@@ -794,7 +794,7 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
           map[plasmaName]->setAdditionalParams(additionalParams);
         }
-        if (PLASMA::isUser1(plasmaFunctionIndex)) {
+        if (PLASMA::isUser1(plasmaFunctionIndex) || PLASMA::isUser2(plasmaFunctionIndex)) {
           double width = 0;
           double depth = 0;
           double position = 0;
