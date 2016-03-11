@@ -31,6 +31,7 @@ SPECIE::SPECIE()
   isTestSpecies = false;
   isFrozen = false;
   isQuiet = false;
+  quietShuffle = 1;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -45,6 +46,7 @@ SPECIE::SPECIE(GRID *grid)
   isTestSpecies = false;
   isFrozen = false;
   isQuiet = false;
+  quietShuffle = 1;
   spectrum.values = NULL;
   energyExtremesFlag = false;
   lastParticle = 0;
@@ -151,6 +153,7 @@ SPECIE SPECIE::operator = (SPECIE &destro)
   isTestSpecies = destro.isTestSpecies;
   isFrozen = destro.isFrozen;
   isQuiet = destro.isQuiet;
+  quietShuffle = destro.quietShuffle;
   for (int i = 0; i < 3; i++)
   {
     particlePerCellXYZ[i] = destro.particlePerCellXYZ[i];
@@ -197,6 +200,9 @@ void SPECIE::setFrozenSpecies() {
 void SPECIE::setQuietStart(){
   isQuiet = true;
   std::cout<< "setQuietStart()!!!" << std::endl;
+}
+void SPECIE::setQuietShuffle(int Nshuffle){
+  quietShuffle = Nshuffle;
 }
 
 bool SPECIE::amIWithMarker() {
@@ -358,32 +364,30 @@ void SPECIE::createParticlesWithinFrom(double plasmarmin[3], double plasmarmax[3
           if (yloc >= plasmarmin[1] && yloc <= plasmarmax[1])
             if (zloc >= plasmarmin[2] && zloc <= plasmarmax[2])
             {
-              if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0)
-              {
+              if (plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) > 0){
                 weight = plasma.density_function(xloc, yloc, zloc, plasma.params, Z, A) / particlePerCell;
-
                 xloc -= 0.5*dx;
                 yloc -= 0.5*dy;
                 zloc -= 0.5*dz;
 
-                for (int ip = 0; ip < particlePerCellXYZ[0]; ip++){
-                  for (int jp = 0; jp < particlePerCellXYZ[1]; jp++){
-                    for (int kp = 0; kp < particlePerCellXYZ[2]; kp++)
-                    {
-                      r0(counter) = xloc + dxp*(ip + 0.5);
-                      r1(counter) = yloc + dyp*(jp + 0.5);
-                      r2(counter) = zloc + dzp*(kp + 0.5);
-                      u0(counter) = u1(counter) = u2(counter) = 0;
-                      w(counter) = weight;
-                      if (flagWithMarker)
-                        marker(counter) = (counter + disp);
-                      if (isTestSpecies)
-                        w(counter) = (double)(counter + disp);
-                      counter++;
-                    }
-                  }
-                }
+
+                  for (int ip = 0; ip < particlePerCellXYZ[0]; ip++)
+                    for (int jp = 0; jp < particlePerCellXYZ[1]; jp++)
+                      for (int kp = 0; kp < particlePerCellXYZ[2]; kp++){
+                        r0(counter) = xloc + dxp*(ip + 0.5);
+                        r1(counter) = yloc + dyp*(jp + 0.5);
+                        r2(counter) = zloc + dzp*(kp + 0.5);
+                        u0(counter) = u1(counter) = u2(counter) = 0;
+                        w(counter) = weight;
+                        if (flagWithMarker)
+                          marker(counter) = (counter + disp);
+                        if (isTestSpecies)
+                          w(counter) = (double)(counter + disp);
+                        counter++;
+                      }
+
               }
+
             }
       }
 }
@@ -2814,45 +2818,100 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
 
 #if defined(USE_BOOST)
   if(isQuiet){
+    int Nshuffle = quietShuffle;
+    std::srand ( unsigned ( std::time(0) ) );
+    std::vector<int> myvector;
+
+    // set some values:
+    for (int i=0; i<Nshuffle; i++) myvector.push_back(i);
+    int groups = Np/Nshuffle;
+    int remain = Np%Nshuffle;
+
+std::cout << "Nshuffle = " << Nshuffle << std::endl;
+
     boost::math::normal dist(0.0, sqrt(Ta));
-    my_uniform_longlongint_distribution myUniform(1,2147483647);
 
-    int dim_num = 3;
+    int dim_num = 6;
+    int offset = 0;
     double randomU[dim_num];
-    long long int seed=111111*(mygrid->myid+1);//myUniform(ext_rng);
-    long long int seed_in;
-    long long int seed_out;
+    long long int seed=111111*(mygrid->myid+1);
 
-    if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
-      std::cout<< "cou cou\n";
-      for (int p = 0; p < Np; p++)
-      {
-        //seed_in = seed;
+    if ((uxin*uxin + uyin*uyin + uzin*uzin) < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
+    /*  for (int p = 0; p < Np; p++){
         i8_sobol ( dim_num, &seed, randomU );
-        //seed_out = seed;
-        randomU[0] = quantile(dist, randomU[0]);
-        randomU[1] = quantile(dist, randomU[1]);
-        randomU[2] = quantile(dist, randomU[2]);
-        u0(p) = uxin + randomU[0];
-        u1(p) = uyin + randomU[1];
-        u2(p) = uzin + randomU[2];
+        u0(p) = uxin +quantile(dist, randomU[0+offset]);
+        u1(p) = uyin +quantile(dist, randomU[1+offset]);
+        u2(p) = uzin +quantile(dist, randomU[2+offset]);
+      }
+      */
+      for(int nn=0; nn<groups;nn++){
+        std::random_shuffle ( myvector.begin(), myvector.end() );
+        for (std::vector<int>::iterator it=myvector.begin(); it!=myvector.end(); ++it){
+
+          int p = nn*Nshuffle + *it;
+          i8_sobol ( dim_num, &seed, randomU );
+          u0(p) = uxin +quantile(dist, randomU[0+offset]);
+          u1(p) = uyin +quantile(dist, randomU[1+offset]);
+          u2(p) = uzin +quantile(dist, randomU[2+offset]);
+        }
+      }
+      for (int p = groups*Nshuffle; p < Np; p++){
+        i8_sobol ( dim_num, &seed, randomU );
+        u0(p) = uxin +quantile(dist, randomU[0+offset]);
+        u1(p) = uyin +quantile(dist, randomU[1+offset]);
+        u2(p) = uzin +quantile(dist, randomU[2+offset]);
       }
     }
     else {
+      std::cout<< "RELLATIVISTIC! uxin=" << uxin << std::endl;
+
       double L[16];
       computeLorentzMatrix(uxin, uyin, uzin, L);
       double Ett, u0t, u1t, u2t;
-      for (int p = 0; p < Np; p++)
+     /* for (int p = 0; p < Np; p++)
       {
-        seed_in = seed;
         i8_sobol ( dim_num, &seed, randomU );
-        seed_out = seed;
-        randomU[0] = quantile(dist, randomU[0]);
-        randomU[1] = quantile(dist, randomU[1]);
-        randomU[2] = quantile(dist, randomU[2]);
-        u0(p) = uxin + randomU[0];
-        u1(p) = uyin + randomU[1];
-        u2(p) = uzin + randomU[2];
+        u0(p) = quantile(dist, randomU[0+offset]);
+        u1(p) = quantile(dist, randomU[1+offset]);
+        u2(p) = quantile(dist, randomU[2+offset]);
+
+        Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+        u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
+        u1t = L[2 * 4 + 0] * Ett + L[2 * 4 + 1] * u0(p) + L[2 * 4 + 2] * u1(p) + L[2 * 4 + 3] * u2(p);
+        u2t = L[3 * 4 + 0] * Ett + L[3 * 4 + 1] * u0(p) + L[3 * 4 + 2] * u1(p) + L[3 * 4 + 3] * u2(p);
+
+        u0(p) = u0t;
+        u1(p) = u1t;
+        u2(p) = u2t;
+      }
+      */
+      for(int nn=0; nn<groups;nn++){
+        std::random_shuffle ( myvector.begin(), myvector.end() );
+        for (std::vector<int>::iterator it=myvector.begin(); it!=myvector.end(); ++it){
+
+          int p = nn*Nshuffle + *it;
+          i8_sobol ( dim_num, &seed, randomU );
+          u0(p) = quantile(dist, randomU[0+offset]);
+          u1(p) = quantile(dist, randomU[1+offset]);
+          u2(p) = quantile(dist, randomU[2+offset]);
+
+          Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
+
+          u0t = L[1 * 4 + 0] * Ett + L[1 * 4 + 1] * u0(p) + L[1 * 4 + 2] * u1(p) + L[1 * 4 + 3] * u2(p);
+          u1t = L[2 * 4 + 0] * Ett + L[2 * 4 + 1] * u0(p) + L[2 * 4 + 2] * u1(p) + L[2 * 4 + 3] * u2(p);
+          u2t = L[3 * 4 + 0] * Ett + L[3 * 4 + 1] * u0(p) + L[3 * 4 + 2] * u1(p) + L[3 * 4 + 3] * u2(p);
+
+          u0(p) = u0t;
+          u1(p) = u1t;
+          u2(p) = u2t;
+        }
+      }
+      for (int p = groups*Nshuffle; p < Np; p++){
+        i8_sobol ( dim_num, &seed, randomU );
+        u0(p) = quantile(dist, randomU[0+offset]);
+        u1(p) = quantile(dist, randomU[1+offset]);
+        u2(p) = quantile(dist, randomU[2+offset]);
 
         Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 
@@ -2883,9 +2942,9 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
       double Ett, u0t, u1t, u2t;
       for (int p = 0; p < Np; p++)
       {
-        u0(p) = uxin + myGaussian(ext_rng);
-        u1(p) = uyin + myGaussian(ext_rng);
-        u2(p) = uzin + myGaussian(ext_rng);
+        u0(p) = myGaussian(ext_rng);
+        u1(p) = myGaussian(ext_rng);
+        u2(p) = myGaussian(ext_rng);
 
         Ett = sqrt(1.0 + u0(p)*u0(p) + u1(p)*u1(p) + u2(p)*u2(p));
 

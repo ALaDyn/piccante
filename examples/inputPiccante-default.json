@@ -73,6 +73,7 @@
       "isTest": false,
       "isFrozen": false,
       "quietStart": false,
+      "NQuietShuffle" : 1,
       "NOdistribution": "Maxwell",
       "NOdistributionParams": [1.0e-5],
       "NOdistributionAddMomentum": [0.0,0.0,0.0]

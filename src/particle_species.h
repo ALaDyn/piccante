@@ -70,6 +70,7 @@ public:
   void setTestSpecies();
   void setFrozenSpecies();
   void setQuietStart();
+  void setQuietShuffle(int Nshuffle);
   bool amIWithMarker();
   bool amIQuietStart();
   void output(std::ofstream &ff);
@@ -146,6 +147,7 @@ private:
   bool isTestSpecies;
   bool isFrozen;
   bool isQuiet;
+  int quietShuffle;
   double dummy;
   int valSize;
   int particlePerCell;

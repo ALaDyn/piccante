@@ -989,6 +989,9 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
         if (isQuiet)
           newSpec->setQuietStart();
 
+        int quiteShuffle = 1;
+        setInt(&quiteShuffle, mySpecies, _JSON_INT_QUIET_SHUFFLE);
+        newSpec->setQuietShuffle(quiteShuffle);
 
         newSpec->creation();
 
