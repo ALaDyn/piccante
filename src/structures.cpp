@@ -931,15 +931,20 @@ double user1(double x, double y, double z, PLASMAparams plist, double Z, double 
       (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
     if(Z==-1){
       double XX = (x-position);
-      double myexp = depth*exp(-XX*XX/(width*width));
+      double YY = y;
+      double myexp = depth*exp(-(XX*XX+YY*YY)/(width*width));
       rho = plist.density_coefficient*(1-myexp);
     }
     else{
       double XX = (x-position);
-      double myexp = depth*exp(-XX*XX/(width*width));
+      double YY = y;
+      double myexp = depth*exp(-(XX*XX+YY*YY)/(width*width));
       double ne = plist.density_coefficient*(1-myexp);
       double dne = plist.density_coefficient*2*XX/(width*width)*myexp;
+      dne += plist.density_coefficient*2*YY/(width*width)*myexp;
       double d2ne = plist.density_coefficient*2/(width*width)*( 1 - 2*XX*XX/(width*width) )*myexp;
+      d2ne += plist.density_coefficient*2/(width*width)*( 1 - 2*YY*YY/(width*width) )*myexp;
+
       rho = ne + temperature/((2 * M_PI)*(2 * M_PI))*( (dne*dne)/(ne*ne) - d2ne/ne );
     }
   }
