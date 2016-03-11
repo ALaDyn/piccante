@@ -749,11 +749,13 @@ void EM_FIELD::poissonSolver(CURRENT *current){
   MPI_Allreduce(MPI_IN_PLACE, &const1, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 
-  double bigNumber, smallNumber=1e-6*const1;
+  double bigNumber, smallNumber=1e-10*const1;
   bool nonMiPiace = true;
   int iteration=0;
   int MAX_NUMBER_OF_ITERATIONS=100000;
 
+  if(smallNumber<1e-14)
+    nonMiPiace = false;
   while(nonMiPiace){
     boundary_conditions();
     putNabla2ofB1inCurrentAux(current);  //current->aux(i,j,k) = A.p
@@ -800,7 +802,6 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     }
 
 
-    iteration++;
     bigNumber=const3;
     if(!(iteration%100)&&mygrid->myid==mygrid->master_proc){
       std::cout << "nonMiPiace="<< nonMiPiace << "  iterazione=" << iteration <<  "  la differenza è " << bigNumber << "/" << smallNumber <<std::endl;
@@ -808,9 +809,11 @@ void EM_FIELD::poissonSolver(CURRENT *current){
     if(bigNumber<smallNumber || iteration >MAX_NUMBER_OF_ITERATIONS ){
       nonMiPiace =false;
     }
+    iteration++;
+
   }
 
-
+  boundary_conditions();
   if (dimensions == 3) {
     //#pragma omp parallel for private(i,j)
     for (int k = 0; k < Nz; k++) {
@@ -827,12 +830,29 @@ void EM_FIELD::poissonSolver(CURRENT *current){
           E0(i,j,k) = -ddx;
           E1(i,j,k) = -ddy;
           E2(i,j,k) = -ddz;
+          B0(i,j,k) = 0;
+          B1(i,j,k) = 0;
+          B2(i,j,k) = 0;
+
         }
       }
     }
   }
   else if (dimensions == 2) {
+
     int k = 0;
+    if(0){
+      std::ofstream phi("phi-2D.txt");
+      for (int j = 0; j < Ny; j++) {
+        for (int i = 0; i < Nx; i++) {
+          double x, y;
+          x = mygrid->rminloc[0] + mygrid->dr[0]*i;
+          y = mygrid->rminloc[1] + mygrid->dr[1]*j;
+          phi << x << " " << y << " " << B2(i, j, k) << std::endl;
+        }
+      }
+    }
+    //    int k = 0;
     for (int j = 0; j < Ny; j++) {
       dyi = mygrid->dri[1] * mygrid->hStretchingDerivativeCorrection[1][j];
       for (int i = 0; i < Nx; i++) {
@@ -843,12 +863,23 @@ void EM_FIELD::poissonSolver(CURRENT *current){
         E0(i,j,k) = -ddx;
         E1(i,j,k) = -ddy;
         E2(i,j,k) = 0;
+        B0(i,j,k) = 0;
+        B1(i,j,k) = 0;
+        B2(i,j,k) = 0;
       }
     }
   }
   else if (dimensions == 1){
     int k = 0;
     int j = 0;
+    if(0){
+      std::ofstream phi("phi-1D.txt");
+      for (int i = 0; i < Nx; i++) {
+        double x;
+        x = mygrid->rminloc[0] + mygrid->dr[0]*i;
+        phi << x << " " << B2(i, j, k) << std::endl;
+      }
+    }
     for (int i = 0; i < Nx; i++) {
       dxi = mygrid->dri[0] * mygrid->hStretchingDerivativeCorrection[0][i];
       double ddx;
@@ -856,6 +887,9 @@ void EM_FIELD::poissonSolver(CURRENT *current){
       E0(i,j,k) = -ddx;
       E1(i,j,k) = 0;
       E2(i,j,k) = 0;
+      B0(i,j,k) = 0;
+      B1(i,j,k) = 0;
+      B2(i,j,k) = 0;
     }
   }
 }
@@ -930,15 +964,14 @@ double EM_FIELD::getErrorInPoissonEquation(CURRENT *current){
 
 void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
   int i, j, k;
-  int Nx, Ny, Nz;
   double dxi, dyi, dzi;
   double dxiR, dyiR, dziR;
   double dxiL, dyiL, dziL;
   int dimensions = mygrid->getDimensionality();
 
-  Nx = mygrid->Nloc[0];
-  Ny = mygrid->Nloc[1];
-  Nz = mygrid->Nloc[2];
+  int Nx = mygrid->Nloc[0];
+  int Ny = mygrid->Nloc[1];
+  int Nz = mygrid->Nloc[2];
 
   if (dimensions == 3) {
     //#pragma omp parallel for private(i,j)
@@ -954,7 +987,7 @@ void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
 
           double ddx, ddy, ddz;
           ddx = dxi*( dxiR*(B1(i+1, j, k)-B1(i, j, k)) - dxiL*(B1(i, j, k) -B1(i-1, j, k)) );
-          ddy = dyi*( dyiR*(B1(1, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
+          ddy = dyi*( dyiR*(B1(i, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
           ddz = dzi*( dziR*(B1(i, j, k+1)-B1(i, j, k)) - dziL*(B1(i, j, k) -B1(i, j, k-1)) );
           current->aux(i,j,k) = ddx + ddy +ddz;
         }
@@ -962,6 +995,7 @@ void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
     }
   }
   else if (dimensions == 2) {
+    k=0;
     for (j = 0; j < Ny; j++) {
       dyi = mygrid->dri[1] * mygrid->iStretchingDerivativeCorrection[1][j];
       dyiR = dyiL = dyi;
@@ -971,12 +1005,13 @@ void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
 
         double ddx, ddy;
         ddx = dxi*( dxiR*(B1(i+1, j, k)-B1(i, j, k)) - dxiL*(B1(i, j, k) -B1(i-1, j, k)) );
-        ddy = dyi*( dyiR*(B1(1, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
+        ddy = dyi*( dyiR*(B1(i, j+1, k)-B1(i, j, k)) - dyiL*(B1(i, j, k) -B1(i, j-1, k)) );
         current->aux(i,j,k) = ddx + ddy;
       }
     }
   }
   else if (dimensions == 1){
+    j=k=0;
     for (i = 0; i < Nx; i++) {
       dxi = mygrid->dri[0] * mygrid->iStretchingDerivativeCorrection[0][i];
       dxiR = dxiL = dxi;
@@ -986,6 +1021,7 @@ void EM_FIELD::putNabla2ofB1inCurrentAux(CURRENT *current){
       current->aux(i,j,k) = ddx;
     }
   }
+
 }
 
 
