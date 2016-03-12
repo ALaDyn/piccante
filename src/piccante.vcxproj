@@ -182,6 +182,7 @@
     <ClInclude Include="rapidjson\reader.h" />
     <ClInclude Include="rapidjson\stringbuffer.h" />
     <ClInclude Include="rapidjson\writer.h" />
+    <ClInclude Include="sobol.hpp" />
     <ClInclude Include="structures.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
@@ -305,13 +306,20 @@
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="jsonparser.cpp" />
+    <ClCompile Include="main-devel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="main-piccante.cpp" />
     <ClCompile Include="output_manager.cpp" />
     <ClCompile Include="particle_species.cpp" />
+    <ClCompile Include="sobol.cpp" />
     <ClCompile Include="structures.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\BUILD.md" />
+    <None Include="..\doc\src\piccante_guide.tex" />
     <None Include="..\README.md" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -320,6 +328,7 @@
     <Import Project="..\packages\boost.1.60.0.0\build\native\boost.targets" Condition="Exists('..\packages\boost.1.60.0.0\build\native\boost.targets')" />
     <Import Project="..\packages\boost_system.1.60.0.0\build\native\boost_system.targets" Condition="Exists('..\packages\boost_system.1.60.0.0\build\native\boost_system.targets')" />
     <Import Project="..\packages\boost_filesystem.1.60.0.0\build\native\boost_filesystem.targets" Condition="Exists('..\packages\boost_filesystem.1.60.0.0\build\native\boost_filesystem.targets')" />
+    <Import Project="..\packages\boost_random.1.60.0.0\build\native\boost_random.targets" Condition="Exists('..\packages\boost_random.1.60.0.0\build\native\boost_random.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -328,5 +337,6 @@
     <Error Condition="!Exists('..\packages\boost.1.60.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.60.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('..\packages\boost_system.1.60.0.0\build\native\boost_system.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_system.1.60.0.0\build\native\boost_system.targets'))" />
     <Error Condition="!Exists('..\packages\boost_filesystem.1.60.0.0\build\native\boost_filesystem.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_filesystem.1.60.0.0\build\native\boost_filesystem.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_random.1.60.0.0\build\native\boost_random.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_random.1.60.0.0\build\native\boost_random.targets'))" />
   </Target>
 </Project>

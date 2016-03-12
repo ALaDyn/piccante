@@ -489,3 +489,5 @@ main-1.cpp
 piccante.files
 piccante.includes
 *.opendb
+*.iobj
+*.ipdb
