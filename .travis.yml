@@ -8,9 +8,7 @@ addons:
     - gcc-4.8
     - g++-4.8
     - libopenmpi-dev
-    - libboost-system-dev
-    - libboost-system-dev
-    - libboost-filesystem-dev
+    - libboost-all-dev
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8" OMPI_MPICXX="g++-4.8" OMPI_MPICC="gcc-4.8"; fi
 compiler:
