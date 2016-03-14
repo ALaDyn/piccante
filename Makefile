@@ -1,6 +1,7 @@
 COMPILER = mpicxx
 EXE = piccante.exe
 MAINFILE = main-piccante.cpp
+MAINFILE_DEV = main-devel.cpp
 
 FILES = grid.cpp \
         sobol.cpp \
@@ -19,6 +20,7 @@ SRC = $(addprefix $(SRC_FOLDER)/, $(FILES))
 MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
 OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
+OBJDEV = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
 LIB =
 OPT = -O3 -std=c++11
 
@@ -26,6 +28,10 @@ BOOST_LIB = $(SRC_FOLDER)
 BOOST_INC = $(SRC_FOLDER)
 HDF5_INC = $(SRC_FOLDER)
 HDF5_LIB = $(SRC_FOLDER)
+
+ifneq (,$(findstring devel,$(config)))
+	MAINFILE = $(MAINFILE_DEV)
+endif
 
 all: $(EXE)
 
@@ -43,7 +49,7 @@ cnaf-intel: OPT += -axSSE4.2,AVX -ipo
 cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
 cnaf-intel: all
 
-brew: nocpp11
+brew: boost
 brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
 brew: BOOST_INC = /usr/local/Cellar/boost/1.60.0_1/include
 brew: all
@@ -121,9 +127,16 @@ $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
 	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
 
 clean:
-	rm -f $(OBJ) *~
+	rm -f $(OBJ) $(OBJDEV) *~
 
 cleanall:
-	rm -f $(OBJ) $(EXE) $(EXE).debug *~
+	rm -f $(OBJ) $(OBJDEV) $(EXE) $(EXE).debug *~
+
+help: 
+	@echo 'Usage: make config=OPTIONS'
+	@echo '	    OPTIONS is a string composed of one or more of:'
+	@echo '	        devel      : to compile using main-devel.cpp instead of default
+	@echo ' examples:'
+	@echo '     make config=devel'
 
 
