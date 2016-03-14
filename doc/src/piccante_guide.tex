@@ -52,9 +52,9 @@ texpreamble("\def\V#1{\bm{#1}}");
 \chapter{Introduction}
 \emph{piccante}, the code described in this document, is a massively parallel fully-relativistic 3D particle-in-cell code. The user is able to define an arbitrary number of particle species with arbitrary density functions and an arbitrary number of Gaussian laser pulses.
 
-The code is proved to run on up to 16384 MPI processes. Some preliminary scaling tests verified a very good scalability on up to 4096 MPI tasks.
+The code is proved to scale very well up to 32768 MPI processes.
 
-In its present state, the code could be considered in ``beta testing''.
+In its present state, the code could be considered in ``beta status''.
 
 This document should provide all the information needed to compile the code, run simulations and analyse the results.
 \begin{figure}[h!]
@@ -67,7 +67,7 @@ This document should provide all the information needed to compile the code, run
 \chapter{How to get and compile the code}
 The following instructions describe the procedure to compile the code in a Linux system. However the code can be compiled also on a Windows system and should be compilable also on an Apple system.
 \section{How to get the code} \label{section_getcode}
-\subsection{Github}  
+\subsection{GitHub}  
 The code is distributed via an open-source repository hosted on \url{https://github.com/}.
 
 Make sure that \emph{git} (a distributed version control system) is installed on your machine (\url{http://git-scm.com/}).
@@ -79,13 +79,13 @@ Once \emph{git} is installed on your system, it is possible to easily install an
 
 To install the code:
 \begin{verbatim}
-# git clone https://github.com/ALaDyn/piccante.git
+$ git clone https://github.com/ALaDyn/piccante.git
 \end{verbatim}
 A folder named \verb+piccante+ will be created.
 
 To check for updates, \verb+cd+ into \verb+piccante+ folder and type:
 \begin{verbatim}
-# git pull
+$ git pull
 \end{verbatim}
 
 \subsection{Ask a contributor}
@@ -99,13 +99,7 @@ If you need further information, ask one of the contributors:
 \end{center}
 
 \section{Dependencies}
-This code depends on \emph{GNU Scientific Library} and \emph{Message Passing Interface}. You need these libraries to compile and run the code on your system. It is possible to enable some functions depending on \emph{Boost} library, which is thus an optional dependence.
-\subsection{GNU Scientific Library}
-In Debian-based Linux distributions, it should be possible to install the GNU Scientific Library typing:
-\begin{verbatim}
-$ sudo apt-get install libgsl0-dev
-\end{verbatim}
-In any case, please refer to \url{http://www.gnu.org/software/gsl/}.
+This code depends on \emph{Boost} and \emph{Message Passing Interface}. You need these libraries to compile and run the code on your system. 
 
 \subsection{MPI}
 Our code has been tested using the \emph{OpenMPI} implementation of the \emph{Message Passing Interface}.
@@ -121,7 +115,7 @@ To install \emph{Boost} on a Debian-based Linux distribution, just type:
 \begin{verbatim}
 $ sudo apt-get install libboost-all-dev
 \end{verbatim}
-Plese refere to \url{http://www.boost.org/} for further information.
+Plese refer to \url{http://www.boost.org/} for further information.
 
 
 \section{Compilation of the code}
@@ -139,7 +133,7 @@ $ make debug
 Finally, if you want to use \emph{Scalasca} profiler (\url{http://www.scalasca.org/}) type:
 \begin{verbatim}
 $ make clean
-$ make scal
+$ make scalasca
 \end{verbatim}
 
 \chapter{How to prepare a simulation}
@@ -165,16 +159,8 @@ Other example main files are described in the next chapter.
 #include <cmath>
 #include <iomanip>
 #include <cstring>
-#include <ctime>    
-#if defined(_MSC_VER)
-#include "gsl/gsl_rng.h" 
-#include "gsl/gsl_randist.h"
-#else
-#include <gsl/gsl_rng.h> 
-#include <gsl/gsl_randist.h>
-#endif
+#include <ctime>
 #include <cstdarg> 
-
 #include <vector>
 
 using namespace std;
@@ -325,6 +311,8 @@ Here the seeds of the random number generators for each MPI task are set (each t
 	grid.visualDiag();
 \end{lstlisting}
 These lines (which should not be modified) conclude the initialization of the grid and display some information on the standard output.
+
+
 \subsection{Stretched grid}\label{subsection_stretch}
 
 \begin{lstlisting}
@@ -532,6 +520,7 @@ In 2 or 3 dimensions, if an oblique incidence pulse is required,
 	current.setAllValuesToZero();
 \end{lstlisting}
 These lines need to be called after pulse generation. They apply boundary conditions for the EM field and they allocate \verb+current+ (which is initialized to zero).
+
 \section{Plasma}
 \begin{lstlisting}
 	PLASMA plasma1;
@@ -919,7 +908,7 @@ You should get something like:
 888                                                                
 888                                                                
 888                                                                
-================   version 1.2.0  ================
+================   version 1.5.0  ================
 ========== GRID_INITIALIZATION ==========
 master_proc=0:
 Ncells   =2500 :     (  2500,     1,     1)
@@ -981,18 +970,17 @@ Most of the output files are in binary format. The code comes with a \emph{reade
 \section{Get the reader}
 \emph{reader} is available as an open-source repository. To get the reader, simply type (see \ref{section_getcode}):
 \begin{verbatim}
-git clone https://github.com/ALaDyn/tools-pic.git
+git clone https://github.com/ALaDyn/tools-piccante.git
 \end{verbatim}
 
 \section{Compile the reader}
-To compile \emph{reader}, it is sufficient to type:
+To compile \emph{reader}, it should be enough to do a make in the tools-piccante root folder
+
+Then, you may want to launch \emph{reader} from any location on your system. To make it possible, copy the \emph{reader.exe} executable in the \verb+\usr\bin+ folder.
 \begin{verbatim}
-$g++ newfield_reader.cpp -O3 -o reader
+$sudo cp reader.exe /usr/bin/reader
 \end{verbatim}
-Then, you may want to launch \emph{reader} from any location on your system. To make it possible, copy the executable in the \verb+\usr\bin+ folder.
-\begin{verbatim}
-$sudo cp reader /usr/bin/reader
-\end{verbatim}
+If you don't want to do this, or you just cannot do it, please refer to your \emph{reader.exe} location in the following guide, instead of just the command \emph{reader} we are going to use.
 
 \section{Human readable outputs}
 \subsection{diag.dat file}
@@ -1050,7 +1038,8 @@ This diagnostic is enabled with \emph{Diag} output and it produces a separate fi
 
 Each file contains an energy spectrum of a given species at a given time. You can visualize these spectra with \emph{gnuplot}:
 \begin{verbatim}
-$plot "SPECTRUM_ELE1_020.000.dat" u ($1+$2):3 w l
+$ gnuplot
+> plot "SPECTRUM_ELE1_020.000.dat" u ($1+$2):3 w l
 \end{verbatim}
 \subsection{EMProbe* files}
 \verb+EMProbe_PROBENAME_PROBEID.txt+ contains the interpolated values of the electromagnetic fields at the position given via the \verb+emProbe+ object during the call. \verb+PROBENAME+ is chosen by the user by setting it via the \verb+emProbe+ object. \verb+PROBEID+ is a progressive number to avoid overwriting a probe which may incidentally have the same name.
@@ -1075,20 +1064,17 @@ These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) and their subdom
 
 First, launch \emph{reader} passing the file name as an argument (this is usually extremely fast for 1D simulation, while it can take several minutes for 2D or 3D simulations):
 \begin{verbatim}
-$reader Efield_050.000.bin
-\end{verbatim}
-If you haven't or you couldn't copy \emph{reader} in \verb+\usr\bin+, copy the executable in the output folder and launch it as:
-\begin{verbatim}
-$./reader Efield_050.000.bin
+$ reader Efield_050.000.bin
 \end{verbatim}
 This command produces a file with a \verb+.txt+ extension (\verb+Efield_050.000.bin.txt+) in this case. The columns of this file are, respectively: $x$, $y$, $z$, $E_x$, $E_y$, $E_z$. So, if you want to plot the $E_x$ field component of a 2D simulation with \emph{gnuplot}, launch the application and type:
 \begin{verbatim}
-$plot "Efield_050.000.bin.txt" u 1:2:4 w image
+$ gnuplot
+> plot "Efield_050.000.bin.txt" u 1:2:4 w image
 \end{verbatim}
 If you have used the stretched grid feature, plotting with image won't work correctly. In this case you have to type:
 \begin{verbatim}
-$set pm3d map
-$splot "Efield_050.000.bin.txt" u 1:2:4 w pm3d
+> set pm3d map
+> splot "Efield_050.000.bin.txt" u 1:2:4 w pm3d
 \end{verbatim}
 You can avoid launching the reader for every single file implementing some simple \emph{bash} scripts. The following script, for example, plots the 
 $E_x$ field component and saves it as a \verb+.png+ file for each \emph{Efield} file in the \verb+TEST+ directory:
@@ -1097,7 +1083,7 @@ $E_x$ field component and saves it as a \verb+.png+ file for each \emph{Efield} 
 echo "set term pngcairo size 1000,1000">gnuplot.scr
 echo "set size ratio -1">>gnuplot.scr
 for f in TEST/Efield_*.bin
-        do ./reader $f
+        do reader $f
         echo "set output '${f}_Ex.png'">>gnuplot.scr
         echo "plot '${f}.txt' u 1:2:4 w image">>gnuplot.scr 
 done
@@ -1130,7 +1116,7 @@ Most of what has been said for \emph{EMfield} files is valid for \emph{Density} 
 
 Suppose that you want the \emph{total charge density} in a simulation where you have one electron species ``ELE1'' and one ion specie ``ION1''. With \emph{gnuplot} you can accomplish this as follows:
 \begin{verbatim}
-plot "< paste DENS_ION1_024.000.bin.txt DENS_ELE1_024.000.bin.txt" u 1:($4-$8) w l
+> plot "< paste DENS_ION1_024.000.bin.txt DENS_ELE1_024.000.bin.txt" u 1:($4-$8) w l
 \end{verbatim}
 
 \subsection{Current files}
@@ -1139,13 +1125,13 @@ Most of what has been said for \emph{EMfield} files is valid for \emph{Density} 
 \subsection{PhaseSpace files}
 The \emph{PhaseSpace} files (\verb+PHASESPACE_NAME_TIME.bin+) have a very simple structure: for each particle, 7 float numbers are saved. These numbers are, respectively: $x$, $y$, $z$, $p_x$, $p_y$, $p_z$ and the weight of the particle. Due to their simplicity, these files can be plotted with \emph{gnuplot}: 
 \begin{verbatim}
-$plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" u 1:4 w d
+> plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" u 1:4 w d
 \end{verbatim}
 For example, this command plots the $x-p_x$ projection of the phase space.
 
 Since these files are usually very large, you may want to plot just a fraction of the particles. Suppose that you want to plot one particle every 100:
 \begin{verbatim}
-$plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" every 100 u 1:4 w d
+> plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" every 100 u 1:4 w d
 \end{verbatim} 
 
 \chapter{Main files collection}

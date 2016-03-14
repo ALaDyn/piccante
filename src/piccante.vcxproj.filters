@@ -16,9 +16,6 @@
     <Filter Include="Header Files\rapidjson">
       <UniqueIdentifier>{f0d4abbf-5ca4-4ebf-bc5e-d58787ab8de9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\boost">
-      <UniqueIdentifier>{40c5e6ac-4827-428d-b664-f3dddcfc61a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\json">
       <UniqueIdentifier>{59678289-01c4-437c-bc87-584a1d3045dc}</UniqueIdentifier>
     </Filter>
@@ -147,6 +144,9 @@
     <ClInclude Include="json\json-forwards.h">
       <Filter>Header Files\json</Filter>
     </ClInclude>
+    <ClInclude Include="sobol.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="current.cpp">
@@ -236,9 +236,17 @@
     <ClCompile Include="..\examples\main-landau-damping.cpp">
       <Filter>Source Files\examples</Filter>
     </ClCompile>
+    <ClCompile Include="main-devel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sobol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="..\README.md" />
+    <None Include="..\BUILD.md" />
+    <None Include="..\doc\src\piccante_guide.tex" />
   </ItemGroup>
 </Project>
