@@ -83,6 +83,10 @@ galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--bina
 galileo: BOOST_LIB = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/lib
 galileo: all
 
+galileo-phi: COMPILER = mpiicpc
+galileo-phi: OPT = -O3 -std=c++11 -mmic
+galileo-phi: all
+
 fermi: COMPILER = mpixlcxx
 fermi: LIB = -lboost_filesystem -lboost_system -lboost_random
 fermi: BOOST_LIB = /cineca/prod/libraries/boost/1.51.0/bgq-xl--1.0/lib/
