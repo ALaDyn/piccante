@@ -51,11 +51,8 @@ cnaf-intel: OPT_REPORT += -vec-report -opt-report 3
 cnaf-intel: all
 
 cnaf-phi: COMPILER = mpiicpc
-cnaf-phi: BOOST_LIB = /shared/software/project/aladyn/boost_1_60_0_MIC/lib
-cnaf-phi: BOOST_INC = /shared/software/project/aladyn/boost_1_60_0_MIC/include
-cnaf-phi: OPT = -O3 -std=c++11 -mmic -DUSE_BOOST
+cnaf-phi: OPT = -O3 -std=c++11 -mmic 
 cnaf-phi: RPATH = -Wl,-rpath=/shared/software/compilers/intel/compilers_and_libraries_2016.0.109/linux/compiler/lib/intel64_lin_mic 
-cnaf-phi: LIB = -lboost_filesystem -lboost_system
 cnaf-phi: all
 
 brew: boost
