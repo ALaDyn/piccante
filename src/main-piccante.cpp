@@ -121,18 +121,31 @@ int main(int narg, char **args)
   }
 
   //*******************************************END SPECIES DEFINITION***********************************************************
-
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
+  current.allocate(&grid);
 
+  //*******************************************    POISSON SOLVER    *********************************************************
+  jsonParser::setPoissonSolver(root, &grid);
 
-  myfield.boundary_conditions();
+  if(grid.isWithPoisson()){
+    bool withSign = true;
+    std::cout << " evaluating density..." << std::endl;
+
+    current.setAllValuesToZero();
+    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      (*spec_iterator)->density_deposition_standard(&current, withSign);
+    }
+    current.pbc();
+    std::cout << "   done... now into Poisson solver" << std::endl;
+    myfield.poissonSolver(&current);
+  }
 
   jsonParser::setLaserPulses(root, &myfield);
   myfield.boundary_conditions();
 
-  current.allocate(&grid);
+
   current.setAllValuesToZero();
   //*******************************************END FIELD DEFINITION***********************************************************
 
