@@ -21,7 +21,6 @@
 #define __PARTICLE_SPECIES_H__
 
 #define _USE_MATH_DEFINES
-
 #include <mpi.h>
 #include "commons.h"
 #include "structures.h"
@@ -35,6 +34,7 @@
 #endif
 
 #define _VERY_SMALL_MOMENTUM 1.0e-5
+//#undef _ACC_SINGLE_POINTER
 
 class SPECIE {
 public:
