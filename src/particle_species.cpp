@@ -963,6 +963,7 @@ void SPECIE::position_parallel_pbc()
     for (p = 0; p < Np; p++)
     {
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       if (pData[direction + p*Ncomp] > mygrid->rmaxloc[direction])
       {
         nlost++;
@@ -974,7 +975,6 @@ void SPECIE::position_parallel_pbc()
           sendr_buffer[c + Ncomp*(nright - 1)] = pData[c + p*Ncomp];
 
       }
-
       else if (pData[direction + p*Ncomp] < mygrid->rminloc[direction])
       {
         nlost++;
@@ -990,6 +990,35 @@ void SPECIE::position_parallel_pbc()
         for (c = 0; c < Ncomp; c++)
           pData[c + (p - nlost)*Ncomp] = pData[c + p*Ncomp];
       }
+#else
+      if (pData[pIndex(direction, p, Ncomp, Np)] > mygrid->rmaxloc[direction])
+      {
+        nlost++;
+        nright++;
+        if (mygrid->rmyid[direction] == mygrid->rnproc[direction] - 1)
+          pData[pIndex(direction, p, Ncomp, Np)] -= Length;
+        sendr_buffer = (double*)realloc(sendr_buffer, nright*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendr_buffer[c + Ncomp*(nright - 1)] = pData[pIndex(c, p, Ncomp, Np)];
+
+      }
+
+      else if (pData[pIndex(direction, p, Ncomp, Np)] < mygrid->rminloc[direction])
+      {
+        nlost++;
+        nleft++;
+        if (mygrid->rmyid[direction] == 0)
+          pData[pIndex(direction, p, Ncomp, Np)] += Length;
+        sendl_buffer = (double*)realloc(sendl_buffer, nleft*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendl_buffer[c + Ncomp*(nleft - 1)] = pData[pIndex(c, p, Ncomp, Np)];
+      }
+      else
+      {
+        for (c = 0; c < Ncomp; c++)
+          pData[pIndex(c, (p - nlost), Ncomp, Np)] = pData[pIndex(c, p, Ncomp, Np)];
+      }
+#endif
 #else
       if (val[direction][p*Ncomp] > mygrid->rmaxloc[direction])
       {
@@ -1050,12 +1079,17 @@ void SPECIE::position_parallel_pbc()
     #ifdef _ACC_SINGLE_POINTER
     for (int pp = 0; pp < nnew; pp++) {
       for (c = 0; c < Ncomp; c++) {
+//        pData[c + (pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
+#ifdef _DIRECT_PARTICLE_ACCESS
         pData[c + (pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
+#else
+        pData[pIndex(c, (pp + nold - nlost), Ncomp, Np)] = recv_buffer[pp*Ncomp + c];
+#endif
       }
     }
 #else
+    for (int pp = 0; pp < nnew; pp++) {
       for (c = 0; c < Ncomp; c++) {
-        for (int pp = 0; pp < nnew; pp++) {
         val[c][(pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
       }
     }
@@ -1156,7 +1190,11 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
       for (c = 0; c < 3; c++) {
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
 #else
         xx[c] = val[c][p*Ncomp];
 #endif
@@ -1548,9 +1586,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
 #endif
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
 #else
       u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
@@ -1577,9 +1621,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
 #else
       val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
@@ -1595,7 +1645,11 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       for (c = 0; c < 3; c++)
       {
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
 #else
         xx[c] = val[c][p*Ncomp];
 #endif
@@ -1801,9 +1855,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
 
 #endif
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
 #else
       u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
@@ -1831,9 +1891,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
 #else
       val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
@@ -1849,7 +1915,11 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       for (c = 0; c < 3; c++)
       {
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
 #else
         xx[c] = val[c][p*Ncomp];
 #endif
@@ -1907,9 +1977,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       }
 
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
 #else
       u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
@@ -1937,9 +2013,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
 #ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
 #else
       val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
