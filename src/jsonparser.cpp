@@ -434,6 +434,9 @@ bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser) {
     else if (type == _LASERTYPEVALUE_COS2_PLATEAU_PLANE_WAVE_) {
       pulse1->type = COS2_PLATEAU_PLANE_WAVE;
     }
+    else if (type == _LASERTYPEVALUE_LG_) {
+      pulse1->type = LAGUERRE_GAUSSIAN;
+    }
     else
       flag = false;
   }
@@ -547,8 +550,28 @@ bool jsonParser::setLaserRiseTime(laserPulse *pulse1, Json::Value  &mylaser) {
   return flag;
 }
 
+bool jsonParser::setLaserLG_l(laserPulse *pulse1, Json::Value  &mylaser) {
+  std::string name2 = _JSON_INT_LG_L_;
+  int LG_l;
+  bool flag = setInt(&LG_l, mylaser, name2.c_str());
+  if (flag) {
+    pulse1->setLaguerreGaussian_l(LG_l);
+  }
+  return flag;
+}
+
+bool jsonParser::setLaserLG_m(laserPulse *pulse1, Json::Value  &mylaser) {
+  std::string name2 = _JSON_INT_LG_M_;
+  int LG_m;
+  bool flag = setInt(&LG_m, mylaser, name2.c_str());
+  if (flag) {
+    pulse1->setLaguerreGaussian_m(LG_m);
+  }
+  return flag;
+}
+
 bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *pulse) {
-  if (!flags.type) {
+      if (!flags.type) {
     return false;
   }
   switch (pulse->type) {
@@ -574,7 +597,7 @@ bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *puls
     break;
   default:
     break;
-  }
+  }  
   return true;
 }
 
@@ -582,11 +605,14 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
   std::string  name1 = _JSON_OBJ_ARRAY_LASER_;
   Json::Value lasers;
 
+
+
   if (setValue(lasers, document, name1.c_str())) {
     if (lasers.isArray()) {
       std::string  name2;
 
       for (unsigned int index = 0; index < lasers.size(); index++) {
+
         Json::Value myLaser = lasers[index];
 
         name2 = _JSON_BOOL_ENABLED;
@@ -607,6 +633,10 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
           flags.rotation = setLaserRotation(pulse1, myLaser);
           flags.lambda = setLaserLambda(pulse1, myLaser);
           flags.riseTime = setLaserRiseTime(pulse1, myLaser);
+
+          setLaserLG_l(pulse1, myLaser);
+          setLaserLG_m(pulse1, myLaser);
+
 
           if (checkLaserBoolFlags(flags, pulse1)) {
             emfield->addPulse(pulse1);

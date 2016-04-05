@@ -1554,6 +1554,38 @@ void EM_FIELD::addPulse(laserPulse* pulse) {
         }
         break;
       }
+  case LAGUERRE_GAUSSIAN:
+  {
+       if (pulse->rotation) {
+        initialize_LG_pulse_angle
+            (pulse->lambda0,
+             pulse->normalized_amplitude,
+             pulse->laser_pulse_initial_position,
+             pulse->t_FWHM,
+             pulse->waist,
+             pulse->focus_position,
+             pulse->rotation_center_along_x,
+             pulse->angle,
+             pulse->polarization,
+             pulse->LG_l,
+             pulse->LG_m);
+      }
+      else {
+        initialize_LG_pulse_angle
+            (pulse->lambda0,
+             pulse->normalized_amplitude,
+             pulse->laser_pulse_initial_position,
+             pulse->t_FWHM,
+             pulse->waist,
+             pulse->focus_position,
+             pulse->rotation_center_along_x,
+             pulse->angle,
+             pulse->polarization,
+             pulse->LG_l,
+             pulse->LG_m);
+      }
+      break;
+  }
 
     default: {}
   }
@@ -1859,6 +1891,94 @@ void EM_FIELD::initialize_gaussian_pulse_angle(double lambda0, double amplitude,
       }
 }
 
+
+void EM_FIELD::initialize_LG_pulse_angle(double lambda0, double amplitude, double laser_pulse_initial_position,
+                                               double t_FWHM, double waist, double focus_position, double xcenter,
+                                               double angle, pulsePolarization polarization, int LG_l, int LG_m)
+{
+  int i, j, k;
+  int Nx, Ny, Nz;
+  double xh, yh, zh;
+  double xx, yy, zz, tt = 0;
+  double xp, yp;
+  double lambda, w0, fwhm;
+  double xc, tc;
+  double field[6];
+  double dim_factorY = 1, dim_factorZ = 1;
+
+  amplitude *= (2 * M_PI) / lambda0;
+  Nx = mygrid->Nloc[0];
+  Ny = mygrid->Nloc[1];
+  Nz = mygrid->Nloc[2];
+
+  lambda = lambda0;
+  fwhm = t_FWHM;
+
+  double mycos, mysin;
+  mycos = cos(angle);
+  mysin = sin(angle);
+  if (fabs(mysin) < 0.001) {
+    mysin = 0;
+    mycos = (mycos > 0) ? (1) : (-1);
+  }
+  if (fabs(mycos) < 0.001) {
+    mycos = 0;
+    mysin = (mysin > 0) ? (1) : (-1);
+  }
+
+
+  w0 = waist;
+  xc = -focus_position;
+  tc = -focus_position + laser_pulse_initial_position;
+  tt = +tc;
+
+  if (mygrid->getDimensionality() == 2) {
+    dim_factorZ = 0;
+  }
+  else if (mygrid->getDimensionality() == 1) {
+    dim_factorY = dim_factorZ = 0;
+  }
+
+  for (k = 0; k < Nz; k++)
+    for (j = 0; j < Ny; j++)
+      for (i = 0; i < Nx; i++)
+      {
+        xx = mygrid->cirloc[0][i];
+        yy = dim_factorY*mygrid->cirloc[1][j];
+        zz = dim_factorZ*mygrid->cirloc[2][k];
+        xh = mygrid->chrloc[0][i];
+        yh = dim_factorY*mygrid->chrloc[1][j];
+        zh = dim_factorZ*mygrid->chrloc[2][k];
+
+        auxiliary_rotation(xh, yy, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        E0(i, j, k) += amplitude*(field[0] * mycos - field[1] * mysin);
+        auxiliary_rotation(xx, yh, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        E1(i, j, k) += amplitude*(field[1] * mycos + field[0] * mysin);
+        auxiliary_rotation(xx, yy, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        E2(i, j, k) += amplitude*field[2];
+
+        auxiliary_rotation(xx, yh, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        B0(i, j, k) += amplitude*(field[3] * mycos - field[4] * mysin);
+        auxiliary_rotation(xh, yy, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        B1(i, j, k) += amplitude*(field[4] * mycos + field[3] * mysin);
+        auxiliary_rotation(xh, yh, xp, yp, xcenter, angle);
+        xp += xc;
+        laguerreGaussian_pulse(mygrid->getDimensionality(), xp, yp, zz, tt, lambda, fwhm, w0, field, polarization, LG_l, LG_m);
+        B2(i, j, k) += amplitude*field[5];
+
+
+      }
+}
 //TODO DA RIVEDERE
 /*
 void inject_field(double angle) {
@@ -2195,6 +2315,77 @@ double EM_FIELD::cossin_profile(double u)
 {
   if (fabs(u) <= 1.0) return cos(0.5*M_PI*u)*sin(0.5*M_PI*u);
   else return 0.0;
+}
+
+void EM_FIELD::laguerreGaussian_pulse(int dimensions, double xx, double yy, double zz, double tt, double lambda, double fwhm, double w0,
+                                      double* field, pulsePolarization polarization, int LG_l, int LG_m)
+{
+    double amp00;
+    int signum;
+    if ( ((LG_m > 0)?(LG_m):(-LG_m))  %2 == 0)
+        signum = 1;
+    else
+        signum = -1;
+
+    double zra = M_PI*w0*w0;
+    double waist = w0*sqrt(1 + (xx*xx) / (zra*zra));
+
+    double r2 = (yy*yy + zz*zz);
+    double rprofile= exp(-r2 / (waist*waist));
+
+    double tprofile = cos2_profile((tt - xx) / fwhm);
+
+    double c1 = pow(sqrt(r2*2)/waist,LG_l);
+
+    double argL = 2*r2/waist/waist;
+
+    //Only l <= 3
+    double Lp;
+    if(LG_m == 3){
+        Lp = -argL*argL*argL/6.0 + (LG_l+3)*argL*argL/2.0 - (LG_l+2)*(LG_l+3)*argL/2.0 + (LG_l+3)*(LG_l+2)*(LG_l+1)/6.0;
+    }
+    else if (LG_m == 2){
+        Lp = -argL*argL/2.0 - (LG_l +2)*argL - 0.5*(LG_l+2)*(LG_l+1);
+    }
+    else if (LG_m == 1){
+        Lp = -argL + LG_l + 1;
+    }
+    else{
+        Lp = 1.0;
+
+    }
+
+    double k0 = 2 * M_PI / lambda;
+
+    double phase = k0*(tt-xx) + k0*(xx)*r2/(2*(xx*xx + zra*zra))+ (2*LG_m + LG_l + 1)*atan(xx/zra) + LG_l*atan2(yy,zz);
+
+    amp00 = cos(phase)*Lp*c1*rprofile*tprofile*signum;
+
+  if (polarization == P_POLARIZATION) {
+    field[0] = 0;          //Ex
+    field[1] = amp00;  //Ey
+    field[2] = 0;                     //Ez
+    field[3] = 0;           //Bx
+    field[4] = 0;                     //By
+    field[5] = amp00;  //Bz
+  }
+  else if (polarization == S_POLARIZATION) {
+    field[0] = 0;           //Ex
+    field[1] = 0;                     //Ey
+    field[2] = amp00;  //Ez
+    field[3] = 0;           //Bx
+    field[4] = -amp00; //By
+    field[5] = 0;                     //Bz
+  }
+  else if (polarization == CIRCULAR_POLARIZATION) {
+    field[0] = 0; //Ex
+    field[1] = amp00; //Ey
+    field[2] = amp00; //Ez
+    field[3] = 0; //Bx
+    field[4] = -amp00; //By
+    field[5] = amp00; //Bz
+  }
+
 }
 
 

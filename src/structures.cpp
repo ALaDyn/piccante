@@ -998,6 +998,8 @@ laserPulse::laserPulse() {
   angle = 0.0;
   rotation_center_along_x = 0.0;
   rise_time = 0.0;
+  LG_l = 0;
+  LG_m = 0;
 }
 
 laserPulse::~laserPulse() {}
@@ -1006,7 +1008,7 @@ laserPulse::laserPulse(const laserPulse& other)
   :type(other.type), t_FWHM(other.t_FWHM), waist(other.waist), focus_position(other.focus_position),
   laser_pulse_initial_position(other.laser_pulse_initial_position), normalized_amplitude(other.normalized_amplitude),
   lambda0(other.lambda0), rotation(other.rotation), angle(other.angle),
-  rotation_center_along_x(other.rotation_center_along_x), rise_time(other.rise_time) {}
+  rotation_center_along_x(other.rotation_center_along_x), rise_time(other.rise_time), LG_l(other.LG_l), LG_m(other.LG_m) {}
 
 
 laserPulse laserPulse::operator=(const laserPulse& p1) {
@@ -1022,6 +1024,8 @@ laserPulse laserPulse::operator=(const laserPulse& p1) {
   angle = p1.angle;
   rotation_center_along_x = p1.rotation_center_along_x;
   rise_time = p1.rise_time;
+  LG_l = p1.LG_l;
+  LG_m = p1.LG_m;
   return *this;
 }
 
@@ -1111,6 +1115,13 @@ void laserPulse::setCircularPolarization() {
   polarization = CIRCULAR_POLARIZATION;
 }
 
+void laserPulse::setLaguerreGaussian_l(int l){
+    LG_l = l;
+}
+
+void laserPulse::setLaguerreGaussian_m(int m){
+    LG_m = m;
+}
 
 //************** DISTRIBUTION_FUNCTION **********
 

@@ -257,6 +257,11 @@ private:
     double tt, double lambda, double fwhm,
     double w0, double* field, pulsePolarization polarization);
 
+  void laguerreGaussian_pulse(int dimensions, double xx, double yy, double zz,
+    double tt, double lambda, double fwhm,
+    double w0, double* field, pulsePolarization polarization,
+                              int LG_l, int LG_m);
+
   void initialize_cos2_plane_wave_angle(double lambda0, double amplitude,
     double laser_pulse_initial_position,
     double t_FWHM, double xcenter, double angle, pulsePolarization polarization, double rise_time);
@@ -268,6 +273,12 @@ private:
     double laser_pulse_initial_position, double t_FWHM,
     double waist, double focus_position,
     double xcenter, double angle, pulsePolarization polarization);
+
+  void initialize_LG_pulse_angle(double lambda0, double amplitude,
+    double laser_pulse_initial_position, double t_FWHM,
+    double waist, double focus_position,
+    double xcenter, double angle, pulsePolarization polarization, int LG_l, int LG_m);
+
 
   void filterDirSelect(int comp, int dirflags);
   void filterCompAlongX(int comp);

@@ -152,7 +152,7 @@ double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, doub
 double user1(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double user2(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
-enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE };
+enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN};
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 
 class laserPulse
@@ -170,6 +170,8 @@ public:
   double angle;
   double rotation_center_along_x;
   double rise_time;
+  int LG_m;
+  int LG_l;
 
 
   laserPulse();
@@ -192,6 +194,8 @@ public:
   void setPlaneWave();
   void setCos2PlaneWave();
   void setCos2PlateauPlaneWave();
+  void setLaguerreGaussian_m(int m);
+  void setLaguerreGaussian_l(int l);
 
   void setPPolarization();
   void setSPolarization();
