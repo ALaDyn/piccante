@@ -122,6 +122,8 @@ namespace jsonParser {
   bool setLaserLambda(laserPulse*, Json::Value&);
   bool setLaserRotation(laserPulse*, Json::Value&);
   bool setLaserRiseTime(laserPulse*, Json::Value&);
+  bool setLaserLG_l(laserPulse*, Json::Value&);
+  bool setLaserLG_m(laserPulse*, Json::Value&);
   bool checkLaserBoolFlags(laserPulseBoolFlags, laserPulse*);
   int findPlasmaFunction(std::string);
 
