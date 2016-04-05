@@ -1,0 +1,27 @@
+## Edit your .bashrc file on the mic with at least these settings
+
+export LD_LIBRARY_PATH=/lib64:${LD_LIBRARY_PATH}
+export I_MPI_MIC_PROXY_PATH=/lib64
+export PATH=/bin:$PATH
+export I_MPI_MIC=enable
+
+
+
+
+## copy the executable and the input file to your mic home dir
+
+scp piccante.exe mic0:~/
+scp inputPiccante.json mic0:~/
+
+
+
+
+## run the executable from the mic
+
+[hpc-200-06-15-mic0]$ mpirun -n N ./piccante.exe
+
+(where N is the number of mic core you want to use)
+
+
+
+

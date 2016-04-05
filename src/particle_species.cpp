@@ -962,6 +962,8 @@ void SPECIE::position_parallel_pbc()
     double Length = (mygrid->rmax[direction] - mygrid->rmin[direction]);
     for (p = 0; p < Np; p++)
     {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       if (pData[direction + p*Ncomp] > mygrid->rmaxloc[direction])
       {
         nlost++;
@@ -988,6 +990,63 @@ void SPECIE::position_parallel_pbc()
         for (c = 0; c < Ncomp; c++)
           pData[c + (p - nlost)*Ncomp] = pData[c + p*Ncomp];
       }
+#else
+      if (pData[pIndex(direction, p, Ncomp, Np)] > mygrid->rmaxloc[direction])
+      {
+        nlost++;
+        nright++;
+        if (mygrid->rmyid[direction] == mygrid->rnproc[direction] - 1)
+          pData[pIndex(direction, p, Ncomp, Np)] -= Length;
+        sendr_buffer = (double*)realloc(sendr_buffer, nright*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendr_buffer[c + Ncomp*(nright - 1)] = pData[pIndex(c, p, Ncomp, Np)];
+
+      }
+
+      else if (pData[pIndex(direction, p, Ncomp, Np)] < mygrid->rminloc[direction])
+      {
+        nlost++;
+        nleft++;
+        if (mygrid->rmyid[direction] == 0)
+          pData[pIndex(direction, p, Ncomp, Np)] += Length;
+        sendl_buffer = (double*)realloc(sendl_buffer, nleft*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendl_buffer[c + Ncomp*(nleft - 1)] = pData[pIndex(c, p, Ncomp, Np)];
+      }
+      else
+      {
+        for (c = 0; c < Ncomp; c++)
+          pData[pIndex(c, (p - nlost), Ncomp, Np)] = pData[pIndex(c, p, Ncomp, Np)];
+      }
+#endif
+#else
+      if (val[direction][p*Ncomp] > mygrid->rmaxloc[direction])
+      {
+        nlost++;
+        nright++;
+        if (mygrid->rmyid[direction] == mygrid->rnproc[direction] - 1)
+          val[direction][p*Ncomp] -= Length;
+        sendr_buffer = (double*)realloc(sendr_buffer, nright*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendr_buffer[c + Ncomp*(nright - 1)] = val[c][p*Ncomp];
+
+      }
+      else if (val[direction][p*Ncomp] < mygrid->rminloc[direction])
+      {
+        nlost++;
+        nleft++;
+        if (mygrid->rmyid[direction] == 0)
+          val[direction][p*Ncomp] += Length;
+        sendl_buffer = (double*)realloc(sendl_buffer, nleft*Ncomp*sizeof(double));
+        for (c = 0; c < Ncomp; c++)
+          sendl_buffer[c + Ncomp*(nleft - 1)] = val[c][p*Ncomp];
+      }
+      else
+      {
+        for (c = 0; c < Ncomp; c++)
+          val[c][(p - nlost)*Ncomp] = val[c][p*Ncomp];
+      }
+#endif
     }
     MPI_Cart_shift(mygrid->cart_comm, direction, 1, &ileft, &iright);
     // ====== send right receive from left
@@ -1017,11 +1076,24 @@ void SPECIE::position_parallel_pbc()
 
     reallocate_species();
 
+    #ifdef _ACC_SINGLE_POINTER
     for (int pp = 0; pp < nnew; pp++) {
       for (c = 0; c < Ncomp; c++) {
+//        pData[c + (pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
+#ifdef _DIRECT_PARTICLE_ACCESS
         pData[c + (pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
+#else
+        pData[pIndex(c, (pp + nold - nlost), Ncomp, Np)] = recv_buffer[pp*Ncomp + c];
+#endif
       }
     }
+#else
+    for (int pp = 0; pp < nnew; pp++) {
+      for (c = 0; c < Ncomp; c++) {
+        val[c][(pp + nold - nlost)*Ncomp] = recv_buffer[pp*Ncomp + c];
+      }
+    }
+#endif
   }
 
   free(sendl_buffer);
@@ -1117,7 +1189,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
     {
       //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
       for (c = 0; c < 3; c++) {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hii[c] = wii[c] = 0;
       }
@@ -1505,10 +1585,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       }
 
 #endif
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
-
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
       gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
       tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
@@ -1529,9 +1620,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
     }
     break;
 
@@ -1541,7 +1644,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
       for (c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hii[c] = wii[c] = 0;
       }
@@ -1743,9 +1854,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       }
 
 #endif
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
 
       gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
@@ -1767,9 +1890,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
     }
     break;
 
@@ -1779,7 +1914,15 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
       for (c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
         xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hii[c] = wii[c] = 0;
       }
@@ -1833,9 +1976,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
         B[2] += BZ*dvol;  //Bz
       }
 
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
       u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
       u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
 
       gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
 
@@ -1857,9 +2012,21 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
       u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
       u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
 
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
       pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
       pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
       pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
     }
     break;
   }
@@ -3074,7 +3241,7 @@ void SPECIE::current_deposition_standard(CURRENT *current)
   }
 
   double dt, gamma_i;
-  int p, c;  // particle_int, component_int
+  int p;  // particle_int, component_int
   int i, j, i1, j1, k1, i2, j2, k2;
 #ifdef OLDCURRENT
   int k;
@@ -3095,16 +3262,26 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
-      for (c = 0; c < mygrid->getDimensionality(); c++)
+      for (int c = 0; c < mygrid->getDimensionality(); c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
-
+#else
+        vv[c] = gamma_i*val[c+3][p];
+        val[c][p] += dt*vv[c];
+#endif
       }
     }
     return;
@@ -3118,24 +3295,38 @@ void SPECIE::current_deposition_standard(CURRENT *current)
   case 3:
     for (p = 0; p < Np; p++) {
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
-      for (c = 0; c < 3; c++)
+      for (int c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+#else
+        vv[c] = gamma_i*val[c + 3][p];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
         hii[c] = wii[c] = 0;
       }
-      for (c = 0; c < 3; c++)
+      for (int c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
-
+#else
+        xx[c] = val[c][p] + 0.5*dt*vv[c];
+        val[c][p] += dt*vv[c];
+#endif
         rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
         rh = rr - 0.5;
 
@@ -3155,7 +3346,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
       }
 
+#ifdef _ACC_SINGLE_POINTER
       double myweight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+      double myweight = val[6][p];
+#endif
 #ifdef OLDCURRENT
 
       for (k = 0; k < 3; k++)
@@ -3442,34 +3637,45 @@ void SPECIE::current_deposition_standard(CURRENT *current)
       }
     }
 #endif
-
-
-
     break;
 
   case 2:
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
 
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
-      for (c = 0; c < 3; c++)
+      for (int c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+#else
+        vv[c] = gamma_i*val[c + 3][p];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
         hii[c] = wii[c] = 0;
       }
-      for (c = 0; c < 2; c++)
+      for (int c = 0; c < 2; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
-
+#else
+        xx[c] = val[c][p] + 0.5*dt*vv[c];
+        val[c][p] += dt*vv[c];
+#endif
         rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
         rh = rr - 0.5;
 
@@ -3500,7 +3706,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-          double weight = pData[pIndex(6, p, Ncomp, Np)]; //
+#ifdef _ACC_SINGLE_POINTER
+          double weight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+          double weight = val[6][p];
+#endif
           double *JX, *JY, *JZ;
           JX = &myCurrent[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
           JY = &myCurrent[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -3530,24 +3740,38 @@ void SPECIE::current_deposition_standard(CURRENT *current)
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
-      for (c = 0; c < 3; c++)
+      for (int c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+#else
+        vv[c] = gamma_i*val[c + 3][p];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
         hii[c] = wii[c] = 0;
       }
-      for (c = 0; c < 1; c++)
+      for (int c = 0; c < 1; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
-
+#else
+        xx[c] = val[c][p] + 0.5*dt*vv[c];
+        val[c][p] += dt*vv[c];
+#endif
 
         rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
         rh = rr - 0.5;
@@ -3576,7 +3800,11 @@ void SPECIE::current_deposition_standard(CURRENT *current)
         i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
 
-        double weight = pData[pIndex(6, p, Ncomp, Np)];
+#ifdef _ACC_SINGLE_POINTER
+      double weight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+      double weight = val[6][p];
+#endif
         double *JX, *JY, *JZ;
         JX = &myCurrent[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
         JY = &myCurrent[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -3665,15 +3893,25 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
     {
       //debug_warning_particle_outside_boundaries(r0(p), r1(p), r2(p), p);
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
 
       for (c = 0; c < 3; c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+#else
+        vv[c] = gamma_i*val[c + 3][p];
+#endif
         hiw[c][1] = wiw[c][1] = 1;
         hiw[c][0] = wiw[c][0] = 0;
         hiw[c][2] = wiw[c][2] = 0;
@@ -3681,8 +3919,13 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
       }
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+#else
+        xx[c] = val[c][p] + 0.5*dt*vv[c];
+        val[c][p] += dt*vv[c];
+#endif
 
         mycsi[c] = mygrid->unStretchGrid(xx[c], c);
         mydr[c] = mygrid->derivativeStretchingFunction(mycsi[c], c);
@@ -3722,7 +3965,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
+#ifdef _ACC_SINGLE_POINTER
               double weight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+              double weight = val[6][p];
+#endif
               double *JX, *JY, *JZ;
               JX = &myCurrent[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
               JY = &myCurrent[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -3762,7 +4009,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-            double weight = pData[6 + p*Ncomp];//pData[pIndex( 6, p, Ncomp, Np)]; //
+#ifdef _ACC_SINGLE_POINTER
+            double weight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+            double weight = val[6][p];
+#endif
             double *JX, *JY, *JZ;
             JX = &myCurrent[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
             JY = &myCurrent[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -3795,7 +4046,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
+#ifdef _ACC_SINGLE_POINTER
           double weight = pData[pIndex(6, p, Ncomp, Np)];
+#else
+          double weight = val[6][p];
+#endif
           double *JX, *JY, *JZ;
           JX = &myCurrent[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
           JY = &myCurrent[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -3827,20 +4082,30 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
     for (p = 0; p < Np; p++)
     {
       double ux, uy, uz;
+#ifdef _ACC_SINGLE_POINTER
       ux = pData[pIndex(3, p, Ncomp, Np)];
       uy = pData[pIndex(4, p, Ncomp, Np)];
       uz = pData[pIndex(5, p, Ncomp, Np)];
+#else
+      ux = val[3][p*Ncomp];
+      uy = val[4][p*Ncomp];
+      uz = val[5][p*Ncomp];
+#endif
 
       gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
       for (c = 0; c < mygrid->getDimensionality(); c++)
       {
+#ifdef _ACC_SINGLE_POINTER
         vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
         pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+#else
+        vv[c] = gamma_i*val[c+3][p];
+        val[c][p] += dt*vv[c];
+#endif
+
       }
     }
   }
-
-
 }
 void SPECIE::density_deposition_standard(CURRENT *current, bool withSign)
 {
@@ -4153,7 +4418,13 @@ void SPECIE::dump(std::ofstream &ff) {
 }
 void SPECIE::dumpBigBuffer(std::ofstream &ff) {
   ff.write((char*)&Np, sizeof(Np));
+#ifdef _ACC_SINGLE_POINTER
   ff.write((char*)pData, sizeof(double)*Np*Ncomp);
+#else
+  for (int c = 0; c < Ncomp; c++) {
+  ff.write((char*)val[c], sizeof(double)*Np);
+  }
+#endif
 }
 void SPECIE::debugDump(std::ofstream &ff) {
   ff << this->name << Np << std::endl;
@@ -4162,11 +4433,14 @@ void SPECIE::debugDump(std::ofstream &ff) {
 void SPECIE::reloadDump(std::ifstream &ff) {
   ff.read((char*)&Np, sizeof(Np));
   SPECIE::reallocate_species();
-  for (int i = 0; i < Np; i++) {
-    for (int c = 0; c < Ncomp; c++) {
-      ff.read((char*)&ru(c, i), sizeof(double));
-    }
+#ifdef _ACC_SINGLE_POINTER
+  ff.read((char*)pData, sizeof(double)*Np*Ncomp);
+#else
+  for (int c = 0; c < Ncomp; c++) {
+  ff.read((char*)val[c], sizeof(double)*Np);
   }
+#endif
+
 }
 
 void SPECIE::reloadBigBufferDump(std::ifstream &ff) {

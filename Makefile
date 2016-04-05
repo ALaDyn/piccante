@@ -22,6 +22,7 @@ OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
 OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
 OBJDEV = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
 LIB =
+RPATH = 
 OPT = -O3 -std=c++11
 
 BOOST_LIB = $(SRC_FOLDER)
@@ -48,6 +49,11 @@ cnaf-intel: COMPILER = mpiicpc
 cnaf-intel: OPT += -axSSE4.2,AVX -ipo
 cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
 cnaf-intel: all
+
+cnaf-phi: COMPILER = mpiicpc
+cnaf-phi: OPT = -O3 -std=c++11 -mmic 
+cnaf-phi: RPATH = -Wl,-rpath=/shared/software/compilers/intel/compilers_and_libraries_2016.0.109/linux/compiler/lib/intel64_lin_mic 
+cnaf-phi: all
 
 brew: boost
 brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
@@ -125,7 +131,7 @@ juqueen: all
 
 
 $(EXE): $(OBJ)
-	$(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) -o $(EXE) $(OBJ) $(LIB)
+	$(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) $(RPATH) -o $(EXE) $(OBJ) $(LIB)
 
 $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
 	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
@@ -142,5 +148,4 @@ help:
 	@echo '	        devel      : to compile using main-devel.cpp instead of default
 	@echo ' examples:'
 	@echo '     make config=devel'
-
 
