@@ -21,6 +21,10 @@
 #define __STRUCTURES_H__
 
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
+
 #define NUMBER_OF_PLASMA_FUNCTIONS 26
 
 #include <math.h>
