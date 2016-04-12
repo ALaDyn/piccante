@@ -3976,11 +3976,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               JZ = &myCurrent[my_indice(edge, 1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
               dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
-              *JX += weight*dvol*vv[0] * chargeSign;
+              *JX += myweight*dvol*vv[0] * chargeSign;
               dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
-              *JY += weight*dvol*vv[1] * chargeSign;
+              *JY += myweight*dvol*vv[1] * chargeSign;
               dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
-              *JZ += weight*dvol*vv[2] * chargeSign;
+              *JZ += myweight*dvol*vv[2] * chargeSign;
 
 #else
               dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
@@ -4020,11 +4020,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             JZ = &myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
             dvol = hiw[0][i] * wiw[1][j];
-            *JX += weight*dvol*vv[0] * chargeSign;
+            *JX += myweight*dvol*vv[0] * chargeSign;
             dvol = wiw[0][i] * hiw[1][j];
-            *JY += weight*dvol*vv[1] * chargeSign;
+            *JY += myweight*dvol*vv[1] * chargeSign;
             dvol = wiw[0][i] * wiw[1][j];
-            *JZ += weight*dvol*vv[2] * chargeSign;
+            *JZ += myweight*dvol*vv[2] * chargeSign;
 #else
             dvol = hiw[0][i] * wiw[1][j],
               current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
@@ -4057,11 +4057,11 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
           JZ = &myCurrent[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
 
           dvol = hiw[0][i];
-          *JX += weight*dvol*vv[0] * chargeSign;
+          *JX += myweight*dvol*vv[0] * chargeSign;
           dvol = wiw[0][i];
-          *JY += weight*dvol*vv[1] * chargeSign;
+          *JY += myweight*dvol*vv[1] * chargeSign;
           dvol = wiw[0][i];
-          *JZ += weight*dvol*vv[2] * chargeSign;
+          *JZ += myweight*dvol*vv[2] * chargeSign;
 #else
 
           dvol = hiw[0][i],
