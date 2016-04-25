@@ -1,0 +1,70 @@
+{
+  "VERSION": 1,
+  "dimensions": 1,
+  "OutputPath": "OUTPUT",
+  "stepFrequencyStdoutPrint": 10,
+  "nProcY": 1,
+  "nProcZ": 1,
+  "xRange": [0, 10],
+  "yRange": [-40, 40],
+  "zRange": [-2, 2],
+  "NCells": [1000, 8192, 400],
+  "simulationTime": 60,
+  "boundaries": ["open", "periodic","periodic"],
+"special":{
+    "amplitude": 0.01,
+	"lambda": 1
+},
+  "restart":{
+    "DumpPath": "DUMP",
+    "doRestart": false,
+    "restartFromDump": 3,
+    "doDump": true,
+    "dumpEvery": 10.0
+  },
+"Laser":[
+    {
+      "enabled": true,
+      "type": "GAUSSIAN",
+      "polarization": "P",
+      "durationFWHM": 12.3,
+      "initialPosition": -16.31,
+      "waist": 4,
+      "focusPosition": 0.0,
+      "a": 18.0,
+      "lambda": 0.8,
+      "rotation": true,
+      "angle": 30.0,
+      "center": 0
+    }
+  ],
+  "Plasma":[
+    {
+      "name": "bulk",
+      "densityFunction": "box",
+      "XRangeBox" : [0.0, 8.0],
+      "YRangeBox" : [-40, 40],
+      "ZRangeBox" : [-100, 100],
+      "DensityCoefficient" : 1.0,
+      "DensityLambda" : 1.0
+    }
+	],
+  "Species":[
+    {
+      "name": "ele",
+      "plasma": "bulk",
+      "ParticlesPerCell": [10000,1,1],
+      "type": "ELECTRON",
+      "distribution": "Maxwell",
+      "distributionParams": [1.0e-5],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    }
+  ],
+  "Output":[
+    {"type": "E",  "every": 10.0},
+    {"type": "Density", "spec": "ele",  "every": 10.0},
+    {"type": "PhSp",    "spec": "ele",  "every": 10.0},
+    {"type": "Diag", "every": 5.0}
+  ]
+ 
+}
