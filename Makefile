@@ -55,10 +55,15 @@ cnaf-phi: OPT = -O3 -std=c++11 -mmic
 cnaf-phi: RPATH = -Wl,-rpath=/shared/software/compilers/intel/compilers_and_libraries_2016.0.109/linux/compiler/lib/intel64_lin_mic 
 cnaf-phi: all
 
-brew: boost
-brew: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_1/lib
-brew: BOOST_INC = /usr/local/Cellar/boost/1.60.0_1/include
-brew: all
+brew: 
+	@echo ' '
+	@echo '"brew" is deprecated: use "make boost" instead'
+	@echo 'if it fails, check Makefile and adapt the rule "brewold"'
+	@echo ' '
+brewold: boost
+brewold: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_2/lib
+brewold: BOOST_INC = /usr/local/Cellar/boost/1.60.0_2/include
+brewold: all
 
 hdf5: boost
 hdf5: OPT += -DUSE_HDF5
