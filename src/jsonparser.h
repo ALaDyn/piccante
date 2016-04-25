@@ -98,6 +98,7 @@ namespace jsonParser {
   void setNprocs(Json::Value &document, GRID *grid);
   void setSimulationTime(Json::Value  &document, GRID *grid);
   void setMasterProc(Json::Value  &document, GRID *grid);
+  void setFrequencyStdoutStatus(Json::Value  &document, GRID *grid);
   void setCourantFactor(Json::Value  &document, GRID *grid);
   void setBoundaryConditions(Json::Value &parent, GRID *grid);
   void setDumpControl(Json::Value  &parent, GRID *mygrid);

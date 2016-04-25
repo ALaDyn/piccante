@@ -26,6 +26,7 @@
 #define INT_DIMENSIONS "dimensions"
 #define _JSON_BOOL_ENABLED "enabled"
 #define _JSON_INT_MASTERPROC "masterProc"
+#define _JSON_INT_FREQUENCY_STDOUT "stepFrequencyStdoutPrint"
 #define _JSON_DOUBLE_COURANT_FACTOR "courantFactor"
 
 #define _JSON_DOUBLE_FRICTION_LENGTH_CM "lambda0"

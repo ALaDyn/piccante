@@ -1,6 +1,7 @@
 {
     "VERSION": 2,
     "dimensions": 3,
+    "stepFrequencyStdoutPrint": 10,
     "masterProc": 0,
     "OutputPath": "OUTPUT",
     "lambda0": 1.0,

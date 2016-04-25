@@ -235,6 +235,13 @@ void jsonParser::setMasterProc(Json::Value  &document, GRID *grid) {
   grid->setMasterProc(masterProc);
 }
 
+void jsonParser::setFrequencyStdoutStatus(Json::Value  &document, GRID *grid) {
+  int frequency = 0;
+  setInt(&frequency, document, _JSON_INT_FREQUENCY_STDOUT);
+  grid->setFrequencyStdoutStatus(frequency);
+}
+
+
 void jsonParser::setCourantFactor(Json::Value  &document, GRID *grid) {
   double courantFactor = 0.98;
   setDouble(&courantFactor, document, _JSON_DOUBLE_COURANT_FACTOR);

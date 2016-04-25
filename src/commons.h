@@ -26,6 +26,7 @@
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
+#define FREQUENCY_STDOUT_STATUS 5
 #ifdef NO_CXX11
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/linear_congruential.hpp>

@@ -48,7 +48,7 @@
 #define DIRECTORY_OUTPUT "OUTPUT"
 
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
-#define FREQUENCY_STDOUT_STATUS 5
+
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
 
@@ -77,14 +77,14 @@ int main(int narg, char **args)
 
   jsonParser::setRadiationFriction(root, &grid);
   jsonParser::setMasterProc(root, &grid);
-
   grid.mpi_grid_initialize(&narg, args);
 
   jsonParser::setCourantFactor(root, &grid);
   jsonParser::setSimulationTime(root, &grid);
   jsonParser::setMovingWindow(root, &grid);
+  jsonParser::setFrequencyStdoutStatus(root, &grid);
 
-  srand(time(NULL));
+  //srand(time(NULL));
   grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.finalize();
@@ -178,7 +178,7 @@ int main(int narg, char **args)
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
 
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepAsPlanned();
 
     manager.callDiags(grid.istep);
 

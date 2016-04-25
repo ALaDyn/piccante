@@ -1,6 +1,7 @@
 {
   "VERSION": 1,
   "dimensions": 2,
+  "stepFrequencyStdoutPrint": 10,
   "OutputPath": "OUTPUT",
   "nProcY": 1024,
   "nProcZ": 4,

@@ -282,7 +282,7 @@ int main(int narg, char **args)
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
 
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepAsPlanned(FREQUENCY_STDOUT_STATUS);
 
     manager.callDiags(grid.istep);
 

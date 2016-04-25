@@ -114,9 +114,11 @@ public:
   void setBetaMovingWindow(double beta);
   void setFrequencyMovingWindow(int frequency_mw);
   void setMasterProc(int idMasterProc);
+  void setFrequencyStdoutStatus(int frequency);
   int getTotalNumberOfTimesteps();
   void moveWindow();
-  void printTStepEvery(int every);
+  void printTStepAsPlanned();
+  void printTStepAsPlanned(int every);
   void initRNG(my_rng_generator &rng, uint32_t auxiliary_seed);
   void visualDiag();
   void mpi_grid_initialize(int *narg, char **args);
@@ -185,7 +187,7 @@ private:
   double beta_mw, t_start_moving_mw, mark_mw;
 
   int frequency_mw_shifts;
-
+  int frequencyStdoutStatus;
   int  cyclic[3];   //cyclic conditions for MPI_CART
 
   double *rproc_rmin[3], *rproc_rmax[3]; //rminloc for each processor, rmaxloc for each processor in the 3D integer space

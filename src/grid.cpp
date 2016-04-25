@@ -35,6 +35,7 @@ GRID::GRID(int dimensions)
   withMovingWindow = false;
   withPoisson = false;
   autoNeutraliseDensity = false;
+  frequencyStdoutStatus = FREQUENCY_STDOUT_STATUS;
 
   proc_totUniquePoints = NULL;
   cyclic[0] = cyclic[1] = cyclic[2] = 1;
@@ -80,6 +81,9 @@ void GRID::initializeStretchParameters() {
 
 void GRID::setMasterProc(int idMasterProc) {
   master_proc = idMasterProc;
+}
+void GRID::setFrequencyStdoutStatus(int frequency){
+ frequencyStdoutStatus = frequency;
 }
 
 void GRID::printMessage(std::string message){
@@ -293,7 +297,23 @@ void GRID::moveWindow() {
   }
 }
 
-void GRID::printTStepEvery(int every) {
+void GRID::printTStepAsPlanned() {
+  int Nstep = totalNumberOfTimesteps;
+  if (!(istep % (frequencyStdoutStatus)))
+  {
+    if (myid == master_proc) {
+      time_t timer;
+      std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+      struct tm * now = localtime(&timer);
+
+      printf("%6i/%i  %f   %2.2i:%2.2i:%2.2i  (%2.2i/%2.2i/%4i)   %8i sec.\n", istep, Nstep, time, now->tm_hour, now->tm_min, now->tm_sec, now->tm_mday, (now->tm_mon + 1), (now->tm_year + 1900), (int)(timer - unix_time_start));
+      fflush(stdout);
+    }
+  }
+}
+
+void GRID::printTStepAsPlanned(int every) {
   int Nstep = totalNumberOfTimesteps;
   if (!(istep % (every)))
   {
