@@ -48,7 +48,6 @@
 #define DIRECTORY_OUTPUT "OUTPUT"
 
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
-#define FREQUENCY_STDOUT_STATUS 5
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
 void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
@@ -107,10 +106,7 @@ void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
   Ngrid[1] = grid->Nloc[1];
   Ngrid[2] = grid->Nloc[2];
 
-  double x;
-
   double totalSum=0;
-
 
   for(int k=0; k<Ngrid[2]; k++){
     for(int j=0; j<Ngrid[1]; j++){
@@ -127,7 +123,6 @@ void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
       }
     }
   }
-
 }
 
 int main(int narg, char **args)
@@ -161,6 +156,7 @@ int main(int narg, char **args)
   jsonParser::setCourantFactor(root, &grid);
   jsonParser::setSimulationTime(root, &grid);
   jsonParser::setMovingWindow(root, &grid);
+  jsonParser::setFrequencyStdoutStatus(root, &grid);
 
   srand(time(NULL));
   grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -282,7 +278,7 @@ int main(int narg, char **args)
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
 
-    grid.printTStepAsPlanned(FREQUENCY_STDOUT_STATUS);
+    grid.printTStepAsPlanned();
 
     manager.callDiags(grid.istep);
 
