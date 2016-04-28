@@ -100,31 +100,6 @@ void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
   }
 }
 
-void poissonTest(GRID* grid, EM_FIELD* field, CURRENT* current){
-  int Ngrid[3];
-  Ngrid[0] = grid->Nloc[0];
-  Ngrid[1] = grid->Nloc[1];
-  Ngrid[2] = grid->Nloc[2];
-
-  double totalSum=0;
-
-  for(int k=0; k<Ngrid[2]; k++){
-    for(int j=0; j<Ngrid[1]; j++){
-      totalSum=0;
-      int i=0;
-      totalSum += field->E0(i,j,k) = 0;
-      for(i=1; i<Ngrid[0]; i++){
-        field->E0(i,j,k) = grid->dr[0]*grid->den_factor*(1+current->density(i,j,k)) + field->E0(i-1,j,k);
-        totalSum += field->E0(i,j,k);
-      }
-      totalSum /= (Ngrid[0]-1);
-      for(i=0; i<Ngrid[0]; i++){
-        field->E0(i,j,k) -= totalSum;
-      }
-    }
-  }
-}
-
 int main(int narg, char **args)
 {
   MPI_Init(&narg, &args);
