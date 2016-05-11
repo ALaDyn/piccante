@@ -93,15 +93,29 @@ int main(int narg, char **args)
   grid.visualDiag();
 
   //********************************************END GRID DEFINITION********************************************************
-  //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
-  int myIntVariable = 0;
-  double myDoubleVariable = 0;
-  bool isThereSpecial = false;
-  Json::Value special= jsonParser::setValue(special, root, "special");
-  if (isThereSpecial) {
-    jsonParser::setInt(&myIntVariable, special, "variabile1");
-    jsonParser::setDouble(&myDoubleVariable, special, "variabile2");
+   //******************** BEGIN TO READ OF user defined INPUT - PARAMETERS ****************************************
+//  int myIntVariable = 0;
+//  double myDoubleVariable = 0;
+//  bool isThereSpecial = false;
+//  Json::Value special= jsonParser::setValue(special, root, "special");
+//  if (isThereSpecial) {
+//    jsonParser::setInt(&myIntVariable, special, "variabile1");
+//    jsonParser::setDouble(&myDoubleVariable, special, "variabile2");
+//  }
+
+   bool isThereSpecial = false;
+   bool areThereSpheres = false;
+
+  std::string fileSpheresName;
+  Json::Value special;
+  SPHERES myspheres;
+  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
+    if (areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile")) {
+      UTILITIES::readAndAllocateSpheres(myspheres, fileSpheresName, grid);
+      UTILITIES::selectSpheres(myspheres, grid);
+    }
   }
+  std::map<std::string, PLASMA*>::iterator pIterator;
 
 
   //********************  END READ OF "SPECIAL" (user defined) INPUT - PARAMETERS  ****************************************
@@ -110,6 +124,11 @@ int main(int narg, char **args)
 
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
+  if (areThereSpheres) {
+    for (pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++) {
+      (pIterator)->second->params.spheres = &myspheres;
+    }
+  }
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   uint64_t totPartNum = 0;
@@ -172,7 +191,7 @@ int main(int narg, char **args)
   grid.istep = 0;
   if (grid.dumpControl.doRestart) {
     dumpID = grid.dumpControl.restartFromDump;
-    restartFromDump(&dumpID, &grid, &myfield, species);
+    UTILITIES::restartFromDump(&dumpID, &grid, &myfield, species);
   }
 
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
@@ -215,12 +234,12 @@ int main(int narg, char **args)
 
     grid.time += grid.dt;
 
-    moveWindow(&grid, &myfield, species);
+    UTILITIES::moveWindow(&grid, &myfield, species);
 
     grid.istep++;
     if (grid.dumpControl.doDump) {
       if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
-        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+        UTILITIES::dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
     }
   }
