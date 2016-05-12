@@ -110,7 +110,6 @@ public:
   static bool isFoils2D(int dfIndex);
   static bool isUser1(int dfIndex);
   static bool isUser2(int dfIndex);
-
 };
 
 

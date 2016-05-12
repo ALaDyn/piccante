@@ -295,6 +295,8 @@ void PLASMA::setZRangeBox(double zmin, double zmax) {
 PLASMA::~PLASMA() {
 }
 
+
+
 double guide(double x, double y, double z, PLASMAparams plist, double Z, double A) {
   double g_x0 = 0.0;
   double g_x1 = 10.0;

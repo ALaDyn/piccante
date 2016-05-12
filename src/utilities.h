@@ -46,16 +46,27 @@
 #include <boost/filesystem.hpp>
 #endif
 
-void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+class UTILITIES{
 
-void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
-void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
-void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+public:
 
-bool doesFileExist(const char *fileName);
+    static void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
-void exitWithError(int error);
-void splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs);
+    static void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+    static void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+    static void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+
+    static bool doesFileExist(const char *fileName);
+
+    static void exitWithError(int error);
+    static void splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs);
+
+    static void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid);
+    static void fromCoordsToSpheresCoords(double &x, double min, double max);
+    static bool isSphereInside(SPHERES& spheres, int index, GRID &grid);
+    static void swapSpheres(SPHERES &spheres, int i, int j);
+    static void selectSpheres(SPHERES &spheres, GRID &grid);
+};
 
 #endif // UTILITIES_H
 

@@ -41,12 +41,12 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
     }
   }
 
-  if (doesFileExist(inputFileName->c_str())) {
+  if (UTILITIES::doesFileExist(inputFileName->c_str())) {
     return;
   }
   else {
     *inputFileName = _DEFAULT_INPUT_FILE_NAME;
-    if (doesFileExist(inputFileName->c_str())) {
+    if (UTILITIES::doesFileExist(inputFileName->c_str())) {
       return;
     }
     else {
@@ -56,7 +56,7 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
         std::cout << "ERROR: no input file found!\n";
         std::cout.flush();
       }
-      exitWithError(12);
+      UTILITIES::exitWithError(12);
     }
 
   }
