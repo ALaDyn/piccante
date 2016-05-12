@@ -1044,7 +1044,7 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
       }
       else if (isThisJsonMaster) {
         std::cout << "Warning: species " << index <<
-          " is not defined correctly." << std::endl;
+          "is either not enabled or not defined correctly." << std::endl;
       }
     }
   }
