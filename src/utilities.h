@@ -66,6 +66,11 @@ public:
     static bool isSphereInside(SPHERES& spheres, int index, GRID &grid);
     static void swapSpheres(SPHERES &spheres, int i, int j);
     static void selectSpheres(SPHERES &spheres, GRID &grid);
+
+    static void readAndAllocateFFTplasma(FFTPLASMA &myfft, std::string filename, GRID &grid);
+
+
+
 };
 
 #endif // UTILITIES_H

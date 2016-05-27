@@ -25,7 +25,7 @@
 #define _XOPEN_SOURCE 500
 #endif
 
-#define NUMBER_OF_PLASMA_FUNCTIONS 26
+#define NUMBER_OF_PLASMA_FUNCTIONS 27
 
 #include <math.h>
 #include "commons.h"
@@ -39,6 +39,15 @@ struct SPHERES {
   float fillingFactor;
 };
 
+struct FFTPLASMA{
+  int numcomp;
+  double shift;
+  double* kx;
+  double* ky;
+  double* phi;
+  double* cc;
+};
+
 struct PLASMAparams {
   double rminbox[3];
   double rmaxbox[3];
@@ -50,6 +59,7 @@ struct PLASMAparams {
   double left_ramp_min_density;
   double right_ramp_min_density;
   SPHERES *spheres;
+  FFTPLASMA *FFTplasma;
   void *additional_params;
   PLASMAparams operator=(const PLASMAparams& p1);
 
@@ -154,6 +164,8 @@ double foils2D (double x, double y, double z, PLASMAparams plist, double Z, doub
 double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, double Z, double A);
 double user1(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double user2(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
+double fftplasma(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
 enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN};
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };

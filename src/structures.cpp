@@ -50,6 +50,7 @@ PLASMAparams PLASMAparams::operator=(const PLASMAparams& p1) {
   rmaxbox[1] = p1.rmaxbox[1];
   rmaxbox[2] = p1.rmaxbox[2];
   spheres = p1.spheres;
+  FFTplasma = p1.FFTplasma;
 
   return *this;
 }
@@ -82,7 +83,8 @@ const std::string PLASMA::dFNames[] = {
   "foils2D",
   "res2D",
   "user1",
-  "user2"
+  "user2",
+  "fftplasma"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -110,7 +112,8 @@ const distrib_function PLASMA::dFPoint[] = {
   foils2D,
   demo_2D_resonator,
   user1,
-  user2
+  user2,
+  fftplasma
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -984,6 +987,31 @@ double user2(double x, double y, double z, PLASMAparams plist, double Z, double 
   return rho;
 }
 
+double fftplasma(double x, double y, double z, PLASMAparams plist, double Z, double A) {
+  FFTPLASMA *myfft = plist.FFTplasma;
+  int numcomp = myfft->numcomp;
+
+
+  double val;
+
+  if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0])) {
+    if ((plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])) {
+      if ((plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])) {
+         val = myfft->shift;
+
+        for (int i = 0; i < numcomp; i++) {
+           val += myfft->cc[i] * sin( 2.0*M_PI*(myfft->kx[i]*(x-plist.rminbox[0]) + myfft->ky[i]*(y-plist.rminbox[1]) ) + myfft->phi[i]);
+
+        }
+      }
+    }
+  }
+  else {
+    val = -1;
+  }
+  return val;
+}
+
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************
 
@@ -1179,6 +1207,9 @@ void tempDistrib::setSpecial(double _a) {
   a = _a;
   init = true;
 }
+
+
+
 
 //************** END DISTRIBUTION_FUNCTION ******
 
