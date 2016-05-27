@@ -296,6 +296,8 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid) {
   Json::Value restartObject;
   if (setValue(restartObject, parent, _JSON_OBJ_RESTART_)) {
 
+    setBool(&mygrid->dumpControl.doDump, restartObject, _JSON_BOOL_DODUMP_);
+
     std::string folderName;
     if (setString(&folderName, restartObject, _JSON_STRING_DUMP_FOLDER_NAME)) {
       mygrid->setDumpPath(folderName);
@@ -307,8 +309,6 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid) {
     setBool(&mygrid->dumpControl.doRestart, restartObject, _JSON_BOOL_RESTART_);
 
     setDouble(&mygrid->dumpControl.dumpEvery, restartObject, _JSON_DOUBLE_DUMPEVERY_);
-
-    setBool(&mygrid->dumpControl.doDump, restartObject, _JSON_BOOL_DODUMP_);
 
     setInt(&mygrid->dumpControl.restartFromDump, restartObject, _JSON_INT_RESTART_FROM_DUMP_);
 
@@ -1044,7 +1044,7 @@ void jsonParser::setSpecies(Json::Value &document, std::vector<SPECIE*> &species
       }
       else if (isThisJsonMaster) {
         std::cout << "Warning: species " << index <<
-          " is not defined correctly." << std::endl;
+          " is either not enabled or not defined correctly." << std::endl;
       }
     }
   }
