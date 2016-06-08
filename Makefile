@@ -13,6 +13,7 @@ FILES = grid.cpp \
         utilities.cpp \
         jsoncpp.cpp \
         jsonparser.cpp
+		
 
 SRC_FOLDER = src
 OBJ_FOLDER = obj
@@ -150,7 +151,7 @@ cleanall:
 help: 
 	@echo 'Usage: make config=OPTIONS'
 	@echo '	    OPTIONS is a string composed of one or more of:'
-	@echo '	        devel      : to compile using main-devel.cpp instead of default
+	@echo '	        devel      : to compile using main-devel.cpp instead of default'
 	@echo ' examples:'
 	@echo '     make config=devel'
 

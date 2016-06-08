@@ -96,6 +96,7 @@ public:
   ~GRID();
 
   void printMessage(std::string message);
+  void printInfoFile(std::string fileName, std::string message);
 
   void setXrange(double min, double max);
   void setYrange(double min, double max);

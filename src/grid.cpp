@@ -92,6 +92,15 @@ void GRID::printMessage(std::string message){
   }
   return;
 }
+void GRID::printInfoFile(std::string fileName, std::string message){
+  if(myid==master_proc){
+    std::ofstream thefile;
+    thefile.open(fileName.c_str());
+    thefile << message<< std::endl;
+    thefile.close();
+  }
+  return;
+}
 
 void GRID::setXrange(double min, double max) {
   rmin[0] = min;
@@ -1258,11 +1267,6 @@ void GRID::computeExtremsStretchedGrid(int c) {
   csimax[c] = csimin[c] + dr[c] * (NGridNodes[c] - 1);
   rmax[c] = stretchGrid(csimax[c], c);
   rmin[c] = stretchGrid(csimin[c], c);
-  //    printf("\tdr= %g NGridNodes=%i \n",dr[c],NGridNodes[c]);
-  //    printf("\tcsi=[ %g:%g] \n",csimin[c],csimax[c]);
-  //    printf("\tr=[ %g:%g] \n",rmin[c],rmax[c]);
-
-
 
 }
 
