@@ -182,6 +182,13 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   outputDir = "OUTPUT";
 }
 
+OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName) {
+  OUTPUT_MANAGER::OUTPUT_MANAGER(_mygrid, _myfield, _mycurrent, _myspecies);
+  outputDir = defaultDirName;
+}
+
+
+
 OUTPUT_MANAGER::~OUTPUT_MANAGER() {
   for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); ++it)
     delete(*it);

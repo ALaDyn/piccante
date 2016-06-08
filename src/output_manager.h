@@ -148,6 +148,7 @@ class OUTPUT_MANAGER
 
 public:
   OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies);
+  OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName);
   ~OUTPUT_MANAGER();
 
   void initialize(std::string _outputDir);
