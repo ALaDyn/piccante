@@ -1417,6 +1417,9 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse) {
       case COS2_PLATEAU_PLANE_WAVE:
         pulseType = "COS2 PLATEAU PLANE WAVE";
         break;
+      case CONST_FIELD:
+        pulseType = "CONSTANT FIELD COMPONENT";
+        break;
       default:
         pulseType = "";
         break;
@@ -1448,6 +1451,7 @@ void EM_FIELD::writeNewPulseInformation(laserPulse* pulse) {
     printf("rotation           = %i\n", pulse->rotation);
     printf("rotation  angle    = %g\n", pulse->angle);
     printf("rotation centre    = %g\n", pulse->rotation_center_along_x);
+    printf("constant component = %i\n", pulse->component);
   }
 }
 
@@ -1554,38 +1558,46 @@ void EM_FIELD::addPulse(laserPulse* pulse) {
         }
         break;
       }
-  case LAGUERRE_GAUSSIAN:
-  {
-       if (pulse->rotation) {
-        initialize_LG_pulse_angle
-            (pulse->lambda0,
-             pulse->normalized_amplitude,
-             pulse->laser_pulse_initial_position,
-             pulse->t_FWHM,
-             pulse->waist,
-             pulse->focus_position,
-             pulse->rotation_center_along_x,
-             pulse->angle,
-             pulse->polarization,
-             pulse->LG_l,
-             pulse->LG_m);
+    case LAGUERRE_GAUSSIAN:
+      {
+        if (pulse->rotation) {
+          initialize_LG_pulse_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               pulse->waist,
+               pulse->focus_position,
+               pulse->rotation_center_along_x,
+               pulse->angle,
+               pulse->polarization,
+               pulse->LG_l,
+               pulse->LG_m);
+        }
+        else {
+          initialize_LG_pulse_angle
+              (pulse->lambda0,
+               pulse->normalized_amplitude,
+               pulse->laser_pulse_initial_position,
+               pulse->t_FWHM,
+               pulse->waist,
+               pulse->focus_position,
+               pulse->rotation_center_along_x,
+               pulse->angle,
+               pulse->polarization,
+               pulse->LG_l,
+               pulse->LG_m);
+        }
+        break;
       }
-      else {
-        initialize_LG_pulse_angle
-            (pulse->lambda0,
-             pulse->normalized_amplitude,
-             pulse->laser_pulse_initial_position,
-             pulse->t_FWHM,
-             pulse->waist,
-             pulse->focus_position,
-             pulse->rotation_center_along_x,
-             pulse->angle,
-             pulse->polarization,
-             pulse->LG_l,
-             pulse->LG_m);
+    case CONST_FIELD:
+      {
+        initialize_const_field
+            (pulse->normalized_amplitude,
+             pulse->component);
+
+        break;
       }
-      break;
-  }
 
     default: {}
   }
@@ -1979,6 +1991,25 @@ void EM_FIELD::initialize_LG_pulse_angle(double lambda0, double amplitude, doubl
 
       }
 }
+
+void EM_FIELD::initialize_const_field(double amplitude, int component){
+  int i, j, k;
+  int Nx, Ny, Nz;
+
+  amplitude *= (2 * M_PI);
+  Nx = mygrid->Nloc[0];
+  Ny = mygrid->Nloc[1];
+  Nz = mygrid->Nloc[2];
+
+  for (k = 0; k < Nz; k++)
+    for (j = 0; j < Ny; j++)
+      for (i = 0; i < Nx; i++)
+      {
+        VEB(component, i, j, k) += amplitude;
+      }
+}
+
+
 //TODO DA RIVEDERE
 /*
 void inject_field(double angle) {

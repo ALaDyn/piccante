@@ -56,9 +56,9 @@ namespace jsonParser {
   extern int inputVersion;
   struct laserPulseBoolFlags {
 
-    bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime;
+    bool type, pol, waist, a, lambda, duration, initialPosition, focusPosition, rotation, riseTime, component;
     laserPulseBoolFlags() {
-      type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime = false;
+      type = pol = waist = a = lambda = duration = initialPosition = focusPosition = rotation = riseTime = component = false;
     }
   };
 
@@ -125,6 +125,7 @@ namespace jsonParser {
   bool setLaserRiseTime(laserPulse*, Json::Value&);
   bool setLaserLG_l(laserPulse*, Json::Value&);
   bool setLaserLG_m(laserPulse*, Json::Value&);
+  bool setConstFieldComponent(laserPulse *pulse1, Json::Value  &mylaser);
   bool checkLaserBoolFlags(laserPulseBoolFlags, laserPulse*);
   int findPlasmaFunction(std::string);
 

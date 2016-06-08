@@ -444,6 +444,9 @@ bool jsonParser::setLaserType(laserPulse *pulse1, Json::Value  &mylaser) {
     else if (type == _LASERTYPEVALUE_LG_) {
       pulse1->type = LAGUERRE_GAUSSIAN;
     }
+    else if (type == _LASERTYPEVALUE_CONST_FIELD_) {
+      pulse1->type = CONST_FIELD;
+    }
     else
       flag = false;
   }
@@ -577,34 +580,49 @@ bool jsonParser::setLaserLG_m(laserPulse *pulse1, Json::Value  &mylaser) {
   return flag;
 }
 
+bool jsonParser::setConstFieldComponent(laserPulse *pulse1, Json::Value  &mylaser) {
+  std::string name2 = _JSON_INT_FIELD_COMP_;
+  int comp;
+  bool flag = setInt(&comp, mylaser, name2.c_str());
+  if (flag) {
+    pulse1->setConstFieldComponent(comp);
+  }
+  return flag;
+}
+
 bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *pulse) {
-      if (!flags.type) {
+  if (!flags.type) {
     return false;
   }
   switch (pulse->type) {
-  case GAUSSIAN:
-    if (!(flags.a && flags.waist && flags.duration)) {
-      return false;
-    }
-    break;
-  case PLANE_WAVE:
-    if (!(flags.a)) {
-      return false;
-    }
-    break;
-  case COS2_PLANE_WAVE:
-    if (!(flags.a && flags.duration)) {
-      return false;
-    }
-    break;
-  case COS2_PLATEAU_PLANE_WAVE:
-    if (!(flags.a && flags.duration)) {
-      return false;
-    }
-    break;
-  default:
-    break;
-  }  
+    case GAUSSIAN:
+      if (!(flags.a && flags.waist && flags.duration)) {
+        return false;
+      }
+      break;
+    case PLANE_WAVE:
+      if (!(flags.a)) {
+        return false;
+      }
+      break;
+    case COS2_PLANE_WAVE:
+      if (!(flags.a && flags.duration)) {
+        return false;
+      }
+      break;
+    case COS2_PLATEAU_PLANE_WAVE:
+      if (!(flags.a && flags.duration)) {
+        return false;
+      }
+      break;
+    case CONST_FIELD:
+      if (!(flags.a && flags.component)) {
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
   return true;
 }
 
@@ -644,6 +662,7 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
           setLaserLG_l(pulse1, myLaser);
           setLaserLG_m(pulse1, myLaser);
 
+          flags.component = setConstFieldComponent(pulse1,myLaser);
 
           if (checkLaserBoolFlags(flags, pulse1)) {
             emfield->addPulse(pulse1);

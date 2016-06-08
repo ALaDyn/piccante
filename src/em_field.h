@@ -279,6 +279,7 @@ private:
     double waist, double focus_position,
     double xcenter, double angle, pulsePolarization polarization, int LG_l, int LG_m);
 
+  void initialize_const_field(double amplitude, int component);
 
   void filterDirSelect(int comp, int dirflags);
   void filterCompAlongX(int comp);
