@@ -39,6 +39,19 @@ struct SPHERES {
   float fillingFactor;
 };
 
+struct GRIDmodes{
+  int Nk[3];
+  double dk[3];
+  double kmax[3];
+  double kmin[3];
+  double *kvalues[3];
+};
+struct KMODE{
+  double k[3];
+  double amplitude;
+  double phase;
+};
+
 struct PLASMAparams {
   double rminbox[3];
   double rmaxbox[3];
@@ -155,7 +168,7 @@ double demo_2D_resonator (double x, double y, double z, PLASMAparams plist, doub
 double user1(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double user2(double x, double y, double z, PLASMAparams plist, double Z, double A);
 //************** LASER PULSE TYPES *******
-enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN};
+enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN, CONST_FIELD};
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };
 
 class laserPulse
@@ -175,6 +188,7 @@ public:
   double rise_time;
   int LG_m;
   int LG_l;
+  int component;
 
 
   laserPulse();
@@ -199,6 +213,7 @@ public:
   void setCos2PlateauPlaneWave();
   void setLaguerreGaussian_m(int m);
   void setLaguerreGaussian_l(int l);
+  void setConstFieldComponent(int comp);
 
   void setPPolarization();
   void setSPolarization();

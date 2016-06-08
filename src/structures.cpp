@@ -1118,11 +1118,15 @@ void laserPulse::setCircularPolarization() {
 }
 
 void laserPulse::setLaguerreGaussian_l(int l){
-    LG_l = l;
+  LG_l = l;
 }
 
 void laserPulse::setLaguerreGaussian_m(int m){
-    LG_m = m;
+  LG_m = m;
+}
+
+void laserPulse::setConstFieldComponent(int comp){
+  component = comp;
 }
 
 //************** DISTRIBUTION_FUNCTION **********
