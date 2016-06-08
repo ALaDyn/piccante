@@ -99,8 +99,7 @@ void SPECIE::erase()
   }
 #endif
 }
-void SPECIE::reallocate_species()
-{
+void SPECIE::reallocate_species(){
   if (mygrid->withParticles == NO)
     return;
 
@@ -216,15 +215,14 @@ void SPECIE::computeParticleMassChargeCoupling() {
     Z = -1.0;
     chargeSign = -1.0;
   }
-  if (type == POSITRON) {
+  if (type == POSITRON){
     coupling = 1.;
     mass = 1.0;
     Z = 1.0;
     chargeSign = 1.0;
   }
   if (type == ION) {
-    if (Z == 0 || A == 0)
-    {
+    if (Z == 0 || A == 0){
       printf("ERROR: Ion charge or mass NOT defined!\n");
       exit(11);
     }
@@ -236,7 +234,6 @@ void SPECIE::computeParticleMassChargeCoupling() {
   }
 }
 int SPECIE::getNumberOfParticlesWithin(double plasmarmin[3], double plasmarmax[3]) {
-
   int counter = 0;
   double xloc, yloc, zloc;
   int Nx = mygrid->Nloc[0];
@@ -842,13 +839,7 @@ void SPECIE::move_window()
   }
 
 }
-//void SPECIE::output_bin(ofstream &ff)
-//{
-//  if (mygrid->with_particles == NO)
-//    return;
 
-//  ff.write((char *)val, sizeof(double)*Ncomp*Np);
-//}
 void SPECIE::output(std::ofstream &ff)
 {
   if (mygrid->withParticles == NO)
@@ -861,30 +852,6 @@ void SPECIE::output(std::ofstream &ff)
     ff << "\n";
   }
 }
-
-//void SPECIE::init_output_diag(std::ofstream &ff){
-//  if (mygrid->withParticles == NO)
-//    return;
-
-//  if (mygrid->myid == mygrid->master_proc){
-//    ff << std::setw(myNarrowWidth) << "#step" << " " << std::setw(myWidth) << "time" << " " << std::setw(myWidth) << "Etot";
-//    ff << " " << std::setw(myWidth) << "Px" << " " << std::setw(myWidth) << "Py" << " " << std::setw(myWidth) << "Pz" << std::endl;
-//  }
-//}
-//void SPECIE::output_diag(int istep, std::ofstream &ff){
-//  if (mygrid->withParticles == NO)
-//    return;
-
-//  //double extrema[14];
-//  computeKineticEnergyWExtrems();
-//  if (mygrid->myid == mygrid->master_proc){
-//    ff << std::setw(myWidth) << istep << " " << std::setw(myWidth) << mygrid->time << " " << std::setw(myWidth) << totalEnergy;
-//    for (int c = 0; c < 3; c++){
-//      ff << " " << std::setw(myWidth) << totalMomentum[c];
-//    }
-//    ff << std::endl;
-//  }
-//}
 
 void SPECIE::init_output_extrems(std::ofstream &ff) {
   if (mygrid->withParticles == NO)
@@ -1100,6 +1067,7 @@ void SPECIE::position_parallel_pbc()
   free(sendr_buffer);
   free(recv_buffer);
 }
+
 void SPECIE::position_obc()
 {
   if (mygrid->withParticles == NO||isFrozen)
@@ -1143,7 +1111,6 @@ void SPECIE::position_obc()
   Np -= nlost;
   reallocate_species();
 }
-
 
 void SPECIE::momenta_advance(EM_FIELD *ebfield)
 {
@@ -2032,6 +1999,438 @@ void SPECIE::momenta_advance(EM_FIELD *ebfield)
   }
 }
 
+void SPECIE::momenta_advance_with_externalFields(EM_FIELD *ebfield, EM_FIELD *externalFields){
+
+  energyExtremesFlag = false;
+
+  if (mygrid->withParticles == NO||isFrozen)
+    return;
+  if (mygrid->isStretched()) {
+    SPECIE::momentaStretchedAdvance(ebfield);
+    return;
+  }
+  double dt, gamma_i;
+  int p, c;  // particle_int, component_int
+  int i, i1, j1, k1, i2, j2, k2;
+  int j, k;
+  //int indexMaxQuadraticShape[]={1,4};
+  int hii[3], wii[3];           // half integer index,   whole integer index
+  double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
+  double rr, rh, rr2, rh2;          // local coordinate to integer grid point and to half integer,     local coordinate squared
+  double dvol, xx[3];           // tensor_product,       absolute particle position
+  double E[3], B[3];
+  double u_plus[3], u_minus[3], u_prime[3], tee[3], ess[3], dummy;
+
+  dt = mygrid->dt;
+
+  double *myfield = ebfield->getDataPointer();
+  double *exfield = externalFields->getDataPointer();
+  int edge = mygrid->getEdge();
+  int ebComp = ebfield->getNcomp();
+  int N_grid[3];
+  ebfield->writeN_grid(N_grid);
+  int Nx, Ny, Nz;
+  Nx = N_grid[0];
+  Ny = N_grid[1];
+  Nz = N_grid[2];
+  switch (mygrid->getDimensionality())
+  {
+
+  case 3:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++) {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+        xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 3; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
+        for (j = 0; j < 3; j++)
+        {
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
+          for (i = 0; i < 3; i++)
+          {
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
+            double EX, EY, EZ;
+            EX = myfield[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EY = myfield[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EZ = myfield[my_indice(edge, 1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EX += exfield[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EY += exfield[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            EZ += exfield[my_indice(edge, 1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            double BX, BY, BZ;
+            BX = myfield[my_indice(edge, 1, 1, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BY = myfield[my_indice(edge, 1, 1, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BZ = myfield[my_indice(edge, 1, 1, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BX += exfield[my_indice(edge, 1, 1, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BY += exfield[my_indice(edge, 1, 1, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+            BZ += exfield[my_indice(edge, 1, 1, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+            E[0] += EX*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+            E[1] += EY*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+            E[2] += EZ*dvol;  //Ez
+
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k];
+            B[0] += BX*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k];
+            B[1] += BY*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k];
+            B[2] += BZ*dvol;  //Bz
+          }
+        }
+      }
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+    }
+    break;
+
+  case 2:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
+      {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+        xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 2; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+      k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
+        for (i = 0; i < 3; i++) {
+          i1 = i + wii[0] - 1;
+          i2 = i + hii[0] - 1;
+          double EX, EY, EZ;
+          EX = myfield[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EY = myfield[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EZ = myfield[my_indice(edge, 1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EX += exfield[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EY += exfield[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          EZ += exfield[my_indice(edge, 1, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          double BX, BY, BZ;
+          BX = myfield[my_indice(edge, 1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BY = myfield[my_indice(edge, 1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BZ = myfield[my_indice(edge, 1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BX += exfield[my_indice(edge, 1, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BY += exfield[my_indice(edge, 1, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+          BZ += exfield[my_indice(edge, 1, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+
+          dvol = hiw[0][i] * wiw[1][j];
+          E[0] += EX*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j];
+          E[1] += EY*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j];
+          E[2] += EZ*dvol;  //Ez
+
+          dvol = wiw[0][i] * hiw[1][j];
+          B[0] += BX*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j];
+          B[1] += BY*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j];
+          B[2] += BZ*dvol;  //Bz
+        }
+      }
+
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+    }
+    break;
+
+  case 1:
+    for (p = 0; p < Np; p++)
+    {
+      //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+      for (c = 0; c < 3; c++)
+      {
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+        xx[c] = pData[c + p*Ncomp];
+#else
+        xx[c] = pData[pIndex(c, p, Ncomp, Np)];
+#endif
+#else
+        xx[c] = val[c][p*Ncomp];
+#endif
+        hiw[c][1] = wiw[c][1] = 1;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 1; c++)
+      {
+        rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][1] = 0.75 - rr2;
+        wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+        wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+        hiw[c][1] = 0.75 - rh2;
+        hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+        hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+      }
+      E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+      k1 = k2 = j1 = j2 = 0;
+      for (i = 0; i < 3; i++)
+      {
+        i1 = i + wii[0] - 1;
+        i2 = i + hii[0] - 1;
+        double EX, EY, EZ;
+        EX = myfield[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EY = myfield[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EZ = myfield[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EX += exfield[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EY += exfield[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        EZ += exfield[my_indice(edge, 0, 0, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        double BX, BY, BZ;
+        BX = myfield[my_indice(edge, 0, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BY = myfield[my_indice(edge, 0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BZ = myfield[my_indice(edge, 0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BX += exfield[my_indice(edge, 0, 0, 3, i1, j2, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BY += exfield[my_indice(edge, 0, 0, 4, i2, j1, k2, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+        BZ += exfield[my_indice(edge, 0, 0, 5, i2, j2, k1, N_grid[0], N_grid[1], N_grid[2], ebComp)];
+
+        dvol = hiw[0][i];
+        E[0] += EX*dvol;  //Ex
+        dvol = wiw[0][i];
+        E[1] += EY*dvol;  //Ey
+        dvol = wiw[0][i];
+        E[2] += EZ*dvol;  //Ez
+
+        dvol = wiw[0][i];
+        B[0] += BX*dvol;  //Bx
+        dvol = hiw[0][i];
+        B[1] += BY*dvol;  //By
+        dvol = hiw[0][i];
+        B[2] += BZ*dvol;  //Bz
+      }
+
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      u_minus[0] = pData[3 + p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[4 + p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[5 + p*Ncomp] + 0.5*dt*coupling*E[2];
+#else
+      u_minus[0] = pData[pIndex(3, p, Ncomp, Np)] + 0.5*dt*coupling*E[0];
+      u_minus[1] = pData[pIndex(4, p, Ncomp, Np)] + 0.5*dt*coupling*E[1];
+      u_minus[2] = pData[pIndex(5, p, Ncomp, Np)] + 0.5*dt*coupling*E[2];
+#endif
+#else
+      u_minus[0] = val[3][p*Ncomp] + 0.5*dt*coupling*E[0];
+      u_minus[1] = val[4][p*Ncomp] + 0.5*dt*coupling*E[1];
+      u_minus[2] = val[5][p*Ncomp] + 0.5*dt*coupling*E[2];
+#endif
+
+      gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+      tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+      tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+      tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+      u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+      u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+      u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+      dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+      ess[0] = 2 * dummy*tee[0];
+      ess[1] = 2 * dummy*tee[1];
+      ess[2] = 2 * dummy*tee[2];
+
+      u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+      u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+      u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+#ifdef _ACC_SINGLE_POINTER
+#ifdef _DIRECT_PARTICLE_ACCESS
+      pData[3 + p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[4 + p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[5 + p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#else
+      pData[pIndex(3, p, Ncomp, Np)] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      pData[pIndex(4, p, Ncomp, Np)] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      pData[pIndex(5, p, Ncomp, Np)] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+#else
+      val[3][p*Ncomp] = (u_plus[0] + 0.5*dt*coupling*E[0]);
+      val[4][p*Ncomp] = (u_plus[1] + 0.5*dt*coupling*E[1]);
+      val[5][p*Ncomp] = (u_plus[2] + 0.5*dt*coupling*E[2]);
+#endif
+    }
+    break;
+  }
+}
 
 void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 {
@@ -2410,8 +2809,6 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
 }
 
 
-
-
 void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
 {
   energyExtremesFlag = false;
@@ -2544,6 +2941,189 @@ void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield)
           B[2] += ebfield->B2(i2, j2, k1)*dvol;  //Bz
       }
       break;
+    }
+
+    u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
+    u_minus[1] = ru(4, p) + 0.5*dt*coupling*E[1];
+    u_minus[2] = ru(5, p) + 0.5*dt*coupling*E[2];
+
+    gamma_i = 1. / sqrt(1 + u_minus[0] * u_minus[0] + u_minus[1] * u_minus[1] + u_minus[2] * u_minus[2]);
+
+    tee[0] = 0.5*dt*coupling*B[0] * gamma_i;
+    tee[1] = 0.5*dt*coupling*B[1] * gamma_i;
+    tee[2] = 0.5*dt*coupling*B[2] * gamma_i;
+
+    u_prime[0] = u_minus[0] + (u_minus[1] * tee[2] - u_minus[2] * tee[1]);
+    u_prime[1] = u_minus[1] + (u_minus[2] * tee[0] - u_minus[0] * tee[2]);
+    u_prime[2] = u_minus[2] + (u_minus[0] * tee[1] - u_minus[1] * tee[0]);
+
+    dummy = 1 / (1 + tee[0] * tee[0] + tee[1] * tee[1] + tee[2] * tee[2]);
+
+    ess[0] = 2 * dummy*tee[0];
+    ess[1] = 2 * dummy*tee[1];
+    ess[2] = 2 * dummy*tee[2];
+
+    u_plus[0] = u_minus[0] + u_prime[1] * ess[2] - u_prime[2] * ess[1];
+    u_plus[1] = u_minus[1] + u_prime[2] * ess[0] - u_prime[0] * ess[2];
+    u_plus[2] = u_minus[2] + u_prime[0] * ess[1] - u_prime[1] * ess[0];
+
+    ru(3, p) = (u_plus[0] + 0.5*dt*coupling*E[0]);
+    ru(4, p) = (u_plus[1] + 0.5*dt*coupling*E[1]);
+    ru(5, p) = (u_plus[2] + 0.5*dt*coupling*E[2]);
+
+  }
+}
+
+void SPECIE::momentaStretchedAdvance(EM_FIELD *ebfield, EM_FIELD *externalFields)
+{
+  energyExtremesFlag = false;
+  if (mygrid->withParticles == NO||isFrozen)
+    return;
+
+  double dt, gamma_i;
+  int p, c;  // particle_int, component_int
+  int i, j, k, i1, j1, k1, i2, j2, k2;
+  //int indexMaxQuadraticShape[]={1,4};
+  int hii[3], wii[3];           // half integer index,   whole integer index
+  double hiw[3][3], wiw[3][3];  // half integer weight,  whole integer weight
+  double rr, rh, rr2, rh2;          // local coordinate to integer grid point and to half integer,     local coordinate squared
+  double dvol, xx[3];           // tensor_product,       absolute particle position
+  double E[3], B[3];
+  double u_plus[3], u_minus[3], u_prime[3], tee[3], ess[3], dummy;
+  double mycsi[3];
+
+  dt = mygrid->dt;
+  for (p = 0; p < Np; p++)
+  {
+    //gamma_i=1./sqrt(1+u0(p)*u0(p)+u1(p)*u1(p)+u2(p)*u2(p));
+    for (c = 0; c < 3; c++)
+    {
+      xx[c] = ru(c, p);
+      hiw[c][1] = wiw[c][1] = 1;
+      hii[c] = wii[c] = 0;
+    }
+    for (c = 0; c < mygrid->getDimensionality(); c++)
+    {
+      mycsi[c] = mygrid->unStretchGrid(xx[c], c);
+      rr = mygrid->dri[c] * (mycsi[c] - mygrid->csiminloc[c]);
+
+      rh = rr - 0.5;
+      wii[c] = (int)floor(rr + 0.5); //whole integer int
+      hii[c] = (int)floor(rr);     //half integer int
+      rr -= wii[c];
+      rh -= hii[c];
+      rr2 = rr*rr;
+      rh2 = rh*rh;
+
+      wiw[c][1] = 0.75 - rr2;
+      wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+      wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+      hiw[c][1] = 0.75 - rh2;
+      hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+      hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+    }
+    E[0] = E[1] = E[2] = B[0] = B[1] = B[2] = 0;
+
+    switch (mygrid->getDimensionality())
+    {
+    case 3:
+      for (k = 0; k < 3; k++)
+      {
+        k1 = k + wii[2] - 1;
+        k2 = k + hii[2] - 1;
+        for (j = 0; j < 3; j++)
+        {
+          j1 = j + wii[1] - 1;
+          j2 = j + hii[1] - 1;
+          for (i = 0; i < 3; i++)
+          {
+            i1 = i + wii[0] - 1;
+            i2 = i + hii[0] - 1;
+            dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                E[0] += ebfield->E0(i2, j1, k1)*dvol,  //Ex
+                E[0] += externalFields->E0(i2, j1, k1)*dvol;  //Ex
+            dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                E[1] += ebfield->E1(i1, j2, k1)*dvol,  //Ey
+                E[1] += externalFields->E1(i1, j2, k1)*dvol;  //Ey
+            dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                E[2] += ebfield->E2(i1, j1, k2)*dvol,  //Ez
+                E[2] += externalFields->E2(i1, j1, k2)*dvol;  //Ez
+
+            dvol = wiw[0][i] * hiw[1][j] * hiw[2][k],
+                B[0] += ebfield->B0(i1, j2, k2)*dvol,  //Bx
+                B[0] += externalFields->B0(i1, j2, k2)*dvol;  //Bx
+            dvol = hiw[0][i] * wiw[1][j] * hiw[2][k],
+                B[1] += ebfield->B1(i2, j1, k2)*dvol,  //By
+                B[1] += externalFields->B1(i2, j1, k2)*dvol;  //By
+            dvol = hiw[0][i] * hiw[1][j] * wiw[2][k],
+                B[2] += ebfield->B2(i2, j2, k1)*dvol,  //Bz
+                B[2] += externalFields->B2(i2, j2, k1)*dvol;  //Bz
+          }
+        }
+      }
+        break;
+
+      case 2:
+        k1 = k2 = 0;
+      for (j = 0; j < 3; j++)
+      {
+        j1 = j + wii[1] - 1;
+        j2 = j + hii[1] - 1;
+        for (i = 0; i < 3; i++)
+        {
+          i1 = i + wii[0] - 1;
+          i2 = i + hii[0] - 1;
+          dvol = hiw[0][i] * wiw[1][j],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol,  //Ex
+              E[0] += externalFields->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i] * hiw[1][j],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol,  //Ey
+              E[1] += externalFields->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i] * wiw[1][j],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol,  //Ez
+              E[2] += externalFields->E2(i1, j1, k2)*dvol;  //Ez
+
+          dvol = wiw[0][i] * hiw[1][j],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol,  //Bx
+              B[0] += externalFields->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i] * wiw[1][j],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol,  //By
+              B[1] += externalFields->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i] * hiw[1][j],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol,  //Bz
+              B[2] += externalFields->B2(i2, j2, k1)*dvol;  //Bz
+        }
+      }
+      break;
+
+      case 1:
+        k1 = k2 = j1 = j2 = 0;
+        for (i = 0; i < 3; i++)
+        {
+          i1 = i + wii[0] - 1;
+          i2 = i + hii[0] - 1;
+          dvol = hiw[0][i],
+              E[0] += ebfield->E0(i2, j1, k1)*dvol,  //Ex
+              E[0] += externalFields->E0(i2, j1, k1)*dvol;  //Ex
+          dvol = wiw[0][i],
+              E[1] += ebfield->E1(i1, j2, k1)*dvol,  //Ey
+              E[1] += externalFields->E1(i1, j2, k1)*dvol;  //Ey
+          dvol = wiw[0][i],
+              E[2] += ebfield->E2(i1, j1, k2)*dvol,  //Ez
+              E[2] += externalFields->E2(i1, j1, k2)*dvol;  //Ez
+
+          dvol = wiw[0][i],
+              B[0] += ebfield->B0(i1, j2, k2)*dvol,  //Bx
+              B[0] += externalFields->B0(i1, j2, k2)*dvol;  //Bx
+          dvol = hiw[0][i],
+              B[1] += ebfield->B1(i2, j1, k2)*dvol,  //By
+              B[1] += externalFields->B1(i2, j1, k2)*dvol;  //By
+          dvol = hiw[0][i],
+              B[2] += ebfield->B2(i2, j2, k1)*dvol,  //Bz
+              B[2] += externalFields->B2(i2, j2, k1)*dvol;  //Bz
+        }
+        break;
     }
 
     u_minus[0] = ru(3, p) + 0.5*dt*coupling*E[0];
@@ -2823,8 +3403,6 @@ void SPECIE::current_deposition(CURRENT *current)
 
 }
 
-
-
 void SPECIE::add_momenta(double uxin, double uyin, double uzin) //Aggiunge semplicemente un drift a tutta la specie
 {
 
@@ -2978,7 +3556,6 @@ void SPECIE::callSupergaussian(my_rng_generator& ext_rng, double p0, double alph
 
 }
 
-//#define USE_BOOST
 void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
 
   my_normal_distribution myGaussian(0,sqrt(Ta));
@@ -3131,9 +3708,11 @@ std::cout << "Nshuffle = " << Nshuffle << std::endl;
 void SPECIE::callJuttner(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
   //DA DEFINIRE
 }
+
 double densityFunctionMaxwell(double px, double alpha, double temp) {
   return exp(-(sqrt(alpha*alpha + px*px) - alpha) / temp);
 }
+
 void SPECIE::callSpecial(my_rng_generator& ext_rng, double Ta) {
   //double ptot, temp, cos_theta, sin_theta, segno, phi;
   double alpha;

@@ -86,7 +86,9 @@ public:
   void position_obc();
   void momenta_advance(EM_FIELD *ebfield);
   void momentaStretchedAdvance(EM_FIELD *ebfield);
+  void momentaStretchedAdvance(EM_FIELD *ebfield, EM_FIELD *externalFields);
   void momenta_advance_with_friction(EM_FIELD *ebfield, double lambda);
+  void momenta_advance_with_externalFields(EM_FIELD *ebfield, EM_FIELD *externalFields);
   void current_deposition(CURRENT *current);
   void add_momenta(double uxin, double uyin, double uzin);
   void add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, double uzin, tempDistrib distribution);
