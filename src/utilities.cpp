@@ -243,3 +243,127 @@ void UTILITIES::selectSpheres(SPHERES &spheres, GRID &grid) {
   spheres.NSpheres = counter;
   spheres.coords = (float*)realloc(spheres.coords, counter * 4 * sizeof(float));
 }
+
+void UTILITIES::allocateAccessibleKModes(GRIDmodes &gridModes, GRID &grid){
+
+  double Lr[3];
+
+  {
+    int c;
+    for(c=0; c<grid.getDimensionality();c++){
+      Lr[c] = grid.rmax[c] - grid.rmin[c];
+    }
+    for(;c<3;c++){
+      Lr[c] = 0;
+    }
+  }
+  for(int c=0; c<3;c++){
+    gridModes.Nk[c] = grid.uniquePoints[c];
+    if(Lr[c]>0){
+      gridModes.dk[c] = 2*M_PI/Lr[c];
+    }
+    else{
+      gridModes.dk[c] = 0;
+    }
+
+    gridModes.kmin[c] = -(gridModes.Nk[c]/2)*gridModes.dk[c];
+    gridModes.kmax[c] = gridModes.kmin[c] + (gridModes.Nk[c]-1)*gridModes.dk[c];
+    gridModes.kvalues[c] = (double*)malloc(sizeof(double)*gridModes.Nk[c]);
+    for(int i=0; i<gridModes.Nk[c]; i++){
+      gridModes.kvalues[c][i] = gridModes.kmin[c] + i*gridModes.dk[c];
+    }
+  }
+}
+
+void UTILITIES::writeGridModes(GRIDmodes &gridModes, GRID &grid){
+  std::stringstream message;
+  char letter[]={'x','y', 'z'};
+  for(int c=0; c<3; c++){
+    message << " # k"<< letter[c] <<"x modes:" << std::endl;
+    message << " Nk"<< letter[c] <<": " << gridModes.Nk[c] << std::endl;
+    message << " dk"<< letter[c] <<": " << gridModes.dk[c] << std::endl;
+    message << " k"<< letter[c] <<" range: [ " << gridModes.kmin[c] << " : " << gridModes.kmax[c] << " ] " << std::endl;
+    for(int i=0; i<gridModes.Nk[c]; i++){
+      message << "| " << gridModes.kvalues[c][i] << " |";
+    }
+    message << "\n ######################" << std::endl;
+  }
+
+  std::string fileName("gridModes.txt");
+  grid.printInfoFile(fileName,message.str());
+}
+
+void UTILITIES::setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes &gridModes, double amplitude, double* centralK, double* sigmaK){
+  my_rng_generator mt_rng;
+  my_uniform_real_distribution randPhase(0, 2.0*M_PI);
+
+  double kz, ky, kx;
+  for(int k=0; k<gridModes.Nk[2]; k++){
+    kz = gridModes.kvalues[2][k];
+    for(int j=0; j<gridModes.Nk[1]; j++){
+      ky = gridModes.kvalues[1][j];
+        for(int i=0; i<gridModes.Nk[0]; i++){
+          kx = gridModes.kvalues[0][i];
+        double amp = 1;
+        amp *= exp( -(kx-centralK[0])*(kx-centralK[0])/(sigmaK[0]*sigmaK[0]) );
+        amp *= exp( -(ky-centralK[1])*(ky-centralK[1])/(sigmaK[1]*sigmaK[1]) );
+        amp *= exp( -(kz-centralK[2])*(kz-centralK[2])/(sigmaK[2]*sigmaK[2]) );
+        if(amp>1e-2){
+          amp *= amplitude;
+          KMODE newMode;
+          newMode.amplitude=amp;
+          newMode.k[0] = kx;
+          newMode.k[1] = ky;
+          newMode.k[2] = kz;
+          newMode.phase = randPhase(mt_rng);
+          myKModes.push_back(newMode);
+        }
+
+      }
+    }
+  }
+
+}
+
+void UTILITIES::exchangeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid){
+  int Nmodes=myKModes.size();
+  double *buffer=new double[Nmodes*5];
+  for(int i=0; i<Nmodes; i++){
+    buffer[i*5+0] = myKModes[i].k[0];
+    buffer[i*5+1] = myKModes[i].k[1];
+    buffer[i*5+2] = myKModes[i].k[2];
+    buffer[i*5+3] = myKModes[i].amplitude;
+    buffer[i*5+4] = myKModes[i].phase;
+  }
+  MPI_Bcast(buffer, Nmodes*5, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+  myKModes.clear();
+  for(int i=0; i<Nmodes; i++){
+    KMODE newMode;
+    newMode.k[0]      = buffer[i*5+0];
+    newMode.k[1]      = buffer[i*5+1];
+    newMode.k[2]      = buffer[i*5+2];
+    newMode.amplitude = buffer[i*5+3];
+    newMode.phase     = buffer[i*5+4];
+    myKModes.push_back(newMode);
+  }
+  delete[] buffer;
+
+}
+
+void UTILITIES::writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid){
+  int Nmodes=myKModes.size();
+  std::stringstream message;
+  message << "#KModes are " << myKModes.size() << std::endl;
+  message << "#" << std::setw(10) << " kx " << std::setw(11) << " ky " << std::setw(11) << " kz " << std::setw(11) << " amp " << std::setw(11) << " phase" << std::endl;
+  KMODE newMode;
+  for(int i=0; i<Nmodes; i++){
+    message << std::setw(10) << myKModes[i].k[0] << " ";
+    message << std::setw(10) << myKModes[i].k[1] << " ";
+    message << std::setw(10) << myKModes[i].k[2] << " ";
+    message << std::setw(10) << myKModes[i].amplitude << " ";
+    message << std::setw(10) << myKModes[i].phase << std::endl;
+  }
+  std::string fileName("kmodes.txt");
+  grid.printInfoFile(fileName,message.str());
+}
+

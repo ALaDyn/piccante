@@ -66,6 +66,13 @@ public:
     static bool isSphereInside(SPHERES& spheres, int index, GRID &grid);
     static void swapSpheres(SPHERES &spheres, int i, int j);
     static void selectSpheres(SPHERES &spheres, GRID &grid);
+
+    static void allocateAccessibleKModes(GRIDmodes &gridModes, GRID &grid);
+    static void writeGridModes(GRIDmodes &gridModes, GRID &grid);
+    static void setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes &gridModes, double amplitude, double *centralK, double *sigmaK);
+    static void exchangeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid);
+    static void writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid);
+
 };
 
 #endif // UTILITIES_H
