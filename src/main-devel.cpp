@@ -112,34 +112,6 @@ void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes){
   }
 }
 
-void deformEx(GRID* grid, EM_FIELD* field, double amplitude, double lambda){
-  double kdx=2*M_PI/lambda;
-  int Ngrid[3];
-
-  Ngrid[0] = grid->Nloc[0];
-  Ngrid[1] = grid->Nloc[1];
-  Ngrid[2] = grid->Nloc[2];
-
-  double x;
-
-  if(false){
-    std::cout<< "deformo Ex che ha " << Ngrid[0] << " punti" << std::endl;
-    std::cout<< "Ny = " << Ngrid[1] << " " << std::endl;
-    std::cout<< "Nz = " << Ngrid[2] << " " << std::endl;
-    std::cout<< "amplitude = " << amplitude << " " << std::endl;
-    std::cout<< "lambda = " << lambda << " " << std::endl;
-  }
-  for(int k=0; k<Ngrid[2]; k++){
-    for(int j=0; j<Ngrid[1]; j++){
-      for(int i=0; i<Ngrid[0]; i++){
-
-        x = grid->rminloc[0] + grid->dr[0]*i;
-
-        field->E0(i,j,k)+=amplitude*M_PI*cos(kdx*x);
-      }
-    }
-  }
-}
 
 int main(int narg, char **args)
 {
