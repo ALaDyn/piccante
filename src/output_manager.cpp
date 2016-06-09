@@ -153,6 +153,14 @@ bool compOutput(const reqOutput &first, const reqOutput &second) {
 
 
 OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies) {
+  init(_mygrid, _myfield, _mycurrent, _myspecies, "OUTPUT");
+}
+
+OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName) {
+  init(_mygrid, _myfield, _mycurrent, _myspecies, defaultDirName);
+}
+
+void OUTPUT_MANAGER::init(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName) {
   mygrid = _mygrid;
   isThereGrid = (mygrid != NULL) ? true : false;
 
@@ -179,11 +187,6 @@ OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycu
   particleGroupSize = PHASE_SPACE_GROUP_SIZE;
   particleBufferSize = NPARTICLE_BUFFER_SIZE;
 
-  outputDir = "OUTPUT";
-}
-
-OUTPUT_MANAGER::OUTPUT_MANAGER(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName) {
-  OUTPUT_MANAGER::OUTPUT_MANAGER(_mygrid, _myfield, _mycurrent, _myspecies);
   outputDir = defaultDirName;
 }
 

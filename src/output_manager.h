@@ -253,6 +253,7 @@ private:
   int particleGroupSize;
   int particleBufferSize;
 
+  void init(GRID* _mygrid, EM_FIELD* _myfield, CURRENT* _mycurrent, std::vector<SPECIE*> _myspecies, std::string defaultDirName);
   bool checkGrid();
   bool checkEMField();
   bool checkCurrent();
