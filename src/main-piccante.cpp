@@ -115,15 +115,15 @@ int main(int narg, char **args)
 
   std::string fileFFTName;
   FFTPLASMA myfft;
-
-  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
-
-    if (areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile")) {
+  isThereSpecial = jsonParser::setValue(special, root, "special");
+  if (isThereSpecial) {
+    areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile");
+    if (areThereSpheres) {
       UTILITIES::readAndAllocateSpheres(myspheres, fileSpheresName, grid);
       UTILITIES::selectSpheres(myspheres, grid);
     }
-
-    if (isThereFFTplasma = jsonParser::setString(&fileFFTName, special, "FFTplasmaFile")) {
+    isThereFFTplasma = jsonParser::setString(&fileFFTName, special, "FFTplasmaFile");
+    if (isThereFFTplasma) {
       UTILITIES::readAndAllocateFFTplasma(myfft, fileFFTName, grid);
     }
   }

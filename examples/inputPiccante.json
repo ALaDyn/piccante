@@ -124,7 +124,13 @@
       "durationFWHM": 5.0,
       "initialPosition": 5.5,
       "a": 8.0
-    }
+    },
+    {
+      "enabled": false,
+      "type": "CONST_FIELD",
+      "component": 5,
+      "a": 8.0
+        }
   ],
   "Domains":[
     {
