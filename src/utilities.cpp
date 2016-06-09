@@ -244,6 +244,60 @@ void UTILITIES::selectSpheres(SPHERES &spheres, GRID &grid) {
   spheres.coords = (float*)realloc(spheres.coords, counter * 4 * sizeof(float));
 }
 
+void UTILITIES::readAndAllocateFFTplasma(FFTPLASMA &myfft, std::string filename, GRID &grid) {
+
+  if (grid.myid == grid.master_proc) {
+    std::ifstream myfile;
+    myfile.open(filename.c_str());
+    if (!myfile.good()) {
+      std::cout << "     FFTplasma file: \"" << filename << "\" does not exists" << std::endl;
+    }
+
+
+    int intbuf;
+    double doubuf;
+    myfile.read((char*)&intbuf, sizeof(int));
+    myfile.read((char*)&doubuf, sizeof(double));
+    myfft.numcomp=intbuf;
+    myfft.shift=doubuf;
+
+    myfft.kx = new double[myfft.numcomp];
+    myfft.ky = new double[myfft.numcomp];
+    myfft.phi = new double[myfft.numcomp];
+    myfft.cc = new double[myfft.numcomp];
+
+    myfile.read((char*)(myfft.kx), sizeof(double)*myfft.numcomp);
+    myfile.read((char*)(myfft.ky), sizeof(double)*myfft.numcomp);
+    myfile.read((char*)(myfft.phi), sizeof(double)*myfft.numcomp);
+    myfile.read((char*)(myfft.cc), sizeof(double)*myfft.numcomp);
+
+    myfile.close();
+  }
+
+
+  MPI_Bcast(&(myfft.numcomp), 1, MPI_INT, grid.master_proc, MPI_COMM_WORLD);
+  MPI_Bcast(&(myfft.shift), 1, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+
+  if (grid.myid != grid.master_proc){
+      myfft.kx = new double[myfft.numcomp];
+      myfft.ky = new double[myfft.numcomp];
+      myfft.phi = new double[myfft.numcomp];
+      myfft.cc = new double[myfft.numcomp];
+
+  }
+
+    MPI_Bcast(myfft.kx, myfft.numcomp, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+    MPI_Bcast(myfft.ky, myfft.numcomp, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+    MPI_Bcast(myfft.phi, myfft.numcomp, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+    MPI_Bcast(myfft.cc, myfft.numcomp, MPI_DOUBLE, grid.master_proc, MPI_COMM_WORLD);
+
+
+}
+
+
+
+
+
 void UTILITIES::allocateAccessibleKModes(GRIDmodes &gridModes, GRID &grid){
 
   double Lr[3];
@@ -366,4 +420,3 @@ void UTILITIES::writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &g
   std::string fileName("kmodes.txt");
   grid.printInfoFile(fileName,message.str());
 }
-

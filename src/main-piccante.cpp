@@ -105,18 +105,30 @@ int main(int narg, char **args)
 
    bool isThereSpecial = false;
    bool areThereSpheres = false;
+   bool isThereFFTplasma = false;
+
+
+  Json::Value special;
 
   std::string fileSpheresName;
-  Json::Value special;
   SPHERES myspheres;
-  isThereSpecial = jsonParser::setValue(special, root, "special");
-  if (isThereSpecial) {
-      areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile");
-    if (areThereSpheres) {
+
+  std::string fileFFTName;
+  FFTPLASMA myfft;
+
+  if (isThereSpecial = jsonParser::setValue(special, root, "special")) {
+
+    if (areThereSpheres = jsonParser::setString(&fileSpheresName, special, "spheresFile")) {
       UTILITIES::readAndAllocateSpheres(myspheres, fileSpheresName, grid);
       UTILITIES::selectSpheres(myspheres, grid);
     }
+
+    if (isThereFFTplasma = jsonParser::setString(&fileFFTName, special, "FFTplasmaFile")) {
+      UTILITIES::readAndAllocateFFTplasma(myfft, fileFFTName, grid);
+    }
   }
+
+
   std::map<std::string, PLASMA*>::iterator pIterator;
 
 
@@ -130,6 +142,11 @@ int main(int narg, char **args)
     for (pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++) {
       (pIterator)->second->params.spheres = &myspheres;
     }
+  }
+  if(isThereFFTplasma){
+      for (pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++) {
+        (pIterator)->second->params.FFTplasma = &myfft;
+      }
   }
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
