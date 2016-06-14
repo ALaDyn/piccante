@@ -54,6 +54,7 @@ public:
   //  double (*initial_profile)(double , double , double , PLASMA*);
   SPECIEspectrum spectrum;
   GRID *mygrid;
+  tempDistrib myTempDistribution;
 
   SPECIE();
   SPECIE(GRID *grid);

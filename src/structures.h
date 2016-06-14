@@ -61,6 +61,16 @@ struct KMODE{
   double phase;
 };
 
+struct LANGMUIRset{
+  GRIDmodes gridModes;
+  std::vector<KMODE> myKModes;
+  double refTemp;
+  double refDens;
+  double endTime;
+  bool isThereLangmuirSet;
+  bool keepForcing;
+};
+
 struct PLASMAparams {
   double rminbox[3];
   double rmaxbox[3];
@@ -254,6 +264,7 @@ public:
   tempDistribType type;
 
   tempDistrib();
+  tempDistrib operator = (tempDistrib &destro);
   void setWaterbag(double _p0);
   void setWaterbag3Temp(double _p0_x, double _p0_y, double _p0_z);
   void setUnifSphere(double _p0);
@@ -264,6 +275,7 @@ public:
 
   bool isInit();
 
+  double getTemperature();
   friend class SPECIE;
 private:
   double p0;

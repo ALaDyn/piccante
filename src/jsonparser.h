@@ -82,14 +82,19 @@ namespace jsonParser {
 
   std::string parseJsonInputFile(Json::Value &root, int narg, char **args);
   int getDimensionality(Json::Value &document, int defaultDimensionality);
-  void setXrange(Json::Value &parent, GRID *grid);
-  void setYrange(Json::Value &parent, GRID *grid);
-  void setZrange(Json::Value &parent, GRID *grid);
-
   bool setInt(int *number, Json::Value &parent, const char* name);
   bool setDouble(double *number, Json::Value &parent, const char* name);
   bool setBool(bool *number, Json::Value &parent, const char* name);
   bool setString(std::string * number, Json::Value  &parent, const char* name);
+  int setIntArray(int *ipointer, int size, Json::Value &parent, const char* name);
+  int setDoubleArray(double *dpointer, int size, Json::Value &parent, const char* name);
+  void setGridGeometry(Json::Value &root, GRID *grid);
+  void setRemainingGridParameters(Json::Value &root, GRID *grid);
+
+  void setXrange(Json::Value &parent, GRID *grid);
+  void setYrange(Json::Value &parent, GRID *grid);
+  void setZrange(Json::Value &parent, GRID *grid);
+
 
   bool setValue(Json::Value &child, Json::Value &parent, const char* name);
   void setRadiationFriction(Json::Value &document, GRID *grid);

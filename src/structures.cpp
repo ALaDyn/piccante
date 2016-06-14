@@ -1161,11 +1161,27 @@ void laserPulse::setConstFieldComponent(int comp){
 
 tempDistrib::tempDistrib() {
   init = false;
+  temp = 0;
+}
+tempDistrib tempDistrib::operator = (tempDistrib &destro){
+  type = destro.type;
+  p0 = destro.p0;
+  p0_x = destro.p0_x;
+  p0_y = destro.p0_y;
+  p0_z = destro.p0_z;
+  alpha = destro.alpha;
+  temp = destro.temp;
+  a = destro.a;
+  init = destro.init;
+  return *this;
 }
 
 bool tempDistrib::isInit() {
   return init;
 }
+ double tempDistrib::getTemperature(){
+   return temp;
+ }
 
 void tempDistrib::setWaterbag(double _p0) {
   type = WATERBAG;

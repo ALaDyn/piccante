@@ -17,6 +17,13 @@
   "boundaries": ["periodic", "periodic","periodic"],
   "withPoissonSolver": false,
   "autoNeutraliseDensity": false,
+  "langmuirSpectrum":{
+     "refDensity": 1.0,
+     "refTemperature": 4e-4,
+     "amplitude": 0.01,
+     "centralK": [30,0,0],
+     "sigmaK"  : [3,2,2],
+    },
   "StretchedGrid":{
     "enabled": false,
     "x":{"left": { "limit": -10.0, "NCells": 1000 },

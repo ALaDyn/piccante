@@ -95,8 +95,7 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
   EBEnergyExtremesFlag = false;
 }
 
-EM_FIELD EM_FIELD::operator = (EM_FIELD &destro)
-{
+EM_FIELD EM_FIELD::operator = (EM_FIELD &destro){
   if (!destro.allocated) {
     printf("---ERROR---\noperation not permitted\nEM_FIELD=EM_FIELD\nnot allocated\n");
     exit(17);

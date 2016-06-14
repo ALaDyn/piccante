@@ -58,9 +58,7 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
       }
       UTILITIES::exitWithError(12);
     }
-
   }
-
 }
 
 std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **args) {
@@ -137,6 +135,32 @@ bool jsonParser::setString(std::string * number, Json::Value  &parent, const cha
   return outFlag;
 }
 
+int jsonParser::setIntArray(int *ipointer, int size, Json::Value &parent, const char* name) {
+  memset((void*)ipointer, 0, size*sizeof(double));
+  bool outFlag= (!parent[name].isNull()) && parent[name].isArray() && (parent[name].size()>=size);
+  if (outFlag) {
+    for(int i=0; i<parent[name].size();i++){
+      ipointer[i] = parent[name][i].asInt();
+    }
+  }
+  if (!outFlag)
+    return 0;
+  return parent[name].size();
+}
+
+int jsonParser::setDoubleArray(double *dpointer, int size, Json::Value &parent, const char* name){
+  memset((void*)dpointer, 0, size*sizeof(int));
+  bool outFlag= (!parent[name].isNull()) && parent[name].isArray() && (parent[name].size()>=size);
+  if (outFlag) {
+    for(int i=0; i<parent[name].size();i++){
+      dpointer[i] = parent[name][i].asDouble();
+    }
+  }
+  if (!outFlag)
+    return 0;
+  return parent[name].size();
+}
+
 
 bool jsonParser::setValue(Json::Value &child, Json::Value &parent, const char* name) {
   bool outFlag= (!parent[name].isNull());
@@ -153,6 +177,25 @@ int jsonParser::getDimensionality(Json::Value &document, int defaultDimensionali
   if ((!setInt(&dim, document, name)) && isThisJsonMaster)
     std::cout << "dimensions not set in JSON input file!\n";
   return dim;
+}
+
+void jsonParser::setGridGeometry(Json::Value &root, GRID *grid) {
+  jsonParser::setXrange(root, grid);
+  jsonParser::setYrange(root, grid);
+  jsonParser::setZrange(root, grid);
+  jsonParser::setNCells(root, grid);
+  jsonParser::setNprocs(root, grid);
+  jsonParser::setStretchedGrid(root, grid);
+  jsonParser::setBoundaryConditions(root, grid);
+}
+
+void jsonParser::setRemainingGridParameters(Json::Value &root, GRID *grid){
+  jsonParser::setMasterProc(root, grid);
+  jsonParser::setRadiationFriction(root, grid);
+  jsonParser::setCourantFactor(root, grid);
+  jsonParser::setSimulationTime(root, grid);
+  jsonParser::setMovingWindow(root, grid);
+  jsonParser::setFrequencyStdoutStatus(root, grid);
 }
 
 void jsonParser::setRadiationFriction(Json::Value &document, GRID *grid) {
@@ -213,7 +256,6 @@ void jsonParser::setNCells(Json::Value &parent, GRID *grid) {
     }
   }
   grid->setNCells(Nx, Ny, Nz);
-
 }
 void jsonParser::setNprocs(Json::Value &document, GRID *grid) {
   int nProcY = 1, nProcZ = 1;

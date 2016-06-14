@@ -50,68 +50,6 @@
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #include "rapidjson/document.h"     // rapidjson's DOM-style API
 
-void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
-  int Npart = specie->Np;
-  double kdx = 2*M_PI/lambda;
-  double density=specie->plasma.params.density_coefficient;
-  double deltaX = amplitude;
-  double deltaV = amplitude*2*M_PI*sqrt(density);
-  double oldX;
-
-  if(false){
-    std::cout<< "sposto le particelle che sono" << Npart << std::endl;
-    std::cout<< "density = " << density << std::endl;
-    std::cout<< " ===================== "<< std::endl;
-  }
-  for(int n=0;n<Npart;n++){
-    oldX = specie->r0(n);
-    specie->r0(n) += deltaX*cos(kdx*oldX);
-    specie->u0(n) += deltaV*sin(kdx*oldX+2*M_PI*sqrt(density)*grid->dt*0.5);
-  }
-}
-
-void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes){
-  int Npart=specie->Np;
-  double density=specie->plasma.params.density_coefficient;
-  double kk, phi, dr;
-  double kx, dx, dVx, oldx;
-  double ky, dy, dVy, oldy;
-  double kz, dz, dVz, oldz;
-
-  for(int n=0;n<Npart;n++){
-    oldx = specie->r0(n);
-    oldy = specie->r1(n);
-    oldz = specie->r2(n);
-    for(int m=0; m < myKModes.size(); m++){
-      kx  = myKModes[m].k[0];
-      ky  = myKModes[m].k[1];
-      kz  = myKModes[m].k[2];
-      kk  = sqrt(kx*kx + ky*ky + kz*kz);
-      if(fabs(kk)>1e-2){
-        dr  = myKModes[m].amplitude/kk;
-        phi = myKModes[m].phase;
-
-        dx  = dr*kx/kk;
-        dy  = dr*ky/kk;
-        dz  = dr*kz/kk;
-        dVx  = dx*2*M_PI*sqrt(density);
-        dVy  = dy*2*M_PI*sqrt(density);
-        dVz  = dz*2*M_PI*sqrt(density);
-
-        phi += kx*oldx + ky*oldy + kz*oldz;
-        specie->r0(n) += dx*cos(phi);
-        specie->r1(n) += dy*cos(phi);
-        specie->r2(n) += dz*cos(phi);
-
-        phi += 2*M_PI*sqrt(density)*grid->dt*0.5;
-        specie->u0(n) += dVx*sin(phi);
-        specie->u1(n) += dVy*sin(phi);
-        specie->u2(n) += dVz*sin(phi);
-      }
-    }
-  }
-}
-
 
 int main(int narg, char **args)
 {
@@ -123,28 +61,19 @@ int main(int narg, char **args)
 
   GRID grid(dim);
   EM_FIELD myfield;
+  EM_FIELD exfield;
   CURRENT current;
   std::vector<SPECIE*> species;
   std::vector<SPECIE*>::const_iterator spec_iterator;
   my_rng_generator mt_rng;
   //*******************************************BEGIN GRID DEFINITION*******************************************************
-  jsonParser::setXrange(root, &grid);
-  jsonParser::setYrange(root, &grid);
-  jsonParser::setZrange(root, &grid);
-  jsonParser::setNCells(root, &grid);
-  jsonParser::setNprocs(root, &grid);
-  jsonParser::setStretchedGrid(root, &grid);
-  jsonParser::setBoundaryConditions(root, &grid);
 
-  jsonParser::setRadiationFriction(root, &grid);
-  jsonParser::setMasterProc(root, &grid);
+
+  jsonParser::setGridGeometry(root, &grid);
 
   grid.mpi_grid_initialize(&narg, args);
 
-  jsonParser::setCourantFactor(root, &grid);
-  jsonParser::setSimulationTime(root, &grid);
-  jsonParser::setMovingWindow(root, &grid);
-  jsonParser::setFrequencyStdoutStatus(root, &grid);
+  jsonParser::setRemainingGridParameters(root, &grid);
 
   srand(time(NULL));
   grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -170,45 +99,39 @@ int main(int narg, char **args)
     isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
     isWaveOK = isThereAmpli&&isThereLambda;
   }
-  if(true){
-    messaggio << "siamo sicuri sia tutto OK? " << " isThereSpecial=" << isThereSpecial << std::endl;
-    messaggio << "siamo sicuri sia tutto OK? " << " amplitude=" << amplitude << std::endl;
-    messaggio << "siamo sicuri sia tutto OK? " << " lambda=" << lambda << std::endl;
-    messaggio << "siamo sicuri sia tutto OK? " << " isWaveOK=" << isWaveOK << std::endl;
-  }
 
-  Json::Value langmuirSet;
-  bool isThereLangmuirSet = jsonParser::setValue(langmuirSet, root, "langmuirSpectrum");
-  std::vector<KMODE> myKModes;
-  GRIDmodes gridModes;
-  if (isThereLangmuirSet) {
+  LANGMUIRset langmuirSet;
 
+  Json::Value jsonLangmuirSet;
+  langmuirSet.isThereLangmuirSet = jsonParser::setValue(jsonLangmuirSet, root, "langmuirSpectrum");
+
+  if (langmuirSet.isThereLangmuirSet) {
+    jsonParser::setDouble(&langmuirSet.refDens, jsonLangmuirSet, "refDensity");
+    jsonParser::setDouble(&langmuirSet.refTemp, jsonLangmuirSet, "refTemperature");
+    jsonParser::setDouble(&langmuirSet.endTime, jsonLangmuirSet, "endTime");
     double amplitude=0.0;
-    jsonParser::setDouble(&amplitude, langmuirSet, "amplitude");
+    jsonParser::setDouble(&amplitude, jsonLangmuirSet, "amplitude");
     double centralK[3];
     centralK[0]=centralK[1]=centralK[2]=0;
-    jsonParser::setDouble(&centralK[0], langmuirSet, "centralKx");
-    jsonParser::setDouble(&centralK[1], langmuirSet, "centralKy");
-    jsonParser::setDouble(&centralK[2], langmuirSet, "centralKz");
+    jsonParser::setDoubleArray(centralK,3,jsonLangmuirSet,"centralK");
     double sigmaK[3];
     sigmaK[0]=sigmaK[1]=sigmaK[2]=0.0;
-    jsonParser::setDouble(&sigmaK[0], langmuirSet, "sigmaKx");
-    jsonParser::setDouble(&sigmaK[1], langmuirSet, "sigmaKy");
-    jsonParser::setDouble(&sigmaK[2], langmuirSet, "sigmaKz");
+    jsonParser::setDoubleArray(sigmaK,3,jsonLangmuirSet,"sigmaK");
 
-    messaggio << "siamo sicuri sia tutto OK? " << " isThereLangmuirSet=" << isThereLangmuirSet << std::endl;
+    messaggio << "siamo sicuri sia tutto OK? " << " isThereLangmuirSet=" << langmuirSet.isThereLangmuirSet << std::endl;
     messaggio << "siamo sicuri sia tutto OK? " << " amplitude=" << amplitude << std::endl;
+    messaggio << "siamo sicuri sia tutto OK? " << " refTemperature=" << langmuirSet.refTemp << std::endl;
+    messaggio << "siamo sicuri sia tutto OK? " << " refDensity=" << langmuirSet.refDens << std::endl;
     messaggio << "siamo sicuri sia tutto OK? " << " centralKx=" << centralK[0] << std::endl;
     messaggio << "siamo sicuri sia tutto OK? " << " sigmaKx=" << sigmaK[0] << std::endl;
+    messaggio << "siamo sicuri sia tutto OK? " << " endTime=" << langmuirSet.endTime << std::endl;
 
-    UTILITIES::allocateAccessibleKModes(gridModes, grid);
-    UTILITIES::writeGridModes(gridModes, grid);
+    UTILITIES::allocateAccessibleKModes(langmuirSet.gridModes, grid);
+    UTILITIES::writeGridModes(langmuirSet.gridModes, grid);
 
-    UTILITIES::setKModesToBeInitialised(myKModes, gridModes, amplitude, centralK, sigmaK);
-
-    //UTILITIES::setKModesToBeInitialised(myKModes, gridModes, amplitude, centralK, sigmaK);
-    UTILITIES::exchangeKModesToBeInitialised(myKModes, grid);
-    UTILITIES::writeKModesToBeInitialised(myKModes, grid);
+    UTILITIES::setKModesToBeInitialised(langmuirSet.myKModes, langmuirSet.gridModes, amplitude, centralK, sigmaK);
+    UTILITIES::exchangeKModesToBeInitialised(langmuirSet.myKModes, grid);
+    UTILITIES::writeKModesToBeInitialised(langmuirSet.myKModes, grid);
 
   }
   grid.printMessage(messaggio.str());
@@ -223,11 +146,11 @@ int main(int narg, char **args)
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   //*******************************************  START LANGMUIR WAVE  *********************************************************
-  if(isThereLangmuirSet){
+  bool moveParticleForLangmuir=false;
+  if(langmuirSet.isThereLangmuirSet&&moveParticleForLangmuir){
     int counter=0;
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      moveParticles(&grid,(*spec_iterator),myKModes);
-      (*spec_iterator)->position_parallel_pbc();
+      UTILITIES::moveParticles(&grid,(*spec_iterator),langmuirSet.myKModes);
       (*spec_iterator)->position_parallel_pbc();
       counter++;
     }
@@ -235,7 +158,7 @@ int main(int narg, char **args)
   if(isWaveOK){
     int counter=0;
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      moveParticles(&grid,(*spec_iterator),amplitude,lambda);
+      UTILITIES::moveParticles(&grid,(*spec_iterator),amplitude,lambda);
       (*spec_iterator)->position_parallel_pbc();
       (*spec_iterator)->position_parallel_pbc();
       counter++;
@@ -255,7 +178,12 @@ int main(int narg, char **args)
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
+
+  exfield.allocate(&grid);
+  exfield.setAllValuesToZero();
+
   current.allocate(&grid);
+
 
   //*******************************************    POISSON SOLVER    *********************************************************
   jsonParser::setPoissonSolver(root, &grid);
@@ -339,11 +267,17 @@ int main(int narg, char **args)
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
+    UTILITIES::setExternaField(exfield, grid, grid.time+grid.dt, langmuirSet);
+    exfield.boundary_conditions();
+
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       if (grid.isRadiationFrictionEnabled()) {
         (*spec_iterator)->momenta_advance_with_friction(&myfield, grid.getLambda0());
       }
-      else {
+      else if(langmuirSet.isThereLangmuirSet&&langmuirSet.keepForcing){
+        (*spec_iterator)->momenta_advance_with_externalFields(&myfield, &exfield);
+      }
+      else{
         (*spec_iterator)->momenta_advance(&myfield);
       }
     }

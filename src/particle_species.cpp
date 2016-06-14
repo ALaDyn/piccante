@@ -3750,7 +3750,7 @@ void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, do
     std::cout << "Warning: distribution function is not initialized !" << std::endl;
     return;
   }
-
+  myTempDistribution=distribution;
   switch (distribution.type)
   {
     //TRASFORMARE LE ISTRUZIONI NEI DIVERSI CASI IN CHIAMATE A FUNZIONI PRIVATE
@@ -3788,6 +3788,7 @@ void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, do
     callMaxwell(ext_rng,
       distribution.temp,
       uxin, uyin, uzin);
+
     break;
 
   case JUTTNER:

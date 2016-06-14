@@ -420,3 +420,119 @@ void UTILITIES::writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &g
   std::string fileName("kmodes.txt");
   grid.printInfoFile(fileName,message.str());
 }
+
+void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
+  int Npart = specie->Np;
+  double kdx = 2*M_PI/lambda;
+  double density=specie->plasma.params.density_coefficient;
+  double deltaX = amplitude;
+  double deltaV = amplitude*2*M_PI*sqrt(density);
+  double oldX;
+
+  if(false){
+    std::cout<< "sposto le particelle che sono" << Npart << std::endl;
+    std::cout<< "density = " << density << std::endl;
+    std::cout<< " ===================== "<< std::endl;
+  }
+  for(int n=0;n<Npart;n++){
+    oldX = specie->r0(n);
+    specie->r0(n) += deltaX*cos(kdx*oldX);
+    specie->u0(n) += deltaV*sin(kdx*oldX+2*M_PI*sqrt(density)*grid->dt*0.5);
+  }
+}
+
+void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes){
+  int Npart=specie->Np;
+  double density=specie->plasma.params.density_coefficient;
+  double kL, phi, dr;
+  double kx, dx, dVx, oldx;
+  double ky, dy, dVy, oldy;
+  double kz, dz, dVz, oldz;
+  double wL;
+  double Temperature=specie->myTempDistribution.getTemperature();
+  for(int n=0;n<Npart;n++){
+    oldx = specie->r0(n);
+    oldy = specie->r1(n);
+    oldz = specie->r2(n);
+    for(int m=0; m < myKModes.size(); m++){
+      kx  = myKModes[m].k[0];
+      ky  = myKModes[m].k[1];
+      kz  = myKModes[m].k[2];
+      kL  = sqrt(kx*kx + ky*ky + kz*kz);
+      wL  = sqrt(1+3*kL*kL*Temperature);
+
+      if(fabs(kL)>1e-2){
+        dr  = myKModes[m].amplitude/kL;
+        phi = myKModes[m].phase;
+
+        dx  = dr*kx/kL;
+        dy  = dr*ky/kL;
+        dz  = dr*kz/kL;
+        dVx  = dx*2*M_PI*sqrt(density);
+        dVy  = dy*2*M_PI*sqrt(density);
+        dVz  = dz*2*M_PI*sqrt(density);
+
+        phi += kx*oldx + ky*oldy + kz*oldz;
+        specie->r0(n) += dx*cos(phi);
+        specie->r1(n) += dy*cos(phi);
+        specie->r2(n) += dz*cos(phi);
+
+        phi += 2*M_PI*sqrt(density)*grid->dt*0.5;
+        specie->u0(n) += dVx*sin(phi);
+        specie->u1(n) += dVy*sin(phi);
+        specie->u2(n) += dVz*sin(phi);
+      }
+    }
+  }
+}
+
+void UTILITIES::setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LANGMUIRset &langmuirSet){
+  exfield.setAllValuesToZero();
+
+  langmuirSet.keepForcing =  (time <= langmuirSet.endTime);
+
+  if(!langmuirSet.keepForcing){
+    return;
+  }
+  double rampa=5;
+  double amplitude =  1.0 - exp(-(time)/rampa);
+  double Temperature=langmuirSet.refTemp;
+  for (int k = 0; k < mygrid.Nloc[2]; k++){
+    double zz = mygrid.cirloc[2][k];
+    for (int j = 0; j < mygrid.Nloc[1]; j++){
+      double yy = mygrid.cirloc[1][j];
+      for (int i = 0; i < mygrid.Nloc[0]; i++){
+        double xx = mygrid.cirloc[0][i];
+        for(int m=0; m < langmuirSet.myKModes.size(); m++){
+          double kL, phi, dE;
+          double kx, dEx;
+          double ky, dEy;
+          double kz, dEz;
+          double wL;
+          kx  = langmuirSet.myKModes[m].k[0];
+          ky  = langmuirSet.myKModes[m].k[1];
+          kz  = langmuirSet.myKModes[m].k[2];
+          kL  = sqrt(kx*kx + ky*ky + kz*kz);
+          wL  = sqrt(1+3*kL*kL*Temperature);
+          if(fabs(kL)>1e-2){
+            dE = amplitude*4*M_PI*langmuirSet.myKModes[m].amplitude/(kL);
+
+            phi = langmuirSet.myKModes[m].phase;
+            phi += kx*xx + ky*yy + kz*zz;
+            phi -= wL*time;
+
+            dEx  = dE*kx/kL*cos(phi);
+            dEy  = dE*ky/kL*cos(phi);
+            dEz  = dE*kz/kL*cos(phi);
+
+            exfield.E0(i,j,k) +=dEx;
+            if(mygrid.getDimensionality()>=2)
+              exfield.E1(i,j,k) +=dEy;
+            if(mygrid.getDimensionality()>=3)
+              exfield.E2(i,j,k) +=dEz;
+          }
+        }
+      }
+    }
+  }
+}
