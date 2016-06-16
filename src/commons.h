@@ -23,6 +23,9 @@
 #define _ACC_SINGLE_POINTER
 //#define NO_ALLOCATION
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
@@ -58,7 +61,7 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 #include <stdint.h>
 #endif
 //*****VERSION*****
-#define CURRENT_VERSION "version 1.5.0"
+#define CURRENT_VERSION "version 1.5.1"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2

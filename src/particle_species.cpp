@@ -507,7 +507,7 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
   xmax = x_in[Nx_in - 1];
   dx_in = x_in[1] - x_in[0];
 
-  double axh, wh[2], denValue, velValue;
+  double axh, wh[2], denValue;
   int ih, ihleft, ihright;
 
   for (int k = 0; k < Nz; k++)
@@ -532,7 +532,6 @@ void SPECIE::createParticlesWithinFromButFromFile1D(double plasmarmin[3], double
               denValue = wh[0] * density[ihleft] + wh[1] * density[ihright];
               if (denValue > 0)
               {
-                velValue = wh[0] * velocity[ihleft] + wh[1] * velocity[ihright];
                 weight = denValue / particlePerCell;
                 xloc -= 0.5*dx;
                 yloc -= 0.5*dy;
@@ -610,7 +609,7 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
   xmax = x_in[Nx_in - 1];
   dx_in = x_in[1] - x_in[0];
 
-  double axh, wh[2], denValue, velValue;
+  double axh, wh[2], denValue;
   int ih, ihleft, ihright;
 
   for (int k = 0; k < Nz; k++) {
@@ -638,7 +637,6 @@ void SPECIE::createStretchedParticlesWithinFromButFromFile1D(double plasmarmin[3
 
               if (denValue > 0)
               {
-                velValue = wh[0] * velocity[ihleft] + wh[1] * velocity[ihright];
                 weight = denValue / particlePerCell;
                 myuy = wh[0] * uy[ihleft] + wh[1] * uy[ihright];
                 myuz = wh[0] * uz[ihleft] + wh[1] * uz[ihright];
@@ -2029,10 +2027,6 @@ void SPECIE::momenta_advance_with_externalFields(EM_FIELD *ebfield, EM_FIELD *ex
   int ebComp = ebfield->getNcomp();
   int N_grid[3];
   ebfield->writeN_grid(N_grid);
-  int Nx, Ny, Nz;
-  Nx = N_grid[0];
-  Ny = N_grid[1];
-  Nz = N_grid[2];
   switch (mygrid->getDimensionality())
   {
 
@@ -4545,11 +4539,6 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
               i1 = i + wii[0] - 1;
               i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-#ifdef _ACC_SINGLE_POINTER
-              double weight = pData[pIndex(6, p, Ncomp, Np)];
-#else
-              double weight = val[6][p];
-#endif
               double *JX, *JY, *JZ;
               JX = &myCurrent[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
               JY = &myCurrent[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -4589,11 +4578,6 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
             i1 = i + wii[0] - 1;
             i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-#ifdef _ACC_SINGLE_POINTER
-            double weight = pData[pIndex(6, p, Ncomp, Np)];
-#else
-            double weight = val[6][p];
-#endif
             double *JX, *JY, *JZ;
             JX = &myCurrent[my_indice(edge, 1, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
             JY = &myCurrent[my_indice(edge, 1, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
@@ -4626,11 +4610,6 @@ void SPECIE::currentStretchedDepositionStandard(CURRENT *current)
           i1 = i + wii[0] - 1;
           i2 = i + hii[0] - 1;
 #ifndef OLD_ACCESS
-#ifdef _ACC_SINGLE_POINTER
-          double weight = pData[pIndex(6, p, Ncomp, Np)];
-#else
-          double weight = val[6][p];
-#endif
           double *JX, *JY, *JZ;
           JX = &myCurrent[my_indice(edge, 0, 0, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
           JY = &myCurrent[my_indice(edge, 0, 0, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];

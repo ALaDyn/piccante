@@ -453,7 +453,6 @@ void GRID::setGridDeltarStretched() {
 }
 
 void GRID::visualDiag() {
-  int Nstep = totalNumberOfTimesteps;
   MPI_Barrier(MPI_COMM_WORLD);
 
   const char* s_pbc = "PBC";

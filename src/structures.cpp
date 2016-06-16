@@ -625,7 +625,6 @@ double left_blazed_grating(double x, double y, double z, PLASMAparams plist, dou
   double* paramlist = (double*)plist.additional_params;
   double g_depth = paramlist[0];
   double g_lambda = paramlist[1];
-  double g_phase = 0.0;
   double blazAngle = 35.0 / 180.0 * M_PI;
 
   double yt = g_depth / tan(blazAngle);

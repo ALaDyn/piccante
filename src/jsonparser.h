@@ -20,9 +20,10 @@
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
 
-#if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
 #endif
 
 #include "grid.h"
@@ -86,8 +87,8 @@ namespace jsonParser {
   bool setDouble(double *number, Json::Value &parent, const char* name);
   bool setBool(bool *number, Json::Value &parent, const char* name);
   bool setString(std::string * number, Json::Value  &parent, const char* name);
-  int setIntArray(int *ipointer, int size, Json::Value &parent, const char* name);
-  int setDoubleArray(double *dpointer, int size, Json::Value &parent, const char* name);
+  int setIntArray(int *ipointer, size_t size, Json::Value &parent, const char* name);
+  int setDoubleArray(double *dpointer, size_t size, Json::Value &parent, const char* name);
   void setGridGeometry(Json::Value &root, GRID *grid);
   void setRemainingGridParameters(Json::Value &root, GRID *grid);
 
@@ -98,7 +99,6 @@ namespace jsonParser {
 
   bool setValue(Json::Value &child, Json::Value &parent, const char* name);
   void setRadiationFriction(Json::Value &document, GRID *grid);
-  bool getLambda0(Json::Value &document, double& lambda0);
   void setNCells(Json::Value &parent, GRID *grid);
   void setNprocs(Json::Value &document, GRID *grid);
   void setSimulationTime(Json::Value  &document, GRID *grid);

@@ -21,6 +21,9 @@
 #define __PARTICLE_SPECIES_H__
 
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
 #include <mpi.h>
 #include "commons.h"
 #include "structures.h"

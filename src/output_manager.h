@@ -21,6 +21,9 @@
 #define __OUTPUT_MANAGER_H__
 
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
 #define _CRT_SECURE_NO_WARNINGS
 
 //#define PHASE_SPACE_USE_MPI_FILE_WRITE_ALL

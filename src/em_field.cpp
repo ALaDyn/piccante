@@ -187,15 +187,12 @@ int EM_FIELD::pbc_compute_alloc_size() {
 
 
 void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer) {
-  int Nx, Ny, Nz;
-  int Ngx, Ngy, Ngz, Nc = Ncomp;
+  int Nx;
+  int Ngy, Ngz, Nc = Ncomp;
 
-  Ngx = N_grid[0];
   Ngy = N_grid[1];
   Ngz = N_grid[2];
   Nx = mygrid->Nloc[0];
-  Ny = mygrid->Nloc[1];
-  Nz = mygrid->Nloc[2];
 
   int Nxchng = mygrid->getNexchange();
 
@@ -277,15 +274,12 @@ void EM_FIELD::pbcExchangeAlongX(double* send_buffer, double* recv_buffer) {
 
 }
 void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer) {
-  int Nx, Ny, Nz;
-  int Ngx, Ngy, Ngz, Nc = Ncomp;
+  int Ny;
+  int Ngx, Ngz, Nc = Ncomp;
 
   Ngx = N_grid[0];
-  Ngy = N_grid[1];
   Ngz = N_grid[2];
-  Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
-  Nz = mygrid->Nloc[2];
 
   int Nxchng = mygrid->getNexchange();
 
@@ -362,14 +356,11 @@ void EM_FIELD::pbcExchangeAlongY(double* send_buffer, double* recv_buffer) {
 }
 
 void EM_FIELD::pbcExchangeAlongZ(double* send_buffer, double* recv_buffer) {
-  int Nx, Ny, Nz;
-  int Ngx, Ngy, Ngz, Nc = Ncomp;
+  int Nz;
+  int Ngx, Ngy, Nc = Ncomp;
 
   Ngx = N_grid[0];
   Ngy = N_grid[1];
-  Ngz = N_grid[2];
-  Nx = mygrid->Nloc[0];
-  Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
 
   int Nxchng = mygrid->getNexchange();
@@ -896,7 +887,7 @@ void EM_FIELD::poissonSolver(CURRENT *current){
 
 
 double EM_FIELD::getErrorInPoissonEquation(CURRENT *current){
-  int i, j, k;
+  int i = 0, j = 0, k = 0;
   int Nx, Ny, Nz;
   double dxi, dyi, dzi;
   double dxiR, dyiR, dziR;
@@ -1144,8 +1135,7 @@ void EM_FIELD::new_halfadvance_B()
       EY_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 1, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
       EZ_XP = val[my_indice(edge, YGrid_factor, ZGrid_factor, 2, i + 1, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
-      double *BX, *BY, *BZ;
-      BX = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 3, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
+      double *BY, *BZ;
       BY = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 4, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
       BZ = &val[my_indice(edge, YGrid_factor, ZGrid_factor, 5, i, j, k, N_grid[0], N_grid[1], N_grid[2], Ncomp)];
 
@@ -1611,14 +1601,13 @@ void EM_FIELD::initialize_cos2_plane_wave_angle(double lambda0, double amplitude
   //DA USARE laser_pulse_initial_position !
   int i, j, k;
   int Nx, Ny, Nz;
-  double k0, rx, x, y, sigma_z, x0;
+  double k0, rx, x, y, x0;
   double rxEnvelope;
   amplitude *= (2 * M_PI) / lambda0;
   Nx = mygrid->Nloc[0];
   Ny = mygrid->Nloc[1];
   Nz = mygrid->Nloc[2];
   k0 = 2 * M_PI / lambda0;
-  sigma_z = t_FWHM;
 
   double mycos, mysin;
   mycos = cos(angle);
@@ -1909,7 +1898,7 @@ void EM_FIELD::initialize_LG_pulse_angle(double lambda0, double amplitude, doubl
 {
   int i, j, k;
   int Nx, Ny, Nz;
-  double xh, yh, zh;
+  double xh, yh;
   double xx, yy, zz, tt = 0;
   double xp, yp;
   double lambda, w0, fwhm;
@@ -1959,7 +1948,6 @@ void EM_FIELD::initialize_LG_pulse_angle(double lambda0, double amplitude, doubl
         zz = dim_factorZ*mygrid->cirloc[2][k];
         xh = mygrid->chrloc[0][i];
         yh = dim_factorY*mygrid->chrloc[1][j];
-        zh = dim_factorZ*mygrid->chrloc[2][k];
 
         auxiliary_rotation(xh, yy, xp, yp, xcenter, angle);
         xp += xc;
@@ -2075,9 +2063,8 @@ void EM_FIELD::addFieldsFromFile(std::string name) {
     fileEMField >> Bz[i];
   }
 
-  double xmin, xmax, dx;
+  double xmin, dx;
   xmin = myx[0];
-  xmax = myx[Nx_in - 1];
   dx = myx[1] - myx[0];
 
   double xi, xh;
