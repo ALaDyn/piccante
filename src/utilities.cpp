@@ -459,7 +459,7 @@ void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myK
       ky  = myKModes[m].k[1];
       kz  = myKModes[m].k[2];
       kL  = sqrt(kx*kx + ky*ky + kz*kz);
-      wL  = sqrt(1+3*kL*kL*Temperature);
+      wL  = sqrt(2*M_PI+3*kL*kL*Temperature);
 
       if(fabs(kL)>1e-2){
         dr  = myKModes[m].amplitude/kL;
@@ -494,7 +494,7 @@ void UTILITIES::setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LA
   if(!langmuirSet.keepForcing){
     return;
   }
-  double rampa=5;
+  double rampa=langmuirSet.growthRate;
   double amplitude =  1.0 - exp(-(time)/rampa);
   double Temperature=langmuirSet.refTemp;
   for (int k = 0; k < mygrid.Nloc[2]; k++){
@@ -513,13 +513,14 @@ void UTILITIES::setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LA
           ky  = langmuirSet.myKModes[m].k[1];
           kz  = langmuirSet.myKModes[m].k[2];
           kL  = sqrt(kx*kx + ky*ky + kz*kz);
-          wL  = sqrt(1+3*kL*kL*Temperature);
+          wL  = sqrt(4*M_PI*M_PI+3*kL*kL*Temperature);
           if(fabs(kL)>1e-2){
-            dE = amplitude*4*M_PI*langmuirSet.myKModes[m].amplitude/(kL);
+//            dE = amplitude*4*M_PI*langmuirSet.myKModes[m].amplitude/(kL);
+            dE = amplitude*langmuirSet.myKModes[m].amplitude/(kL);
 
             phi = langmuirSet.myKModes[m].phase;
-            phi += kx*xx + ky*yy + kz*zz;
-            phi -= wL*time;
+            phi = kx*xx + ky*yy + kz*zz;
+            phi -= (2*M_PI*time);
 
             dEx  = dE*kx/kL*cos(phi);
             dEy  = dE*ky/kL*cos(phi);

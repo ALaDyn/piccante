@@ -1,0 +1,71 @@
+{
+  "VERSION": 2,
+  "dimensions": 1,
+  "masterProc": 0,
+  "stepFrequencyStdoutPrint": 10,
+  "OutputPath": "OUTPUT",
+  "lambda0": 1.0,
+  "radiationFriction": false,
+  "courantFactor": 0.98,
+  "nProcY": 1,
+  "nProcZ": 1,
+  "xRange": [-1, 1],
+  "yRange": [-1, 1],
+  "zRange": [-1, 1],
+  "NCells": [100, 200, 1],
+  "simulationTime": 160,
+  "boundaries": ["periodic", "periodic","periodic"],
+  "withPoissonSolver": false,
+  "autoNeutraliseDensity": false,
+  "langmuirSpectrum":{
+     "refDensity": 1.0,
+     "refTemperature": 4e-14,
+     "growthRate": 30,
+     "amplitude": 0.001,
+     "centralK": [3.14159,0,0],
+     "sigmaK"  : [0.6,2,2],
+     "endTime": 150
+    },
+  "restart":{
+    "DumpPath": "DUMP",
+    "doRestart": false,
+    "restartFromDump": 1,
+    "doDump": false,
+    "dumpEvery": 2.0
+  },
+  "Plasma":[
+    {
+      "name": "bulk",
+      "densityFunction": "nanotubes2D",
+      "XRangeBox" : [-10, 10],
+      "YRangeBox" : [-10, 10],
+      "ZRangeBox" : [-1, 1],
+      "DensityCoefficient" : 1.0
+    }
+  ],
+  "Species":[
+    {
+      "enabled": true,
+      "name": "ELE1",
+      "plasma": "bulk",
+      "ParticlesPerCell": [200,2,1],
+      "type": "ELECTRON",
+      "isMarker": false,
+      "isTest": false,
+      "distribution": "Maxwell",
+      "distributionParams": [4.0e-14],
+      "distributionAddMomentum": [0.0,0.0,0.0]
+    }
+  ],
+  "Output":[
+    {"type": "EB", "every": 10.0},
+    {"type": "Density", "spec": "ELE1", "every":10.0},
+    {"type": "PhSp", "spec": "ELE1", "every":10.0},
+    
+    {"type": "EB", "from": 150.0, "to": 160.0, "every":0.1},
+    {"type": "Density", "spec": "ELE1", "from": 150.0, "to": 160.0, "every":0.1},
+    {"type": "PhSp", "spec": "ELE1", "from": 150.0, "to": 160.0, "every":0.1},
+    {"type": "Diag", "every": 0.5}
+  ]
+
+}

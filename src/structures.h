@@ -64,6 +64,7 @@ struct KMODE{
 struct LANGMUIRset{
   GRIDmodes gridModes;
   std::vector<KMODE> myKModes;
+  double growthRate;
   double refTemp;
   double refDens;
   double endTime;

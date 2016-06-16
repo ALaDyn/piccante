@@ -70,9 +70,7 @@ int main(int narg, char **args)
 
 
   jsonParser::setGridGeometry(root, &grid);
-
   grid.mpi_grid_initialize(&narg, args);
-
   jsonParser::setRemainingGridParameters(root, &grid);
 
   srand(time(NULL));
@@ -107,6 +105,7 @@ int main(int narg, char **args)
 
   if (langmuirSet.isThereLangmuirSet) {
     jsonParser::setDouble(&langmuirSet.refDens, jsonLangmuirSet, "refDensity");
+    jsonParser::setDouble(&langmuirSet.growthRate, jsonLangmuirSet, "growthRate");
     jsonParser::setDouble(&langmuirSet.refTemp, jsonLangmuirSet, "refTemperature");
     jsonParser::setDouble(&langmuirSet.endTime, jsonLangmuirSet, "endTime");
     double amplitude=0.0;
@@ -191,7 +190,6 @@ int main(int narg, char **args)
   if(grid.isWithPoisson()){
     bool withSign = true;
     std::cout << " evaluating density..." << std::endl;
-
     current.setAllValuesToZero();
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->density_deposition_standard(&current, withSign);
@@ -211,6 +209,7 @@ int main(int narg, char **args)
   //*******************************************BEGIN DIAG DEFINITION**************************************************
   std::map<std::string, outDomain*> outDomains;
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
+  //OUTPUT_MANAGER manager(&grid, &exfield, &current, species);
   jsonParser::setDomains(root, outDomains);
   jsonParser::setOutputRequests(root, manager, outDomains, species);
   jsonParser::setOutputDirPath(root, manager);
