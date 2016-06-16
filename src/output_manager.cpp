@@ -1231,14 +1231,6 @@ void OUTPUT_MANAGER::writeCPUFieldValues(MPI_File thefile, int uniqueLocN[], int
 }
 
 void OUTPUT_MANAGER::prepareCPUFieldValues(float *buffer, int uniqueLocN[], int imin[], int locimin[], int remains[3], request req) {
-  int Ncomp = 3;
-  if ((req.type == OUT_E_FIELD) || (req.type == OUT_B_FIELD))
-    Ncomp = 3;
-  else if (req.type == OUT_SPEC_DENSITY)
-    Ncomp = 1;
-  else if (req.type == OUT_CURRENT)
-    Ncomp = 3;
-
   int origin[3];
   int ri[3], globalri[3];
   nearestInt(myDomains[req.domain]->coordinates, ri, globalri);
@@ -2131,7 +2123,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
     std::vector<reqOutput> reqList;
     fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
 
-    for (int i = 0; i < reqList.size(); i++) {
+    for (size_t i = 0; i < reqList.size(); i++) {
       MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task, reqList[i].p, groupCommunicator, &status);
 #ifndef DEBUG_NO_MPI_FILE_WRITE
       MPI_File_write(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
@@ -2258,7 +2250,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesFewFilesWritingGroups(std::string  f
     std::vector<reqOutput> reqList;
     fillRequestList(bufsize, groupProcNumData, groupNproc, reqList);
 
-    for (int i = 0; i < reqList.size(); i++) {
+    for (size_t i = 0; i < reqList.size(); i++) {
       MPI_Recv(data, bufsize, MPI_FLOAT, reqList[i].task, reqList[i].p, groupCommunicator, &status);
 #ifdef ENABLE_WRITE_ALL
       MPI_File_write_all(thefile, data, reqList[i].packageSize, MPI_FLOAT, &status);
@@ -2429,12 +2421,6 @@ int OUTPUT_MANAGER::findNumberOfParticlesInSubdomainAndReorder(request req) {
 }
 
 void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request req) {
-  double rmin[3], rmax[3];
-  for (int c = 0; c < 3; c++) {
-    rmin[c] = myDomains[req.domain]->rmin[c];
-    rmax[c] = myDomains[req.domain]->rmax[c];
-  }
-
   SPECIE* spec = myspecies[req.target];
   int shouldIWrite = false;
   shouldIWrite = amIInTheSubDomain(req);
@@ -2476,6 +2462,12 @@ void OUTPUT_MANAGER::writeSpecPhaseSpaceSubDomain(std::string fileName, request 
 
 
 #else
+    double rmin[3], rmax[3];
+    for (int c = 0; c < 3; c++) {
+      rmin[c] = myDomains[req.domain]->rmin[c];
+      rmax[c] = myDomains[req.domain]->rmax[c];
+    }
+
     int* NfloatLoc = new int[outputNProc];
     NfloatLoc[myOutputID] = outputNPart*spec->Ncomp;
     MPI_Allgather(MPI_IN_PLACE, 1, MPI_INT, NfloatLoc, 1, MPI_INT, outputCommunicator);
@@ -2671,7 +2663,6 @@ int OUTPUT_MANAGER::findLeftNeightbourPoint(double val, double* coords, int numc
 }
 
 int OUTPUT_MANAGER::findRightNeightbourPoint(double val, double* coords, int numcoords) {
-  int indexMax = 0;
   if (numcoords <= 1)
     return 0;
   if (val >= coords[numcoords - 1])
@@ -2682,6 +2673,7 @@ int OUTPUT_MANAGER::findRightNeightbourPoint(double val, double* coords, int num
   }
   return 0;
 }
+
 void OUTPUT_MANAGER::setAndCheckRemains(int *remains, bool remainingCoord[3]) {
   for (int c = 0; c < 3; c++) {
     if (c < mygrid->getDimensionality())

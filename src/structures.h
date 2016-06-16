@@ -208,8 +208,8 @@ public:
   double angle;
   double rotation_center_along_x;
   double rise_time;
-  int LG_m;
   int LG_l;
+  int LG_m;
   int component;
 
 

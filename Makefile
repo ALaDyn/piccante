@@ -76,7 +76,7 @@ hdf5: all
 warn: OPT += -Wall -Winline -Wextra
 warn: all
 
-debug: OPT = -O0 -g 
+debug: OPT = -O0 -g -std=c++11 -Wall
 debug: all
 
 profiling: OPT += -g -pg

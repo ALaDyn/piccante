@@ -166,16 +166,13 @@ void UTILITIES::fromCoordsToSpheresCoords(double &x, double min, double max) {
 }
 
 bool UTILITIES::isSphereInside(SPHERES& spheres, int index, GRID &grid) {
-  float x = spheres.coords[index * 4];
   float y = spheres.coords[index * 4 + 1];
   float z = spheres.coords[index * 4 + 2];
   float r = spheres.coords[index * 4 + 3];
 
-  double xl = grid.rminloc[0] - r;
   double yl = grid.rminloc[1] - r;
   double zl = grid.rminloc[2] - r;
 
-  double xr = grid.rmaxloc[0] + r;
   double yr = grid.rmaxloc[1] + r;
   double zr = grid.rmaxloc[2] + r;
 
@@ -409,7 +406,6 @@ void UTILITIES::writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &g
   std::stringstream message;
   message << "#KModes are " << myKModes.size() << std::endl;
   message << "#" << std::setw(10) << " kx " << std::setw(11) << " ky " << std::setw(11) << " kz " << std::setw(11) << " amp " << std::setw(11) << " phase" << std::endl;
-  KMODE newMode;
   for(int i=0; i<Nmodes; i++){
     message << std::setw(10) << myKModes[i].k[0] << " ";
     message << std::setw(10) << myKModes[i].k[1] << " ";
@@ -448,18 +444,15 @@ void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myK
   double kx, dx, dVx, oldx;
   double ky, dy, dVy, oldy;
   double kz, dz, dVz, oldz;
-  double wL;
-  double Temperature=specie->myTempDistribution.getTemperature();
   for(int n=0;n<Npart;n++){
     oldx = specie->r0(n);
     oldy = specie->r1(n);
     oldz = specie->r2(n);
-    for(int m=0; m < myKModes.size(); m++){
+    for(size_t m=0; m < myKModes.size(); m++){
       kx  = myKModes[m].k[0];
       ky  = myKModes[m].k[1];
       kz  = myKModes[m].k[2];
       kL  = sqrt(kx*kx + ky*ky + kz*kz);
-      wL  = sqrt(1+3*kL*kL*Temperature);
 
       if(fabs(kL)>1e-2){
         dr  = myKModes[m].amplitude/kL;
@@ -503,7 +496,7 @@ void UTILITIES::setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LA
       double yy = mygrid.cirloc[1][j];
       for (int i = 0; i < mygrid.Nloc[0]; i++){
         double xx = mygrid.cirloc[0][i];
-        for(int m=0; m < langmuirSet.myKModes.size(); m++){
+        for(size_t m=0; m < langmuirSet.myKModes.size(); m++){
           double kL, phi, dE;
           double kx, dEx;
           double ky, dEy;

@@ -135,12 +135,12 @@ bool jsonParser::setString(std::string * number, Json::Value  &parent, const cha
   return outFlag;
 }
 
-int jsonParser::setIntArray(int *ipointer, int size, Json::Value &parent, const char* name) {
+int jsonParser::setIntArray(int *ipointer, size_t size, Json::Value &parent, const char* name) {
   memset((void*)ipointer, 0, size*sizeof(double));
   bool outFlag= (!parent[name].isNull()) && parent[name].isArray() && (parent[name].size()>=size);
   if (outFlag) {
-    for(int i=0; i<parent[name].size();i++){
-      ipointer[i] = parent[name][i].asInt();
+    for(size_t i=0; i<parent[name].size();i++){
+      ipointer[i] = parent[name][(int)i].asInt();
     }
   }
   if (!outFlag)
@@ -148,12 +148,12 @@ int jsonParser::setIntArray(int *ipointer, int size, Json::Value &parent, const 
   return parent[name].size();
 }
 
-int jsonParser::setDoubleArray(double *dpointer, int size, Json::Value &parent, const char* name){
+int jsonParser::setDoubleArray(double *dpointer, size_t size, Json::Value &parent, const char* name){
   memset((void*)dpointer, 0, size*sizeof(int));
   bool outFlag= (!parent[name].isNull()) && parent[name].isArray() && (parent[name].size()>=size);
   if (outFlag) {
-    for(int i=0; i<parent[name].size();i++){
-      dpointer[i] = parent[name][i].asDouble();
+    for(size_t i=0; i<parent[name].size();i++){
+      dpointer[i] = parent[name][(int)i].asDouble();
     }
   }
   if (!outFlag)
@@ -267,7 +267,7 @@ void jsonParser::setNprocs(Json::Value &document, GRID *grid) {
 }
 
 void jsonParser::setSimulationTime(Json::Value &document, GRID *grid) {
-  double simulationTime;
+  double simulationTime = 0.0;
   setDouble(&simulationTime, document, _JSON_DOUBLE_SIMULATION_TIME_);
   grid->setSimulationTime(simulationTime);
 }
@@ -278,7 +278,7 @@ void jsonParser::setMasterProc(Json::Value  &document, GRID *grid) {
 }
 
 void jsonParser::setFrequencyStdoutStatus(Json::Value  &document, GRID *grid) {
-  int frequency = 0;
+  int frequency = 10;
   setInt(&frequency, document, _JSON_INT_FREQUENCY_STDOUT);
   grid->setFrequencyStdoutStatus(frequency);
 }
