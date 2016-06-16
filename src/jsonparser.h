@@ -20,9 +20,10 @@
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
 
-#if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
 #endif
 
 #include "grid.h"

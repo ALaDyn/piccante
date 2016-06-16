@@ -490,3 +490,5 @@ piccante.includes
 *.opendb
 *.iobj
 *.ipdb
+*.db
+/src/inputPiccante.json

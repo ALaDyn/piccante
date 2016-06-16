@@ -896,7 +896,7 @@ void EM_FIELD::poissonSolver(CURRENT *current){
 
 
 double EM_FIELD::getErrorInPoissonEquation(CURRENT *current){
-  int i, j, k;
+  int i = 0, j = 0, k = 0;
   int Nx, Ny, Nz;
   double dxi, dyi, dzi;
   double dxiR, dyiR, dziR;

@@ -21,6 +21,9 @@
 #define __GRID_H__
 
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <mpi.h>

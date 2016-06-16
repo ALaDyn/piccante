@@ -23,6 +23,9 @@
 #define _ACC_SINGLE_POINTER
 //#define NO_ALLOCATION
 #define _USE_MATH_DEFINES
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
+#endif
 //#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
