@@ -88,6 +88,7 @@ namespace jsonParser {
   int setDoubleArray(double *dpointer, size_t size, Json::Value &parent, const char* name);
   void setGridGeometry(Json::Value &root, GRID *grid);
   void setRemainingGridParameters(Json::Value &root, GRID *grid);
+  void setOutputManagerParameters(Json::Value &root, OUTPUT_MANAGER &manager, std::vector<SPECIE*> &species);
 
   void setXrange(Json::Value &parent, GRID *grid);
   void setYrange(Json::Value &parent, GRID *grid);

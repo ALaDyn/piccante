@@ -54,7 +54,11 @@ public:
 
     static void moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
+    static void considerRestartFromDump(GRID* grid, EM_FIELD* myfield, std::vector<SPECIE*> species);
+    static void restartFromDump(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
     static void restartFromDump(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
+    static void considerDumpForRestart(GRID* grid, EM_FIELD* myfield, std::vector<SPECIE*> species);
+    static void dumpFilesForRestart(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
     static void dumpFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
     static void dumpDebugFilesForRestart(int *dumpID, GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE*> _myspecies);
 
@@ -80,6 +84,9 @@ public:
     static void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda);
     static void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes);
     static void setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LANGMUIRset &langmuirSet);
+
+    static void printTotalNumberOfParticles(std::vector<SPECIE*> species, GRID &mygrid);
+    static void launchPoissonSolver(EM_FIELD &myfield, std::vector<SPECIE*> species, GRID &grid, CURRENT &current);
 
 };
 

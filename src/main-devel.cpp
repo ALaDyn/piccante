@@ -143,6 +143,7 @@ int main(int narg, char **args)
   std::map<std::string, PLASMA*> plasmas;
   jsonParser::setPlasmas(root, plasmas);
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
+  UTILITIES::printTotalNumberOfParticles(species, grid);
 
   //*******************************************  START LANGMUIR WAVE  *********************************************************
   bool moveParticleForLangmuir=false;
@@ -165,13 +166,7 @@ int main(int narg, char **args)
   }
   //*******************************************   END  LANGMUIR WAVE  *********************************************************
 
-  uint64_t totPartNum = 0;
-  for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
-    totPartNum += (*spec_iterator)->printParticleNumber();
-  }
-  if (grid.myid == grid.master_proc) {
-    std::cout << "Total particle number: " << totPartNum << std::endl;
-  }
+
 
   //*******************************************END SPECIES DEFINITION***********************************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
@@ -182,38 +177,23 @@ int main(int narg, char **args)
   exfield.setAllValuesToZero();
 
   current.allocate(&grid);
-
+  current.setAllValuesToZero();
 
   //*******************************************    POISSON SOLVER    *********************************************************
-  jsonParser::setPoissonSolver(root, &grid);
 
-  if(grid.isWithPoisson()){
-    bool withSign = true;
-    std::cout << " evaluating density..." << std::endl;
-    current.setAllValuesToZero();
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
-      (*spec_iterator)->density_deposition_standard(&current, withSign);
-    }
-    current.pbc();
-    std::cout << "   done... now into Poisson solver" << std::endl;
-    myfield.poissonSolver(&current);
-  }
+  UTILITIES::launchPoissonSolver(myfield, species, grid, current);
 
   jsonParser::setLaserPulses(root, &myfield);
   myfield.boundary_conditions();
 
 
-  current.setAllValuesToZero();
   //*******************************************END FIELD DEFINITION***********************************************************
 
   //*******************************************BEGIN DIAG DEFINITION**************************************************
-  std::map<std::string, outDomain*> outDomains;
   OUTPUT_MANAGER manager(&grid, &myfield, &current, species);
   //OUTPUT_MANAGER manager(&grid, &exfield, &current, species);
-  jsonParser::setDomains(root, outDomains);
-  jsonParser::setOutputRequests(root, manager, outDomains, species);
-  jsonParser::setOutputDirPath(root, manager);
-  jsonParser::setOutputParameters(root, manager);
+
+  jsonParser::setOutputManagerParameters(root, manager, species);
 
   manager.initialize();
   manager.copyInputFileInOutDir(inputFileName);
@@ -221,21 +201,9 @@ int main(int narg, char **args)
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  std::cout << messaggio.str();
+  grid.printMessage("---- START temporal cicle -----\n");
 
-
-
-  if (grid.myid == grid.master_proc) {
-    printf("----- START temporal cicle -----\n");
-    fflush(stdout);
-  }
-
-  int dumpID = 1;
-  grid.istep = 0;
-  if (grid.dumpControl.doRestart) {
-    dumpID = grid.dumpControl.restartFromDump;
-    UTILITIES::restartFromDump(&dumpID, &grid, &myfield, species);
-  }
+  UTILITIES::considerRestartFromDump(&grid, &myfield, species);
 
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
   {
@@ -282,19 +250,12 @@ int main(int narg, char **args)
     }
 
     grid.time += grid.dt;
-
-    UTILITIES::moveWindow(&grid, &myfield, species);
-
     grid.istep++;
-    if (grid.dumpControl.doDump) {
-      if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
-        UTILITIES::dumpFilesForRestart(&dumpID, &grid, &myfield, species);
-      }
-    }
+    UTILITIES::moveWindow(&grid, &myfield, species);
+    UTILITIES::considerDumpForRestart(&grid, &myfield, species);
   }
 
   manager.close();
   MPI_Finalize();
   exit(0);
-
 }

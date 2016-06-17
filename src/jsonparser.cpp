@@ -196,6 +196,16 @@ void jsonParser::setRemainingGridParameters(Json::Value &root, GRID *grid){
   jsonParser::setSimulationTime(root, grid);
   jsonParser::setMovingWindow(root, grid);
   jsonParser::setFrequencyStdoutStatus(root, grid);
+
+  jsonParser::setPoissonSolver(root, grid);
+}
+
+void jsonParser::setOutputManagerParameters(Json::Value &root, OUTPUT_MANAGER &manager, std::vector<SPECIE*> &species) {
+  std::map<std::string, outDomain*> outDomains;
+  jsonParser::setDomains(root, outDomains);
+  jsonParser::setOutputRequests(root, manager, outDomains, species);
+  jsonParser::setOutputDirPath(root, manager);
+  jsonParser::setOutputParameters(root, manager);
 }
 
 void jsonParser::setRadiationFriction(Json::Value &document, GRID *grid) {

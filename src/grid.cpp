@@ -50,6 +50,7 @@ GRID::GRID(int dimensions)
   dumpControl.doRestart = false;
   dumpControl.dumpEvery = 1000;
   dumpControl.restartFromDump = 1;
+  dumpControl.currentDumpID = 1;
 }
 
 GRID::~GRID() {

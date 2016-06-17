@@ -29,8 +29,53 @@ void UTILITIES::moveWindow(GRID* _mygrid, EM_FIELD* _myfield, std::vector<SPECIE
   }
 }
 
+void UTILITIES::considerRestartFromDump(GRID* grid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
+  if (grid->dumpControl.doRestart) {
+    grid->dumpControl.currentDumpID = grid->dumpControl.restartFromDump;
+    UTILITIES::restartFromDump(grid, myfield, species);
+  }
+}
+
+void UTILITIES::restartFromDump(GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
+  int dumpID = mygrid->dumpControl.currentDumpID;
+  std::ifstream dumpFile;
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  if (mygrid->myid == mygrid->master_proc) {
+    time_t timer;
+    std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+    struct tm * now = localtime(&timer);
+
+    printf("   restart from DUMP #%i ... %2.2i:%2.2i:%2.2i\n", (dumpID), now->tm_hour, now->tm_min, now->tm_sec);
+    fflush(stdout);
+  }
+  dumpFile.open(mygrid->composeDumpFileName(dumpID).c_str());
+  if (dumpFile.good()) {
+    mygrid->reloadDump(dumpFile);
+    myfield->reloadDump(dumpFile);
+
+    for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      (*spec_iterator)->reloadBigBufferDump(dumpFile);
+    }
+    dumpFile.close();
+    dumpID++;
+  }
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (mygrid->myid == mygrid->master_proc) {
+    time_t timer;
+    std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+    struct tm * now = localtime(&timer);
+
+    printf("  ... DONE %2.2i:%2.2i:%2.2i\n", now->tm_hour, now->tm_min, now->tm_sec);
+    fflush(stdout);
+  }
+  mygrid->dumpControl.currentDumpID = dumpID;
+}
+
 void UTILITIES::restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
-  int dumpID = _dumpID[0];
+  int dumpID = mygrid->dumpControl.currentDumpID;
   std::ifstream dumpFile;
   MPI_Barrier(MPI_COMM_WORLD);
 
@@ -67,6 +112,32 @@ void UTILITIES::restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, s
   _dumpID[0] = dumpID;
 }
 
+void UTILITIES::considerDumpForRestart(GRID* grid, EM_FIELD* myfield, std::vector<SPECIE*> species){
+  if (grid->dumpControl.doDump) {
+    if (grid->istep != 0 && !(grid->istep % ((int)(grid->dumpControl.dumpEvery / grid->dt)))) {
+      UTILITIES::dumpFilesForRestart(grid, myfield, species);
+    }
+  }
+}
+
+
+void UTILITIES::dumpFilesForRestart(GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
+  int dumpID = mygrid->dumpControl.currentDumpID;
+  std::ofstream dumpFile;
+  dumpFile.open(mygrid->composeDumpFileName(dumpID).c_str());
+  mygrid->dump(dumpFile);
+  myfield->dump(dumpFile);
+  for (std::vector<SPECIE*>::iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+    (*spec_iterator)->dumpBigBuffer(dumpFile);
+  }
+  dumpFile.close();
+  dumpID++;
+  mygrid->dumpControl.currentDumpID = dumpID;
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (mygrid->myid == mygrid->master_proc) {
+    printf("\t DUMP #%i done!\n", (dumpID - 1));
+  }
+}
 void UTILITIES::dumpFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
   int dumpID = _dumpID[0];
   std::ofstream dumpFile;
@@ -84,6 +155,8 @@ void UTILITIES::dumpFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfiel
     printf("\t DUMP #%i done!\n", (dumpID - 1));
   }
 }
+
+
 
 void UTILITIES::dumpDebugFilesForRestart(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
   int dumpID = _dumpID[0];
@@ -529,4 +602,37 @@ void UTILITIES::setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LA
       }
     }
   }
+}
+
+void UTILITIES::printTotalNumberOfParticles(std::vector<SPECIE*> species, GRID &mygrid){
+  uint64_t totPartNum = 0;
+  for (std::vector<SPECIE*>::const_iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+    totPartNum += (*spec_iterator)->printParticleNumber();
+  }
+
+  std::stringstream messaggio;
+  messaggio << "Total particle number: " << totPartNum << std::endl;
+  mygrid.printMessage(messaggio.str());
+}
+
+void UTILITIES::launchPoissonSolver(EM_FIELD &myfield, std::vector<SPECIE*> species, GRID &grid, CURRENT &current){
+  if(grid.isWithPoisson()){
+    std::stringstream messaggio;
+    messaggio << " evaluating density..." << std::endl;
+    grid.printMessage(messaggio.str());
+
+    bool withSign = true;
+    current.setAllValuesToZero();
+    for (std::vector<SPECIE*>::const_iterator spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
+      (*spec_iterator)->density_deposition_standard(&current, withSign);
+    }
+    current.pbc();
+
+    messaggio.str(std::string());
+    messaggio << "   done... now into Poisson solver" << std::endl;
+    grid.printMessage(messaggio.str());
+
+    myfield.poissonSolver(&current);
+  }
+  current.setAllValuesToZero();
 }

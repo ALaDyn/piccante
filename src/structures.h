@@ -98,6 +98,7 @@ struct SPECIEspectrum {
 struct DUMP_CONTROL {
   bool doRestart, doDump;
   int restartFromDump;
+  int currentDumpID;
   double dumpEvery;
 };
 
