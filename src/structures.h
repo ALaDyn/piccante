@@ -29,6 +29,7 @@
 #include "commons.h"
 #include <cstdio>
 #include <iostream>
+#include <vector>
 
 struct SPHERES {
   float *coords;
