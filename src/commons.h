@@ -20,13 +20,9 @@
 #ifndef __COMMONS_H__
 #define __COMMONS_H__
 
+//IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
+#include "preproc_defs.h"
 #define _ACC_SINGLE_POINTER
-//#define NO_ALLOCATION
-#define _USE_MATH_DEFINES
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
-//#define USE_HDF5
 #define _REORDER_MPI_CART_PROCESSES 1
 
 #define FREQUENCY_STDOUT_STATUS 5
@@ -61,7 +57,7 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 #include <stdint.h>
 #endif
 //*****VERSION*****
-#define CURRENT_VERSION "version 1.5.1"
+#define CURRENT_VERSION "version 1.5.2"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2

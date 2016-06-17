@@ -20,10 +20,8 @@
 #ifndef __STRUCTURES_H__
 #define __STRUCTURES_H__
 
-#define _USE_MATH_DEFINES
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
+//IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
+#include "preproc_defs.h"
 
 #define NUMBER_OF_PLASMA_FUNCTIONS 27
 

@@ -20,11 +20,8 @@
 #ifndef __GRID_H__
 #define __GRID_H__
 
-#define _USE_MATH_DEFINES
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
-#define _CRT_SECURE_NO_WARNINGS
+//IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
+#include "preproc_defs.h"
 
 #include <mpi.h>
 #include "commons.h"

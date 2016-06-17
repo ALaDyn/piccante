@@ -20,6 +20,9 @@
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
+//IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
+#include "preproc_defs.h"
+
 #include "grid.h"
 #include "structures.h"
 #include "em_field.h"
@@ -27,7 +30,6 @@
 #include "json/json.h"
 
 #if defined(_MSC_VER)
-#define _CRT_SECURE_NO_WARNINGS
 #include <cstdint>
 #else
 #include <stdint.h>
