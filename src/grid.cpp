@@ -366,6 +366,33 @@ void GRID::initRNG(my_rng_generator& rng, uint32_t auxiliary_seed){
   delete[] seeds;
 }
 
+
+void GRID::initRNG(uint32_t auxiliary_seed){
+  //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
+  //Seeding del generatore di numeri casuali.
+  //Strategia: con il generatore std::random (inizializzato allo stesso modo per tutti)
+  //calcolo per il processo con rank i, i numeri casuali tutti diversi.
+  //Tengo soltanto l'ultimo numero, che uso per inizializzare un altro generatore
+  //di numeri casuali di tipo differente (RANLUX).
+  //Questo generatore verrà passato come argomento in add_momenta
+  aux_rnd_generator rng_aux;
+  rng_aux.seed(auxiliary_seed);
+
+  uint32_t* seeds;
+  seeds = new uint32_t[myid + 1];
+
+  for (int i = 0; i <= myid; i++) {
+    seeds[i] = rng_aux();
+    //Questo controllo potrebbe essere superfluo...
+    for (int j = 0; j < i; j++) {
+      if (seeds[j] == seeds[i]) { i--; break; }
+    }
+  }
+
+  mt_rng.seed(seeds[myid]);
+  delete[] seeds;
+}
+
 void GRID::setGridDeltar() {
   if (flagStretched) {
     GRID::setGridDeltarStretched();

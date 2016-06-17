@@ -73,6 +73,8 @@ public:
   double rminloc[3], rmaxloc[3], *cirloc[3], *chrloc[3];
   double time, dt;                   // [in micron]  
 
+  my_rng_generator mt_rng;
+
   bool shouldIMove;
   int imove_mw;
   double fmove_mw;
@@ -121,6 +123,7 @@ public:
   void printTStepAsPlanned();
   void printTStepAsPlanned(int every);
   void initRNG(my_rng_generator &rng, uint32_t auxiliary_seed);
+  void initRNG(uint32_t auxiliary_seed);
   void visualDiag();
   void mpi_grid_initialize(int *narg, char **args);
   void finalize();

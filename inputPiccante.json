@@ -20,11 +20,11 @@
   "langmuirSpectrum":{
      "refDensity": 1.0,
      "refTemperature": 4e-14,
-     "growthRate": 30,
-     "amplitude": 0.001,
+     "growthRate": 10,
+     "amplitude": 0.01,
      "centralK": [3.14159,0,0],
      "sigmaK"  : [0.6,2,2],
-     "endTime": 150
+     "endTime": 50
     },
   "restart":{
     "DumpPath": "DUMP",

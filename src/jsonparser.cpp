@@ -678,18 +678,15 @@ bool jsonParser::checkLaserBoolFlags(laserPulseBoolFlags flags, laserPulse *puls
   return true;
 }
 
-void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
+void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield){
   std::string  name1 = _JSON_OBJ_ARRAY_LASER_;
   Json::Value lasers;
-
-
 
   if (setValue(lasers, document, name1.c_str())) {
     if (lasers.isArray()) {
       std::string  name2;
 
       for (unsigned int index = 0; index < lasers.size(); index++) {
-
         Json::Value myLaser = lasers[index];
 
         name2 = _JSON_BOOL_ENABLED;
@@ -728,6 +725,7 @@ void jsonParser::setLaserPulses(Json::Value &document, EM_FIELD *emfield) {
       }
     }
   }
+  emfield->boundary_conditions();
 }
 
 void jsonParser::setPoissonSolver(Json::Value &document, GRID *grid){
@@ -1427,5 +1425,27 @@ void jsonParser::setOutputParameters(Json::Value &document, OUTPUT_MANAGER &mana
 
 }
 
+void jsonParser::setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet){
+  Json::Value jsonLangmuirSet;
+  langmuirSet.checkLangmuirSetValidity = jsonParser::setValue(jsonLangmuirSet, root, "langmuirSpectrum");
+  if (langmuirSet.checkLangmuirSetValidity) {
+    bool checkFlag;
+    langmuirSet.refDens=1;
+    jsonParser::setDouble(&langmuirSet.refDens, jsonLangmuirSet, "refDensity");
+    langmuirSet.growthRate=30;
+    jsonParser::setDouble(&langmuirSet.growthRate, jsonLangmuirSet, "growthRate");
+    langmuirSet.refTemp = 1e-15;
+    jsonParser::setDouble(&langmuirSet.refTemp, jsonLangmuirSet, "refTemperature");
+    langmuirSet.endTime = 150;
+    jsonParser::setDouble(&langmuirSet.endTime, jsonLangmuirSet, "endTime");
+    langmuirSet.amplitude = 0;
+    checkFlag = jsonParser::setDouble(&langmuirSet.amplitude, jsonLangmuirSet, "amplitude");
+    langmuirSet.centralK[0]=langmuirSet.centralK[1]=langmuirSet.centralK[2]=0;
+    checkFlag = checkFlag&&jsonParser::setDoubleArray(langmuirSet.centralK,3,jsonLangmuirSet,"centralK");
+    langmuirSet.sigmaK[0]=langmuirSet.sigmaK[1]=langmuirSet.sigmaK[2]=0.0;
+    checkFlag = checkFlag&&jsonParser::setDoubleArray(langmuirSet.sigmaK,3,jsonLangmuirSet,"sigmaK");
 
+    langmuirSet.checkLangmuirSetValidity = langmuirSet.checkLangmuirSetValidity && checkFlag;
+  }
 
+}

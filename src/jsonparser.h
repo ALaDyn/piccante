@@ -143,5 +143,6 @@ namespace jsonParser {
   void setOutputDirPath(Json::Value &document, OUTPUT_MANAGER &manager);
   void setOutputParameters(Json::Value &document, OUTPUT_MANAGER &manager);
 
+  void setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet);
 }
 #endif // JSONPARSER_H

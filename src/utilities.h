@@ -78,10 +78,13 @@ public:
     static void allocateAccessibleKModes(GRIDmodes &gridModes, GRID &grid);
     static void writeGridModes(GRIDmodes &gridModes, GRID &grid);
     static void setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes &gridModes, double amplitude, double *centralK, double *sigmaK);
+    static void newSetKModesToBeInitialised(LANGMUIRset &langmuirSet);
     static void exchangeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid);
     static void writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid);
+    static void writeLangmuirSetDataFile(LANGMUIRset &langmuirSet, GRID &grid);
+    static void setLangmuirWaveSet(LANGMUIRset &langmuirSet, GRID &grid);
 
-    static void moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda);
+    static void OldMoveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda);
     static void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes);
     static void setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LANGMUIRset &langmuirSet);
 

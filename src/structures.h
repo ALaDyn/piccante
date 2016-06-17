@@ -67,8 +67,12 @@ struct LANGMUIRset{
   double refTemp;
   double refDens;
   double endTime;
-  bool isThereLangmuirSet;
+  bool checkLangmuirSetValidity;
   bool keepForcing;
+
+  double amplitude;
+  double centralK[3];
+  double sigmaK[3];
 };
 
 struct PLASMAparams {

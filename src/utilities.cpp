@@ -364,10 +364,6 @@ void UTILITIES::readAndAllocateFFTplasma(FFTPLASMA &myfft, std::string filename,
 
 }
 
-
-
-
-
 void UTILITIES::allocateAccessibleKModes(GRIDmodes &gridModes, GRID &grid){
 
   double Lr[3];
@@ -412,7 +408,6 @@ void UTILITIES::writeGridModes(GRIDmodes &gridModes, GRID &grid){
     }
     message << "\n ######################" << std::endl;
   }
-
   std::string fileName("gridModes.txt");
   grid.printInfoFile(fileName,message.str());
 }
@@ -441,6 +436,38 @@ void UTILITIES::setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes
           newMode.k[2] = kz;
           newMode.phase = randPhase(mt_rng);
           myKModes.push_back(newMode);
+        }
+
+      }
+    }
+  }
+
+}
+
+void UTILITIES::newSetKModesToBeInitialised(LANGMUIRset &langmuirSet){
+  my_rng_generator mt_rng;
+  my_uniform_real_distribution randPhase(0, 2.0*M_PI);
+
+  double kz, ky, kx;
+  for(int k=0; k<langmuirSet.gridModes.Nk[2]; k++){
+    kz = langmuirSet.gridModes.kvalues[2][k];
+    for(int j=0; j<langmuirSet.gridModes.Nk[1]; j++){
+      ky = langmuirSet.gridModes.kvalues[1][j];
+        for(int i=0; i<langmuirSet.gridModes.Nk[0]; i++){
+          kx = langmuirSet.gridModes.kvalues[0][i];
+        double amp = 1;
+        amp *= exp( -(kx-langmuirSet.centralK[0])*(kx-langmuirSet.centralK[0])/(langmuirSet.sigmaK[0]*langmuirSet.sigmaK[0]) );
+        amp *= exp( -(ky-langmuirSet.centralK[1])*(ky-langmuirSet.centralK[1])/(langmuirSet.sigmaK[1]*langmuirSet.sigmaK[1]) );
+        amp *= exp( -(kz-langmuirSet.centralK[2])*(kz-langmuirSet.centralK[2])/(langmuirSet.sigmaK[2]*langmuirSet.sigmaK[2]) );
+        if(amp>1e-2){
+          amp *= langmuirSet.amplitude;
+          KMODE newMode;
+          newMode.amplitude=amp;
+          newMode.k[0] = kx;
+          newMode.k[1] = ky;
+          newMode.k[2] = kz;
+          newMode.phase = randPhase(mt_rng);
+          langmuirSet.myKModes.push_back(newMode);
         }
 
       }
@@ -490,7 +517,36 @@ void UTILITIES::writeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &g
   grid.printInfoFile(fileName,message.str());
 }
 
-void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
+void UTILITIES::writeLangmuirSetDataFile(LANGMUIRset &langmuirSet, GRID &grid){
+  std::stringstream message;
+  message << " langmuirSet Validity=" << langmuirSet.checkLangmuirSetValidity << std::endl;
+  message << " amplitude=" << langmuirSet.amplitude << std::endl;
+  message << " refTemperature=" << langmuirSet.refTemp << std::endl;
+  message << " refDensity=" << langmuirSet.refDens << std::endl;
+  message << " centralKx=" << langmuirSet.centralK[0] << std::endl;
+  message << " sigmaKx=" << langmuirSet.sigmaK[0] << std::endl;
+  message << " endTime=" << langmuirSet.endTime << std::endl;
+
+  grid.printInfoFile("langmuirSetDataFile.txt",message.str());
+}
+
+void UTILITIES::setLangmuirWaveSet(LANGMUIRset &langmuirSet, GRID &grid){
+  if(langmuirSet.checkLangmuirSetValidity){
+  UTILITIES::allocateAccessibleKModes(langmuirSet.gridModes, grid);
+  UTILITIES::newSetKModesToBeInitialised(langmuirSet);
+  UTILITIES::exchangeKModesToBeInitialised(langmuirSet.myKModes, grid);
+
+  }
+  else{
+    grid.printMessage("NO Langmuir Wave Set is possible");
+  }
+  UTILITIES::writeLangmuirSetDataFile(langmuirSet, grid);
+  UTILITIES::writeGridModes(langmuirSet.gridModes, grid);
+  UTILITIES::writeKModesToBeInitialised(langmuirSet.myKModes, grid);
+
+}
+
+void UTILITIES::OldMoveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda){
   int Npart = specie->Np;
   double kdx = 2*M_PI/lambda;
   double density=specie->plasma.params.density_coefficient;
