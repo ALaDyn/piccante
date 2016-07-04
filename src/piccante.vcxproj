@@ -152,6 +152,7 @@
     <ClInclude Include="jsonparser.h" />
     <ClInclude Include="json\json-forwards.h" />
     <ClInclude Include="json\json.h" />
+    <ClInclude Include="main-piccante.h" />
     <ClInclude Include="output_manager.h" />
     <ClInclude Include="particle_species.h" />
     <ClInclude Include="preproc_defs.h" />
@@ -183,7 +184,7 @@
     <ClInclude Include="rapidjson\reader.h" />
     <ClInclude Include="rapidjson\stringbuffer.h" />
     <ClInclude Include="rapidjson\writer.h" />
-    <ClInclude Include="sobol.hpp" />
+    <ClInclude Include="sobol.h" />
     <ClInclude Include="structures.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>

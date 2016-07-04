@@ -8,7 +8,7 @@
 
 using namespace std;
 
-# include "sobol.hpp"
+# include "sobol.h"
 
 //****************************************************************************80
 

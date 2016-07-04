@@ -29,7 +29,7 @@
 #include "grid.h"
 #include "current.h"
 #include "em_field.h"
-#include "sobol.hpp"
+#include "sobol.h"
 
 #if defined(USE_BOOST)
 #include <boost/math/distributions/normal.hpp>

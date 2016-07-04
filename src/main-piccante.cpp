@@ -17,39 +17,12 @@
 * along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
 ******************************************************************************/
 
-#define _USE_MATH_DEFINES
-
-#include <mpi.h>
-#include "commons.h"
-#include "grid.h"
-#include "structures.h"
-#include "current.h"
-#include "em_field.h"
-#include "particle_species.h"
-#include "output_manager.h"
-#include "utilities.h"
-#include "jsonparser.h"
-
-#include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <iomanip>
-#include <cstring>
-#include <ctime>
-#include <cstdarg>
-#include <vector>
-#include <map>
+#include "main-piccante.h"
 
 #define DEFAULT_DIMENSIONALITY 1
-
-
 #define DIRECTORY_OUTPUT "OUTPUT"
-
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
 
 
 int main(int narg, char **args)
