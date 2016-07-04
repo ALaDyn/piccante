@@ -45,10 +45,17 @@ nocpp11: boost
 nocpp11: OPT = -O3 -DNO_CXX11 -lboost_random
 nocpp11: all
 
+cnaf: boost
+cnaf: BOOST_LIB = /shared/software/BOOST/boost_1_56_0/lib
+cnaf: BOOST_INC = /shared/software/BOOST/boost_1_56_0/include
+cnaf: all
+
 cnaf-intel: boost
 cnaf-intel: COMPILER = mpiicpc
 cnaf-intel: OPT += -axSSE4.2,AVX -ipo
 cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
+cnaf-intel: BOOST_LIB = /shared/software/BOOST/boost_1_56_0/lib
+cnaf-intel: BOOST_INC = /shared/software/BOOST/boost_1_56_0/include
 cnaf-intel: all
 
 cnaf-phi: COMPILER = mpiicpc
@@ -61,6 +68,7 @@ brew:
 	@echo '"brew" is deprecated: use "make boost" instead'
 	@echo 'if it fails, check Makefile and adapt the rule "brewold"'
 	@echo ' '
+
 brewold: boost
 brewold: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_2/lib
 brewold: BOOST_INC = /usr/local/Cellar/boost/1.60.0_2/include

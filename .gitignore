@@ -494,4 +494,7 @@ piccante.includes
 /src/inputPiccante.json
 
 marconi.perf.sh
+cnaf.gnu.sh
+cnaf.intel.sh
+cnaf.phi.sh
 
