@@ -154,6 +154,7 @@
     <ClInclude Include="json\json.h" />
     <ClInclude Include="output_manager.h" />
     <ClInclude Include="particle_species.h" />
+    <ClInclude Include="preproc_defs.h" />
     <ClInclude Include="rapidjson\allocators.h" />
     <ClInclude Include="rapidjson\document.h" />
     <ClInclude Include="rapidjson\encodedstream.h" />

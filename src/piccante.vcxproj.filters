@@ -150,6 +150,9 @@
     <ClInclude Include="sobol.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="preproc_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="current.cpp">
