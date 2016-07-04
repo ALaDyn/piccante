@@ -89,6 +89,12 @@ scalasca: all
 sse2-vec: OPT += -ftree-vectorize -msse2 -ftree-vectorizer-verbose=5
 sse2-vec: all
 
+marconi: boost
+marconi: OPT += -xCORE-AVX2 -ipo
+marconi: BOOST_LIB = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--5.1--binary/lib
+marconi: BOOST_INC = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--5.1--binary/include
+marconi: all
+
 galileo: boost
 galileo: OPT += -xCORE-AVX2 -ipo
 galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/include
@@ -139,7 +145,7 @@ juqueen: all
 $(EXE): $(OBJ)
 	$(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) $(RPATH) -o $(EXE) $(OBJ) $(LIB)
 
-$(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp
+$(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp $(SRC_FOLDER)/%.h $(SRC_FOLDER)/preproc_defs.h
 	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
 
 clean:

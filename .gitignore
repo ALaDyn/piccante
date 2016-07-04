@@ -492,3 +492,6 @@ piccante.includes
 *.ipdb
 *.db
 /src/inputPiccante.json
+
+marconi.perf.sh
+
