@@ -148,6 +148,7 @@
     <ClInclude Include="current.h" />
     <ClInclude Include="em_field.h" />
     <ClInclude Include="grid.h" />
+    <ClInclude Include="jsoncpp.h" />
     <ClInclude Include="jsonnames.h" />
     <ClInclude Include="jsonparser.h" />
     <ClInclude Include="json\json-forwards.h" />
