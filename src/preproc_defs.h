@@ -10,7 +10,7 @@
 #endif
 #endif
 
-#if defined (__GNUC__) && !defined (__clang__)
+#if (defined (__GNUC__) && !defined (__clang__))
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
 #endif
