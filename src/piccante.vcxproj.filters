@@ -147,7 +147,16 @@
     <ClInclude Include="json\json-forwards.h">
       <Filter>Header Files\json</Filter>
     </ClInclude>
-    <ClInclude Include="sobol.hpp">
+    <ClInclude Include="preproc_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sobol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main-piccante.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsoncpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
