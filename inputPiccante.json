@@ -1,6 +1,6 @@
 {
   "VERSION": 2,
-  "dimensions": 1,
+  "dimensions": 2,
   "masterProc": 0,
   "stepFrequencyStdoutPrint": 10,
   "OutputPath": "OUTPUT",
@@ -17,11 +17,11 @@
   "boundaries": ["periodic", "periodic","periodic"],
   "withPoissonSolver": false,
   "autoNeutraliseDensity": false,
-  "langmuirSpectrum":{
+  "NOlangmuirSpectrum":{
      "refDensity": 1.0,
      "refTemperature": 4e-14,
      "growthRate": 10,
-     "amplitude": 0.01,
+     "amplitude": 0.001,
      "centralK": [3.14159,0,0],
      "sigmaK"  : [0.6,2,2],
      "endTime": 50
@@ -33,6 +33,14 @@
     "doDump": false,
     "dumpEvery": 2.0
   },
+  "Laser":[
+      {
+        "enabled": true,
+        "type": "CONST_FIELD",
+        "component": 5,
+        "a": 8.0
+          }
+    ],
   "Plasma":[
     {
       "name": "bulk",
