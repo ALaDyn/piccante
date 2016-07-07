@@ -655,22 +655,22 @@ double EM_FIELD::getTotalCharge(CURRENT *current){
       }
     }
   }
-  std::cout << "ID: " << mygrid->myid << " totalCharge = " << totalCharge << std::endl;
+  //std::cout << "ID: " << mygrid->myid << " totalCharge = " << totalCharge << std::endl;
   MPI_Allreduce(MPI_IN_PLACE, &totalCharge, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   std::stringstream message, filename;
   message << " totalCharge = " << totalCharge;
   mygrid->printMessage(message.str());
 
-  filename << "density_loc_" << mygrid->myid << ".txt";
-  std::ofstream densityFile(filename.str().c_str() );
+  //filename << "density_loc_" << mygrid->myid << ".txt";
+  //std::ofstream densityFile(filename.str().c_str() );
 
-  int j=0;
-  int k=0;
-  for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
-    double x= mygrid->rminloc[0] + i* mygrid->dr[0];
-    densityFile << x << " " <<  current->density(i,j,k) << std::endl;
-  }
-  densityFile.close();
+  //int j=0;
+  //int k=0;
+  //for (int i = 0; i < mygrid->uniquePointsloc[0]; i++) {
+  //  double x= mygrid->rminloc[0] + i* mygrid->dr[0];
+  //  densityFile << x << " " <<  current->density(i,j,k) << std::endl;
+  //}
+  //densityFile.close();
   return totalCharge;
 }
 

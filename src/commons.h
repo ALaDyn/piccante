@@ -22,6 +22,7 @@
 
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
+
 #define _ACC_SINGLE_POINTER
 #define _REORDER_MPI_CART_PROCESSES 1
 

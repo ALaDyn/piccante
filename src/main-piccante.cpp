@@ -169,14 +169,14 @@ int main(int narg, char **args)
 
   if(grid.isWithPoisson()){
     bool withSign = true;
-    std::cout << " evaluating density..." << std::endl;
+    //std::cout << " evaluating density..." << std::endl;
 
     current.setAllValuesToZero();
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       (*spec_iterator)->density_deposition_standard(&current, withSign);
     }
     current.pbc();
-    std::cout << "   done... now into Poisson solver" << std::endl;
+    //std::cout << "   done... now into Poisson solver" << std::endl;
     myfield.poissonSolver(&current);
   }
 
