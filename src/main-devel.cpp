@@ -93,7 +93,9 @@ int main(int narg, char **args)
   //************** IF IF IF ********** MOVE PARTICLES USING LANGMUIR SET  *********************************************************
   if(langmuirSet.checkLangmuirSetValidity&&langmuirSet.enableStandingWaves){
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+      if((*spec_iterator)->type==ELECTRON){
       UTILITIES::moveParticles(&grid,(*spec_iterator),langmuirSet.myKModes);
+      }
       (*spec_iterator)->position_parallel_pbc();
     }
   }
@@ -115,7 +117,9 @@ int main(int narg, char **args)
   }
   if(isWaveOK){
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-      UTILITIES::OldMoveParticles(&grid,(*spec_iterator),amplitude,lambda);
+     if((*spec_iterator)->type==ELECTRON){
+         UTILITIES::OldMoveParticles(&grid,(*spec_iterator),amplitude,lambda);
+     }
       (*spec_iterator)->position_parallel_pbc();
       (*spec_iterator)->position_parallel_pbc();
     }
