@@ -1,7 +1,6 @@
 COMPILER = mpicxx
 EXE = piccante.exe
 MAINFILE = main-piccante.cpp
-MAINFILE_DEV = main-devel.cpp
 
 FILES = grid.cpp \
         sobol.cpp \
@@ -21,15 +20,12 @@ SRC = $(addprefix $(SRC_FOLDER)/, $(FILES))
 OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
 #OBJDEV = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
 ifneq (,$(findstring devel,$(config)))
-    MAINFILE = $(MAINFILE_DEV)
-    MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE_DEV))
-    MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
-    OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))    
-else
-    MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
-    MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
-    OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))    
+    MAINFILE = main-devel.cpp
 endif
+
+MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
+MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
+OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))    
 
 LIB =
 RPATH = 
@@ -41,8 +37,14 @@ HDF5_INC = $(SRC_FOLDER)
 HDF5_LIB = $(SRC_FOLDER)
 
 
-all: $(EXE)
+all: print-MAINFILE $(EXE)
 
+print-% :
+	$(info $* : $($*)) @true
+
+pippo:
+	@echo "$(MAINFILE)"
+    
 boost: OPT += -DUSE_BOOST
 boost: LIB += -lboost_filesystem -lboost_system
 boost: all
