@@ -13,15 +13,24 @@ FILES = grid.cpp \
         utilities.cpp \
         jsoncpp.cpp \
         jsonparser.cpp
-		
+
 
 SRC_FOLDER = src
 OBJ_FOLDER = obj
 SRC = $(addprefix $(SRC_FOLDER)/, $(FILES))
-MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 OBJ = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(FILES))))
-OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
-OBJDEV = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
+#OBJDEV = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
+ifneq (,$(findstring devel,$(config)))
+    MAINFILE = $(MAINFILE_DEV)
+    MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE_DEV))
+    MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))
+    OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE_DEV))))    
+else
+    MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
+    MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
+    OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))    
+endif
+
 LIB =
 RPATH = 
 OPT = -O3 -std=c++11
@@ -31,9 +40,6 @@ BOOST_INC = $(SRC_FOLDER)
 HDF5_INC = $(SRC_FOLDER)
 HDF5_LIB = $(SRC_FOLDER)
 
-ifneq (,$(findstring devel,$(config)))
-	MAINFILE = $(MAINFILE_DEV)
-endif
 
 all: $(EXE)
 
@@ -156,6 +162,12 @@ $(EXE): $(OBJ)
 $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp $(SRC_FOLDER)/%.h $(SRC_FOLDER)/preproc_defs.h
 	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
 
+#$(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))  : $(SRC_FOLDER)/$(MAINFILE) $(SRC_FOLDER)/preproc_defs.h
+#	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE)))) $(SRC_FOLDER)/$(MAINFILE)
+
+$(MAINO) : $(MAIN) $(SRC_FOLDER)/preproc_defs.h
+	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $(MAINO) $(MAIN)
+    
 clean:
 	rm -f $(OBJ) $(OBJDEV) *~
 

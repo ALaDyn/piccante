@@ -1430,6 +1430,8 @@ void jsonParser::setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet
   langmuirSet.checkLangmuirSetValidity = jsonParser::setValue(jsonLangmuirSet, root, "langmuirSpectrum");
   if (langmuirSet.checkLangmuirSetValidity) {
     bool checkFlag;
+    bool enabled=false;
+    jsonParser::setBool(&enabled, jsonLangmuirSet, "enabled");
     langmuirSet.refDens=1;
     jsonParser::setDouble(&langmuirSet.refDens, jsonLangmuirSet, "refDensity");
     langmuirSet.growthRate=30;
@@ -1440,10 +1442,14 @@ void jsonParser::setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet
     jsonParser::setDouble(&langmuirSet.endTime, jsonLangmuirSet, "endTime");
     langmuirSet.amplitude = 0;
     checkFlag = jsonParser::setDouble(&langmuirSet.amplitude, jsonLangmuirSet, "amplitude");
+    langmuirSet.enableForcing = false;
+    jsonParser::setBool(&langmuirSet.enableForcing, jsonLangmuirSet, "enableForcing");
+    langmuirSet.enableStandingWaves = false;
+    jsonParser::setBool(&langmuirSet.enableStandingWaves, jsonLangmuirSet, "enableStandingWaves");
     langmuirSet.centralK[0]=langmuirSet.centralK[1]=langmuirSet.centralK[2]=0;
     checkFlag = checkFlag&&jsonParser::setDoubleArray(langmuirSet.centralK,3,jsonLangmuirSet,"centralK");
     langmuirSet.sigmaK[0]=langmuirSet.sigmaK[1]=langmuirSet.sigmaK[2]=0.0;
-    checkFlag = checkFlag&&jsonParser::setDoubleArray(langmuirSet.sigmaK,3,jsonLangmuirSet,"sigmaK");
+    checkFlag = enabled&&checkFlag&&jsonParser::setDoubleArray(langmuirSet.sigmaK,3,jsonLangmuirSet,"sigmaK");
 
     langmuirSet.checkLangmuirSetValidity = langmuirSet.checkLangmuirSetValidity && checkFlag;
   }

@@ -91,8 +91,7 @@ int main(int narg, char **args)
   UTILITIES::setLangmuirWaveSet(langmuirSet, grid);
 
   //************** IF IF IF ********** MOVE PARTICLES USING LANGMUIR SET  *********************************************************
-  bool moveParticleForLangmuir=false;
-  if(langmuirSet.checkLangmuirSetValidity&&moveParticleForLangmuir){
+  if(langmuirSet.checkLangmuirSetValidity&&langmuirSet.enableStandingWaves){
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       UTILITIES::moveParticles(&grid,(*spec_iterator),langmuirSet.myKModes);
       (*spec_iterator)->position_parallel_pbc();
@@ -124,7 +123,9 @@ int main(int narg, char **args)
 
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);
-  exfield.allocate(&grid);
+  if(langmuirSet.enableForcing){
+    exfield.allocate(&grid);
+  }
   current.allocate(&grid);
 
   UTILITIES::launchPoissonSolver(myfield, species, grid, current);
@@ -170,14 +171,14 @@ int main(int narg, char **args)
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
 
-    UTILITIES::setExternaField(exfield, grid, grid.time+grid.dt, langmuirSet);
-    exfield.boundary_conditions();
 
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++) {
       if (grid.isRadiationFrictionEnabled()) {
         (*spec_iterator)->momenta_advance_with_friction(&myfield, grid.getLambda0());
       }
-      else if(langmuirSet.checkLangmuirSetValidity&&langmuirSet.keepForcing){
+      else if(langmuirSet.enableForcing&&langmuirSet.checkLangmuirSetValidity&&langmuirSet.keepForcing){
+        UTILITIES::setExternaField(exfield, grid, grid.time+grid.dt, langmuirSet);
+        exfield.boundary_conditions();
         (*spec_iterator)->momenta_advance_with_externalFields(&myfield, &exfield);
       }
       else{

@@ -446,6 +446,7 @@ void UTILITIES::setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes
 
 void UTILITIES::newSetKModesToBeInitialised(LANGMUIRset &langmuirSet){
   my_rng_generator mt_rng;
+  mt_rng.seed(54890);
   my_uniform_real_distribution randPhase(0, 2.0*M_PI);
 
   double kz, ky, kx;
@@ -600,9 +601,9 @@ void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myK
         specie->r2(n) += dz*cos(phi);
 
         phi += 2*M_PI*sqrt(density)*grid->dt*0.5;
-        specie->u0(n) += dVx*sin(phi);
-        specie->u1(n) += dVy*sin(phi);
-        specie->u2(n) += dVz*sin(phi);
+        //specie->u0(n) += dVx*sin(phi);
+        //specie->u1(n) += dVy*sin(phi);
+        //specie->u2(n) += dVz*sin(phi);
       }
     }
   }

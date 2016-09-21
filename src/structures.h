@@ -69,6 +69,8 @@ struct LANGMUIRset{
   double endTime;
   bool checkLangmuirSetValidity;
   bool keepForcing;
+  bool enableForcing;
+  bool enableStandingWaves;
 
   double amplitude;
   double centralK[3];

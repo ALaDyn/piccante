@@ -18,11 +18,16 @@
   "withPoissonSolver": false,
   "autoNeutraliseDensity": false,
   "langmuirSpectrum":{
+     "enabled": true,
+     "enableForcing": false,
+     "enableStandingWaves": true,
      "refDensity": 1.0,
-     "refTemperature": 4e-4,
-     "amplitude": 0.01,
-     "centralK": [30,0,0],
-     "sigmaK"  : [3,2,2],
+     "refTemperature": 4e-14,
+     "growthRate": 10,
+     "amplitude": 0.001,
+     "centralK": [3.14159,0,0],
+     "sigmaK"  : [0.6,2,2],
+     "endTime": 50
     },
   "StretchedGrid":{
     "enabled": false,
@@ -105,8 +110,6 @@
       "distributionParams": [1.0e-5],
       "distributionAddMomentum": [0.0,0.0,0.0]
     }
-
-
   ],
   "Laser":[
     {
