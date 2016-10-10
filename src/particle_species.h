@@ -115,6 +115,8 @@ public:
 
   uint64_t printParticleNumber();
 
+  void current_deposition_esirkepov(CURRENT *current);
+
 
   //PUBLIC INLINE FUNCTIONS
 #ifdef _ACC_SINGLE_POINTER

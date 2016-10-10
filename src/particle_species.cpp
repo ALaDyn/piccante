@@ -5020,4 +5020,1090 @@ uint64_t SPECIE::printParticleNumber() {
   return lastParticle;
 }
 
+void SPECIE::current_deposition_esirkepov(CURRENT *current)
+{
+  if (mygrid->withParticles == NO||isFrozen)
+    return;
+  if (mygrid->isStretched()) {
+    SPECIE::currentStretchedDepositionStandard(current);
+    return;
+  }
+
+  double dt, gamma_i;
+  int p, c;  // particle_int, component_int
+  int i, j, i1, j1, k1, i2, j2, k2;
+#ifdef OLDCURRENT
+  int k;
+#endif
+  //int indexMaxQuadraticShape[]={1,4};
+  int hii[3], wii[3];           // half integer index,   whole integer index
+  int hii_new[3], wii_new[3];
+  double hiw[3][5], wiw[3][5];  // half integer weight,  whole integer weight
+  double hiw_new[3][5], wiw_new[3][5];
+  double rr, rh, rr2, rh2;      // local coordinate to integer grid point and to half integer, local coordinate squared
+  double dvol, xx[3], vv[3];    // tensor_product, absolute particle position
+
+  dt = mygrid->dt;
+  double* myCurrent = current->getDataPointer();
+  int N_grid[3];
+  current->writeN_grid(N_grid);
+  int edge = mygrid->getEdge();
+  if (!(mygrid->withCurrent == YES && (!isTestSpecies)))
+  {
+    for (p = 0; p < Np; p++) // DEVO METTERE IFDEF _ACC_SINGLE_POINTER ??
+    {
+      double ux, uy, uz;
+      ux = pData[pIndex(3, p, Ncomp, Np)];
+      uy = pData[pIndex(4, p, Ncomp, Np)];
+      uz = pData[pIndex(5, p, Ncomp, Np)];
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+
+      for (c = 0; c < mygrid->getDimensionality(); c++)
+      {
+          vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+          pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+      }
+    }
+    return;
+  }
+  int Nx, Ny, Nz;
+  Nx = N_grid[0];
+  Ny = N_grid[1];
+  Nz = N_grid[2];
+  switch (mygrid->getDimensionality())
+  {
+  case 3:
+      for (p = 0; p < Np; p++) {
+        double ux, uy, uz;
+        ux = pData[pIndex(3, p, Ncomp, Np)];
+        uy = pData[pIndex(4, p, Ncomp, Np)];
+        uz = pData[pIndex(5, p, Ncomp, Np)];
+        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+
+        for (c = 0; c < 3; c++)
+        {
+          vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+          hiw[c][1] = wiw[c][1] = 1;
+          hiw[c][0] = wiw[c][0] = 0;
+          hiw[c][2] = wiw[c][2] = 0;
+          hii[c] = wii[c] = 0;
+        }
+        for (c = 0; c < 3; c++)
+        {
+          xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+          pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+
+          rr = mygrid->dri[c] * (xx[c] - mygrid->rminloc[c]);
+          rh = rr - 0.5;
+
+          wii[c] = (int)floor(rr + 0.5); //whole integer int
+          hii[c] = (int)floor(rr);     //half integer int
+          rr -= wii[c];
+          rh -= hii[c];
+          rr2 = rr*rr;
+          rh2 = rh*rh;
+
+          wiw[c][1] = 0.75 - rr2;
+          wiw[c][2] = 0.5*(0.25 + rr2 + rr);
+          wiw[c][0] = 1. - wiw[c][1] - wiw[c][2];
+
+          hiw[c][1] = 0.75 - rh2;
+          hiw[c][2] = 0.5*(0.25 + rh2 + rh);
+          hiw[c][0] = 1. - hiw[c][1] - hiw[c][2];
+        }
+
+        double myweight = pData[pIndex(6, p, Ncomp, Np)];
+  #ifdef OLDCURRENT
+
+        for (k = 0; k < 3; k++)
+        {
+          k1 = k + wii[2] - 1;
+          k2 = k + hii[2] - 1;
+          for (j = 0; j < 3; j++)
+          {
+            j1 = j + wii[1] - 1;
+            j2 = j + hii[1] - 1;
+            for (i = 0; i < 3; i++)
+            {
+              i1 = i + wii[0] - 1;
+              i2 = i + hii[0] - 1;
+  #ifndef OLD_ACCESS
+
+              double weight = pData[pIndex(6, p, Ncomp, Np)];
+              double *JX, *JY, *JZ;
+              JX = &myCurrent[my_indice(edge, 1, 1, 0, i2, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JY = &myCurrent[my_indice(edge, 1, 1, 1, i1, j2, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+              JZ = &myCurrent[my_indice(edge, 1, 1, 2, i1, j1, k2, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)];
+
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k];
+              *JX += weight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k];
+              *JY += weight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k];
+              *JZ += weight*dvol*vv[2] * chargeSign;
+  #else
+              dvol = hiw[0][i] * wiw[1][j] * wiw[2][k],
+                current->Jx(i2, j1, k1) += myweight*dvol*vv[0] * chargeSign;
+              dvol = wiw[0][i] * hiw[1][j] * wiw[2][k],
+                current->Jy(i1, j2, k1) += myweight*dvol*vv[1] * chargeSign;
+              dvol = wiw[0][i] * wiw[1][j] * hiw[2][k],
+                current->Jz(i1, j1, k2) += myweight*dvol*vv[2] * chargeSign;
+  #endif
+
+
+            }
+          }
+        }
+      }
+  #else
+        {
+          double *JXLLL, *JXCLL, *JXRLL, *JXLCL, *JXCCL, *JXRCL, *JXLRL, *JXCRL, *JXRRL;
+          double *JYLLL, *JYCLL, *JYRLL, *JYLCL, *JYCCL, *JYRCL, *JYLRL, *JYCRL, *JYRRL;
+          double *JZLLL, *JZCLL, *JZRLL, *JZLCL, *JZCCL, *JZRCL, *JZLRL, *JZCRL, *JZRRL;
+
+          double *JXLLC, *JXCLC, *JXRLC, *JXLCC, *JXCCC, *JXRCC, *JXLRC, *JXCRC, *JXRRC;
+          double *JYLLC, *JYCLC, *JYRLC, *JYLCC, *JYCCC, *JYRCC, *JYLRC, *JYCRC, *JYRRC;
+          double *JZLLC, *JZCLC, *JZRLC, *JZLCC, *JZCCC, *JZRCC, *JZLRC, *JZCRC, *JZRRC;
+
+          double *JXLLR, *JXCLR, *JXRLR, *JXLCR, *JXCCR, *JXRCR, *JXLRR, *JXCRR, *JXRRR;
+          double *JYLLR, *JYCLR, *JYRLR, *JYLCR, *JYCCR, *JYRCR, *JYLRR, *JYCRR, *JYRRR;
+          double *JZLLR, *JZCLR, *JZRLR, *JZLCR, *JZCCR, *JZRCR, *JZLRR, *JZCRR, *JZRRR;
+
+
+          int iiL, iiC, iiR, hiL, hiC, hiR;
+          iiL = wii[0] - 1;
+          iiC = wii[0];
+          iiR = wii[0] + 1;
+          hiL = hii[0] - 1;
+          hiC = hii[0];
+          hiR = hii[0] + 1;
+
+          int ijL, ijC, ijR, hjL, hjC, hjR;
+          ijL = wii[1] - 1;
+          ijC = wii[1];
+          ijR = wii[1] + 1;
+          hjL = hii[1] - 1;
+          hjC = hii[1];
+          hjR = hii[1] + 1;
+
+          int ikL, ikC, ikR, hkL, hkC, hkR;
+          ikL = wii[2] - 1;
+          ikC = wii[2];
+          ikR = wii[2] + 1;
+          hkL = hii[2] - 1;
+          hkC = hii[2];
+          hkR = hii[2] + 1;
+
+
+          {
+            JXLLL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCLL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRLL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLCL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCCL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRCL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXLRL = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXCRL = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JXRRL = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikL, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCLL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRLL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLCL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCCL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRCL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYLRL = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYCRL = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+            JYRRL = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikL, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCLL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRLL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLCL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCCL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRCL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZLRL = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZCRL = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+            JZRRL = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkL, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+            JXLLC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCLC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRLC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLCC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCCC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRCC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXLRC = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXCRC = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JXRRC = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikC, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCLC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRLC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLCC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCCC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRCC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYLRC = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYCRC = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+            JYRRC = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikC, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCLC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRLC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLCC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCCC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRCC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZLRC = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZCRC = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+            JZRRC = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkC, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+            JXLLR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCLR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRLR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLCR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCCR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRCR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXLRR = &myCurrent[my_indice(edge, 1, 1, 0, hiL, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXCRR = &myCurrent[my_indice(edge, 1, 1, 0, hiC, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JXRRR = &myCurrent[my_indice(edge, 1, 1, 0, hiR, ijR, ikR, Nx, Ny, Nz, current->Ncomp)];
+
+            JYLLR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCLR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRLR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjL, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLCR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCCR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRCR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjC, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYLRR = &myCurrent[my_indice(edge, 1, 1, 1, iiL, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYCRR = &myCurrent[my_indice(edge, 1, 1, 1, iiC, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+            JYRRR = &myCurrent[my_indice(edge, 1, 1, 1, iiR, hjR, ikR, Nx, Ny, Nz, current->Ncomp)];
+
+            JZLLR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCLR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRLR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijL, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLCR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCCR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRCR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijC, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZLRR = &myCurrent[my_indice(edge, 1, 1, 2, iiL, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZCRR = &myCurrent[my_indice(edge, 1, 1, 2, iiC, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+            JZRRR = &myCurrent[my_indice(edge, 1, 1, 2, iiR, ijR, hkR, Nx, Ny, Nz, current->Ncomp)];
+          }
+
+          {
+
+            double WSVx, WSVy, WSVz;
+            WSVx = myweight*vv[0] * chargeSign;
+            WSVy = myweight*vv[1] * chargeSign;
+            WSVz = myweight*vv[2] * chargeSign;
+
+            {
+              *JXLLL += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][0];
+              *JXCLL += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][0];
+              *JXRLL += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][0];
+              *JXLCL += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][0];
+              *JXCCL += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][0];
+              *JXRCL += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][0];
+              *JXLRL += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][0];
+              *JXCRL += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][0];
+              *JXRRL += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][0];
+
+              *JXLLC += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][1];
+              *JXCLC += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][1];
+              *JXRLC += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][1];
+              *JXLCC += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][1];
+              *JXCCC += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][1];
+              *JXRCC += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][1];
+              *JXLRC += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][1];
+              *JXCRC += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][1];
+              *JXRRC += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][1];
+
+              *JXLLR += WSVx*hiw[0][0] * wiw[1][0] * wiw[2][2];
+              *JXCLR += WSVx*hiw[0][1] * wiw[1][0] * wiw[2][2];
+              *JXRLR += WSVx*hiw[0][2] * wiw[1][0] * wiw[2][2];
+              *JXLCR += WSVx*hiw[0][0] * wiw[1][1] * wiw[2][2];
+              *JXCCR += WSVx*hiw[0][1] * wiw[1][1] * wiw[2][2];
+              *JXRCR += WSVx*hiw[0][2] * wiw[1][1] * wiw[2][2];
+              *JXLRR += WSVx*hiw[0][0] * wiw[1][2] * wiw[2][2];
+              *JXCRR += WSVx*hiw[0][1] * wiw[1][2] * wiw[2][2];
+              *JXRRR += WSVx*hiw[0][2] * wiw[1][2] * wiw[2][2];
+            }
+
+            {
+              *JYLLL += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][0];
+              *JYCLL += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][0];
+              *JYRLL += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][0];
+              *JYLCL += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][0];
+              *JYCCL += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][0];
+              *JYRCL += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][0];
+              *JYLRL += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][0];
+              *JYCRL += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][0];
+              *JYRRL += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][0];
+
+              *JYLLC += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][1];
+              *JYCLC += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][1];
+              *JYRLC += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][1];
+              *JYLCC += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][1];
+              *JYCCC += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][1];
+              *JYRCC += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][1];
+              *JYLRC += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][1];
+              *JYCRC += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][1];
+              *JYRRC += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][1];
+
+              *JYLLR += WSVy*wiw[0][0] * hiw[1][0] * wiw[2][2];
+              *JYCLR += WSVy*wiw[0][1] * hiw[1][0] * wiw[2][2];
+              *JYRLR += WSVy*wiw[0][2] * hiw[1][0] * wiw[2][2];
+              *JYLCR += WSVy*wiw[0][0] * hiw[1][1] * wiw[2][2];
+              *JYCCR += WSVy*wiw[0][1] * hiw[1][1] * wiw[2][2];
+              *JYRCR += WSVy*wiw[0][2] * hiw[1][1] * wiw[2][2];
+              *JYLRR += WSVy*wiw[0][0] * hiw[1][2] * wiw[2][2];
+              *JYCRR += WSVy*wiw[0][1] * hiw[1][2] * wiw[2][2];
+              *JYRRR += WSVy*wiw[0][2] * hiw[1][2] * wiw[2][2];
+            }
+
+            {
+              *JZLLL += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][0];
+              *JZCLL += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][0];
+              *JZRLL += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][0];
+              *JZLCL += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][0];
+              *JZCCL += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][0];
+              *JZRCL += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][0];
+              *JZLRL += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][0];
+              *JZCRL += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][0];
+              *JZRRL += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][0];
+
+              *JZLLC += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][1];
+              *JZCLC += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][1];
+              *JZRLC += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][1];
+              *JZLCC += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][1];
+              *JZCCC += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][1];
+              *JZRCC += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][1];
+              *JZLRC += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][1];
+              *JZCRC += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][1];
+              *JZRRC += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][1];
+
+              *JZLLR += WSVz*wiw[0][0] * wiw[1][0] * hiw[2][2];
+              *JZCLR += WSVz*wiw[0][1] * wiw[1][0] * hiw[2][2];
+              *JZRLR += WSVz*wiw[0][2] * wiw[1][0] * hiw[2][2];
+              *JZLCR += WSVz*wiw[0][0] * wiw[1][1] * hiw[2][2];
+              *JZCCR += WSVz*wiw[0][1] * wiw[1][1] * hiw[2][2];
+              *JZRCR += WSVz*wiw[0][2] * wiw[1][1] * hiw[2][2];
+              *JZLRR += WSVz*wiw[0][0] * wiw[1][2] * hiw[2][2];
+              *JZCRR += WSVz*wiw[0][1] * wiw[1][2] * hiw[2][2];
+              *JZRRR += WSVz*wiw[0][2] * wiw[1][2] * hiw[2][2];
+            }
+
+
+          }
+        }
+      }
+  #endif
+
+
+
+      break;
+
+
+  case 2:
+      for (p = 0; p < Np; p++)
+      {
+        double ux, uy, uz;
+        ux = pData[pIndex(3, p, Ncomp, Np)];
+        uy = pData[pIndex(4, p, Ncomp, Np)];
+        uz = pData[pIndex(5, p, Ncomp, Np)];
+
+
+        gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+
+        for (c = 0; c < 3; c++)
+        {
+          vv[c] = gamma_i*pData[pIndex(c + 3, p, Ncomp, Np)];
+        }
+
+          wiw[0][0] = wiw_new[0][0] = 0.0;
+          wiw[0][1] = wiw_new[0][1] = 0.0;
+          wiw[0][2] = wiw_new[0][2] = 0.0;
+          wiw[0][3] = wiw_new[0][3] = 0.0;
+          wiw[0][4] = wiw_new[0][4] = 0.0;
+          wiw[1][0] = wiw_new[1][0] = 0.0;
+          wiw[1][1] = wiw_new[1][1] = 0.0;
+          wiw[1][2] = wiw_new[1][2] = 0.0;
+          wiw[1][3] = wiw_new[1][3] = 0.0;
+          wiw[1][4] = wiw_new[1][4] = 0.0;
+          wiw[2][0] = wiw_new[2][0] = 0.0;
+          wiw[2][1] = wiw_new[2][1] = 0.0;
+          wiw[2][2] = wiw_new[2][2] = 0.0;
+          wiw[2][3] = wiw_new[2][3] = 0.0;
+          wiw[2][4] = wiw_new[2][4] = 0.0;
+
+
+          // c = 0
+
+          rr = mygrid->dri[0] * (pData[pIndex(0, p, Ncomp, Np)]- mygrid->rminloc[0]);
+
+          wii[0] = (int)floor(rr + 0.5); //whole integer int
+          rr -= wii[0];
+          rr2 = rr*rr;
+
+          // form-factors at time step n
+          //wiw[c][0] = 0;
+          wiw[0][1] = 0.5*(0.25 + rr2 - rr);
+          wiw[0][2] = 0.75 - rr2;
+          wiw[0][3] = 0.5*(0.25 + rr2 + rr);
+          //wiw[c][4] = 0;
+
+          pData[pIndex(0, p, Ncomp, Np)] += dt*vv[0]; // advance the quasi-particle
+
+          rr = mygrid->dri[0] * (pData[pIndex(0, p, Ncomp, Np)] - mygrid->rminloc[0]);
+
+          // form-factors at time step n+1
+          wii_new[0] = (int)floor(rr + 0.5); //whole integer int
+          rr -= wii_new[0];
+          rr2 = rr*rr;
+
+
+          switch (wii_new[0]-wii[0])
+          {
+          case -1: // the quasi-particle moved backwards
+              wiw_new[0][0] = 0.5*(0.25 + rr2 - rr) - wiw[0][0];
+              wiw_new[0][1] = 0.75 - rr2 - wiw[0][1];
+              wiw_new[0][2] = 0.5*(0.25 + rr2 + rr) - wiw[0][2];
+              wiw_new[0][3] = - wiw[0][3];
+              wiw_new[0][4] = - wiw[0][4];
+              break;
+          case  0: // nearest node hasn't changed
+              wiw_new[0][0] = - wiw[0][0];
+              wiw_new[0][1] = 0.5*(0.25 + rr2 - rr) - wiw[0][1];
+              wiw_new[0][2] = 0.75 - rr2 - wiw[0][2];
+              wiw_new[0][3] = 0.5*(0.25 + rr2 + rr) - wiw[0][3];
+              wiw_new[0][4] = - wiw[0][4];
+              break;
+
+          case 1: // the quasi-particle moved forward
+              wiw_new[0][0] = - wiw[0][0];
+              wiw_new[0][1] = - wiw[0][1];
+              wiw_new[0][2] = 0.5*(0.25 + rr2 - rr) - wiw[0][2];
+              wiw_new[0][3] = 0.75 - rr2 - wiw[0][3];
+              wiw_new[0][4] = 0.5*(0.25 + rr2 + rr) - wiw[0][4];
+              break;
+          }
+
+
+  // c = 1
+
+          rr = mygrid->dri[1] * (pData[pIndex(1, p, Ncomp, Np)] - mygrid->rminloc[1]);
+
+          wii[1] = (int)floor(rr + 0.5); //whole integer int
+          rr -= wii[1];
+          rr2 = rr*rr;
+
+          // form-factors at time step n
+          //wiw[c][0] = 0;
+          wiw[1][1] = 0.5*(0.25 + rr2 - rr);
+          wiw[1][2] = 0.75 - rr2;
+          wiw[1][3] = 0.5*(0.25 + rr2 + rr);
+          //wiw[c][4] = 0;
+
+          pData[pIndex(1, p, Ncomp, Np)] += dt*vv[1]; // advance the quasi-particle
+
+          rr = mygrid->dri[1] * (pData[pIndex(1, p, Ncomp, Np)]- mygrid->rminloc[1]);
+
+          // form-factors at time step n+1
+          wii_new[1] = (int)floor(rr + 0.5); //whole integer int
+          rr -= wii_new[1];
+          rr2 = rr*rr;
+
+
+          switch (wii_new[1]-wii[1])
+          {
+          case -1: // the quasi-particle moved backwards
+              wiw_new[1][0] = 0.5*(0.25 + rr2 - rr) - wiw[1][0];
+              wiw_new[1][1] = 0.75 - rr2 - wiw[1][1];
+              wiw_new[1][2] = 0.5*(0.25 + rr2 + rr) - wiw[1][2];
+              wiw_new[1][3] = - wiw[1][3];
+              wiw_new[1][4] = - wiw[1][4];
+              break;
+          case  0: // nearest node hasn't changed
+              wiw_new[1][0] = - wiw[1][0];
+              wiw_new[1][1] = 0.5*(0.25 + rr2 - rr) - wiw[1][1];
+              wiw_new[1][2] = 0.75 - rr2 - wiw[1][2];
+              wiw_new[1][3] = 0.5*(0.25 + rr2 + rr) - wiw[1][3];
+              wiw_new[1][4] = - wiw[1][4];
+              break;
+
+          case 1: // the quasi-particle moved forward
+              wiw_new[1][0] = - wiw[1][0];
+              wiw_new[1][1] = - wiw[1][1];
+              wiw_new[1][2] = 0.5*(0.25 + rr2 - rr) - wiw[1][2];
+              wiw_new[1][3] = 0.75 - rr2 - wiw[1][3];
+              wiw_new[1][4] = 0.5*(0.25 + rr2 + rr) - wiw[1][4];
+              break;
+          }
+
+
+  // -------------------------------------
+        k1 = k2 = 0;
+        double W[5][5][3]; // density decomposition
+
+          W[0][0][0] = wiw_new[0][0]*(wiw[1][0]+0.5*wiw_new[1][0]);
+          W[0][0][1] = wiw_new[1][0]*(wiw[0][0]+0.5*wiw_new[0][0]);
+          W[0][0][2] = wiw[0][0]*wiw[1][0]+0.5*wiw_new[0][0]*wiw[1][0]+0.5*wiw[0][0]*wiw_new[1][0]+wiw_new[0][0]*wiw_new[1][0]/3.;
+
+          W[0][1][0] = wiw_new[0][0]*(wiw[1][1]+0.5*wiw_new[1][1]);
+          W[0][1][1] = wiw_new[1][1]*(wiw[0][0]+0.5*wiw_new[0][0]);
+          W[0][1][2] = wiw[0][0]*wiw[1][1]+0.5*wiw_new[0][0]*wiw[1][1]+0.5*wiw[0][0]*wiw_new[1][1]+wiw_new[0][0]*wiw_new[1][1]/3.;
+
+          W[0][2][0] = wiw_new[0][0]*(wiw[1][2]+0.5*wiw_new[1][2]);
+          W[0][2][1] = wiw_new[1][2]*(wiw[0][0]+0.5*wiw_new[0][0]);
+          W[0][2][2] = wiw[0][0]*wiw[1][2]+0.5*wiw_new[0][0]*wiw[1][2]+0.5*wiw[0][0]*wiw_new[1][2]+wiw_new[0][0]*wiw_new[1][2]/3.;
+
+          W[0][3][0] = wiw_new[0][0]*(wiw[1][3]+0.5*wiw_new[1][3]);
+          W[0][3][1] = wiw_new[1][3]*(wiw[0][0]+0.5*wiw_new[0][0]);
+          W[0][3][2] = wiw[0][0]*wiw[1][3]+0.5*wiw_new[0][0]*wiw[1][3]+0.5*wiw[0][0]*wiw_new[1][3]+wiw_new[0][0]*wiw_new[1][3]/3.;
+
+          W[0][4][0] = wiw_new[0][0]*(wiw[1][4]+0.5*wiw_new[1][4]);
+          W[0][4][1] = wiw_new[1][4]*(wiw[0][0]+0.5*wiw_new[0][0]);
+          W[0][4][2] = wiw[0][0]*wiw[1][4]+0.5*wiw_new[0][0]*wiw[1][4]+0.5*wiw[0][0]*wiw_new[1][4]+wiw_new[0][0]*wiw_new[1][4]/3.;
+
+          W[1][0][0] = wiw_new[0][1]*(wiw[1][0]+0.5*wiw_new[1][0]);
+          W[1][0][1] = wiw_new[1][0]*(wiw[0][1]+0.5*wiw_new[0][1]);
+          W[1][0][2] = wiw[0][1]*wiw[1][0]+0.5*wiw_new[0][1]*wiw[1][0]+0.5*wiw[0][1]*wiw_new[1][0]+wiw_new[0][1]*wiw_new[1][0]/3.;
+
+          W[1][1][0] = wiw_new[0][1]*(wiw[1][1]+0.5*wiw_new[1][1]);
+          W[1][1][1] = wiw_new[1][1]*(wiw[0][1]+0.5*wiw_new[0][1]);
+          W[1][1][2] = wiw[0][1]*wiw[1][1]+0.5*wiw_new[0][1]*wiw[1][1]+0.5*wiw[0][1]*wiw_new[1][1]+wiw_new[0][1]*wiw_new[1][1]/3.;
+
+          W[1][2][0] = wiw_new[0][1]*(wiw[1][2]+0.5*wiw_new[1][2]);
+          W[1][2][1] = wiw_new[1][2]*(wiw[0][1]+0.5*wiw_new[0][1]);
+          W[1][2][2] = wiw[0][1]*wiw[1][2]+0.5*wiw_new[0][1]*wiw[1][2]+0.5*wiw[0][1]*wiw_new[1][2]+wiw_new[0][1]*wiw_new[1][2]/3.;
+
+          W[1][3][0] = wiw_new[0][1]*(wiw[1][3]+0.5*wiw_new[1][3]);
+          W[1][3][1] = wiw_new[1][3]*(wiw[0][1]+0.5*wiw_new[0][1]);
+          W[1][3][2] = wiw[0][1]*wiw[1][3]+0.5*wiw_new[0][1]*wiw[1][3]+0.5*wiw[0][1]*wiw_new[1][3]+wiw_new[0][1]*wiw_new[1][3]/3.;
+
+          W[1][4][0] = wiw_new[0][1]*(wiw[1][4]+0.5*wiw_new[1][4]);
+          W[1][4][1] = wiw_new[1][4]*(wiw[0][1]+0.5*wiw_new[0][1]);
+          W[1][4][2] = wiw[0][1]*wiw[1][4]+0.5*wiw_new[0][1]*wiw[1][4]+0.5*wiw[0][1]*wiw_new[1][4]+wiw_new[0][1]*wiw_new[1][4]/3.;
+
+          W[2][0][0] = wiw_new[0][2]*(wiw[1][0]+0.5*wiw_new[1][0]);
+          W[2][0][1] = wiw_new[1][0]*(wiw[0][2]+0.5*wiw_new[0][2]);
+          W[2][0][2] = wiw[0][2]*wiw[1][0]+0.5*wiw_new[0][2]*wiw[1][0]+0.5*wiw[0][2]*wiw_new[1][0]+wiw_new[0][2]*wiw_new[1][0]/3.;
+
+          W[2][1][0] = wiw_new[0][2]*(wiw[1][1]+0.5*wiw_new[1][1]);
+          W[2][1][1] = wiw_new[1][1]*(wiw[0][2]+0.5*wiw_new[0][2]);
+          W[2][1][2] = wiw[0][2]*wiw[1][1]+0.5*wiw_new[0][2]*wiw[1][1]+0.5*wiw[0][2]*wiw_new[1][1]+wiw_new[0][2]*wiw_new[1][1]/3.;
+
+          W[2][2][0] = wiw_new[0][2]*(wiw[1][2]+0.5*wiw_new[1][2]);
+          W[2][2][1] = wiw_new[1][2]*(wiw[0][2]+0.5*wiw_new[0][2]);
+          W[2][2][2] = wiw[0][2]*wiw[1][2]+0.5*wiw_new[0][2]*wiw[1][2]+0.5*wiw[0][2]*wiw_new[1][2]+wiw_new[0][2]*wiw_new[1][2]/3.;
+
+          W[2][3][0] = wiw_new[0][2]*(wiw[1][3]+0.5*wiw_new[1][3]);
+          W[2][3][1] = wiw_new[1][3]*(wiw[0][2]+0.5*wiw_new[0][2]);
+          W[2][3][2] = wiw[0][2]*wiw[1][3]+0.5*wiw_new[0][2]*wiw[1][3]+0.5*wiw[0][2]*wiw_new[1][3]+wiw_new[0][2]*wiw_new[1][3]/3.;
+
+          W[2][4][0] = wiw_new[0][2]*(wiw[1][4]+0.5*wiw_new[1][4]);
+          W[2][4][1] = wiw_new[1][4]*(wiw[0][2]+0.5*wiw_new[0][2]);
+          W[2][4][2] = wiw[0][2]*wiw[1][4]+0.5*wiw_new[0][2]*wiw[1][4]+0.5*wiw[0][2]*wiw_new[1][4]+wiw_new[0][2]*wiw_new[1][4]/3.;
+
+          W[3][0][0] = wiw_new[0][3]*(wiw[1][0]+0.5*wiw_new[1][0]);
+          W[3][0][1] = wiw_new[1][0]*(wiw[0][3]+0.5*wiw_new[0][3]);
+          W[3][0][2] = wiw[0][3]*wiw[1][0]+0.5*wiw_new[0][3]*wiw[1][0]+0.5*wiw[0][3]*wiw_new[1][0]+wiw_new[0][3]*wiw_new[1][0]/3.;
+
+          W[3][1][0] = wiw_new[0][3]*(wiw[1][1]+0.5*wiw_new[1][1]);
+          W[3][1][1] = wiw_new[1][1]*(wiw[0][3]+0.5*wiw_new[0][3]);
+          W[3][1][2] = wiw[0][3]*wiw[1][1]+0.5*wiw_new[0][3]*wiw[1][1]+0.5*wiw[0][3]*wiw_new[1][1]+wiw_new[0][3]*wiw_new[1][1]/3.;
+
+          W[3][2][0] = wiw_new[0][3]*(wiw[1][2]+0.5*wiw_new[1][2]);
+          W[3][2][1] = wiw_new[1][2]*(wiw[0][3]+0.5*wiw_new[0][3]);
+          W[3][2][2] = wiw[0][3]*wiw[1][2]+0.5*wiw_new[0][3]*wiw[1][2]+0.5*wiw[0][3]*wiw_new[1][2]+wiw_new[0][3]*wiw_new[1][2]/3.;
+
+          W[3][3][0] = wiw_new[0][3]*(wiw[1][3]+0.5*wiw_new[1][3]);
+          W[3][3][1] = wiw_new[1][3]*(wiw[0][3]+0.5*wiw_new[0][3]);
+          W[3][3][2] = wiw[0][3]*wiw[1][3]+0.5*wiw_new[0][3]*wiw[1][3]+0.5*wiw[0][3]*wiw_new[1][3]+wiw_new[0][3]*wiw_new[1][3]/3.;
+
+          W[3][4][0] = wiw_new[0][3]*(wiw[1][4]+0.5*wiw_new[1][4]);
+          W[3][4][1] = wiw_new[1][4]*(wiw[0][3]+0.5*wiw_new[0][3]);
+          W[3][4][2] = wiw[0][3]*wiw[1][4]+0.5*wiw_new[0][3]*wiw[1][4]+0.5*wiw[0][3]*wiw_new[1][4]+wiw_new[0][3]*wiw_new[1][4]/3.;
+
+          W[4][0][0] = wiw_new[0][4]*(wiw[1][0]+0.5*wiw_new[1][0]);
+          W[4][0][1] = wiw_new[1][0]*(wiw[0][4]+0.5*wiw_new[0][4]);
+          W[4][0][2] = wiw[0][4]*wiw[1][0]+0.5*wiw_new[0][4]*wiw[1][0]+0.5*wiw[0][4]*wiw_new[1][0]+wiw_new[0][4]*wiw_new[1][4]/3.;
+
+          W[4][1][0] = wiw_new[0][4]*(wiw[1][1]+0.5*wiw_new[1][1]);
+          W[4][1][1] = wiw_new[1][1]*(wiw[0][4]+0.5*wiw_new[0][4]);
+          W[4][1][2] = wiw[0][4]*wiw[1][1]+0.5*wiw_new[0][4]*wiw[1][1]+0.5*wiw[0][4]*wiw_new[1][1]+wiw_new[0][4]*wiw_new[1][1]/3.;
+
+          W[4][2][0] = wiw_new[0][4]*(wiw[1][2]+0.5*wiw_new[1][2]);
+          W[4][2][1] = wiw_new[1][2]*(wiw[0][4]+0.5*wiw_new[0][4]);
+          W[4][2][2] = wiw[0][4]*wiw[1][2]+0.5*wiw_new[0][4]*wiw[1][2]+0.5*wiw[0][4]*wiw_new[1][2]+wiw_new[0][4]*wiw_new[1][2]/3.;
+
+          W[4][3][0] = wiw_new[0][4]*(wiw[1][3]+0.5*wiw_new[1][3]);
+          W[4][3][1] = wiw_new[1][3]*(wiw[0][4]+0.5*wiw_new[0][4]);
+          W[4][3][2] = wiw[0][4]*wiw[1][3]+0.5*wiw_new[0][4]*wiw[1][3]+0.5*wiw[0][4]*wiw_new[1][3]+wiw_new[0][4]*wiw_new[1][3]/3.;
+
+          W[4][4][0] = wiw_new[0][4]*(wiw[1][4]+0.5*wiw_new[1][4]);
+          W[4][4][1] = wiw_new[1][4]*(wiw[0][4]+0.5*wiw_new[0][4]);
+          W[4][4][2] = wiw[0][4]*wiw[1][4]+0.5*wiw_new[0][4]*wiw[1][4]+0.5*wiw[0][4]*wiw_new[1][4]+wiw_new[0][4]*wiw_new[1][4]/3.;
+
+
+  /*      for(j=0; j<5; j++){
+            for(i=0; i<5; i++){
+                W[i][j][0] = wiw_new[0][i]*(wiw[1][j]+0.5*wiw_new[1][j]);
+                W[i][j][1] = wiw_new[1][j]*(wiw[0][i]+0.5*wiw_new[0][i]);
+                W[i][j][2] = wiw[0][i]*wiw[1][j]+0.5*wiw_new[0][i]*wiw[1][j]+0.5*wiw[0][i]*wiw_new[1][j]+wiw_new[0][i]*wiw_new[1][j]/3.;
+        }*/
+
+        double Jxloc[5][5], Jyloc[5][5], Jzloc[5][5]; // local current contribution of the quasi-particle
+      /*  std::memset(Jxloc,0,sizeof(Jxloc));
+      std::memset(Jyloc,0,sizeof(Jyloc));
+       std::memset(Jzloc,0,sizeof(Jzloc));    */
+
+
+       /* for (j = 0; j < 5; j++){
+            Jxloc[0][j] = - w(p) * chargeSign * mygrid->dr[0] / dt * W[0][j][0];
+            Jzloc[0][j] = w(p) * chargeSign * vv[2] * W[0][j][2];
+        }*/
+
+          Jxloc[0][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[0][0][0];
+          Jzloc[0][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][0][2];
+
+          Jxloc[0][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[0][1][0];
+          Jzloc[0][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][1][2];
+
+          Jxloc[0][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[0][2][0];
+          Jzloc[0][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][2][2];
+
+          Jxloc[0][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[0][3][0];
+          Jzloc[0][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][3][2];
+
+          Jxloc[0][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[0][4][0];
+          Jzloc[0][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][4][2];
+
+
+    /*    for (i = 0; i < 5; i++){
+            Jyloc[i][0] = - w(p) * chargeSign * mygrid->dr[1] / dt * W[i][0][1];
+            Jzloc[i][0] = w(p) * chargeSign * vv[2] * W[i][0][2];
+        }*/
+
+          Jyloc[0][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[0][0][1];
+          Jzloc[0][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][0][2];
+
+          Jyloc[1][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[1][0][1];
+          Jzloc[1][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][0][2];
+
+          Jyloc[2][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[2][0][1];
+          Jzloc[2][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][0][2];
+
+          Jyloc[3][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[3][0][1];
+          Jzloc[3][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][0][2];
+
+          Jyloc[4][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[4][0][1];
+          Jzloc[4][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][0][2];
+
+
+        /*for (j = 0; j < 5; j++)
+          {
+            for (i = 1; i < 5; i++)
+              {
+                Jxloc[i][j] = - w(p) * chargeSign * mygrid->dr[0] / dt * W[i][j][0] + Jxloc[i-1][j];
+                Jzloc[i][j] = w(p) * chargeSign * vv[2] * W[i][j][2];
+              }
+          }*/
+
+          Jxloc[1][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[1][0][0] + Jxloc[0][0];
+          Jzloc[1][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][0][2];
+
+          Jxloc[2][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[2][0][0] + Jxloc[1][0];
+          Jzloc[2][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][0][2];
+
+          Jxloc[3][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[3][0][0] + Jxloc[2][0];
+          Jzloc[3][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][0][2];
+
+          Jxloc[4][0] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[4][0][0] + Jxloc[3][0];
+          Jzloc[4][0] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][0][2];
+
+          Jxloc[1][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[1][1][0] + Jxloc[0][1];
+          Jzloc[1][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][1][2];
+
+          Jxloc[2][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[2][1][0] + Jxloc[1][1];
+          Jzloc[2][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][1][2];
+
+          Jxloc[3][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[3][1][0] + Jxloc[2][1];
+          Jzloc[3][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][1][2];
+
+          Jxloc[4][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[4][1][0] + Jxloc[3][1];
+          Jzloc[4][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][1][2];
+
+          Jxloc[1][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[1][2][0] + Jxloc[0][2];
+          Jzloc[1][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][2][2];
+
+          Jxloc[2][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[2][2][0] + Jxloc[1][2];
+          Jzloc[2][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][2][2];
+
+          Jxloc[3][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[3][2][0] + Jxloc[2][2];
+          Jzloc[3][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][2][2];
+
+          Jxloc[4][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[4][2][0] + Jxloc[3][2];
+          Jzloc[4][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][2][2];
+
+          Jxloc[1][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[1][3][0] + Jxloc[0][3];
+          Jzloc[1][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][3][2];
+
+          Jxloc[2][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[2][3][0] + Jxloc[1][3];
+          Jzloc[2][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][3][2];
+
+          Jxloc[3][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[3][3][0] + Jxloc[2][3];
+          Jzloc[3][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][3][2];
+
+          Jxloc[4][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[4][3][0] + Jxloc[3][3];
+          Jzloc[4][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][3][2];
+
+          Jxloc[1][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[1][4][0] + Jxloc[0][4];
+          Jzloc[1][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][4][2];
+
+          Jxloc[2][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[2][4][0] + Jxloc[1][4];
+          Jzloc[2][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][4][2];
+
+          Jxloc[3][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[3][4][0] + Jxloc[2][4];
+          Jzloc[3][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][4][2];
+
+          Jxloc[4][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[0] / dt * W[4][4][0] + Jxloc[3][4];
+          Jzloc[4][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][4][2];
+
+        /*for (j = 1; j < 5; j++)
+          {
+            for (i = 0; i < 5; i++)
+              {
+                Jyloc[i][j] = - w(p) * chargeSign * mygrid->dr[1] / dt * W[i][j][1] + Jyloc[i][j-1];
+                Jzloc[i][j] = w(p) * chargeSign * vv[2] * W[i][j][2];
+              }
+          }*/
+
+
+          Jyloc[0][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[0][1][1] + Jyloc[0][0];
+          Jzloc[0][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][1][2];
+
+          Jyloc[1][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[1][1][1] + Jyloc[1][0];
+          Jzloc[1][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][1][2];
+
+          Jyloc[2][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[2][1][1] + Jyloc[2][0];
+          Jzloc[2][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][1][2];
+
+          Jyloc[3][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[3][1][1] + Jyloc[3][0];
+          Jzloc[3][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][1][2];
+
+          Jyloc[4][1] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[4][1][1] + Jyloc[4][0];
+          Jzloc[4][1] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][1][2];
+
+          Jyloc[0][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[0][2][1] + Jyloc[0][1];
+          Jzloc[0][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][2][2];
+
+          Jyloc[1][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[1][2][1] + Jyloc[1][1];
+          Jzloc[1][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][2][2];
+
+          Jyloc[2][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[2][2][1] + Jyloc[2][1];
+          Jzloc[2][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][2][2];
+
+          Jyloc[3][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[3][2][1] + Jyloc[3][1];
+          Jzloc[3][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][2][2];
+
+          Jyloc[4][2] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[4][2][1] + Jyloc[4][1];
+          Jzloc[4][2] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][2][2];
+
+          Jyloc[0][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[0][3][1] + Jyloc[0][2];
+          Jzloc[0][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][3][2];
+
+          Jyloc[1][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[1][3][1] + Jyloc[1][2];
+          Jzloc[1][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][3][2];
+
+          Jyloc[2][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[2][3][1] + Jyloc[2][2];
+          Jzloc[2][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][3][2];
+
+          Jyloc[3][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[3][3][1] + Jyloc[3][2];
+          Jzloc[3][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][3][2];
+
+          Jyloc[4][3] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[4][3][1] + Jyloc[4][2];
+          Jzloc[4][3] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][3][2];
+
+          Jyloc[0][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[0][4][1] + Jyloc[0][3];
+          Jzloc[0][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[0][4][2];
+
+          Jyloc[1][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[1][4][1] + Jyloc[1][3];
+          Jzloc[1][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[1][4][2];
+
+          Jyloc[2][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[2][4][1] + Jyloc[2][3];
+          Jzloc[2][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[2][4][2];
+
+          Jyloc[3][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[3][4][1] + Jyloc[3][3];
+          Jzloc[3][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[3][4][2];
+
+          Jyloc[4][4] = - pData[pIndex(6, p, Ncomp, Np)] * chargeSign * mygrid->dr[1] / dt * W[4][4][1] + Jyloc[4][3];
+          Jzloc[4][4] = pData[pIndex(6, p, Ncomp, Np)] * chargeSign * vv[2] * W[4][4][2];
+
+
+
+        // compute total current
+        //for (j = 0; j < 5; j++)
+
+
+          j1 = wii[1] - 2;
+          i1 = wii[0] - 2;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[0][0];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[0][0];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]+= Jzloc[0][0];
+
+          i1 = wii[0] - 1;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jxloc[1][0];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[1][0];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[1][0];
+
+          i1 = wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[2][0];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[2][0];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[2][0];
+
+          i1 = 1 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[3][0];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[3][0];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]+= Jzloc[3][0];
+
+          i1 = 2 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[4][0];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[4][0];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[4][0];
+
+          j1 = wii[1] - 1;
+          i1 = wii[0] - 2;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[0][1];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[0][1];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[0][1];
+
+          i1 = wii[0] - 1;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[1][1];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[1][1];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[1][1];
+
+          i1 = wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[2][1];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[2][1];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[2][1];
+
+          i1 = 1 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[3][1];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[3][1];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[3][1];
+
+          i1 = 2 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[4][1];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[4][1];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[4][1];
+
+          j1 = wii[1];
+          i1 = wii[0] - 2;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[0][2];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[0][2];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[0][2];
+
+          i1 = wii[0] - 1;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[1][2];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[1][2];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[1][2];
+
+          i1 = wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[2][2];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[2][2];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[2][2];
+
+          i1 = 1 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[3][2];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[3][2];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[3][2];
+
+          i1 = 2 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[4][2];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jyloc[4][2];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[4][2];
+
+          j1 = 1 + wii[1];
+          i1 = wii[0] - 2;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[0][3];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[0][3];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[0][3];
+
+          i1 = wii[0] - 1;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[1][3];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[1][3];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[1][3];
+
+          i1 = wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[2][3];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[2][3];
+          current->Jz(i1, j1, k1) += Jzloc[2][3];
+
+          i1 = 1 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[3][3];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[3][3];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[3][3];
+
+          i1 = 2 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[4][3];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[4][3];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[4][3];
+
+          j1 = 2 + wii[1];
+          i1 = wii[0] - 2;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[0][4];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[0][4];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[0][4];
+
+          i1 = wii[0] - 1;
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[1][4];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[1][4];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[1][4];
+
+          i1 = wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[2][4];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[2][4];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[2][4];
+
+          i1 = 1 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[3][4];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[3][4];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[3][4];
+
+          i1 = 2 + wii[0];
+          myCurrent[my_indice(edge, 1, 0, 0, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jxloc[4][4];
+          myCurrent[my_indice(edge, 1, 0, 1, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)]  += Jyloc[4][4];
+          myCurrent[my_indice(edge, 1, 0, 2, i1, j1, k1, N_grid[0], N_grid[1], N_grid[2], current->Ncomp)] += Jzloc[4][4];
+
+
+
+      }
+      break;
+
+
+  case 1:
+    for (p = 0; p < Np; p++)
+    {
+      double ux, uy, uz;
+      ux = ru(3,p);
+      uy = ru(4,p);
+      uz = ru(5,p);
+
+      gamma_i = 1. / sqrt(1 + ux*ux + uy*uy + uz*uz);
+      for (c = 0; c < 3; c++)
+      {
+        vv[c] = gamma_i*ru(c+3,p);
+        hiw[c][0] = wiw[c][0] = 0;
+        hiw[c][1] = wiw[c][1] = 0;
+        hiw[c][2] = wiw[c][2] = 1;
+        hiw[c][3] = wiw[c][3] = 0;
+        hiw[c][4] = wiw[c][4] = 0;
+        hii[c] = wii[c] = 0;
+      }
+      for (c = 0; c < 1; c++)
+      {
+        //xx[c] = pData[pIndex(c, p, Ncomp, Np)] + 0.5*dt*vv[c];
+        //pData[pIndex(c, p, Ncomp, Np)] += dt*vv[c];
+
+
+        rr = mygrid->dri[c] * (ru(c,p) - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+
+        wii[c] = (int)floor(rr + 0.5); //whole integer int
+        hii[c] = (int)floor(rr);     //half integer int
+        rr -= wii[c];
+        rh -= hii[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        wiw[c][0] = 0.;
+        wiw[c][1] = 0.5*(0.25 + rr2 - rr);
+        wiw[c][2] = 0.75 - rr2;
+        wiw[c][3] = 1. - wiw[c][1] - wiw[c][2];
+        wiw[c][4] = 0;
+
+        ru(c, p) += dt*vv[c];
+
+        rr = mygrid->dri[c] * (ru(c,p) - mygrid->rminloc[c]);
+        rh = rr - 0.5;
+
+        wii_new[c] = (int)floor(rr + 0.5); //whole integer int
+        hii_new[c] = (int)floor(rr);     //half integer int
+        rr -= wii_new[c];
+        rh -= hii_new[c];
+        rr2 = rr*rr;
+        rh2 = rh*rh;
+
+        int dii = wii_new[c]-wii[c];
+
+        switch (dii)
+        {
+        case -1: // la particella si è spostata indietro quindi deposito su i-2,i-1,i
+            wiw_new[c][0] = 0.5*(0.25 + rr2 - rr);
+            wiw_new[c][1] = 0.75 - rr2;
+            wiw_new[c][2] = 1. - wiw_new[c][0] - wiw_new[c][1];
+            wiw_new[c][3] = 0;
+            wiw_new[c][4] = 0;
+            break;
+        case  0: // deposito di nuovo su i-1,i,i+1 perchè non è cambiato il nodo più vicino alla particella
+            wiw_new[c][0] = 0.;
+            wiw_new[c][1] = 0.5*(0.25 + rr2 - rr);
+            wiw_new[c][2] = 0.75 - rr2;
+            wiw_new[c][3] = 1. - wiw_new[c][1] - wiw_new[c][2];
+            wiw_new[c][4] = 0;
+            break;
+
+        case 1: // deposito su i,i+1,i+2
+            wiw_new[c][0] = 0;
+            wiw_new[c][1] = 0;
+            wiw_new[c][2] = 0.5*(0.25 + rr2 - rr);
+            wiw_new[c][3] = 0.75 - rr2;
+            wiw_new[c][4] = 1. - wiw_new[c][2] - wiw_new[c][3];
+            break;
+        }
+
+    // non faccio la differenza
+      }
+
+
+      k1 = k2 = j1 = j2 = 0;
+      double W[5][3];
+
+      for (i = 0; i < 5; i++)
+      {
+
+        W[i][0] = wiw_new[0][i]-wiw[0][i];
+        W[i][1] = 0.5*wiw_new[0][i]+0.5*wiw[0][i];
+        W[i][2] = W[i][1];
+
+      }
+
+      double Jxloc[5], Jyloc[5], Jzloc[5];
+
+      Jxloc[0] = - w(p) * chargeSign * mygrid->dr[0] / dt * W[0][0];
+      Jyloc[0] = w(p) * chargeSign * vv[1] * W[0][1];
+      Jzloc[0] = w(p) * chargeSign * vv[2] * W[0][2];
+
+      for (i=1;i<5;i++){
+
+          Jxloc[i] = - w(p) * chargeSign * mygrid->dr[0] / dt * W[i][0] + Jxloc[i-1];
+          Jyloc[i] = w(p) * chargeSign * vv[1] * W[i][1];
+          Jzloc[i] = w(p) * chargeSign * vv[2] * W[i][2];
+      }
+
+      for(i=0;i<5;i++){
+          i1 = i + wii[0] - 2;
+
+          current->Jx(i1, j1, k1) += Jxloc[i];
+          current->Jy(i1, j1, k1) += Jyloc[i];
+          current->Jz(i1, j1, k1) += Jzloc[i];
+
+      }
+    }
+    break;
+  }
+}
+
 
