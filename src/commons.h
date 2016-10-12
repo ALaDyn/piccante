@@ -152,6 +152,11 @@ template <class T>const T& TMAX(const T& a, const T& b) {
   return (a > b) ? a : b;
 }
 
+inline int factorial(int n)
+{
+  return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
+
 //*****LOGOS******
 
 const std::string common_logo =

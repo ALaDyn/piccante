@@ -2359,13 +2359,13 @@ void EM_FIELD::laguerreGaussian_pulse(int dimensions, double xx, double yy, doub
     //Only l <= 3
     double Lp;
     if(LG_m == 3){
-        Lp = -argL*argL*argL/6.0 + (LG_l+3)*argL*argL/2.0 - (LG_l+2)*(LG_l+3)*argL/2.0 + (LG_l+3)*(LG_l+2)*(LG_l+1)/6.0;
+        Lp = (-argL*argL*argL/6.0 + (LG_l+3)*argL*argL/2.0 - (LG_l+2)*(LG_l+3)*argL/2.0 + (LG_l+3)*(LG_l+2)*(LG_l+1)/6.0 );
     }
     else if (LG_m == 2){
-        Lp = +argL*argL/2.0 - (LG_l +2)*argL + 0.5*(LG_l+2)*(LG_l+1);
+        Lp = (+argL*argL/2.0 - (LG_l +2)*argL + 0.5*(LG_l+2)*(LG_l+1));
     }
     else if (LG_m == 1){
-        Lp = -argL + LG_l + 1;
+        Lp = (-argL + LG_l + 1);
     }
     else{
         Lp = 1.0;
@@ -2376,7 +2376,9 @@ void EM_FIELD::laguerreGaussian_pulse(int dimensions, double xx, double yy, doub
 
     double phase = k0*(tt-xx) + k0*(xx)*r2/(2*(xx*xx + zra*zra))+ (2*LG_m + LG_l + 1)*atan(xx/zra) + LG_l*atan2(yy,zz);
 
-    amp00 = cos(phase)*Lp*c1*rprofile*tprofile*signum;
+    double nnorm  = sqrt(factorial(LG_m) / (1.0*factorial(LG_m + LG_l)));
+
+    amp00 = cos(phase)*Lp*c1*rprofile*tprofile*signum*nnorm;
 
   if (polarization == P_POLARIZATION) {
     field[0] = 0;          //Ex
