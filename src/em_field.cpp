@@ -2352,7 +2352,7 @@ void EM_FIELD::laguerreGaussian_pulse(int dimensions, double xx, double yy, doub
 
     double tprofile = cos2_profile((tt - xx) / fwhm);
 
-    double c1 = pow(sqrt(r2*2)/waist,LG_l);
+    double c1 = pow(sqrt(r2*2.0)/waist,LG_l);
 
     double argL = 2*r2/waist/waist;
 
@@ -2362,7 +2362,7 @@ void EM_FIELD::laguerreGaussian_pulse(int dimensions, double xx, double yy, doub
         Lp = -argL*argL*argL/6.0 + (LG_l+3)*argL*argL/2.0 - (LG_l+2)*(LG_l+3)*argL/2.0 + (LG_l+3)*(LG_l+2)*(LG_l+1)/6.0;
     }
     else if (LG_m == 2){
-        Lp = -argL*argL/2.0 - (LG_l +2)*argL - 0.5*(LG_l+2)*(LG_l+1);
+        Lp = +argL*argL/2.0 - (LG_l +2)*argL + 0.5*(LG_l+2)*(LG_l+1);
     }
     else if (LG_m == 1){
         Lp = -argL + LG_l + 1;
