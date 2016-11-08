@@ -546,7 +546,7 @@ double right_free_exp_ramp(double x, double y, double z, PLASMAparams plist, dou
     }
     else {
       double xx = (plist.rmaxbox[0] - x - plist.right_ramp_length);
-      return (plist.density_coefficient*exp(xx / plist.left_scale_length));
+      return (plist.density_coefficient*exp(xx / plist.right_scale_length));
     }
   }
   else {
