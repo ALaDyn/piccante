@@ -111,6 +111,12 @@ marconi: BOOST_LIB = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--5.1--bina
 marconi: BOOST_INC = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--5.1--binary/include
 marconi: all
 
+marconi-knl: boost
+marconi-knl: OPT +=  -axMIC-AVX512 
+marconi-knl: BOOST_LIB = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--2017--binary/lib
+marconi-knl: BOOST_INC = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--2017--binary/include
+marconi-knl: all
+
 galileo: boost
 galileo: OPT += -xCORE-AVX2 -ipo
 galileo: BOOST_INC = /cineca/prod/libraries/boost/1.57.0/intel--cs-xe-2015--binary/include
