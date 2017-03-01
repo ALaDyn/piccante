@@ -2578,7 +2578,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
       vdotE2 = vdotE2*vdotE2;
 
       fvecB[0] = fLorentz[1]*B[2]-fLorentz[2]*B[1];
-      fvecB[1] = fLorentz[3]*B[0]-fLorentz[0]*B[3];
+      fvecB[1] = fLorentz[2]*B[0]-fLorentz[0]*B[2];
       fvecB[2] = fLorentz[0]*B[1]-fLorentz[1]*B[0];
 
       ru(3, p) -= RRcoefficient*(fvecB[0] - vdotEE[0] + (gamman*gamman)*(fLorentz2 - vdotE2)*vn[0]) * dt;
@@ -2700,7 +2700,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
       vdotE2 = vdotE2*vdotE2;
 
       fvecB[0] = fLorentz[1]*B[2]-fLorentz[2]*B[1];
-      fvecB[1] = fLorentz[3]*B[0]-fLorentz[0]*B[3];
+      fvecB[1] = fLorentz[2]*B[0]-fLorentz[0]*B[2];
       fvecB[2] = fLorentz[0]*B[1]-fLorentz[1]*B[0];
 
       ru(3, p) -= RRcoefficient*(fvecB[0] - vdotEE[0] + (gamman*gamman)*(fLorentz2 - vdotE2)*vn[0]) * dt;
@@ -2816,7 +2816,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
       vdotE2 = vdotE2*vdotE2;
 
       fvecB[0] = fLorentz[1]*B[2]-fLorentz[2]*B[1];
-      fvecB[1] = fLorentz[3]*B[0]-fLorentz[0]*B[3];
+      fvecB[1] = fLorentz[2]*B[0]-fLorentz[0]*B[2];
       fvecB[2] = fLorentz[0]*B[1]-fLorentz[1]*B[0];
 
       ru(3, p) -= RRcoefficient*(fvecB[0] - vdotEE[0] + (gamman*gamman)*(fLorentz2 - vdotE2)*vn[0]) * dt;
