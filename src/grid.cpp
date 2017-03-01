@@ -347,7 +347,7 @@ void GRID::printTheEnd() {
 
     struct tm * now = localtime(&timer);
 
-    printf("%6i/%i  %f   %2.2i:%2.2i:%2.2i  (%2.2i/%2.2i/%4i)   %8i sec.\n", istep, Nstep, time, now->tm_hour, now->tm_min, now->tm_sec, now->tm_mday, (now->tm_mon + 1), (now->tm_year + 1900), (int)(timer - unix_time_start));
+    printf("%6i/%i  %f   %2.2i:%2.2i:%2.2i  (%2.2i/%2.2i/%4i)   %8i sec.\n", (istep-1), Nstep, time, now->tm_hour, now->tm_min, now->tm_sec, now->tm_mday, (now->tm_mon + 1), (now->tm_year + 1900), (int)(timer - unix_time_start));
     printf("-------------- THE END ----------------\n");
     fflush(stdout);
   }
