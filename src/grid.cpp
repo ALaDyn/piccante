@@ -339,6 +339,21 @@ void GRID::printTStepAsPlanned(int every) {
   }
 }
 
+void GRID::printTheEnd() {
+  int Nstep = totalNumberOfTimesteps;
+  if (myid == master_proc) {
+    time_t timer;
+    std::time(&timer);  /* get current time; same as: timer = time(NULL)  */
+
+    struct tm * now = localtime(&timer);
+
+    printf("%6i/%i  %f   %2.2i:%2.2i:%2.2i  (%2.2i/%2.2i/%4i)   %8i sec.\n", istep, Nstep, time, now->tm_hour, now->tm_min, now->tm_sec, now->tm_mday, (now->tm_mon + 1), (now->tm_year + 1900), (int)(timer - unix_time_start));
+    printf("-------------- THE END ----------------\n");
+    fflush(stdout);
+  }
+}
+
+
 void GRID::initRNG(my_rng_generator& rng, uint32_t auxiliary_seed){
   //INIZIALIZZO IL GENERATORE DI NUMERI CASUALI
   //Seeding del generatore di numeri casuali.

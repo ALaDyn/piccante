@@ -122,6 +122,7 @@ public:
   void moveWindow();
   void printTStepAsPlanned();
   void printTStepAsPlanned(int every);
+  void printTheEnd();
   void initRNG(my_rng_generator &rng, uint32_t auxiliary_seed);
   void initRNG(uint32_t auxiliary_seed);
   void visualDiag();

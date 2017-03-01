@@ -195,7 +195,7 @@ int main(int narg, char **args)
     UTILITIES::moveWindow(&grid, &myfield, species);
     UTILITIES::considerDumpForRestart(&grid, &myfield, species);
   }
-
+  grid.printTheEnd();
   manager.close();
   MPI_Finalize();
   exit(0);
