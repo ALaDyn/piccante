@@ -145,6 +145,7 @@ public:
   static const distrib_function dFPoint[];
 
   static bool isGrating(int dfIndex);
+  static bool isBlazedGrating(int dfIndex);
   static bool isPillar2D(int dfIndex);
   static bool isNanotubes2D(int dfIndex);
   static bool isFoils2D(int dfIndex);

@@ -123,6 +123,13 @@ bool PLASMA::isGrating(int dfIndex) {
     return false;
 }
 
+bool PLASMA::isBlazedGrating(int dfIndex) {
+  if (dfIndex == 19)
+    return true;
+  else
+    return false;
+}
+
 bool PLASMA::isPillar2D(int dfIndex) {
   if (dfIndex == 20)
     return true;
@@ -623,23 +630,29 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
 double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A) {
   double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
   double* paramlist = (double*)plist.additional_params;
-  double g_depth = paramlist[0];
+  //double g_depth = paramlist[0];
   double g_lambda = paramlist[1];
-  double blazAngle = 35.0 / 180.0 * M_PI;
-
-  double yt = g_depth / tan(blazAngle);
-  double ytt = g_lambda - yt;
-
-  double yy = (y - g_y0) / g_lambda;
+  double g_alpha = paramlist[0]/ 180.0 * M_PI;
+  double g_phase = paramlist[2];
+  double mySign = 1;
+  if(g_alpha<0){
+    mySign=-1;
+    g_alpha= -g_alpha;
+  }
+  g_y0 += g_phase/(2*M_PI)*g_lambda;
+  double g_ah = g_lambda*cos(g_alpha)*cos(g_alpha);
+  double g_ch = g_lambda -g_ah;
+  double g_depth = g_lambda*cos(g_alpha)*sin(g_alpha);
+  double yy = (mySign*y - g_y0) / g_lambda;
   yy = (yy - floor(yy))*g_lambda;
 
   double xminbound;
 
-  if (yy < ytt) {
-    xminbound = plist.rminbox[0] + g_depth*(yy / ytt);
+  if (yy < g_ah) {
+    xminbound = plist.rminbox[0] + g_depth*(yy / g_ah);
   }
   else {
-    xminbound = plist.rminbox[0] + g_depth*((g_lambda - yy) / yt);
+    xminbound = plist.rminbox[0] + g_depth*((g_lambda - yy) / g_ch);
   }
 
   if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&

@@ -845,6 +845,21 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
           additionalParams[1] = g_period;
           additionalParams[2] = g_phase;
 
+          if(PLASMA::isBlazedGrating(plasmaFunctionIndex)){
+            double g_blaze_angle = 35;
+            setDouble(&g_blaze_angle, myPlasma, _JSON_DOUBLE_PLASMA_GRATING_BLAZE_ANGLE);
+            if(g_blaze_angle>90&& isThisJsonMaster){
+              std::cout << "Warning! In plasma " << plasmaName << " blaze angle is incorrect (>90): " << g_blaze_angle << std::endl;
+              std::cout << "Warning! In plasma " << plasmaName << " 35 will be used instead!!!" << std::endl;
+              g_blaze_angle = 35;
+            }
+            if(g_blaze_angle<-90&& isThisJsonMaster){
+              std::cout << "Warning! In plasma " << plasmaName << " blaze angle is incorrect (<-90): " << g_blaze_angle << std::endl;
+              std::cout << "Warning! In plasma " << plasmaName << " -35 will be used instead!!!" << std::endl;
+              g_blaze_angle = - 35;
+            }
+            additionalParams[0] = g_blaze_angle;
+          }
           map[plasmaName]->setAdditionalParams(additionalParams);
         }
 
