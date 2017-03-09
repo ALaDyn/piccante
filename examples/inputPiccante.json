@@ -81,7 +81,18 @@
       "Nanotubes2DDist" : 1.0,
       "Nanotubes2DDepth" : 5.0,
       "Nanotubes2DWidth" : 0.1	
-    }
+    },
+    {
+        "name": "blazed_grating",
+        "densityFunction": "left_blazed_grating",
+        "XRangeBox" : [0, 2],
+        "YRangeBox" : [-30, 30],
+        "ZRangeBox" : [-1, 1],
+        "DensityCoefficient" : 1.0,
+        "GratingBlazeAngle" : 30.0,
+        "GratingPeriod" : 2.0,
+        "GratingPhase" : 0.0
+      }
   ],
   "Species":[
     {
