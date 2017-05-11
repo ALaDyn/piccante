@@ -74,8 +74,8 @@ void UTILITIES::restartFromDump(GRID* mygrid, EM_FIELD* myfield, std::vector<SPE
   mygrid->dumpControl.currentDumpID = dumpID;
 }
 
-void UTILITIES::restartFromDump(int *_dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
-  int dumpID = mygrid->dumpControl.currentDumpID;
+void UTILITIES::restartFromDump(int* _dumpID, GRID* mygrid, EM_FIELD* myfield, std::vector<SPECIE*> species) {
+  int dumpID = mygrid->dumpControl.restartFromDump;
   std::ifstream dumpFile;
   MPI_Barrier(MPI_COMM_WORLD);
 

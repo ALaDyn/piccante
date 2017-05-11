@@ -25,10 +25,10 @@ endif
 
 MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
-OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))    
+OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
 
 LIB =
-RPATH = 
+RPATH =
 OPT = -O3 -std=c++11
 
 BOOST_LIB = $(SRC_FOLDER)
@@ -44,9 +44,9 @@ print-% :
 
 pippo:
 	@echo "$(MAINFILE)"
-    
+
 boost: OPT += -DUSE_BOOST
-boost: LIB += -lboost_filesystem -lboost_system
+boost: LIB = -lboost_filesystem -lboost_system
 boost: all
 
 nocpp11: boost
@@ -61,25 +61,25 @@ cnaf: all
 cnaf-intel: boost
 cnaf-intel: COMPILER = mpiicpc
 cnaf-intel: OPT += -axSSE4.2,AVX -ipo
-cnaf-intel: OPT_REPORT += -vec-report -opt-report 3 
+cnaf-intel: OPT_REPORT += -vec-report -opt-report 3
 cnaf-intel: BOOST_LIB = /shared/software/BOOST/boost_1_56_0/lib
 cnaf-intel: BOOST_INC = /shared/software/BOOST/boost_1_56_0/include
 cnaf-intel: all
 
 cnaf-phi: COMPILER = mpiicpc
-cnaf-phi: OPT = -O3 -std=c++11 -mmic 
-cnaf-phi: RPATH = -Wl,-rpath=/shared/software/compilers/intel/compilers_and_libraries_2016.0.109/linux/compiler/lib/intel64_lin_mic 
+cnaf-phi: OPT = -O3 -std=c++11 -mmic
+cnaf-phi: RPATH = -Wl,-rpath=/shared/software/compilers/intel/compilers_and_libraries_2016.0.109/linux/compiler/lib/intel64_lin_mic
 cnaf-phi: all
 
-brew: 
+brew:
 	@echo ' '
 	@echo '"brew" is deprecated: use "make boost" instead'
 	@echo 'if it fails, check Makefile and adapt the rule "brewold"'
 	@echo ' '
 
 brewold: boost
-brewold: BOOST_LIB = /usr/local/Cellar/boost/1.60.0_2/lib
-brewold: BOOST_INC = /usr/local/Cellar/boost/1.60.0_2/include
+brewold: BOOST_LIB = /usr/local/Cellar/boost/1.63.0/lib
+brewold: BOOST_INC = /usr/local/Cellar/boost/1.63.0/include
 brewold: all
 
 hdf5: boost
@@ -100,7 +100,7 @@ profiling: all
 
 scalasca: COMPILER = scalasca -instrument mpicxx
 scalasca: OPT += -g
-scalasca: all 
+scalasca: all
 
 sse2-vec: OPT += -ftree-vectorize -msse2 -ftree-vectorizer-verbose=5
 sse2-vec: all
@@ -112,7 +112,7 @@ marconi: BOOST_INC = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--5.1--bina
 marconi: all
 
 marconi-knl: boost
-marconi-knl: OPT +=  -axMIC-AVX512 
+marconi-knl: OPT +=  -axMIC-AVX512
 marconi-knl: BOOST_LIB = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--2017--binary/lib
 marconi-knl: BOOST_INC = /cineca/prod/opt/libraries/boost/1.61.0/intelmpi--2017--binary/include
 marconi-knl: all
@@ -175,17 +175,16 @@ $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp $(SRC_FOLDER)/%.h $(SRC_FOLDER)/preproc_d
 
 $(MAINO) : $(MAIN) $(SRC_FOLDER)/preproc_defs.h
 	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $(MAINO) $(MAIN)
-    
+
 clean:
 	rm -f $(OBJ) $(OBJDEV) *~
 
 cleanall:
 	rm -f $(OBJ) $(OBJDEV) $(EXE) $(EXE).debug *~
 
-help: 
+help:
 	@echo 'Usage: make config=OPTIONS'
 	@echo '	    OPTIONS is a string composed of one or more of:'
 	@echo '	        devel      : to compile using main-devel.cpp instead of default'
 	@echo ' examples:'
 	@echo '     make config=devel'
-
