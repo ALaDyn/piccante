@@ -86,15 +86,13 @@ int main(int narg, char **args)
   //*******************************************  START LANGMUIR SET  *********************************************************
   //*******************************************  READ  LANGMUIR SET  *********************************************************
   LANGMUIRset langmuirSet;
-
   jsonParser::setLangmuirWavesSet(root,langmuirSet);
   UTILITIES::setLangmuirWaveSet(langmuirSet, grid);
-
   //************** IF IF IF ********** MOVE PARTICLES USING LANGMUIR SET  *********************************************************
-  if(langmuirSet.checkLangmuirSetValidity&&langmuirSet.enableStandingWaves){
+  if(langmuirSet.checkLangmuirSetValidity){
     for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
       if((*spec_iterator)->type==ELECTRON){
-      UTILITIES::moveParticles(&grid,(*spec_iterator),langmuirSet.myKModes);
+      UTILITIES::moveParticles(&grid,(*spec_iterator),langmuirSet.myKModes,langmuirSet.enableStandingWaves);
       }
       (*spec_iterator)->position_parallel_pbc();
     }
@@ -102,28 +100,28 @@ int main(int narg, char **args)
   //*******************************************  END LANGMUIR SET  *********************************************************
 
   //*******************************************  OLD WAVE INITIALIZATION  *********************************************************
-  bool isThereSpecial=false;
-  bool isThereAmpli=false;
-  bool isThereLambda=false;
-  bool isWaveOK = false;
-  double amplitude;
-  double lambda;
-  Json::Value special;
-  isThereSpecial=jsonParser::setValue(special,root,"special");
-  if(isThereSpecial){
-    isThereAmpli  = jsonParser::setDouble(&amplitude, special, "amplitude");
-    isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
-    isWaveOK = isThereAmpli&&isThereLambda;
-  }
-  if(isWaveOK){
-    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
-     if((*spec_iterator)->type==ELECTRON){
-         UTILITIES::OldMoveParticles(&grid,(*spec_iterator),amplitude,lambda);
-     }
-      (*spec_iterator)->position_parallel_pbc();
-      (*spec_iterator)->position_parallel_pbc();
-    }
-  }
+//  bool isThereSpecial=false;
+//  bool isThereAmpli=false;
+//  bool isThereLambda=false;
+//  bool isWaveOK = false;
+//  double amplitude;
+//  double lambda;
+//  Json::Value special;
+//  isThereSpecial=jsonParser::setValue(special,root,"special");
+//  if(isThereSpecial){
+//    isThereAmpli  = jsonParser::setDouble(&amplitude, special, "amplitude");
+//    isThereLambda = jsonParser::setDouble(&lambda,    special, "lambda");
+//    isWaveOK = isThereAmpli&&isThereLambda;
+//  }
+//  if(isWaveOK){
+//    for (spec_iterator = species.begin(); spec_iterator != species.end(); spec_iterator++){
+//     if((*spec_iterator)->type==ELECTRON){
+//         UTILITIES::OldMoveParticles(&grid,(*spec_iterator),amplitude,lambda);
+//     }
+//      (*spec_iterator)->position_parallel_pbc();
+//      (*spec_iterator)->position_parallel_pbc();
+//    }
+//  }
 
   //*******************************************BEGIN FIELD DEFINITION*********************************************************
   myfield.allocate(&grid);

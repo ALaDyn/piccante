@@ -85,7 +85,7 @@ public:
     static void setLangmuirWaveSet(LANGMUIRset &langmuirSet, GRID &grid);
 
     static void OldMoveParticles(GRID* grid, SPECIE* specie, double amplitude,double lambda);
-    static void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes);
+    static void moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes, bool enableStandingWaves);
     static void setExternaField(EM_FIELD &exfield, GRID &mygrid, double time, LANGMUIRset &langmuirSet);
 
     static void printTotalNumberOfParticles(std::vector<SPECIE*> species, GRID &mygrid);

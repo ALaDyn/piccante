@@ -60,9 +60,16 @@ struct KMODE{
   double phase;
 };
 
+struct KSPECTRUM{
+  double amplitude;
+  double centralK[3];
+  double sigmaK[3];
+};
+
 struct LANGMUIRset{
   GRIDmodes gridModes;
   std::vector<KMODE> myKModes;
+  std::vector<KSPECTRUM> myKSpectra;
   double growthRate;
   double refTemp;
   double refDens;

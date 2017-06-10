@@ -444,37 +444,40 @@ void UTILITIES::setKModesToBeInitialised(std::vector<KMODE> &myKModes, GRIDmodes
 
 }
 
+
 void UTILITIES::newSetKModesToBeInitialised(LANGMUIRset &langmuirSet){
   my_rng_generator mt_rng;
   mt_rng.seed(54890);
   my_uniform_real_distribution randPhase(0, 2.0*M_PI);
 
-  double kz, ky, kx;
-  for(int k=0; k<langmuirSet.gridModes.Nk[2]; k++){
-    kz = langmuirSet.gridModes.kvalues[2][k];
-    for(int j=0; j<langmuirSet.gridModes.Nk[1]; j++){
-      ky = langmuirSet.gridModes.kvalues[1][j];
+  for(int index=0; index<langmuirSet.myKSpectra.size();index++){
+    double kz, ky, kx;
+    for(int k=0; k<langmuirSet.gridModes.Nk[2]; k++){
+      kz = langmuirSet.gridModes.kvalues[2][k];
+      for(int j=0; j<langmuirSet.gridModes.Nk[1]; j++){
+        ky = langmuirSet.gridModes.kvalues[1][j];
         for(int i=0; i<langmuirSet.gridModes.Nk[0]; i++){
           kx = langmuirSet.gridModes.kvalues[0][i];
-        double amp = 1;
-        amp *= exp( -(kx-langmuirSet.centralK[0])*(kx-langmuirSet.centralK[0])/(langmuirSet.sigmaK[0]*langmuirSet.sigmaK[0]) );
-        amp *= exp( -(ky-langmuirSet.centralK[1])*(ky-langmuirSet.centralK[1])/(langmuirSet.sigmaK[1]*langmuirSet.sigmaK[1]) );
-        amp *= exp( -(kz-langmuirSet.centralK[2])*(kz-langmuirSet.centralK[2])/(langmuirSet.sigmaK[2]*langmuirSet.sigmaK[2]) );
-        if(amp>1e-2){
-          amp *= langmuirSet.amplitude;
-          KMODE newMode;
-          newMode.amplitude=amp;
-          newMode.k[0] = kx;
-          newMode.k[1] = ky;
-          newMode.k[2] = kz;
-          newMode.phase = randPhase(mt_rng);
-          langmuirSet.myKModes.push_back(newMode);
-        }
+          double amp = 1;
 
+          amp *= exp( -(kx-langmuirSet.myKSpectra[index].centralK[0])*(kx-langmuirSet.myKSpectra[index].centralK[0])/(langmuirSet.myKSpectra[index].sigmaK[0]*langmuirSet.myKSpectra[index].sigmaK[0]) );
+          amp *= exp( -(ky-langmuirSet.myKSpectra[index].centralK[1])*(ky-langmuirSet.myKSpectra[index].centralK[1])/(langmuirSet.myKSpectra[index].sigmaK[1]*langmuirSet.myKSpectra[index].sigmaK[1]) );
+          amp *= exp( -(kz-langmuirSet.myKSpectra[index].centralK[2])*(kz-langmuirSet.myKSpectra[index].centralK[2])/(langmuirSet.myKSpectra[index].sigmaK[2]*langmuirSet.myKSpectra[index].sigmaK[2]) );
+          if(amp>1e-2){
+            amp *= langmuirSet.myKSpectra[index].amplitude;
+            KMODE newMode;
+            newMode.amplitude=amp;
+            newMode.k[0] = kx;
+            newMode.k[1] = ky;
+            newMode.k[2] = kz;
+            newMode.phase = randPhase(mt_rng);
+            langmuirSet.myKModes.push_back(newMode);
+          }
+
+        }
       }
     }
   }
-
 }
 
 void UTILITIES::exchangeKModesToBeInitialised(std::vector<KMODE> &myKModes, GRID &grid){
@@ -532,18 +535,20 @@ void UTILITIES::writeLangmuirSetDataFile(LANGMUIRset &langmuirSet, GRID &grid){
 }
 
 void UTILITIES::setLangmuirWaveSet(LANGMUIRset &langmuirSet, GRID &grid){
-  if(langmuirSet.checkLangmuirSetValidity){
   UTILITIES::allocateAccessibleKModes(langmuirSet.gridModes, grid);
+  UTILITIES::writeGridModes(langmuirSet.gridModes, grid);
+  if(langmuirSet.checkLangmuirSetValidity){
+
   UTILITIES::newSetKModesToBeInitialised(langmuirSet);
   UTILITIES::exchangeKModesToBeInitialised(langmuirSet.myKModes, grid);
 
+  UTILITIES::writeLangmuirSetDataFile(langmuirSet, grid);
+  UTILITIES::writeKModesToBeInitialised(langmuirSet.myKModes, grid);
+
   }
   else{
-    grid.printMessage("NO Langmuir Wave Set is possible");
+    grid.printMessage("NO Langmuir Wave Set is possible or enabled");
   }
-  UTILITIES::writeLangmuirSetDataFile(langmuirSet, grid);
-  UTILITIES::writeGridModes(langmuirSet.gridModes, grid);
-  UTILITIES::writeKModesToBeInitialised(langmuirSet.myKModes, grid);
 
 }
 
@@ -567,7 +572,7 @@ void UTILITIES::OldMoveParticles(GRID* grid, SPECIE* specie, double amplitude,do
   }
 }
 
-void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes){
+void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myKModes, bool enableStandingWaves){
   int Npart=specie->Np;
   double density=specie->plasma.params.density_coefficient;
   double kL, phi, dr;
@@ -596,14 +601,17 @@ void UTILITIES::moveParticles(GRID* grid, SPECIE* specie, std::vector<KMODE> myK
         dVz  = dz*2*M_PI*sqrt(density);
 
         phi += kx*oldx + ky*oldy + kz*oldz;
-        specie->r0(n) += dx*cos(phi);
-        specie->r1(n) += dy*cos(phi);
-        specie->r2(n) += dz*cos(phi);
+        specie->w(n) *=myKModes[m].amplitude*sin(phi);
+        //specie->r0(n) += dx*cos(phi);
+        //specie->r1(n) += dy*cos(phi);
+        //specie->r2(n) += dz*cos(phi);
 
         phi += 2*M_PI*sqrt(density)*grid->dt*0.5;
-        //specie->u0(n) += dVx*sin(phi);
-        //specie->u1(n) += dVy*sin(phi);
-        //specie->u2(n) += dVz*sin(phi);
+        if(!enableStandingWaves){
+          specie->u0(n) += dVx*sin(phi);
+          specie->u1(n) += dVy*sin(phi);
+          specie->u2(n) += dVz*sin(phi);
+        }
       }
     }
   }

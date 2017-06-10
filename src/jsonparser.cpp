@@ -72,7 +72,9 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
   Json::Reader reader;
   bool parsedSuccess = reader.parse(buffer.str().c_str(), root, false);
 
-  if ((!parsedSuccess) && isThisJsonMaster) {
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if ((!parsedSuccess) && rank==0) {
     std::cout << "Failed to parse JSON" << std::endl
       << reader.getFormattedErrorMessages()
       << std::endl;
@@ -81,8 +83,6 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
 
   int masterProc = 0;
   setInt(&masterProc, root, _JSON_INT_MASTERPROC);
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if (rank == masterProc)
     isThisJsonMaster = true;
   else
@@ -1445,8 +1445,12 @@ void jsonParser::setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet
   langmuirSet.checkLangmuirSetValidity = jsonParser::setValue(jsonLangmuirSet, root, "langmuirSpectrum");
   if (langmuirSet.checkLangmuirSetValidity) {
     bool checkFlag;
-    bool enabled=false;
-    jsonParser::setBool(&enabled, jsonLangmuirSet, "enabled");
+    bool langmuirSetEnabled=false;
+    jsonParser::setBool(&langmuirSetEnabled, jsonLangmuirSet, "enabled");
+    if(!langmuirSetEnabled){
+      langmuirSet.checkLangmuirSetValidity = false;
+      return;
+    }
     langmuirSet.refDens=1;
     jsonParser::setDouble(&langmuirSet.refDens, jsonLangmuirSet, "refDensity");
     langmuirSet.growthRate=30;
@@ -1455,18 +1459,44 @@ void jsonParser::setLangmuirWavesSet(Json::Value &root, LANGMUIRset &langmuirSet
     jsonParser::setDouble(&langmuirSet.refTemp, jsonLangmuirSet, "refTemperature");
     langmuirSet.endTime = 150;
     jsonParser::setDouble(&langmuirSet.endTime, jsonLangmuirSet, "endTime");
-    langmuirSet.amplitude = 0;
-    checkFlag = jsonParser::setDouble(&langmuirSet.amplitude, jsonLangmuirSet, "amplitude");
     langmuirSet.enableForcing = false;
     jsonParser::setBool(&langmuirSet.enableForcing, jsonLangmuirSet, "enableForcing");
     langmuirSet.enableStandingWaves = false;
     jsonParser::setBool(&langmuirSet.enableStandingWaves, jsonLangmuirSet, "enableStandingWaves");
-    langmuirSet.centralK[0]=langmuirSet.centralK[1]=langmuirSet.centralK[2]=0;
-    checkFlag = checkFlag&&jsonParser::setDoubleArray(langmuirSet.centralK,3,jsonLangmuirSet,"centralK");
-    langmuirSet.sigmaK[0]=langmuirSet.sigmaK[1]=langmuirSet.sigmaK[2]=0.0;
-    checkFlag = enabled&&checkFlag&&jsonParser::setDoubleArray(langmuirSet.sigmaK,3,jsonLangmuirSet,"sigmaK");
 
+    if (isThisJsonMaster) {
+      std::cout << "!!! k-spectra: enabled=" << langmuirSet.checkLangmuirSetValidity << std::endl;
+    }
+    Json::Value kspectra;
+    if (setValue(kspectra, jsonLangmuirSet, "spectra") && kspectra.isArray()) {
+
+      for (unsigned int index = 0; index < kspectra.size(); index++) {
+        Json::Value myKspectrum = kspectra[index];
+        bool enabled=false;
+
+        if(jsonParser::setBool(&enabled, myKspectrum, "enabled")){
+
+          KSPECTRUM kspectrum;
+          kspectrum.amplitude = 0;
+
+          enabled = enabled&&jsonParser::setDouble(&kspectrum.amplitude, myKspectrum, "amplitude");
+          kspectrum.centralK[0]=kspectrum.centralK[1]=kspectrum.centralK[2]=0;
+          enabled = enabled&&jsonParser::setDoubleArray(kspectrum.centralK,3,myKspectrum,"centralK");
+          kspectrum.sigmaK[0]=kspectrum.sigmaK[1]=kspectrum.sigmaK[2]=0.0;
+          enabled = enabled&&jsonParser::setDoubleArray(kspectrum.sigmaK,3,myKspectrum,"sigmaK");
+
+          if(enabled){
+            checkFlag=langmuirSetEnabled&&enabled;
+            langmuirSet.myKSpectra.push_back(kspectrum);
+          }
+        }
+      }
+    }
     langmuirSet.checkLangmuirSetValidity = langmuirSet.checkLangmuirSetValidity && checkFlag;
+  }
+  if (isThisJsonMaster) {
+    std::cout << "k-spectra: enabled=" << langmuirSet.checkLangmuirSetValidity << std::endl;
+    std::cout << "k-spectra: #kspecra=" << langmuirSet.myKSpectra.size() << std::endl;
   }
 
 }
