@@ -84,7 +84,8 @@ const std::string PLASMA::dFNames[] = {
   "res2D",
   "user1",
   "user2",
-  "fftplasma"
+  "fftplasma",
+  "cylinder"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -113,7 +114,8 @@ const distrib_function PLASMA::dFPoint[] = {
   demo_2D_resonator,
   user1,
   user2,
-  fftplasma
+  fftplasma,
+  cylinder
 };
 
 bool PLASMA::isGrating(int dfIndex) {
@@ -152,12 +154,20 @@ bool PLASMA::isFoils2D(int dfIndex) {
     return false;
 }
 
+bool PLASMA::isr1r1(int dfIndex) {
+  if (dfIndex == 24)
+    return true;
+  else
+    return false;
+}
+
 bool PLASMA::isUser1(int dfIndex) {
   if (dfIndex == 24)
     return true;
   else
     return false;
 }
+
 
 bool PLASMA::isUser2(int dfIndex) {
   if (dfIndex == 25)
@@ -493,6 +503,29 @@ double right_fixed_exp_ramp(double x, double y, double z, PLASMAparams plist, do
       double alpha = densDiff / (1 - exp(-plist.right_ramp_length / plist.right_scale_length));
       double kk = plist.density_coefficient - alpha;
       return (alpha*exp(xx / plist.right_scale_length) + kk);
+    }
+  }
+  else {
+    return -1;
+  }
+}
+
+
+double cylinder(double x, double y, double z, PLASMAparams plist, double Z, double A) {
+  if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])) {
+    double cy = 0.5*(plist.rminbox[1]+plist.rmaxbox[1]);
+    double cz = 0.5*(plist.rminbox[2]+plist.rmaxbox[2]);
+    double exty = plist.rmaxbox[1]-plist.rminbox[1];
+     double extz = plist.rmaxbox[2]-plist.rminbox[2];
+    double radius = 0.5*MIN(exty,extz);
+    double rr = (y - cy)*(y - cy) + (z -cz)*(z-cz);
+    if (rr <= radius*radius) {
+      return plist.density_coefficient;
+    }
+    else {
+      return -1;
     }
   }
   else {
