@@ -85,7 +85,8 @@ const std::string PLASMA::dFNames[] = {
   "user1",
   "user2",
   "fftplasma",
-  "cylinder"
+  "cylinder",
+  "left_grating_exp_ramp"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -115,11 +116,12 @@ const distrib_function PLASMA::dFPoint[] = {
   user1,
   user2,
   fftplasma,
-  cylinder
+  cylinder,
+  left_grating_exp_ramp
 };
 
 bool PLASMA::isGrating(int dfIndex) {
-  if (dfIndex == 13 || dfIndex == 14 || dfIndex == 19)
+  if (dfIndex == 13 || dfIndex == 14 || dfIndex == 19 || dfIndex == 28)
     return true;
   else
     return false;
@@ -659,6 +661,31 @@ double left_grating(double x, double y, double z, PLASMAparams plist, double Z, 
   }
 }
 
+double left_grating_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A) {
+  double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
+  double* paramlist = (double*)plist.additional_params;
+  double g_depth = paramlist[0] * 0.5;
+  double g_lambda = paramlist[1];
+  double g_phase = paramlist[2];
+
+  double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
+  double xminbound = plist.rminbox[0] + g_depth*(1.0 - cos(phase));
+
+  if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
+    (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+    (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])) {
+    if ((x - xminbound) <= plist.left_ramp_length) {
+      double xx = (x - xminbound - plist.left_ramp_length);
+      return (plist.density_coefficient*exp(xx / plist.left_scale_length));
+    }
+    else {
+      return plist.density_coefficient;
+    }
+  }
+  else {
+    return -1;
+  }
+}
 
 double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A) {
   double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;

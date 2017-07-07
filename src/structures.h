@@ -23,7 +23,7 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
-#define NUMBER_OF_PLASMA_FUNCTIONS 28
+#define NUMBER_OF_PLASMA_FUNCTIONS 29
 
 #include <math.h>
 #include "commons.h"
@@ -184,6 +184,7 @@ double rough_box_edgeCalc(double x0, double y0, double x, double y, int order, d
 double box_minus_box(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double left_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
+double left_grating_exp_ramp(double x, double y, double z, PLASMAparams plist, double Z, double A);
 double left_blazed_grating(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double square_func(double x);
