@@ -1,3 +1,5 @@
+A useful practical guide to building `piccante` is also available looking at the CI recipes (both travis and appveyor).
+
 ## Ubuntu On Windows
 It's better to use Bash on Ubuntu on Windows only on builds 15063+ (Creators Update and beyond).  
 1) If not enabled, activate UoW following the [official guide](https://msdn.microsoft.com/it-it/commandline/wsl/install_guide)
@@ -60,8 +62,11 @@ PS Code\vcpkg>     .\bootstrap-vcpkg.bat
 8) Close the Powershell and re-open it with admin privileges
 ```
 PS \>              cd $env:WORKSPACE
+PS \>              Invoke-WebRequest https://download.microsoft.com/download/B/2/E/B2EB83FE-98C2-4156-834A-E1711E6884FB/MSMpiSetup.exe -OutFile $env:WORKSPACE\msmpi.exe }
+PS Code>           ./msmpi.exe -unattend
 PS Code>           cd vcpkg
 PS Code\vcpkg>     .\vcpkg integrate install
+
 ```
 9) Close the Powershell and re-open it without admin privileges
 ```

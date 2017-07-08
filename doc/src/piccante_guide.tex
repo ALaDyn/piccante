@@ -65,28 +65,7 @@ This document should provide all the information needed to compile the code, run
 
 
 \chapter{How to get and compile the code}
-The following instructions describe the procedure to compile the code in a Linux system. However the code can be compiled also on a Windows system and should be compilable also on an Apple system.
-\section{How to get the code} \label{section_getcode}
-\subsection{GitHub}  
-The code is distributed via an open-source repository hosted on \url{https://github.com/}.
-
-Make sure that \emph{git} (a distributed version control system) is installed on your machine (\url{http://git-scm.com/}).
-On a Debian-based system, just type:
-\begin{verbatim}
-$ sudo apt-get install git
-\end{verbatim}
-Once \emph{git} is installed on your system, it is possible to easily install and keep updated the code.
-
-To install the code:
-\begin{verbatim}
-$ git clone https://github.com/ALaDyn/piccante.git
-\end{verbatim}
-A folder named \verb+piccante+ will be created.
-
-To check for updates, \verb+cd+ into \verb+piccante+ folder and type:
-\begin{verbatim}
-$ git pull
-\end{verbatim}
+Please refer to the \verb+BUILD.md+ document in the project root folder to have latest information on how to get and build the code.
 
 \subsection{Ask a contributor}
 If you need further information, ask one of the contributors:
@@ -98,43 +77,8 @@ If you need further information, ask one of the contributors:
     \end{tabular}
 \end{center}
 
-\section{Dependencies}
-This code depends on \emph{Boost} and \emph{Message Passing Interface}. You need these libraries to compile and run the code on your system. 
-
-\subsection{MPI}
-Our code has been tested using the \emph{OpenMPI} implementation of the \emph{Message Passing Interface}.
-
-To install \emph{MPI} on a Debian-based Linux distribution, just type: 
-\begin{verbatim}
-$ sudo apt-get install openmpi-bin libopenmpi-dev
-\end{verbatim}
-Plese refere to \url{http://www.open-mpi.org/} for further information.
-
-\subsection{Boost library}
-To install \emph{Boost} on a Debian-based Linux distribution, just type: 
-\begin{verbatim}
-$ sudo apt-get install libboost-all-dev
-\end{verbatim}
-Plese refer to \url{http://www.boost.org/} for further information.
 
 
-\section{Compilation of the code}
-The code is provided with a Makefile, so, in order to compile it, just type:
-\begin{verbatim}
-$ make
-\end{verbatim}
-In this way, the code is compiled with \verb+-O3+ optimization level and no debug symbols.
-
-If you want to run the code through a debugger, type (\verb+make clean+ erases the executable and the \verb+.o+ files):
-\begin{verbatim}
-$ make clean
-$ make debug
-\end{verbatim}
-Finally, if you want to use \emph{Scalasca} profiler (\url{http://www.scalasca.org/}) type:
-\begin{verbatim}
-$ make clean
-$ make scalasca
-\end{verbatim}
 
 \chapter{How to prepare a simulation}
 In order to prepare a new simulation, among the source files only \verb+main-piccante.cpp+ needs to be modified.
@@ -147,8 +91,6 @@ Other example main files are described in the next chapter.
 
 \section{Headers and definitions}
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
-
-#define _USE_MATH_DEFINES
 
 #include <mpi.h>
 #include <cstdio>
@@ -889,10 +831,9 @@ To run as a serial job, make sure that in \verb+main-piccante.cpp+ source file y
 #define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 \end{lstlisting}
-Then, \verb+cd+ to the directory containing the source file and type simply:
+Then, \verb+cd+ to the directory containing the source file, build it and type simply:
 \begin{verbatim}
-$make
-$./piccante
+$ ./piccante
 \end{verbatim}
 You should get something like:
 
@@ -936,7 +877,7 @@ These lines contains some information about the simulation. As far as the simula
 
 You may want to redirect the standard output to a text file. If this is the case, launch the simulation as follows:
 \begin{verbatim}
-$./piccante > output.txt &
+$ ./piccante > output.txt &
 \end{verbatim}
 
 \section{Run as a parallel job on a single multi-core machine}
@@ -958,7 +899,7 @@ You should get on the standard output a longer initial message, detailing the bo
 If you want to redirect the standard output to a text file, type:
 
 \begin{verbatim}
-$mpirun -np 8 ./piccante > output.txt &
+$ mpirun -np 8 ./piccante > output.txt &
 \end{verbatim}
 
 \section{Run on a BG/Q supercomputer}
@@ -974,11 +915,11 @@ git clone https://github.com/ALaDyn/tools-piccante.git
 \end{verbatim}
 
 \section{Compile the reader}
-To compile \emph{reader}, it should be enough to do a make in the tools-piccante root folder
+To compile \emph{reader}, it should be enough to do a \verb+make+ in the tools-piccante root folder
 
 Then, you may want to launch \emph{reader} from any location on your system. To make it possible, copy the \emph{reader.exe} executable in the \verb+\usr\bin+ folder.
 \begin{verbatim}
-$sudo cp reader.exe /usr/bin/reader
+$ sudo cp reader.exe /usr/bin/reader
 \end{verbatim}
 If you don't want to do this, or you just cannot do it, please refer to your \emph{reader.exe} location in the following guide, instead of just the command \emph{reader} we are going to use.
 
@@ -1005,7 +946,7 @@ From left to right, the columns in the file are:
 \end{itemize}
 For the visualisation in a terminal, due to the large number of columns, you may want to use the command:
 \begin{verbatim}
-$less -S diag.dat
+$ less -S diag.dat
 \end{verbatim}
 
 \subsection{EXTREMES\_* files}
