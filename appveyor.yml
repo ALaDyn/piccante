@@ -1,17 +1,27 @@
+image: Visual Studio 2017
+
 clone_folder: c:\projects\piccante
 
+install:
+  - cinst cmake
+
 environment:
-    CYGWIN_NOWINPATH: yes
     matrix:
+    # cygwin
         - cygwin_url: https://cygwin.com/setup-x86_64.exe
           COMPILER: cygwin
+          CYGWIN_NOWINPATH: yes
+    # native VS
+        - configuration: Release
+          platform: Win32
+          COMPILER: vs
 
 install:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
   - if [%COMPILER%]==[cygwin] SET "PATH=C:\cygwin64\bin;C:\cygwin64\usr\bin;%PATH%"
 # Remove C:/Program Files/Git/usr/bin from the path, CMake is incompatible with the sh.exe found inside
-  - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-# update and add packages to cygwin (already installed on appveyor, easily portable to a completely new installation)
+  - if [%COMPILER%]==[cygwin] SET PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+  - git submodule -q update --init --recursive
   - cd ..
   - mkdir C:\projects\deps
   - cd C:\projects\deps
@@ -19,10 +29,17 @@ install:
   - ps: if($env:COMPILER -eq "cygwin") { Invoke-WebRequest $env:cygwin_url -OutFile C:\projects\deps\cygwin-setup.exe }
   - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel
   - cd ..
+  - git clone https://github.com/Microsoft/vcpkg
+  - cd vcpkg
+  - if [%COMPILER%]==[vs] powershell -exec bypass scripts\bootstrap.ps1
+  - if [%COMPILER%]==[vs] vcpkg integrate install
+  - if [%COMPILER%]==[vs] vcpkg install boost msmpi
+  - cd ..
   - cd C:\projects\piccante
 
 build_script:
   - mkdir build
   - cd build
-  - cmake .. -G "Unix Makefiles"
+  - if [%COMPILER%]==[cygwin] cmake .. -G "Unix Makefiles"
+  - if [%COMPILER%]==[vs]     cmake .. -G "Visual Studio 15 2017" "-DCMAKE_TOOLCHAIN_FILE=C:\projects\vcpkg\scripts\buildsystems\vcpkg.cmake"
   - cmake --build . --target install

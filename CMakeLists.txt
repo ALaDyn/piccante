@@ -3,6 +3,13 @@ project(piccante)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 11)
 
+
+if(MSVC)
+  add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-D_USE_MATH_DEFINES)
+endif()
+
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(MPI REQUIRED)
 
