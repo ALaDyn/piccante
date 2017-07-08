@@ -1,17 +1,53 @@
-sudo: false
-language: c++
+language: cpp
+
+os:
+  - linux
+  - osx
+
+compiler: 
+  - gcc
+
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - sourceline: 'ppa:boost-latest/ppa'
     packages:
-    - gcc-4.8
-    - g++-4.8
+    - gcc
+    - g++
     - libopenmpi-dev
     - libboost-all-dev
+    - cmake
+
+before_install:
+  # OSX Setup 
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew update                                                                               ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install gcc                                                                          ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew link gcc                                                                             ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw                                                                         ;fi
+
 install:
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8" OMPI_MPICXX="g++-4.8" OMPI_MPICC="gcc-4.8"; fi
-compiler:
-  - gcc
+  # OSX Setup
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export CMAKE_C_COMPILER=/usr/local/bin/gcc-7                                              ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export CMAKE_CXX_COMPILER=/usr/local/bin/g++-7                                            ;fi 
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export CMAKE_LINKER=clang++                                                               ;fi 
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export FC=${CMAKE_Fortran_COMPILER}                                                       ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export CC=${CMAKE_C_COMPILER}                                                             ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export CXX=${CMAKE_CXX_COMPILER}                                                          ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export OMPI_MPICXX=$CXX                                                                   ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export OMPI_CXX=$CXX                                                                      ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export OMPI_MPICC=$CC                                                                     ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then export OMPI_CC=$CC                                                                        ;fi
+
+  # Linux Setup 
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export CXX="/usr/bin/g++"                                                                 ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export CC="/usr/bin/gcc"                                                                  ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export OMPI_MPICXX=$CXX                                                                   ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export OMPI_CXX=$CXX                                                                      ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export OMPI_MPICC=$CC                                                                     ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export OMPI_CC=$CC                                                                        ;fi
+
 script:
-  - make all
+  - mkdir build && cd build && cmake .. && cmake --build . --target install
+
