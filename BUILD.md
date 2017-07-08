@@ -98,6 +98,7 @@ PS \>              cd $env:WORKSPACE
 PS Code>           git clone https://github.com/AlaDyn/piccante.git
 PS Code>           cd piccante
 PS Code\piccante>  mkdir build && cd build
-PS piccante\build> cmake .. ; cmake --build . --target install --config Release
+PS piccante\build> cmake .. "-DCMAKE_TOOLCHAIN_FILE=C:\projects\vcpkg\scripts\buildsystems\vcpkg.cmake"
+PS piccante\build> cmake --build . --target install --config Release
 ```
 

@@ -1,1 +1,0 @@
-Object files will be built here, both by the makefile and the VS solution

@@ -37,7 +37,10 @@ HDF5_INC = $(SRC_FOLDER)
 HDF5_LIB = $(SRC_FOLDER)
 
 
-all: print-MAINFILE $(EXE)
+all: dirtree print-MAINFILE $(EXE)
+
+dirtree:
+	mkdir -p $(OBJ_FOLDER) 
 
 print-% :
 	$(info $* : $($*)) @true

@@ -22,6 +22,8 @@ install:
   - cd ..
   - mkdir C:\projects\deps
   - cd C:\projects\deps
+  - ps: if($env:COMPILER -eq "vs") { Invoke-WebRequest https://download.microsoft.com/download/B/2/E/B2EB83FE-98C2-4156-834A-E1711E6884FB/MSMpiSetup.exe -OutFile C:\projects\deps\msmpi.exe }
+  - if [%COMPILER%]==[vs] C:\projects\deps\msmpi.exe -unattend
   - mkdir cygwin-downloads
   - ps: if($env:COMPILER -eq "cygwin") { Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile C:\projects\deps\cygwin-setup.exe }
   - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel
