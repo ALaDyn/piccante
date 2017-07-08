@@ -1,7 +1,5 @@
 image: Visual Studio 2017
-
 clone_folder: c:\projects\piccante
-
 configuration: Release
 
 environment:
@@ -13,10 +11,10 @@ environment:
       COMPILER: vs
 
 install:
-  - cinst cmake
-  - if not [%COMPILER%]==[cygwin] call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+  - if [%COMPILER%]==[vs] cinst cmake
+  - if [%COMPILER%]==[vs] SET "PATH=C:\Program Files\CMake\bin;%PATH%"
+  - if [%COMPILER%]==[vs] call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
   - if [%COMPILER%]==[cygwin] SET "PATH=C:\cygwin64\bin;C:\cygwin64\usr\bin;%PATH%"
-# Remove C:/Program Files/Git/usr/bin from the path, CMake is incompatible with the sh.exe found inside
   - if [%COMPILER%]==[cygwin] SET PATH=%PATH:C:\Program Files\Git\usr\bin;=%
   - git submodule -q update --init --recursive
   - cd ..
@@ -40,5 +38,6 @@ build_script:
   - mkdir build
   - cd build
   - if [%COMPILER%]==[cygwin] cmake .. -G "Unix Makefiles"
+  - if [%COMPILER%]==[cygwin] cmake --build . --target install
   - if [%COMPILER%]==[vs]     cmake .. -G "Visual Studio 15 2017" "-DCMAKE_TOOLCHAIN_FILE=C:\projects\vcpkg\scripts\buildsystems\vcpkg.cmake"
-  - cmake --build . --target install
+  - if [%COMPILER%]==[vs]     cmake --build . --target install --config Release
