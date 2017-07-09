@@ -1,8 +1,10 @@
 cmake_minimum_required (VERSION 3.1)
 project(piccante)
 enable_language(CXX)
-#set(CMAKE_CXX_STANDARD 11)
 
+## use C++11 if you can, otherwise, add the NO_CXX11 definition to correctly build piccante
+#set(CMAKE_CXX_STANDARD 11)
+add_definitions(-DNO_CXX11)
 
 if(MSVC)
   add_definitions(-D_SCL_SECURE_NO_WARNINGS)
