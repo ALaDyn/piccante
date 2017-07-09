@@ -1,18 +1,12 @@
 A useful practical guide to building `piccante` is also available looking at the CI recipes (both travis and appveyor).
 
-## Ubuntu On Windows
-It's better to use Bash on Ubuntu on Windows only on builds 15063+ (Creators Update and beyond).  
-1) If not enabled, activate UoW following the [official guide](https://msdn.microsoft.com/it-it/commandline/wsl/install_guide)
-2) Follow the Ubuntu guide
-
-
 
 ## Ubuntu
 Open a bash terminal and write  
 ```
 $  sudo apt-get update
 $  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin openmpi-doc libopenmpi-dev
-$  git clone https://github.com/AlaDyn/piccante.git
+$  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
 $  cmake .. ; cmake --build . --target install
@@ -29,16 +23,16 @@ $  xcode-select --install
 ```
 $  brew update
 $  brew install cmake make boost git open-mpi
-$  git clone https://github.com/AlaDyn/piccante.git
+$  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
 $  cmake .. ; cmake --build . --target install
 ```
 
 
-## Windows (7+)
-1) Install or Update Visual Studio. We need at least VS 2015.3 or newer. If not installed, we suggest [Visual Studio 2017 Community](http://visualstudio.com).  
-2) If not already done, install [chocolatey](http://chocolatey.org)
+## Windows (7+) [native Win32]
+1) Install or Update Visual Studio. We need at least VS 2015.3 or newer. If not installed, we suggest [Visual Studio 2017 Community](http://visualstudio.com)   
+2) If not already done, install [chocolatey](http://chocolatey.org)   
 3) Open a Powershell with admin privileges and write
 ```
 PS \>              cinst -y git cmake pscx powershell
@@ -62,8 +56,8 @@ PS Code\vcpkg>     .\bootstrap-vcpkg.bat
 8) Close the Powershell and re-open it with admin privileges
 ```
 PS \>              cd $env:WORKSPACE
-PS \>              Invoke-WebRequest https://download.microsoft.com/download/B/2/E/B2EB83FE-98C2-4156-834A-E1711E6884FB/MSMpiSetup.exe -OutFile $env:WORKSPACE\msmpi.exe }
-PS Code>           ./msmpi.exe -unattend
+PS Code\>          Invoke-WebRequest https://download.microsoft.com/download/B/2/E/B2EB83FE-98C2-4156-834A-E1711E6884FB/MSMpiSetup.exe -OutFile $env:WORKSPACE\msmpi.exe
+PS Code>           .\msmpi -unattend
 PS Code>           cd vcpkg
 PS Code\vcpkg>     .\vcpkg integrate install
 
@@ -96,14 +90,45 @@ Invoke-BatchFile "${env:PROGRAMFILES}\Microsoft Visual Studio\2017\Community\VC\
 Import-Module Pscx
 Invoke-BatchFile "${env:PROGRAMFILES(x86)}\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 ```
-Save it in the folder Documents\WindowsPowerShell with the filename `Microsoft.PowerShell_profile.ps1`   
+Save it in the folder Documents\WindowsPowerShell with the filename `Microsoft.PowerShell_profile.ps1`
+
 11) Close Powershell, reopen it without admin privileges
 ```
 PS \>              cd $env:WORKSPACE
-PS Code>           git clone https://github.com/AlaDyn/piccante.git
+PS Code>           git clone https://github.com/ALaDyn/piccante.git
 PS Code>           cd piccante
-PS Code\piccante>  mkdir build && cd build
-PS piccante\build> cmake .. "-DCMAKE_TOOLCHAIN_FILE=C:\projects\vcpkg\scripts\buildsystems\vcpkg.cmake"
+PS Code\piccante>  mkdir build ; cd build
+PS piccante\build> cmake .. "-DCMAKE_TOOLCHAIN_FILE=$env:WORKSPACE\vcpkg\scripts\buildsystems\vcpkg.cmake"
 PS piccante\build> cmake --build . --target install --config Release
 ```
+
+
+## Windows Subsystem for Linux (WSL)
+It's better to use Bash on Ubuntu on Windows only on builds 15063+ (Creators Update and beyond).  
+1) If not enabled, activate UoW following the [official guide](https://msdn.microsoft.com/it-it/commandline/wsl/install_guide)   
+2) Follow the Ubuntu guide
+
+
+## Cygwin
+1) If not already done, install [chocolatey](http://chocolatey.org)   
+2) Open a Powershell with admin privileges and write
+```
+PS \>              cinst -y cygwin
+```
+3) Close the Powershell, reopen it without admin privileges
+```
+PS \>              cd $env:WORKSPACE
+PS Code>           Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile $env:WORKSPACE\cygwin-setup.exe
+PS Code>           .\cygwin-setup --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel
+```
+4) Open a Cygwin shell
+```
+$  cd $WORKSPACE
+$  git clone https://github.com/ALaDyn/piccante.git
+$  cd piccante
+$  mkdir build && cd build
+$  cmake .. ; cmake --build . --target install
+```
+
+
 
