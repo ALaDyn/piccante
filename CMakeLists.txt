@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.1)
 project(piccante)
 enable_language(CXX)
 
-## use C++11 if you can, otherwise, add the NO_CXX11 definition to correctly build piccante
+## use C++11 if you can, otherwise, add the NO_CXX11 definition to correctly build piccante (in this case, boost 1.47+ is required for RNG)
 #set(CMAKE_CXX_STANDARD 11)
 add_definitions(-DNO_CXX11)
 
@@ -12,7 +12,7 @@ if(MSVC)
   add_definitions(-D_USE_MATH_DEFINES)
 endif()
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost 1.47.0 COMPONENTS system filesystem REQUIRED)
 find_package(MPI REQUIRED)
 
 # make sure that the default is a RELEASE

@@ -51,7 +51,6 @@
 #define DIRECTORY_DUMP "DUMP"
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
 #define FREQUENCY_STDOUT_STATUS 5
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
 
 void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid) {
 

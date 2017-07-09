@@ -46,8 +46,6 @@
 #define DIRECTORY_OUTPUT "OUTPUT"
 
 #define RANDOM_NUMBER_GENERATOR_SEED 5489
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
-
 
 int main(int narg, char **args)
 {

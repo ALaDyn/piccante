@@ -48,7 +48,5 @@
 #include "utilities.h"
 #include "jsonparser.h"
 
-#include "rapidjson/document.h"     // rapidjson's DOM-style API
-
 #endif
 
