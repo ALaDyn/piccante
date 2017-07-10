@@ -3592,13 +3592,13 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
     int groups = Np/Nshuffle;
     int remain = Np%Nshuffle;
 
-std::cout << "Nshuffle = " << Nshuffle << std::endl;
+    std::cout << "Nshuffle = " << Nshuffle << std::endl;
 
     boost::math::normal dist(0.0, sqrt(Ta));
 
     int dim_num = 6;
     int offset = 0;
-    double randomU[dim_num];
+    double *randomU = new double[dim_num];
     long long int seed=111111*(mygrid->myid+1);
 
     if ((uxin*uxin + uyin*uyin + uzin*uzin) < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
