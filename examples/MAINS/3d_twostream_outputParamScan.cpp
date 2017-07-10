@@ -17,8 +17,6 @@
 * along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
 ******************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 #include <mpi.h>
 #include <cstdio>
 #include <iostream>
@@ -195,7 +193,7 @@ int main(int narg, char **args)
   grid.istep = 0;
   if (_DO_RESTART) {
     dumpID = _RESTART_FROM_DUMP;
-    restartFromDump(&dumpID, &grid, &myfield, species);
+    UTILITIES::restartFromDump(&dumpID, &grid, &myfield, species);
   }
   while (grid.istep <= Nstep)
   {
@@ -204,7 +202,7 @@ int main(int narg, char **args)
       myGroupSize *= 2;
     }
     manager.setFieldGroupSize(myGroupSize);
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.setFrequencyStdoutStatus(FREQUENCY_STDOUT_STATUS);
     manager.callDiags(grid.istep);
 
     myfield.openBoundariesE_1();
@@ -249,12 +247,12 @@ int main(int narg, char **args)
 
     grid.time += grid.dt;
 
-    moveWindow(&grid, &myfield, species);
+    UTILITIES::moveWindow(&grid, &myfield, species);
 
     grid.istep++;
     if (DO_DUMP) {
       if (grid.istep != 0 && !(grid.istep % (dumpEvery))) {
-        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+        UTILITIES::dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
     }
   }

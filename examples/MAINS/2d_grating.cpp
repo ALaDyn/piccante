@@ -17,8 +17,6 @@
 * along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
 ******************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 #include <mpi.h>
 #include <cstdio>
 #include <iostream>
@@ -274,7 +272,7 @@ int main(int narg, char **args)
   for (; grid.istep <= Nstep; grid.istep++)
   {
 
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.setFrequencyStdoutStatus(FREQUENCY_STDOUT_STATUS);
 
 
     manager.callDiags(grid.istep);

@@ -17,8 +17,6 @@
 * along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
 ******************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 #include <mpi.h>
 #include <cstdio>
 #include <iostream>
@@ -212,7 +210,7 @@ int main(int narg, char **args)
   jsonParser::setSimulationTime(root, &grid);
   jsonParser::setMovingWindow(root, &grid);
 
-  srand(time(NULL));
+  srand((unsigned int)time(NULL));
   grid.initRNG(mt_rng, RANDOM_NUMBER_GENERATOR_SEED);
 
   grid.finalize();
@@ -296,7 +294,7 @@ int main(int narg, char **args)
   grid.istep = 0;
   if (grid.dumpControl.doRestart) {
     dumpID = grid.dumpControl.restartFromDump;
-    restartFromDump(&dumpID, &grid, &myfield, species);
+    UTILITIES::restartFromDump(&dumpID, &grid, &myfield, species);
   }
 
   while (grid.istep <= grid.getTotalNumberOfTimesteps())
@@ -307,7 +305,7 @@ int main(int narg, char **args)
     exit(0);
 #endif
 
-    grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
+    grid.setFrequencyStdoutStatus(FREQUENCY_STDOUT_STATUS);
 
     manager.callDiags(grid.istep);
 
@@ -355,12 +353,12 @@ int main(int narg, char **args)
 
     grid.time += grid.dt;
 
-    moveWindow(&grid, &myfield, species);
+    UTILITIES::moveWindow(&grid, &myfield, species);
 
     grid.istep++;
     if (grid.dumpControl.doDump) {
       if (grid.istep != 0 && !(grid.istep % ((int)(grid.dumpControl.dumpEvery / grid.dt)))) {
-        dumpFilesForRestart(&dumpID, &grid, &myfield, species);
+        UTILITIES::dumpFilesForRestart(&dumpID, &grid, &myfield, species);
       }
     }
   }
