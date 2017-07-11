@@ -9,7 +9,7 @@ In its present state, the code could be considered in *beta status*.
 Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi
  
 `piccante` uses code from [jsoncpp](https://github.com/open-source-parsers/jsoncpp) and [SOBOL](http://people.sc.fsu.edu/~jburkardt/cpp_src/sobol/sobol.html). Each source files contain original copyright notice   
-`piccante` make use of functions and classes from the library [boost](http://www.boost.org/)   
+`piccante` make use of functions and classes from the library [boost](http://www.boost.org/), [fftw](http://www.fftw.org/) and [HDF5](https://support.hdfgroup.org/HDF5/).   
 To build `piccante`, please refer to [BUILD](./BUILD.md) instructions.
 
 

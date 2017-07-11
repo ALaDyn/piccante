@@ -22,6 +22,7 @@ $  xcode-select --install
 3) Open a terminal and write
 ```
 $  brew update
+$  brew tap homebrew/science
 $  brew install cmake make boost git open-mpi hdf5
 $  brew install fftw --with-mpi
 $  git clone https://github.com/ALaDyn/piccante.git

@@ -30,6 +30,7 @@ matrix:
 before_install:
   # OSX Setup 
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew update                                                                               ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew tap homebrew/science                                                                 ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw --with-mpi                                                              ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install hdf5                                                                         ;fi
