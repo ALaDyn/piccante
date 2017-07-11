@@ -16,6 +16,10 @@ addons:
     packages:
     - gcc-5
     - g++-5
+    - libhdf5-dev
+    - libhdf5-openmpi-dev
+    - libfftw3-dev
+    - libfftw3-mpi-dev
     - libopenmpi-dev
     - libboost1.55-all-dev
     - cmake
@@ -31,10 +35,9 @@ matrix:
 before_install:
   # OSX Setup 
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew update                                                                               ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install gcc                                                                          ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew link gcc                                                                             ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw                                                                         ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw --with-mpi                                                              ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install hdf5                                                                         ;fi
 
 install:
   # OSX Setup

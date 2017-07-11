@@ -5,7 +5,7 @@ A useful practical guide to building `piccante` is also available looking at the
 Open a bash terminal and write  
 ```
 $  sudo apt-get update
-$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin openmpi-doc libopenmpi-dev
+$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin libopenmpi-dev libhdf5-dev libhdf5-openmpi-dev libfftw3-dev libfftw3-mpi-dev
 $  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
@@ -22,7 +22,8 @@ $  xcode-select --install
 3) Open a terminal and write
 ```
 $  brew update
-$  brew install cmake make boost git open-mpi
+$  brew install cmake make boost git open-mpi hdf5
+$  brew install fftw --with-mpi
 $  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
