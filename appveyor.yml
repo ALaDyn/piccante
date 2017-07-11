@@ -24,13 +24,13 @@ install:
   - if [%COMPILER%]==[vs] C:\projects\deps\msmpi.exe -unattend
   - mkdir cygwin-downloads
   - ps: if($env:COMPILER -eq "cygwin") { Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile C:\projects\deps\cygwin-setup.exe }
-  - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel
+  - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel,libhdf5-devel,libfftw3-devel
   - cd ..
   - git clone https://github.com/Microsoft/vcpkg
   - cd vcpkg
   - if [%COMPILER%]==[vs] powershell -exec bypass scripts\bootstrap.ps1
   - if [%COMPILER%]==[vs] vcpkg integrate install
-  - if [%COMPILER%]==[vs] vcpkg install boost msmpi
+  - if [%COMPILER%]==[vs] vcpkg install boost msmpi hdf5 fftw3
   - cd ..
   - cd C:\projects\piccante
 

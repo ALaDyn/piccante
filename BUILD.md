@@ -5,7 +5,7 @@ A useful practical guide to building `piccante` is also available looking at the
 Open a bash terminal and write  
 ```
 $  sudo apt-get update
-$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin libopenmpi-dev libhdf5-dev libhdf5-openmpi-dev libfftw3-dev libfftw3-mpi-dev
+$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin libopenmpi-dev libhdf5-openmpi-dev libfftw3-dev libfftw3-mpi-dev
 $  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
@@ -67,7 +67,7 @@ PS Code\vcpkg>     .\vcpkg integrate install
 ```
 PS \>              cd $env:WORKSPACE
 PS Code>           cd vcpkg
-PS Code\vcpkg>     .\vcpkg install boost msmpi
+PS Code\vcpkg>     .\vcpkg install boost msmpi hdf5 fftw3
 ```
 10) Open a text editor (`notepad.exe`is ok!) and paste the following text, depending on your configuration:
 
@@ -120,7 +120,7 @@ PS \>              cinst -y cygwin
 ```
 PS \>              cd $env:WORKSPACE
 PS Code>           Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile $env:WORKSPACE\cygwin-setup.exe
-PS Code>           .\cygwin-setup --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel
+PS Code>           .\cygwin-setup --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel,libhdf5-devel,libfftw3-devel
 ```
 4) Open a Cygwin shell
 ```
