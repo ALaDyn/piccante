@@ -879,8 +879,10 @@ double spheres(double x, double y, double z, PLASMAparams plist, double Z, doubl
           ysp = myspheres->coords[i * 4 + 1];
           zsp = myspheres->coords[i * 4 + 2];
           double distance = (xsp - x)*(xsp - x) + (ysp - y)*(ysp - y) + (zsp - z)*(zsp - z);
-          if (distance < (radius*radius))
-            value += spDensity;
+          if (distance <= (radius*radius)){
+            value = spDensity;
+            break;
+          }
 
         }
       }
