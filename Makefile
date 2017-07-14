@@ -3,7 +3,6 @@ EXE = piccante.exe
 MAINFILE = main-piccante.cpp
 
 FILES = grid.cpp \
-        sobol.cpp \
         structures.cpp \
         current.cpp \
         em_field.cpp \

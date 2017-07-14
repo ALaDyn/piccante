@@ -2,13 +2,7 @@ diff --git src/sobol.cpp src/sobol.cpp
 index 61b5f84..e541663 100644
 --- src/sobol.cpp
 +++ src/sobol.cpp
-@@ -8,17 +8,17 @@
- 
- using namespace std;
- 
--# include "sobol.hpp"
-+# include "sobol.h"
- 
+@@ -13,12 +13,12 @@
  //****************************************************************************80
  
 -int i4_bit_hi1 ( int n )

@@ -3577,6 +3577,7 @@ void SPECIE::callSupergaussian(my_rng_generator& ext_rng, double p0, double alph
 
 }
 
+#ifdef USE_SOBOL
 void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
 
   my_normal_distribution myGaussian(0,sqrt(Ta));
@@ -3691,7 +3692,7 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
     }
   }
   else{
-#endif
+#endif // USE_BOOST
 
     if (uxin*uxin + uyin*uyin + uzin*uzin < _VERY_SMALL_MOMENTUM*_VERY_SMALL_MOMENTUM) {
       for (int p = 0; p < Np; p++)
@@ -3724,8 +3725,11 @@ void SPECIE::callMaxwell(my_rng_generator& ext_rng, double Ta, double uxin, doub
     }
 #if defined(USE_BOOST)
   }
-#endif
+#endif // USE_BOOST
 }
+#endif // USE_SOBOL
+
+
 void SPECIE::callJuttner(my_rng_generator& ext_rng, double Ta, double uxin, double uyin, double uzin) {
   //DA DEFINIRE
 }
@@ -3806,10 +3810,14 @@ void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, do
     break;
 
   case MAXWELL:
+#ifdef USE_SOBOL
     callMaxwell(ext_rng,
       distribution.temp,
       uxin, uyin, uzin);
 
+#else
+  // DA FARE
+#endif
     break;
 
   case JUTTNER:

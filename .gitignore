@@ -79,4 +79,4 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
-
+src/sobol.*

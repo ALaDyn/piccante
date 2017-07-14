@@ -29,7 +29,10 @@
 #include "grid.h"
 #include "current.h"
 #include "em_field.h"
-#include "sobol.h"
+
+#ifdef USE_SOBOL
+#include "sobol.hpp"
+#endif
 
 #if defined(USE_BOOST)
 #include <boost/math/distributions/normal.hpp>
@@ -167,7 +170,9 @@ private:
   void callWaterbag(my_rng_generator& ext_rng, double p0_x, double p0_y, double p0_z, double uxin, double uyin, double uzin);
   void callUnifSphere(my_rng_generator& ext_rng, double p0, double uxin, double uyin, double uzin);
   void callSupergaussian(my_rng_generator& ext_rng, double p0, double alpha, double uxin, double uyin, double uzin);
+#ifdef USE_SOBOL
   void callMaxwell(my_rng_generator& ext_rng, double temp, double uxin, double uyin, double uzin);
+#endif
   void callJuttner(my_rng_generator& ext_rng, double a, double uxin, double uyin, double uzin);
   void callSpecial(my_rng_generator& ext_rng, double Ta);
   void computeParticleMassChargeCoupling();
