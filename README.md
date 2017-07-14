@@ -6,16 +6,15 @@
 Its strengths are related to flexibility: the user is able to define an arbitrary number of particle species with arbitrary density functions and an arbitrary number of Gaussian laser pulses.  
 The code is proved to scale very well up to 32768 MPI processes.
 In its present state, the code could be considered in *beta status*.  
-Copyright 2014-2016 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi
+Copyright 2014-2017 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi
  
-`piccante` uses code from and . 
 `piccante` make use of the following libraries:
 - [boost](http://www.boost.org/)
 - [fftw](http://www.fftw.org/)
 - [HDF5](https://support.hdfgroup.org/HDF5/)
 - [jsoncpp](https://github.com/open-source-parsers/jsoncpp) 
 - [SOBOL](http://people.sc.fsu.edu/~jburkardt/cpp_src/sobol/sobol.html)
-If included in the piccante folder, each source file contains the original copyright notice.   
+
 To build `piccante`, please refer to [BUILD](./BUILD.md) instructions.
 
 A paper that describes the technical features of `piccante` is under development now, in the meantime if you want to use the code please ask the authors for a ZENODO doi linked to the release you're using.  
