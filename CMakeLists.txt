@@ -84,8 +84,11 @@ file(DOWNLOAD "https://raw.githubusercontent.com/cenit/jburkardt/master/sobol/so
   TIMEOUT 3
   STATUS download_status
 )
-
-
+execute_process(
+  COMMAND git --work-tree=. --git-dir=.git apply ${CMAKE_SOURCE_DIR}/cmake/sobol.patch --ignore-whitespace --whitespace=nowarn --verbose
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
+  RESULT_VARIABLE error_code
+)
 
 set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS}")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
