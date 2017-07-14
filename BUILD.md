@@ -5,7 +5,7 @@ A useful practical guide to building `piccante` is also available looking at the
 Open a bash terminal and write  
 ```
 $  sudo apt-get update
-$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin libopenmpi-dev libhdf5-openmpi-dev libfftw3-dev libfftw3-mpi-dev
+$  sudo apt-get install g++ cmake make libboost-all-dev git openmpi-bin libopenmpi-dev libhdf5-openmpi-dev libfftw3-dev libfftw3-mpi-dev libjsoncpp-dev
 $  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
 $  mkdir build && cd build
@@ -23,7 +23,7 @@ $  xcode-select --install
 ```
 $  brew update
 $  brew tap homebrew/science
-$  brew install cmake make boost git open-mpi hdf5
+$  brew install cmake make boost git open-mpi hdf5 jsoncpp
 $  brew install fftw --with-mpi
 $  git clone https://github.com/ALaDyn/piccante.git
 $  cd piccante
@@ -68,7 +68,7 @@ PS Code\vcpkg>     .\vcpkg integrate install
 ```
 PS \>              cd $env:WORKSPACE
 PS Code>           cd vcpkg
-PS Code\vcpkg>     .\vcpkg install boost msmpi hdf5 fftw3
+PS Code\vcpkg>     .\vcpkg install boost msmpi hdf5 fftw3 jsoncpp
 ```
 10) Open a text editor (`notepad.exe`is ok!) and paste the following text, depending on your configuration:
 

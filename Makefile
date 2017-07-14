@@ -10,7 +10,6 @@ FILES = grid.cpp \
         particle_species.cpp \
         output_manager.cpp \
         utilities.cpp \
-        jsoncpp.cpp \
         jsonparser.cpp
 
 
@@ -27,7 +26,7 @@ MAIN = $(addprefix $(SRC_FOLDER)/, $(MAINFILE))
 MAINO = $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
 OBJ += $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))
 
-LIB =
+LIB = -ljsoncpp
 RPATH =
 OPT = -O3 -std=c++11
 
@@ -35,6 +34,7 @@ BOOST_LIB = $(SRC_FOLDER)
 BOOST_INC = $(SRC_FOLDER)
 HDF5_INC = $(SRC_FOLDER)
 HDF5_LIB = $(SRC_FOLDER)
+JSONCPP_INC = /usr/include/jsoncpp
 
 
 all: dirtree print-MAINFILE $(EXE)
@@ -171,13 +171,13 @@ $(EXE): $(OBJ)
 	$(COMPILER) $(OPT)  -L$(BOOST_LIB) -L$(HDF5_LIB) $(RPATH) -o $(EXE) $(OBJ) $(LIB)
 
 $(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp $(SRC_FOLDER)/%.h $(SRC_FOLDER)/preproc_defs.h
-	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $@ $<
+	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -I$(JSONCPP_INC) -c -o $@ $<
 
 #$(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE))))  : $(SRC_FOLDER)/$(MAINFILE) $(SRC_FOLDER)/preproc_defs.h
-#	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE)))) $(SRC_FOLDER)/$(MAINFILE)
+#	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -I$(JSONCPP_INC) -c -o $(addprefix $(OBJ_FOLDER)/, $(addsuffix .o, $(basename $(MAINFILE)))) $(SRC_FOLDER)/$(MAINFILE)
 
 $(MAINO) : $(MAIN) $(SRC_FOLDER)/preproc_defs.h
-	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -c -o $(MAINO) $(MAIN)
+	$(COMPILER) $(OPT)  -I$(BOOST_INC) -I$(HDF5_INC) -I$(JSONCPP_INC) -c -o $(MAINO) $(MAIN)
 
 clean:
 	rm -f $(OBJ) $(OBJDEV) *~

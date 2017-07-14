@@ -19,6 +19,7 @@ addons:
     - libfftw3-mpi-dev
     - libopenmpi-dev
     - libboost-all-dev
+    - libjsoncpp-dev
 
 matrix:
     exclude:
@@ -34,6 +35,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw --with-mpi                                                              ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install hdf5                                                                         ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install jsoncpp                                                                      ;fi
 
 install:
   # OSX Setup

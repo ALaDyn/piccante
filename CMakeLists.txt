@@ -7,11 +7,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_CXX_STANDARD 11)
 #add_definitions(-DNO_CXX11)
 
+# make sure that the default is a RELEASE
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RELEASE)
+endif()
+
 if(MSVC)
   add_definitions(-D_SCL_SECURE_NO_WARNINGS)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-D_USE_MATH_DEFINES)
 endif()
+
+include(ExternalProject)
 
 ## use Boost if you can (mandatory if C++11 is not available); if found, a USE_BOOST flag is declared - remove definition manually if you enable C++11!
 find_package(Boost 1.47.0 COMPONENTS system filesystem)
@@ -43,23 +50,53 @@ if(HDF5_FOUND)
 #  include_directories(${HDF5_INCLUDE_DIRS})
 endif()
 
+find_package(JsonCpp)
+if(NOT JsonCpp_FOUND)
+	message(STATUS "  --> JsonCpp will be built as an external project")
+	ExternalProject_Add(json-cpp
+		URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.1.zip
+		CMAKE_ARGS
+			-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+			-DJSONCPP_WITH_TESTS:BOOL=OFF
+		# Disable the install step.
+		INSTALL_COMMAND ""
+		# Wrap the download, configure and build steps in a script to log the output.
+		LOG_DOWNLOAD ON
+		LOG_CONFIGURE ON
+		LOG_BUILD ON
+	)
+	ExternalProject_Get_Property(json-cpp source_dir)
+	ExternalProject_Get_Property(json-cpp binary_dir)
+	set(JsonCpp_INCLUDE_DIR "${source_dir}/include")
+	set(JsonCpp_LIBRARY_DIR "${binary_dir}/src/lib_json")
+	set(JsonCpp_LIBRARY "jsoncpp")
+endif()
+
 find_package(MPI REQUIRED)
 
-# make sure that the default is a RELEASE
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RELEASE)
-endif()
+file(DOWNLOAD "https://raw.githubusercontent.com/cenit/jburkardt/master/sobol/sobol.cpp"
+  ${CMAKE_SOURCE_DIR}/src/sobol.cpp
+  TIMEOUT 3
+  STATUS download_status
+)
+file(DOWNLOAD "https://raw.githubusercontent.com/cenit/jburkardt/master/sobol/sobol.hpp"
+  ${CMAKE_SOURCE_DIR}/src/sobol.hpp
+  TIMEOUT 3
+  STATUS download_status
+)
+
+
 
 set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS}")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 
-include_directories(${MPI_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/src/)
+include_directories(${JsonCpp_INCLUDE_DIR} ${jsoncpp_DIR} ${MPI_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/src/)
+link_directories(${JsonCpp_LIBRARY_DIR})
 
 set (COMMON_PICCANTE_FILES 	
 	${CMAKE_SOURCE_DIR}/src/current.cpp
 	${CMAKE_SOURCE_DIR}/src/em_field.cpp
 	${CMAKE_SOURCE_DIR}/src/grid.cpp
-	${CMAKE_SOURCE_DIR}/src/jsoncpp.cpp
 	${CMAKE_SOURCE_DIR}/src/jsonparser.cpp
 	${CMAKE_SOURCE_DIR}/src/output_manager.cpp
 	${CMAKE_SOURCE_DIR}/src/particle_species.cpp
@@ -91,27 +128,51 @@ add_executable (piccante_3d_twostream_scaling_no_output  ${CMAKE_SOURCE_DIR}/exa
 add_executable (piccante_3d_wakefield                    ${CMAKE_SOURCE_DIR}/examples/MAINS/3d_wakefield.cpp ${COMMON_PICCANTE_FILES})
 add_executable (piccante_3d_wakefield_no_output          ${CMAKE_SOURCE_DIR}/examples/MAINS/3d_wakefield_no_output.cpp ${COMMON_PICCANTE_FILES})
 
-target_link_libraries(piccante                                 ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_dev                             ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_clusters                        ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_landau_damping                  ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_1d_TNSA                         ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_1d_solitons                     ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_1d_wakefield                    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_grating                      ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_twostream                    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_twostream_no_output          ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_twostream_scaling            ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_twostream_scaling_no_noutput ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_wakefield                    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_2d_wakefield_no_output          ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_twostream                    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_twostream_no_output          ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_twostream_outputParamScan    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_twostream_scaling            ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_twostream_scaling_no_output  ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_wakefield                    ${MPI_LIBRARIES}) 
-target_link_libraries(piccante_3d_wakefield_no_output          ${MPI_LIBRARIES}) 
+if(NOT JsonCpp_FOUND)
+  add_dependencies(piccante                                  json-cpp)
+  add_dependencies(piccante_dev                              json-cpp)
+  add_dependencies(piccante_clusters                         json-cpp)
+  add_dependencies(piccante_landau_damping                   json-cpp)
+  add_dependencies(piccante_1d_TNSA                          json-cpp)
+  add_dependencies(piccante_1d_solitons                      json-cpp)
+  add_dependencies(piccante_1d_wakefield                     json-cpp)
+  add_dependencies(piccante_2d_grating                       json-cpp)
+  add_dependencies(piccante_2d_twostream                     json-cpp)
+  add_dependencies(piccante_2d_twostream_no_output           json-cpp)
+  add_dependencies(piccante_2d_twostream_scaling             json-cpp)
+  add_dependencies(piccante_2d_twostream_scaling_no_noutput  json-cpp)
+  add_dependencies(piccante_2d_wakefield                     json-cpp)
+  add_dependencies(piccante_2d_wakefield_no_output           json-cpp)
+  add_dependencies(piccante_3d_twostream                     json-cpp)
+  add_dependencies(piccante_3d_twostream_no_output           json-cpp)
+  add_dependencies(piccante_3d_twostream_outputParamScan     json-cpp)
+  add_dependencies(piccante_3d_twostream_scaling             json-cpp)
+  add_dependencies(piccante_3d_twostream_scaling_no_output   json-cpp)
+  add_dependencies(piccante_3d_wakefield                     json-cpp)
+  add_dependencies(piccante_3d_wakefield_no_output           json-cpp)
+endif()
+
+target_link_libraries(piccante                                 ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_dev                             ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_clusters                        ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_landau_damping                  ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_1d_TNSA                         ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_1d_solitons                     ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_1d_wakefield                    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_grating                      ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_twostream                    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_twostream_no_output          ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_twostream_scaling            ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_twostream_scaling_no_noutput ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_wakefield                    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_2d_wakefield_no_output          ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_twostream                    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_twostream_no_output          ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_twostream_outputParamScan    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_twostream_scaling            ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_twostream_scaling_no_output  ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_wakefield                    ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
+target_link_libraries(piccante_3d_wakefield_no_output          ${MPI_LIBRARIES} ${JsonCpp_LIBRARY}) 
 
 if(Boost_FOUND)
   target_link_libraries(piccante                                 ${Boost_LIBRARIES}) 

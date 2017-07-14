@@ -30,7 +30,7 @@ install:
   - cd vcpkg
   - if [%COMPILER%]==[vs] powershell -exec bypass scripts\bootstrap.ps1
   - if [%COMPILER%]==[vs] vcpkg integrate install
-  - if [%COMPILER%]==[vs] vcpkg install boost msmpi hdf5 fftw3
+  - if [%COMPILER%]==[vs] vcpkg install boost msmpi hdf5 fftw3 jsoncpp
   - cd ..
   - cd C:\projects\piccante
 
