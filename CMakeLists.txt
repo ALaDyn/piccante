@@ -56,8 +56,13 @@ if(NOT JsonCpp_FOUND)
 	ExternalProject_Add(json-cpp
 		URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.1.zip
 		CMAKE_ARGS
+                        -DCMAKE_CXX_STANDARD=11
 			-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 			-DJSONCPP_WITH_TESTS:BOOL=OFF
+                        -DCMAKE_LINKER=${CMAKE_LINKER}
+                        -DBoost_NO_BOOST_CMAKE=ON
+                        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+                        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 		# Disable the install step.
 		INSTALL_COMMAND ""
 		# Wrap the download, configure and build steps in a script to log the output.
