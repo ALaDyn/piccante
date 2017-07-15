@@ -17,7 +17,8 @@ Copyright 2014-2017 - Andrea Sgattoni, Luca Fedeli, Stefano Sinigardi
 
 To build `piccante`, please refer to [BUILD](./BUILD.md) instructions.
 
-A paper that describes the technical features of `piccante` is under development now, in the meantime if you want to use the code please ask the authors for a ZENODO doi linked to the release you're using.  
+A paper that describes the technical features of `piccante` is under development now, in the meantime if you want to use the code please ask the authors for a ZENODO doi linked to the specific release you're using or just use the following DOI always pointing to the latest release: [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.592346.svg)](http://dx.doi.org/10.5281/zenodo.592346).   
+
 A technical paper describing optimizations performed during a Preparatory PRACE can be found [here](http://www.prace-ri.eu/IMG/pdf/WP209.pdf) [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.16097.svg)](http://dx.doi.org/10.5281/zenodo.16097).
 
 ### Papers containing simulations done with piccante ###
