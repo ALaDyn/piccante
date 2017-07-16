@@ -28,7 +28,7 @@
 #define _REORDER_MPI_CART_PROCESSES 1
 
 #define FREQUENCY_STDOUT_STATUS 5
-#ifdef NO_CXX11
+#if defined (USE_BOOST) && defined(NO_CXX11)
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_real_distribution.hpp>
@@ -61,7 +61,7 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 
 
 //*****VERSION*****
-#define CURRENT_VERSION "version 1.5.2"
+#define CURRENT_VERSION "version 1.5.3"
 
 /***************  GENERAL CONSTANTS ***************/
 #define NOT_DEFINED false // -2
@@ -111,7 +111,7 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 
 #define Dfloat float
 #define MPI_Dfloat MPI_FLOAT
-#define UN_TERZO 0.333333333333333333
+#define ONE_THIRD 0.333333333333333333
 
 // ************** FIELD TYPE *************** (forse si può togliere)
 //enum fieldType {DUMMY, ELECTRO_MAGNETIC_FIELD,DENSITY_CURRENT_FIELD };

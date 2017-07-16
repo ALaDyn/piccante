@@ -81,6 +81,10 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
     exitWithError(1);
   }
 
+  if (parsedSuccess && rank==0) {
+    std::cout << "Successfully parsed JSON" << std::endl;
+  }
+
   int masterProc = 0;
   setInt(&masterProc, root, _JSON_INT_MASTERPROC);
   if (rank == masterProc)
@@ -355,7 +359,8 @@ void jsonParser::setDumpControl(Json::Value &parent, GRID *mygrid) {
       mygrid->setDumpPath(folderName);
     }
     else {
-      mygrid->setDumpPath(_STRING_DUMP_DEFAULT_PATH);
+      folderName = _STRING_DUMP_DEFAULT_PATH;
+      mygrid->setDumpPath(folderName);
     }
 
     setBool(&mygrid->dumpControl.doRestart, restartObject, _JSON_BOOL_RESTART_);
@@ -1416,7 +1421,7 @@ void jsonParser::setOutputRequests(Json::Value &document, OUTPUT_MANAGER &manage
 }
 
 void jsonParser::setOutputDirPath(Json::Value &document, OUTPUT_MANAGER &manager) {
-  std::string  folderName;
+  std::string folderName;
   if (setString(&folderName, document, _JSON_STRING_OUTPUT_FOLDER_NAME))
     manager.setOutputPath(folderName);
   else {

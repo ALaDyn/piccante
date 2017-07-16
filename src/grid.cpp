@@ -1631,8 +1631,27 @@ double GRID::getMarkMW() {
 void GRID::setDumpPath(std::string _dumpDir) {
 #if defined (USE_BOOST)
   if (myid == master_proc) {
-    if ((!boost::filesystem::exists(_dumpDir))&& dumpControl.doDump) {
-      boost::filesystem::create_directories(_dumpDir);
+    /*
+    bool folderExists;
+    try {
+      folderExists = boost::filesystem::exists(_dumpDir);
+    }
+    catch (std::exception &e) {
+      std::cout << "boost::filesystem::exists(" << _dumpDir << ") failed with exception: " << e.what() << std::flush << std::endl;
+      exitWithError(98);
+    }
+
+    if ((!folderExists)&& dumpControl.doDump) {
+    */
+    if (dumpControl.doDump) {
+      try {
+        std::cout << "Creating directory " << _dumpDir << std::endl;  
+        boost::filesystem::create_directory(_dumpDir);
+      }
+      catch (std::exception &e) {
+        std::cout << "boost::filesystem::create_directory(" << _dumpDir << ") failed with exception: " << e.what() << std::flush << std::endl;
+        exitWithError(99);
+      }
     }
   }
 #endif

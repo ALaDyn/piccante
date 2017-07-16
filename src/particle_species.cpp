@@ -3263,9 +3263,9 @@ void SPECIE::current_deposition(CURRENT *current)
             dsy = -w1[1][tj] + w2[1][tj];
             dsz = -w1[2][tk] + w2[2][tk];
 
-            W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + UN_TERZO*dsy*dsz) / dt;
-            W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + UN_TERZO*dsz*dsx) / dt;
-            W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy) / dt;
+            W[0][0][tj][tk] += norm*dsx*(s0y*s0z + 0.5*dsy*s0z + 0.5*s0y*dsz + ONE_THIRD*dsy*dsz) / dt;
+            W[1][ti][0][tk] += norm*dsy*(s0z*s0x + 0.5*dsz*s0x + 0.5*s0z*dsx + ONE_THIRD*dsz*dsx) / dt;
+            W[2][ti][tj][0] += norm*dsz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + ONE_THIRD*dsx*dsy) / dt;
 
             J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
             J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];
@@ -3343,7 +3343,7 @@ void SPECIE::current_deposition(CURRENT *current)
 
           W[0][0][tj][tk] += norm*dsx*(s0y + 0.5*dsy) / dt;
           W[1][ti][0][tk] += norm*dsy*(s0x + 0.5*dsx) / dt;
-          W[2][ti][tj][0] = norm*vz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + UN_TERZO*dsx*dsy);
+          W[2][ti][tj][0] = norm*vz*(s0x*s0y + 0.5*dsx*s0y + 0.5*s0x*dsy + ONE_THIRD*dsx*dsy);
 
           J[0][ti][tj][tk] = -mygrid->dr[0] * W[0][0][tj][tk];
           J[1][ti][tj][tk] = -mygrid->dr[1] * W[1][ti][0][tk];

@@ -295,13 +295,12 @@ void OUTPUT_MANAGER::initialize(std::string _outputDir) {
   ss << _outputDir << "_" << (int)timer;
   _newoutputDir = ss.str();
   if (mygrid->myid == mygrid->master_proc) {
-    if (!boost::filesystem::exists(_outputDir)) {
-      boost::filesystem::create_directories(_outputDir);
-    }
-    else {
+    /*
+    if (boost::filesystem::exists(_outputDir)) {
       boost::filesystem::rename(_outputDir, _newoutputDir);
-      boost::filesystem::create_directories(_outputDir);
     }
+    */
+    boost::filesystem::create_directory(_outputDir);
   }
 #endif
   outputDir = _outputDir;
@@ -330,13 +329,12 @@ void OUTPUT_MANAGER::initialize() {
   ss << outputDir << "_" << (int)timer;
   _newoutputDir = ss.str();
   if (mygrid->myid == mygrid->master_proc) {
-    if (!boost::filesystem::exists(outputDir)) {
-      boost::filesystem::create_directories(outputDir);
-    }
-    else {
+    /*
+    if (boost::filesystem::exists(outputDir)) {
       boost::filesystem::rename(outputDir, _newoutputDir);
-      boost::filesystem::create_directories(outputDir);
     }
+    */
+    boost::filesystem::create_directory(outputDir);
   }
 #endif
 
