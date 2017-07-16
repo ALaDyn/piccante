@@ -17,7 +17,6 @@
 * along with piccante. If not, see <http://www.gnu.org/licenses/>.            *
 ******************************************************************************/
 
-#include <mpi.h>
 #include "commons.h"
 #include "grid.h"
 #include "structures.h"
@@ -192,5 +191,6 @@ int main(int narg, char **args)
   grid.printTheEnd();
   manager.close();
   MPI_Finalize();
-  exit(0);
+
+  return 0;
 }

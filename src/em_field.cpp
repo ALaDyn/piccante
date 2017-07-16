@@ -64,7 +64,7 @@ void EM_FIELD::allocate(GRID *grid) {
 void EM_FIELD::reallocate() {
   if (!allocated) {
     printf("ERROR: reallocate\n");
-    exit(17);
+    exitWithError(17);
   }
   mygrid->alloc_number(N_grid, mygrid->Nloc);
   if (N_grid[2] == 1)
@@ -87,7 +87,7 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
   else {
 #ifndef NO_ALLOCATION
     printf("ERROR: erase_field\n");
-    exit(17);
+    exitWithError(17);
 #else
     return;
 #endif
@@ -98,7 +98,7 @@ void EM_FIELD::setAllValuesToZero()  //set all the values to zero
 EM_FIELD EM_FIELD::operator = (EM_FIELD &destro){
   if (!destro.allocated) {
     printf("---ERROR---\noperation not permitted\nEM_FIELD=EM_FIELD\nnot allocated\n");
-    exit(17);
+    exitWithError(17);
   }
   Ncomp = destro.Ncomp;
   mygrid = destro.mygrid;
@@ -685,7 +685,7 @@ double EM_FIELD::getChargeCorrection(double  totalCharge){
         std::cout<< "ERROR!!! AutoNeutraliseDensity was set to " << mygrid->isAutoNeutraliseDensity() << std::endl;
         std::cout<< "ERROR!!! I cannot solve the Poisson equation: I STOP!" << std::endl;
       }
-      exit(17);
+      exitWithError(17);
     }
     else{
       if(mygrid->myid==mygrid->master_proc){

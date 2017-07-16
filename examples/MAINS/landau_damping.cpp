@@ -301,8 +301,7 @@ int main(int narg, char **args)
   {
 #ifdef NO_ALLOCATION
     manager.close();
-    MPI_Finalize();
-    exit(0);
+    exitWithError(20);
 #endif
 
     grid.setFrequencyStdoutStatus(FREQUENCY_STDOUT_STATUS);
@@ -365,6 +364,7 @@ int main(int narg, char **args)
 
   manager.close();
   MPI_Finalize();
-  exit(0);
+
+  return 0;
 
 }

@@ -23,6 +23,7 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
+#include "commons.h"
 #include "grid.h"
 #include "structures.h"
 #include "em_field.h"
@@ -43,7 +44,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "commons.h"
 #if defined(USE_BOOST)
 #include <boost/filesystem.hpp>
 #endif
@@ -64,7 +64,6 @@ public:
 
     static bool doesFileExist(const char *fileName);
 
-    static void exitWithError(int error);
     static void splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs);
 
     static void readAndAllocateSpheres(SPHERES &spheres, std::string filename, GRID &grid);

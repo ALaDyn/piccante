@@ -148,7 +148,7 @@ void GRID::checkDimensionality() {
     if (myid == master_proc) {
       std::cout << "ERROR: invalid dimensionality!" << std::endl;
     }
-    exit(19);
+    exitWithError(19);
   }
 }
 
@@ -209,7 +209,7 @@ void GRID::setCourantFactor(double courant_factor) {
     break;
   default:
     printf("WRONG definition of DIMENSIONALITY\n");
-    exit(17);
+    exitWithError(17);
     break;
   }
 }
@@ -452,7 +452,7 @@ void GRID::setGridDeltarNormal() {
     break;
   default:
     printf("WRONG definition of DIMENSIONALITY\n");
-    exit(17);
+    exitWithError(17);
     break;
   }
 }
@@ -490,7 +490,7 @@ void GRID::setGridDeltarStretched() {
     break;
   default:
     printf("WRONG definition of DIMENSIONALITY\n");
-    exit(17);
+    exitWithError(17);
     break;
   }
 }
@@ -701,22 +701,22 @@ void GRID::checkProcNumber() {
   if (nproc != (rnproc[0] * rnproc[1] * rnproc[2]))
   {
     printf("BADLY defined number of processors nproc=%i  rnprocx=%i  rnprocy=%i  rnprocz=%i!!!\n", nproc, rnproc[0], rnproc[1], rnproc[2]);
-    exit(18);
+    exitWithError(18);
   }
   if (rnproc[0] < 1 || NGridNodes[0] < 1)
   {
     printf("BADLY defined rnprocx=%i  or  Nx=%i   !!!\n", rnproc[0], NGridNodes[0]);
-    exit(18);
+    exitWithError(18);
   }
   if (rnproc[1] < 1)
   {
     printf("BADLY defined rnprocy=%i  or  Ny=%i   !!!\n", rnproc[1], NGridNodes[1]);
-    exit(18);
+    exitWithError(18);
   }
   if (rnproc[2] < 1)
   {
     printf("BADLY defined rnprocz=%i  or  Nz=%i   !!!\n", rnproc[2], NGridNodes[2]);
-    exit(18);
+    exitWithError(18);
   }
 
   if (rnproc[0] * 5 > NGridNodes[0]) {
@@ -860,7 +860,7 @@ void GRID::checkProcNumberInitialization() {
 
     if ((check != (NGridNodes[c] - 1))) {
       printf("ERROR BAD PROC INITIALIZATION at dimension number %i  !!!\n %i - %i \n", c, check, NGridNodes[c] - 1);
-      exit(18);
+      exitWithError(18);
     }
   }
 }
@@ -1052,7 +1052,7 @@ void GRID::setXandNxLeftStretchedGrid(double min, int N) {
   rminUniformGrid[0] = min;
   if ((N >= NGridNodes[0]) || (N < 0)) {
     printf("ERROR NxLeftStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NLeftStretcheGrid[0] = N;
 }
@@ -1066,7 +1066,7 @@ void GRID::setYandNyLeftStretchedGrid(double min, int N) {
   rminUniformGrid[1] = min;
   if ((N >= NGridNodes[1]) || (N < 0)) {
     printf("ERROR NyLeftStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NLeftStretcheGrid[1] = N;
 }
@@ -1080,7 +1080,7 @@ void GRID::setZandNzLeftStretchedGrid(double min, int N) {
   rminUniformGrid[2] = min;
   if ((N >= NGridNodes[2]) || (N < 0)) {
     printf("ERROR NzLeftStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NLeftStretcheGrid[2] = N;
 }
@@ -1092,7 +1092,7 @@ void GRID::setXandNxRightStretchedGrid(double max, int N) {
   rmaxUniformGrid[0] = max;
   if ((N >= NGridNodes[0]) || (N < 0)) {
     printf("ERROR NxRightStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NRightStretcheGrid[0] = N;
 }
@@ -1106,7 +1106,7 @@ void GRID::setYandNyRightStretchedGrid(double max, int N) {
   rmaxUniformGrid[1] = max;
   if ((N >= NGridNodes[1]) || (N < 0)) {
     printf("ERROR NyRightStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NRightStretcheGrid[1] = N;
 }
@@ -1120,7 +1120,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N) {
   rmaxUniformGrid[2] = max;
   if ((N >= NGridNodes[2]) || (N < 0)) {
     printf("ERROR NzRightStretcheGrid cannot be set to %i \n", N);
-    exit(19);
+    exitWithError(19);
   }
   NRightStretcheGrid[2] = N;
 }
@@ -1130,7 +1130,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N) {
 //        return;
 //    if((N>NGridNodes[0])||(N<0)) {
 //        printf("ERROR NxLeftStretcheGrid cannot be set to %i \n", N);
-//        exit(0);
+//        exitWithError(0);
 //    }
 //    NLeftStretcheGrid[0]=N;
 //}
@@ -1139,7 +1139,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N) {
 //        return;
 //    if((N>NGridNodes[1])||(N<0)) {
 //        printf("ERROR NyLeftStretcheGrid cannot be set to %i \n", N);
-//        exit(0);
+//        exitWithError(0);
 //    }
 //    NLeftStretcheGrid[1]=N;
 
@@ -1149,7 +1149,7 @@ void GRID::setZandNzRightStretchedGrid(double max, int N) {
 //        return;
 //    if((N>NGridNodes[2])||(N<0)) {
 //        printf("ERROR NzLeftStretcheGrid cannot be set to %i \n", N);
-//        exit(0);
+//        exitWithError(0);
 //    }
 //    NLeftStretcheGrid[2]=N;
 //}
@@ -1183,7 +1183,7 @@ void GRID::checkStretchedGridNpointsAlong(int c) {
       printf("\tNLeftStretcheGrid[%i]= %i", c, NLeftStretcheGrid[c]);
       printf("\tNRightStretcheGrid[%i]= %i", c, NRightStretcheGrid[c]);
       printf("\tand NGridNodes[%i]=%i", c, NGridNodes[c]);
-      exit(13);
+      exitWithError(13);
     }
   }
 
@@ -1235,7 +1235,7 @@ void GRID::checkStretchedGridExtensionAlong(int c) {
       printf("ERROR!!! LEFT stretched Grid along %i enabled\n", c);
       printf("\tleft layer physical    thickness = %g\n", Dx);
       printf("\tleft layer unstretched thickness = %g\n", Dxi);
-      exit(14);
+      exitWithError(14);
     }
   }
   if (flagRightStretchedAlong[c]) {
@@ -1250,7 +1250,7 @@ void GRID::checkStretchedGridExtensionAlong(int c) {
       printf("ERROR!!! RIGHT stretched Grid along %i enabled\n", c);
       printf("\tright layer physical    thickness = %g\n", Dx);
       printf("\tright layer unstretched thickness = %g\n", Dxi);
-      exit(14);
+      exitWithError(14);
     }
   }
 
@@ -1502,8 +1502,7 @@ axisBoundaryConditions GRID::getZBoundaryConditions() {
 }
 
 void GRID::emergencyStop() {
-  MPI_Finalize();
-  exit(17);
+  exitWithError(17);
 }
 
 void GRID::dump(std::ofstream &ff) {

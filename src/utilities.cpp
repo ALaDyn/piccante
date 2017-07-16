@@ -182,11 +182,6 @@ bool UTILITIES::doesFileExist(const char *fileName)
   return infile.good();
 }
 
-void UTILITIES::exitWithError(int error) {
-  MPI_Finalize();
-  exit(error);
-}
-
 void UTILITIES::splitCommGetRankNproc(MPI_Comm parentComm, MPI_Comm *childComm, int color, int *rank, int *NProcs) {
   MPI_Comm_split(parentComm, color, 0, childComm);
   MPI_Comm_size(*childComm, NProcs);

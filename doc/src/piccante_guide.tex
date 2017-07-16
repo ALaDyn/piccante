@@ -815,11 +815,12 @@ while(grid.istep <= Nstep)
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	manager.close();
 	MPI_Finalize();
-	exit(1);
+	
+	return 0;
 
 }
 \end{lstlisting}
-In these last lines of the code, \verb+manager+ executes its closing routine, \verb+MPI_Finalize()+ is called and the program exits with code 1. No modification by the user is required.
+In these last lines of the code, \verb+manager+ executes its closing routine, \verb+MPI_Finalize()+ is called and the program exits with code 0. No modification by the user is required.
 
 
 

@@ -39,7 +39,6 @@
 #define FIELDS_GROUP_SIZE 64
 #define MACRO_CPUGROUP_FOR_MULTIFILE 1024
 
-#include <mpi.h>
 #include "commons.h"
 #include "grid.h"
 #include "structures.h"

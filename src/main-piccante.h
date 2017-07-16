@@ -25,7 +25,6 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
-#include <mpi.h>
 #include <cstdio>
 #include <iostream>
 #include <fstream>

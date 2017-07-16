@@ -22,6 +22,7 @@
 
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
+#include <mpi.h>
 
 #define _ACC_SINGLE_POINTER
 #define _REORDER_MPI_CART_PROCESSES 1
@@ -57,6 +58,8 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 #else
 #include <stdint.h>
 #endif
+
+
 //*****VERSION*****
 #define CURRENT_VERSION "version 1.5.2"
 
@@ -156,6 +159,12 @@ inline int factorial(int n)
 {
   return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
 }
+
+inline void exitWithError(int error) {
+  MPI_Finalize();
+  exit(error);
+}
+
 
 //*****LOGOS******
 

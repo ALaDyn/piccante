@@ -238,6 +238,6 @@ int main(int narg, char **args)
   grid.printTheEnd();
   manager.close();
   MPI_Finalize();
-  exit(0);
 
+  return 0;
 }

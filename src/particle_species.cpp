@@ -89,7 +89,7 @@ void SPECIE::erase()
 
   if (!allocated) {
     printf("ERROR: species not allocated!!!\n");
-    exit(11);
+    exitWithError(11);
   }
 #ifdef _ACC_SINGLE_POINTER
   memset((void*)pData, 0, (Np*Ncomp)*sizeof(double));
@@ -107,7 +107,7 @@ void SPECIE::reallocate_species(){
   {
 #ifndef NO_ALLOCATION
     printf("\nERROR: species not allocated\n\n");
-    exit(11);
+    exitWithError(11);
 #else
     return;
 #endif
@@ -138,7 +138,10 @@ void SPECIE::reallocate_species(){
 
 SPECIE SPECIE::operator = (SPECIE &destro)
 {
-  if (!destro.allocated) { printf("---ERROR---\noperation not permitted\nSPECIE=SPECIE\nnot allocated\n"); exit(11); }
+  if (!destro.allocated) { 
+    printf("---ERROR---\noperation not permitted\nSPECIE=SPECIE\nnot allocated\n"); 
+    exitWithError(11);
+  }
 
   Np = destro.Np;
   Ncomp = destro.Ncomp;
@@ -224,7 +227,7 @@ void SPECIE::computeParticleMassChargeCoupling() {
   if (type == ION) {
     if (Z == 0 || A == 0){
       printf("ERROR: Ion charge or mass NOT defined!\n");
-      exit(11);
+      exitWithError(11);
     }
     else {
       coupling = Z / (1.8362e3*A);
@@ -2435,7 +2438,7 @@ void SPECIE::momenta_advance_with_friction(EM_FIELD *ebfield, double lambda)
   if (mygrid->isStretched()) {
     //SPECIE::momentaStretchedAdvance(ebfield);
     std::cout << "RR not yet implemented with stretched grid!" << std::endl;
-    exit(13);
+    exitWithError(13);
     return;
   }
   double dt, gamma_i;
@@ -3816,7 +3819,8 @@ void SPECIE::add_momenta(my_rng_generator& ext_rng, double uxin, double uyin, do
       uxin, uyin, uzin);
 
 #else
-  // DA FARE
+    printf("ERROR: unable to use sobol routines without CMake-based toolchain!!!\n");
+    exitWithError(21);
 #endif
     break;
 

@@ -238,6 +238,7 @@ int main(int narg, char **args)
 
   manager.close();
   MPI_Finalize();
-  exit(1);
+
+  return 0;
 
 }

@@ -52,7 +52,7 @@ void CURRENT::reallocate()
 {
   if (!allocated) {
     printf("ERROR: reallocate\n");
-    exit(17);
+    exitWithError(17);
   }
   mygrid->alloc_number(N_grid, mygrid->Nloc);
   Ntot = ((uint64_t)N_grid[0]) * ((uint64_t)N_grid[1]) * ((uint64_t)N_grid[2]);
@@ -73,7 +73,7 @@ void CURRENT::setAllValuesToZero()  //set all the values to zero
   {
 #ifndef NO_ALLOCATION
     printf("ERROR: current.setAllValuesToZero impossible\n");
-    exit(17);
+    exitWithError(17);
 #else
     return;
 #endif
@@ -84,7 +84,7 @@ CURRENT CURRENT::operator = (CURRENT &destro)
 {
   if (!destro.allocated) {
     printf("---ERROR---\noperation not permitted\nCURRENT=CURRENT\nnot allocated\n");
-    exit(17);
+    exitWithError(17);
   }
   Ncomp = destro.Ncomp;
   mygrid = destro.mygrid;

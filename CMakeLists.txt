@@ -52,29 +52,32 @@ endif()
 
 find_package(JsonCpp)
 if(NOT JsonCpp_FOUND)
-	message(STATUS "  --> JsonCpp will be built as an external project")
-	ExternalProject_Add(json-cpp
-		URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.1.zip
-		CMAKE_ARGS
-                        -DCMAKE_CXX_STANDARD=11
-			-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-			-DJSONCPP_WITH_TESTS:BOOL=OFF
-                        -DCMAKE_LINKER=${CMAKE_LINKER}
-                        -DBoost_NO_BOOST_CMAKE=ON
-                        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-                        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-		# Disable the install step.
-		INSTALL_COMMAND ""
-		# Wrap the download, configure and build steps in a script to log the output.
-		LOG_DOWNLOAD ON
-		LOG_CONFIGURE ON
-		LOG_BUILD ON
-	)
-	ExternalProject_Get_Property(json-cpp source_dir)
-	ExternalProject_Get_Property(json-cpp binary_dir)
-	set(JsonCpp_INCLUDE_DIR "${source_dir}/include")
-	set(JsonCpp_LIBRARY_DIR "${binary_dir}/src/lib_json")
-	set(JsonCpp_LIBRARY "jsoncpp")
+  if(NO_CXX11)
+    message(FATAL_ERROR "Without C++11 available, the system must provide an already built jsoncpp library")
+  endif()
+  message(STATUS "  --> JsonCpp will be built as an external project")
+  ExternalProject_Add(json-cpp
+    URL https://github.com/open-source-parsers/jsoncpp/archive/1.8.1.zip
+    CMAKE_ARGS
+      -DCMAKE_CXX_STANDARD=11
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DJSONCPP_WITH_TESTS:BOOL=OFF
+      -DCMAKE_LINKER=${CMAKE_LINKER}
+      -DBoost_NO_BOOST_CMAKE=ON
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    # Disable the install step.
+    INSTALL_COMMAND ""
+    # Wrap the download, configure and build steps in a script to log the output.
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE ON
+    LOG_BUILD ON
+  )
+  ExternalProject_Get_Property(json-cpp source_dir)
+  ExternalProject_Get_Property(json-cpp binary_dir)
+  set(JsonCpp_INCLUDE_DIR "${source_dir}/include")
+  set(JsonCpp_LIBRARY_DIR "${binary_dir}/src/lib_json")
+  set(JsonCpp_LIBRARY "jsoncpp")
 endif()
 
 find_package(MPI REQUIRED)

@@ -56,7 +56,7 @@ void jsonParser::lookForInputFile(int narg, char **args, std::string *inputFileN
         std::cout << "ERROR: no input file found!\n";
         std::cout.flush();
       }
-      UTILITIES::exitWithError(12);
+      exitWithError(12);
     }
   }
 }
@@ -78,7 +78,7 @@ std::string jsonParser::parseJsonInputFile(Json::Value &root, int narg, char **a
     std::cout << "Failed to parse JSON" << std::endl
       << reader.getFormattedErrorMessages()
       << std::endl;
-    exit(1);
+    exitWithError(1);
   }
 
   int masterProc = 0;

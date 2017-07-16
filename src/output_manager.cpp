@@ -1173,7 +1173,7 @@ void OUTPUT_MANAGER::findDispForSetView(MPI_Offset *disp, int myOutputID, int *t
   if (mydisp < 0) {
     std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
     std::cout << "myrank=" << mygrid->myid << " disp=" << mydisp << std::endl;
-    exit(33);
+    exitWithError(33);
   }
   disp[0] = mydisp;
 }
@@ -1185,7 +1185,7 @@ void OUTPUT_MANAGER::findDispForSetView(MPI_Offset *disp, int myOutputID, int *b
   if (mydisp < 0) {
     std::cout << "a problem occurred when trying to mpi_file_set_view in writeEMFieldBinary" << std::endl;
     std::cout << "myrank=" << mygrid->myid << " disp=" << mydisp << std::endl;
-    exit(33);
+    exitWithError(33);
   }
   disp[0] = mydisp;
 }
@@ -2721,7 +2721,7 @@ void OUTPUT_MANAGER::findGlobalSubdomainUniquePointsNumber(int *uniqueN, int imi
     if (remains[c]) {
       if (imin[c] < 0) {
         printf("ERROR: subdomain minimum is wrong (component=%i, imin[c]=%i\n", c, imin[c]);
-        exit(118);
+        exitWithError(118);
       }
 
       if (imax[c] < (mygrid->uniquePoints[c]))
@@ -2740,7 +2740,7 @@ void OUTPUT_MANAGER::findLocalSubdomainUniquePointsNumber(int *uniqueLocN, int l
     if (remains[c]) {
       if (locimin[c] < 0) {
         printf("ERROR: subdomain local minimum is wrong (component=%i, locimin[c]=%i\n", c, locimin[c]);
-        exit(118);
+        exitWithError(118);
       }
 
       if (locimax[c] < (mygrid->uniquePointsloc[c]))

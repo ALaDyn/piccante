@@ -23,7 +23,6 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
-#include <mpi.h>
 #include "commons.h"
 #include "structures.h"
 #include <cstdio>
