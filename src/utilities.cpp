@@ -259,7 +259,7 @@ bool UTILITIES::isSphereInside(SPHERES& spheres, int index, GRID &grid) {
       if (yl <= yr)
         chkY = ((y >= yl) && (y <= yr));
       else
-        chkY = ((y >= yr) || (y <= yl));
+        chkY = ((y >= yl) || (y <= yr));
     }
   }
 
@@ -271,7 +271,7 @@ bool UTILITIES::isSphereInside(SPHERES& spheres, int index, GRID &grid) {
       if (zl <= zr)
         chkZ = ((z >= zl) && (z <= zr));
       else
-        chkZ = ((z >= zr) || (z <= zl));
+        chkZ = ((z >= zl) || (z <= zr));
     }
   }
 
