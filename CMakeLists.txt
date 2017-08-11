@@ -43,12 +43,12 @@ if(FFTW_MPI_FOUND OR MKL_FOUND)
   add_definitions(-D_USE_FFTW_FILTER)
 endif()
 
-find_package(HDF5)
-if(HDF5_FOUND)
-#  DO NOT ENABLE, since it is broken
+#DO NOT ENABLE, since it is broken
+#find_package(HDF5)
+#if(HDF5_FOUND)
 #  add_definitions(-DUSE_HDF5)
 #  include_directories(${HDF5_INCLUDE_DIRS})
-endif()
+#endif()
 
 find_package(JsonCpp)
 if(NOT JsonCpp_FOUND)
