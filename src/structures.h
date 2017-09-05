@@ -23,13 +23,34 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
-#define NUMBER_OF_PLASMA_FUNCTIONS 29
+#define NUMBER_OF_PLASMA_FUNCTIONS 30
 
 #include <math.h>
 #include "commons.h"
 #include <cstdio>
 #include <iostream>
 #include <vector>
+
+struct ALLWIRS{
+    bool init;
+    int num;
+    double radius;
+    double* x1;
+    double* x2;
+    double* y1;
+    double* y2;
+    double* z1;
+    double* z2;
+/*     ~ALLWIRS(){
+        delete[] x1;
+        delete[] x2;
+        delete[] y1;
+        delete[] y2;
+        delete[] z1;
+        delete[] z2;
+
+    }*/
+};
 
 struct SPHERES {
   float *coords;
@@ -159,6 +180,7 @@ public:
   static bool isUser1(int dfIndex);
   static bool isUser2(int dfIndex);
   static bool isr1r1(int dfIndex);
+  static bool isRndWir(int dfIndex);
 };
 
 
@@ -208,6 +230,9 @@ double user2(double x, double y, double z, PLASMAparams plist, double Z, double 
 double fftplasma(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double cylinder(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
+double rand_wires(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
 //************** LASER PULSE TYPES *******
 enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN, CONST_FIELD};
 enum pulsePolarization { P_POLARIZATION, S_POLARIZATION, CIRCULAR_POLARIZATION };

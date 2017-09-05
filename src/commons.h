@@ -187,7 +187,10 @@ const std::string common_logo =
 // character "bolger"
 //************** PLASMA TYPES *******
 
-
+typedef union{
+    int iDat;
+    double dDat;
+} intdouble;
 
 #endif
 

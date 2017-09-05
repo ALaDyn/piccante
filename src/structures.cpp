@@ -86,7 +86,8 @@ const std::string PLASMA::dFNames[] = {
   "user2",
   "fftplasma",
   "cylinder",
-  "left_grating_exp_ramp"
+  "left_grating_exp_ramp",
+  "rand_wires"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -117,8 +118,14 @@ const distrib_function PLASMA::dFPoint[] = {
   user2,
   fftplasma,
   cylinder,
-  left_grating_exp_ramp
+  left_grating_exp_ramp,
+  rand_wires
 };
+
+bool PLASMA::isRndWir(int dfIndex){
+    return (dfIndex == 29);
+
+}
 
 bool PLASMA::isGrating(int dfIndex) {
   if (dfIndex == 13 || dfIndex == 14 || dfIndex == 19 || dfIndex == 28)
@@ -196,45 +203,13 @@ PLASMA::PLASMA() {
 PLASMA::PLASMA(const PLASMA& other)
 {
   density_function = other.density_function;
-
   params = other.params;
-  //params.left_ramp_length = other.params.left_ramp_length;
-  //params.right_ramp_length = other.params.right_ramp_length;
-  //params.left_scale_length = other.params.left_scale_length;
-  //params.right_scale_length = other.params.right_scale_length;
-  //params.density_coefficient = other.params.density_coefficient;
-  //params.left_ramp_min_density = other.params.left_ramp_min_density;
-  //params.right_ramp_min_density = other.params.right_ramp_min_density;
-  //params.additional_params = other.params.additional_params;
-  //params.rminbox[0] = other.params.rminbox[0];
-  //params.rminbox[1] = other.params.rminbox[1];
-  //params.rminbox[2] = other.params.rminbox[2];
-  //params.rmaxbox[0] = other.params.rmaxbox[0];
-  //params.rmaxbox[1] = other.params.rmaxbox[1];
-  //params.rmaxbox[2] = other.params.rmaxbox[2];
-  //params.spheres = other.params.spheres;
+
 }
 
 PLASMA PLASMA::operator=(const PLASMA& p1) {
   density_function = p1.density_function;
-
-  params = p1.params;
-  //params.left_ramp_length = p1.params.left_ramp_length;
-  //params.right_ramp_length = p1.params.right_ramp_length;
-  //params.left_scale_length = p1.params.left_scale_length;
-  //params.right_scale_length = p1.params.right_scale_length;
-  //params.density_coefficient = p1.params.density_coefficient;
-  //params.left_ramp_min_density = p1.params.left_ramp_min_density;
-  //params.right_ramp_min_density = p1.params.right_ramp_min_density;
-  //params.additional_params = p1.params.additional_params;
-  //params.rminbox[0] = p1.params.rminbox[0];
-  //params.rminbox[1] = p1.params.rminbox[1];
-  //params.rminbox[2] = p1.params.rminbox[2];
-  //params.rmaxbox[0] = p1.params.rmaxbox[0];
-  //params.rmaxbox[1] = p1.params.rmaxbox[1];
-  //params.rmaxbox[2] = p1.params.rmaxbox[2];
-  //params.spheres = p1.params.spheres;
-
+  params = p1.params; 
   return *this;
 }
 
@@ -314,7 +289,7 @@ void PLASMA::setZRangeBox(double zmin, double zmax) {
 }
 
 
-PLASMA::~PLASMA() {
+PLASMA::~PLASMA() {    
 }
 
 
@@ -1085,6 +1060,64 @@ double fftplasma(double x, double y, double z, PLASMAparams plist, double Z, dou
   }
   return val;
 }
+
+double rand_wires(double x, double y, double z, PLASMAparams plist, double Z, double A){
+    ALLWIRS* wirs = (ALLWIRS*)plist.additional_params;
+
+    double val = -1;
+
+    if ((plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0])) {
+      if ((plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1])) {
+        if ((plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])) {
+
+            for(int i = 0; i < wirs->num; i++){
+
+                double dist;
+
+                double vx = wirs->x2[i] -  wirs->x1[i];
+                double vy = wirs->y2[i] -  wirs->y1[i];
+                double vz = wirs->z2[i] -  wirs->z1[i];
+
+                double wx = x - wirs->x1[i];
+                double wy = y - wirs->y1[i];
+                double wz = z - wirs->z1[i];
+
+                double c1 = wx*vx + wy*vy + wz*vz;
+                if (c1 <= 0)
+                    dist = sqrt(wx*wx + wy*wy + wz*wz);
+                else{
+                    double c2 = vx*vx + vy*vy + vz*vz;
+                    if(c2 <= c1){
+                        dist = sqrt((x - wirs->x2[i])*(x - wirs->x2[i]) + (y - wirs->y2[i])*(y - wirs->y2[i]) + (z - wirs->z2[i])*(z - wirs->z2[i]) );
+                    }
+                    else{
+                        double b = c1/c2;
+                        double bx = wirs->x1[i] + b*vx;
+                        double by = wirs->y1[i] + b*vy;
+                        double bz = wirs->z1[i] + b*vz;
+
+                        dist = sqrt((x - bx)*(x - bx) + (y - by)*(y - by) + (z - bz)*(z - bz) );
+                    }
+                }
+
+                if(dist <= wirs->radius){
+                    val = plist.density_coefficient;
+                    break;
+                }
+            }
+
+          }
+        }
+      }
+    else {
+      val = -1;
+    }
+    return val;
+
+
+}
+
+
 
 //*************************END_PLASMA*****************************
 //*************************LASER_PULSE***************************

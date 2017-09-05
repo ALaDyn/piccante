@@ -940,6 +940,68 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
           map[plasmaName]->setAdditionalParams(additionalParams);
         }
+
+        if(PLASMA::isRndWir(plasmaFunctionIndex)){
+            int num = 0;
+            double length = 0.0;
+            double radius = 0.0;
+            double theta = 0.0;
+
+            setInt(&num, myPlasma, _JSON_INT_PLASMA_RWIRES_NUM);
+            setDouble(&length, myPlasma, _JSON_DOUBLE_PLASMA_RWIRES_LENGTH);
+            setDouble(&radius, myPlasma, _JSON_DOUBLE_PLASMA_RWIRES_RAD);
+            setDouble(&theta, myPlasma, _JSON_DOUBLE_PLASMA_RWIRES_THETA);
+
+
+            //VERY UGLY SECTION
+            int rank;
+            MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+            ALLWIRS* wirs = new ALLWIRS;
+            double* x1 = new double[num];
+            double* x2 = new double[num];
+            double* y1 = new double[num];
+            double* y2 = new double[num];
+            double* z1 = new double[num];
+            double* z2 = new double[num];
+
+           if(rank == 0){
+                for(int i = 0; i < num; i++){
+                    y1[i] = map[plasmaName]->params.rminbox[1] + rand()*(map[plasmaName]->params.rmaxbox[1] - map[plasmaName]->params.rminbox[1])/RAND_MAX;
+                    z1[i] = map[plasmaName]->params.rminbox[2] + rand()*(map[plasmaName]->params.rmaxbox[2] - map[plasmaName]->params.rminbox[2])/RAND_MAX;
+                    x1[i] = map[plasmaName]->params.rmaxbox[0];
+
+                    double th = (RAND_MAX/2 - rand())*M_PI*theta/180.0/RAND_MAX;
+                    double phi = rand()*2*M_PI/RAND_MAX;
+
+                    z2[i] = z1[i] + length*sin(th)*cos(phi);
+                    y2[i] = y1[i] + length*sin(th)*sin(phi);
+                    x2[i] = x1[i] - length*cos(th);
+                }
+            }
+
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            MPI_Bcast(x1, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(x2, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(y1, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(y2, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(z1, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(z2, num, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+            wirs->num = num;
+            wirs->x1 = x1;
+            wirs->x2 = x2;
+            wirs->y1 = y1;
+            wirs->y2 = y2;
+            wirs->z1 = z1;
+            wirs->z2 = z2;
+            wirs->radius = radius;
+
+            map[plasmaName]->setAdditionalParams(wirs);
+
+        }
+
       }
       else {
         if (isThisJsonMaster)
