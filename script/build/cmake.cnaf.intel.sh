@@ -1,3 +1,5 @@
+export PAHT=${PATH}:/shared/software/project/aladyn/cmake-3.8.2-Linux-x86_64/bin/
+
 module purge
 
 module load compilers/gcc-6.2.0
