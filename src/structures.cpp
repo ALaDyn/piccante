@@ -51,7 +51,7 @@ PLASMAparams PLASMAparams::operator=(const PLASMAparams& p1) {
   rmaxbox[2] = p1.rmaxbox[2];
   spheres = p1.spheres;
   FFTplasma = p1.FFTplasma;
-
+  amIRNDwire = p1.amIRNDwire;
   return *this;
 }
 
@@ -186,6 +186,7 @@ bool PLASMA::isUser2(int dfIndex) {
 }
 
 
+
 PLASMA::PLASMA() {
   params.rminbox[0] = params.rminbox[1] = params.rminbox[2] = 0.0;
   params.rmaxbox[0] = params.rmaxbox[1] = params.rmaxbox[2] = 0.0;
@@ -197,6 +198,7 @@ PLASMA::PLASMA() {
   params.left_ramp_min_density = 0.0;
   params.right_ramp_min_density = 0.0;
   params.additional_params = NULL;
+  params.amIRNDwire = false;
   density_function = NULL;
 }
 
@@ -224,6 +226,7 @@ void PLASMA::setLeftRampLength(double rlength) {
 void PLASMA::setRightRampLength(double rlength) {
   params.right_ramp_length = rlength;
 }
+
 
 void PLASMA::setScaleLength(double slength) {
   params.left_scale_length = slength;
@@ -287,6 +290,15 @@ void PLASMA::setZRangeBox(double zmin, double zmax) {
   params.rminbox[2] = zmin;
   params.rmaxbox[2] = zmax;
 }
+
+void PLASMA::setRNDwire(bool val){
+    params.amIRNDwire = val;
+}
+
+bool PLASMA::getRNDwire(){
+    return params.amIRNDwire;
+}
+
 
 
 PLASMA::~PLASMA() {    
@@ -1114,6 +1126,168 @@ double rand_wires(double x, double y, double z, PLASMAparams plist, double Z, do
     }
     return val;
 
+
+}
+
+void PLASMA::trimWirs(double llimits[3], double rlimits[3]){
+    if(!params.amIRNDwire)
+        return;
+
+    ALLWIRS* wirs = (ALLWIRS*)params.additional_params;
+
+    if(!wirs->init)
+        return;
+
+    int num = wirs->num;
+    double radius = wirs->radius;
+
+    double* x1 = wirs->x1;
+    double* x2 = wirs->x2;
+    double* y1 = wirs->y1;
+    double* y2 = wirs->y2;
+    double* z1 = wirs->z1;
+    double* z2 = wirs->z2;
+
+    //SELECT ONLY RELEVANT WIRES
+
+    int del = 0;
+
+    for(int i = 0; i < (num-del); i++){
+
+        double xleft = llimits[0] - radius;
+        double xright =rlimits[0] + radius;
+
+        double yleft = llimits[1] - radius;
+        double yright =rlimits[1] + radius;
+
+        double zleft = llimits[2] - radius;
+        double zright =rlimits[2] + radius;
+
+        bool isIn = false;
+
+
+        double xa = x1[i];
+        double xb = x2[i];
+        double ya = y1[i];
+        double yb = y2[i];
+        double za = z1[i];
+        double zb = z2[i];
+
+        double ux = xb-xa;
+        double uy = yb-ya;
+        double uz = zb-za;
+
+        //X PLANES
+
+        if( xa >= xleft && xa <= xright && ya >= yleft && ya <= yright && za >= zleft && za <= zright &&
+            xb >= xleft && xb <= xright && yb >= yleft && yb <= yright && zb >= zleft && zb <= zright)
+            isIn = true;
+
+        if ((!isIn) && (ux != 0)){
+            double sl = (xleft - xa)/ux;
+            if(sl >= 0 && sl <= 1)
+                isIn=true;
+            double sr = (xright - xa)/ux;
+            if(sr >= 0 && sr <= 1)
+                isIn=true;
+        }
+        else if((!isIn) && (ux == 0)){
+            if(xa == xleft || xa == xright)
+                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
+        }
+
+        //YPLANES
+
+        if ((!isIn) && (uy != 0)){
+            double sl = (yleft - ya)/uy;
+            if(sl >= 0 && sl <= 1)
+                isIn=true;
+            double sr = (yright - ya)/uy;
+            if(sr >= 0 && sr <= 1)
+                isIn=true;
+
+        }
+        else if((!isIn) && (uy == 0)){
+            if(ya == yleft || ya == yright)
+                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
+        }
+
+        //ZPLANES
+
+        if ((!isIn) && (uz != 0)){
+            double sl = (zleft - za)/uz;
+            if(sl >= 0 && sl <= 1)
+                isIn=true;
+            double sr = (zright - za)/uz;
+            if(sr >= 0 && sr <= 1)
+                isIn=true;
+
+        }
+        else if((!isIn) && (uz == 0)){
+            if(za == zleft || za == zright)
+                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
+        }
+
+        if(!isIn){
+            double x1t = x1[num-del-1];
+            double x2t = x2[num-del-1];
+            double y1t = y1[num-del-1];
+            double y2t = y2[num-del-1];
+            double z1t = z1[num-del-1];
+            double z2t = z2[num-del-1];
+
+            x1[num-del-1] = x1[i];
+            x2[num-del-1] = x2[i];
+            y1[num-del-1] = y1[i];
+            y2[num-del-1] = y2[i];
+            z1[num-del-1] = z1[i];
+            z2[num-del-1] = z2[i];
+
+            x1[i] = x1t;
+            x2[i] = x2t;
+            y1[i] = y1t;
+            y2[i] = y2t;
+            z1[i] = z1t;
+            z2[i] = z2t;
+
+            i--;
+            del++;
+        }
+
+
+    }
+
+    double* x1r = new double[num-del];
+    double* x2r = new double[num-del];
+    double* y1r = new double[num-del];
+    double* y2r = new double[num-del];
+    double* z1r = new double[num-del];
+    double* z2r = new double[num-del];
+
+    std::memcpy(x1r, x1, sizeof(double)*(num-del));
+    std::memcpy(x2r, x2, sizeof(double)*(num-del));
+    std::memcpy(y1r, y1, sizeof(double)*(num-del));
+    std::memcpy(y2r, y2, sizeof(double)*(num-del));
+    std::memcpy(z1r, z1, sizeof(double)*(num-del));
+    std::memcpy(z2r, z2, sizeof(double)*(num-del));
+
+    delete[] x1;
+    delete[] x2;
+    delete[] y1;
+    delete[] y2;
+    delete[] z1;
+    delete[] z2;
+
+    wirs->x1 = x1r;
+    wirs->x2 = x2r;
+    wirs->y1 = y1r;
+    wirs->y2 = y2r;
+    wirs->z1 = z1r;
+    wirs->z2 = z2r;
+
+    wirs->num = num-del;
+
+    //***SELECT ONLY RELEVANT WIRES***
 
 }
 

@@ -121,6 +121,17 @@ int main(int narg, char **args)
         (pIterator)->second->params.FFTplasma = &myfft;
       }
   }
+
+   for (pIterator = plasmas.begin(); pIterator != plasmas.end(); pIterator++) {
+    if(pIterator->second->getRNDwire()){      ;
+        double llimits[3];
+        double rlimits[3];
+        llimits[0] = grid.rminloc[0];llimits[1] = grid.rminloc[1];llimits[2] = grid.rminloc[2];
+        rlimits[0] = grid.rmaxloc[0];rlimits[1] = grid.rmaxloc[1];rlimits[2] = grid.rmaxloc[2];
+        pIterator->second->trimWirs(llimits,rlimits);
+    }
+  }
+
   jsonParser::setSpecies(root, species, plasmas, &grid, mt_rng);
 
   uint64_t totPartNum = 0;
@@ -130,6 +141,7 @@ int main(int narg, char **args)
   if (grid.myid == grid.master_proc) {
     std::cout << "Total particle number: " << totPartNum << std::endl;
   }
+
 
   //*******************************************END SPECIES DEFINITION***********************************************************
   //*******************************************BEGIN FIELD DEFINITION*********************************************************

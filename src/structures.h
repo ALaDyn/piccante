@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 struct ALLWIRS{
     bool init;
@@ -114,10 +115,11 @@ struct PLASMAparams {
   double right_scale_length;
   double density_coefficient;
   double left_ramp_min_density;
-  double right_ramp_min_density;
+  double right_ramp_min_density;  
   SPHERES *spheres;
   FFTPLASMA *FFTplasma;
   void *additional_params;
+  bool amIRNDwire;
   PLASMAparams operator=(const PLASMAparams& p1);
 
 };
@@ -143,7 +145,7 @@ class PLASMA
 
 public:
   PLASMAparams params;
-  distrib_function density_function;
+  distrib_function density_function; 
 
   PLASMA();
   PLASMA(const PLASMA& other);
@@ -165,6 +167,11 @@ public:
   void setXRangeBox(double xmin, double xmax);
   void setYRangeBox(double ymin, double ymax);
   void setZRangeBox(double zmin, double zmax);
+  void setRNDwire(bool val);
+  bool getRNDwire();
+
+  void trimWirs(double llimits[3], double rlimits[3]);
+
 
   ~PLASMA();
 
@@ -181,6 +188,9 @@ public:
   static bool isUser2(int dfIndex);
   static bool isr1r1(int dfIndex);
   static bool isRndWir(int dfIndex);
+
+
+
 };
 
 

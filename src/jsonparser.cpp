@@ -994,130 +994,6 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
 
             MPI_Barrier(MPI_COMM_WORLD);
 
-            //SELECT ONLY RELEVANT WIRES
-
-            int del = 0;
-
-            for(int i = 0; i < (num-del); i++){
-
-                double xleft = map[plasmaName]->params.rminbox[0] - radius;
-                double xright =map[plasmaName]->params.rmaxbox[0] + radius;
-
-                double yleft = map[plasmaName]->params.rminbox[1] - radius;
-                double yright =map[plasmaName]->params.rmaxbox[1] + radius;
-
-                double zleft = map[plasmaName]->params.rminbox[2] - radius;
-                double zright =map[plasmaName]->params.rmaxbox[2] + radius;
-
-                bool isIn = false;
-
-                double xa = x1[i];
-                double xb = x2[i];
-                double ya = y1[i];
-                double yb = y2[i];
-                double za = z1[i];
-                double zb = z2[i];
-
-                double ux = xb-xa;
-                double uy = yb-ya;
-                double uz = zb-za;
-
-                //X PLANES
-
-
-                if ((!isIn) && (ux != 0)){
-                    double sl = (xleft - xa)/ux;
-                    if(sl >= 0 && sl <= 1)
-                        isIn=true;
-                    double sr = (xright - xa)/ux;
-                    if(sr >= 0 && sr <= 1)
-                        isIn=true;
-
-                }
-                else if((!isIn) && (ux == 0)){
-                    if(xa == xleft || xa == xright)
-                        isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-                }
-
-                //YPLANES
-
-                if ((!isIn) && (uy != 0)){
-                    double sl = (yleft - ya)/ux;
-                    if(sl >= 0 && sl <= 1)
-                        isIn=true;
-                    double sr = (yright - ya)/ux;
-                    if(sr >= 0 && sr <= 1)
-                        isIn=true;
-
-                }
-                else if((!isIn) && (uy == 0)){
-                    if(ya == yleft || ya == yright)
-                        isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-                }
-
-                //ZPLANES
-
-                if ((!isIn) && (uz != 0)){
-                    double sl = (zleft - za)/ux;
-                    if(sl >= 0 && sl <= 1)
-                        isIn=true;
-                    double sr = (zright - za)/ux;
-                    if(sr >= 0 && sr <= 1)
-                        isIn=true;
-
-                }
-                else if((!isIn) && (uz == 0)){
-                    if(ya == zleft || ya == zright)
-                        isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-                }
-
-
-                if(!isIn){
-                    double x1t = x1[num-del-1];
-                    double x2t = x2[num-del-1];
-                    double y1t = y1[num-del-1];
-                    double y2t = y2[num-del-1];
-                    double z1t = z1[num-del-1];
-                    double z2t = z2[num-del-1];
-
-                    x1[num-del-1] = x1[i];
-                    x2[num-del-1] = x2[i];
-                    y1[num-del-1] = y1[i];
-                    y2[num-del-1] = y2[i];
-                    z1[num-del-1] = z1[i];
-                    z2[num-del-1] = z2[i];
-
-                    x1[i] = x1t;
-                    x2[i] = x2t;
-                    y1[i] = y1t;
-                    y2[i] = y2t;
-                    z1[i] = z1t;
-                    z2[i] = z2t;
-
-                    i--;
-                    del++;
-                }
-
-            }
-
-            double* x1r = new double[num-del];
-            double* x2r = new double[num-del];
-            double* y1r = new double[num-del];
-            double* y2r = new double[num-del];
-            double* z1r = new double[num-del];
-            double* z2r = new double[num-del];
-
-            std::memcpy(x1r, x1, sizeof(double)*(num-del));
-            std::memcpy(x2r, x2, sizeof(double)*(num-del));
-            std::memcpy(y1r, y1, sizeof(double)*(num-del));
-            std::memcpy(y2r, y2, sizeof(double)*(num-del));
-            std::memcpy(z1r, z1, sizeof(double)*(num-del));
-            std::memcpy(z2r, z2, sizeof(double)*(num-del));
-
-
-
-            //***SELECT ONLY RELEVANT WIRES***
-
             wirs->num = num;
             wirs->x1 = x1;
             wirs->x2 = x2;
@@ -1126,7 +1002,9 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
             wirs->z1 = z1;
             wirs->z2 = z2;
             wirs->radius = radius;
+            wirs->init=true;
 
+            map[plasmaName]->setRNDwire(true);
             map[plasmaName]->setAdditionalParams(wirs);
 
         }
