@@ -19,6 +19,7 @@
 
 
 #include "structures.h"
+using namespace MUTILS;
 
 
 /***************************************************************
@@ -1154,14 +1155,16 @@ void PLASMA::trimWirs(double llimits[3], double rlimits[3]){
 
     for(int i = 0; i < (num-del); i++){
 
-        double xleft = llimits[0] - radius;
-        double xright =rlimits[0] + radius;
+        const double incfact = 1.01;
 
-        double yleft = llimits[1] - radius;
-        double yright =rlimits[1] + radius;
+        double xleft = llimits[0] - radius*incfact;
+        double xright =rlimits[0] + radius*incfact;
 
-        double zleft = llimits[2] - radius;
-        double zright =rlimits[2] + radius;
+        double yleft = llimits[1] - radius*incfact;
+        double yright =rlimits[1] + radius*incfact;
+
+        double zleft = llimits[2] - radius*incfact;
+        double zright =rlimits[2] + radius*incfact;
 
         bool isIn = false;
 
@@ -1173,60 +1176,45 @@ void PLASMA::trimWirs(double llimits[3], double rlimits[3]){
         double za = z1[i];
         double zb = z2[i];
 
-        double ux = xb-xa;
-        double uy = yb-ya;
-        double uz = zb-za;
+        if( INRANGE(xa,xleft,xright)&&INRANGE(ya,yleft,yright)&&INRANGE(za,zleft,zright)&&INRANGE(xb,xleft,xright)&&INRANGE(yb,yleft,yright)&&INRANGE(zb,zleft,zright)){
+                    isIn = true;
+                }
+                else{
+                    VECT its(0,0,0);
 
-        //X PLANES
+                    if(SEG_PLANE_INTERSECT(VECT(xleft,0,0),VECT(1,0,0),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.y,yleft,yright)&&INRANGE(its.z,zleft,zright))
+                            isIn = true;
+                    }
 
-        if( xa >= xleft && xa <= xright && ya >= yleft && ya <= yright && za >= zleft && za <= zright &&
-            xb >= xleft && xb <= xright && yb >= yleft && yb <= yright && zb >= zleft && zb <= zright)
-            isIn = true;
+                    if(!isIn && SEG_PLANE_INTERSECT(VECT(xright,0,0),VECT(-1,0,0),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.y,yleft,yright)&&INRANGE(its.z,zleft,zright))
+                            isIn = true;
+                    }
 
-        if ((!isIn) && (ux != 0)){
-            double sl = (xleft - xa)/ux;
-            if(sl >= 0 && sl <= 1)
-                isIn=true;
-            double sr = (xright - xa)/ux;
-            if(sr >= 0 && sr <= 1)
-                isIn=true;
-        }
-        else if((!isIn) && (ux == 0)){
-            if(xa == xleft || xa == xright)
-                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-        }
+                    if(!isIn && SEG_PLANE_INTERSECT(VECT(0,yleft,0),VECT(0,1,0),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.x,xleft,xright)&&INRANGE(its.z,zleft,zright))
+                            isIn = true;
+                    }
 
-        //YPLANES
+                    if(!isIn && SEG_PLANE_INTERSECT(VECT(0,yright,0),VECT(0,-1,0),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.x,xleft,xright)&&INRANGE(its.z,zleft,zright))
+                            isIn = true;
+                    }
 
-        if ((!isIn) && (uy != 0)){
-            double sl = (yleft - ya)/uy;
-            if(sl >= 0 && sl <= 1)
-                isIn=true;
-            double sr = (yright - ya)/uy;
-            if(sr >= 0 && sr <= 1)
-                isIn=true;
+                    if(!isIn && SEG_PLANE_INTERSECT(VECT(0,0,zleft),VECT(0,0,1),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.x,xleft,xright)&&INRANGE(its.y,yleft,yright))
+                            isIn = true;
+                    }
 
-        }
-        else if((!isIn) && (uy == 0)){
-            if(ya == yleft || ya == yright)
-                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-        }
+                    if(!isIn && SEG_PLANE_INTERSECT(VECT(0,0,zright),VECT(0,0,-1),VECT(xa,ya,za),VECT(xb,yb,zb),its)){
+                        if(INRANGE(its.x,xleft,xright)&&INRANGE(its.y,yleft,yright))
+                            isIn = true;
+                    }
 
-        //ZPLANES
+                }
 
-        if ((!isIn) && (uz != 0)){
-            double sl = (zleft - za)/uz;
-            if(sl >= 0 && sl <= 1)
-                isIn=true;
-            double sr = (zright - za)/uz;
-            if(sr >= 0 && sr <= 1)
-                isIn=true;
 
-        }
-        else if((!isIn) && (uz == 0)){
-            if(za == zleft || za == zright)
-                isIn = true;//Not guaranteed actually. More wires could be excluded. To be improved in the future.
-        }
 
         if(!isIn){
             double x1t = x1[num-del-1];
@@ -1513,4 +1501,37 @@ void tempDistrib::setSpecial(double _a) {
 
 
 //************** END DISTRIBUTION_FUNCTION ******
+
+MUTILS::VECT::VECT(double x, double y, double z){
+        this->x = x;
+        this->y = y;
+        this->z = z;
+}
+VECT MUTILS::VECT::operator+(const VECT& rhs){
+          return VECT(x+rhs.x, y+rhs.y,z+rhs.z);
+}
+VECT MUTILS::VECT::operator-(const VECT& rhs){
+        return VECT(x-rhs.x, y-rhs.y,z-rhs.z);
+    }
+double MUTILS::VECT::operator*(const VECT& rhs){
+        return x*rhs.x + y*rhs.y + z*rhs.z;
+    }
+VECT MUTILS::VECT::operator*(const double& coeff){
+        return VECT(coeff*x, coeff*y,coeff*z);
+    }
+
+
+
+bool MUTILS::SEG_PLANE_INTERSECT(VECT v0, VECT n, VECT xa, VECT xb, VECT& inters){
+    double den = (n*(xb-xa));
+    if(den == 0)
+        return false;
+    double s = (n*(v0 - xa))/den;
+    if (INRANGE(s,0.0,1.0)){
+        inters = xa + (xb-xa)*s;
+        return true;
+    }
+    return false;
+}
+
 

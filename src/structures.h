@@ -32,6 +32,9 @@
 #include <vector>
 #include <cstring>
 
+
+
+
 struct ALLWIRS{
     bool init;
     int num;
@@ -343,6 +346,28 @@ private:
 
 };
 //**************** SPHERES *****************/
+
+namespace MUTILS {
+template <class T> bool INRANGE(T val, T lb, T ub) {
+  return (val >= lb) && (val <= ub);
+}
+
+class VECT{
+public:
+    double x;
+    double y;
+    double z;
+    VECT(double x, double y, double z);
+    VECT operator+(const VECT& rhs);
+    VECT operator-(const VECT& rhs);
+    double operator*(const VECT& rhs);
+    VECT operator*(const double& coeff);
+
+};
+
+bool SEG_PLANE_INTERSECT(VECT v0, VECT n, VECT xa, VECT xb, VECT& inters);
+}
+
 
 #endif
 
