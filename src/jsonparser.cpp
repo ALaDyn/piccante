@@ -971,7 +971,7 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
                     z1[i] = map[plasmaName]->params.rminbox[2] + rand()*(map[plasmaName]->params.rmaxbox[2] - map[plasmaName]->params.rminbox[2])/RAND_MAX;
                     x1[i] = map[plasmaName]->params.rmaxbox[0];
 
-                    double ctheta = cos(theta);
+                    double ctheta = cos(M_PI*theta/180.0);
                     double lintheta = (1.0 - ctheta)*(1.0*rand())/(RAND_MAX) + ctheta;
 
                     double th = acos(lintheta);
