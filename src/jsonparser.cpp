@@ -1008,6 +1008,26 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
             map[plasmaName]->setAdditionalParams(wirs);
 
         }
+        if(PLASMA::isPillar3D(plasmaFunctionIndex)){
+            double p3d_dy = 1.0;
+            double p3d_dz = 1.0;
+            double p3d_r = 0.1;
+            double p3d_h = 1.0;
+
+            double* additionalParams = new double[4];
+
+            setDouble(&p3d_dy, myPlasma, _JSON_DOUBLE_PLASMA_PILLARS3D_DY);
+            setDouble(&p3d_dz, myPlasma, _JSON_DOUBLE_PLASMA_PILLARS3D_DZ);
+            setDouble(&p3d_r,  myPlasma, _JSON_DOUBLE_PLASMA_PILLARS3D_R);
+            setDouble(&p3d_h,  myPlasma, _JSON_DOUBLE_PLASMA_PILLARS3D_H);
+
+            additionalParams[0] = p3d_dy;
+            additionalParams[1] = p3d_dz;
+            additionalParams[2] = p3d_r;
+            additionalParams[3] = p3d_h;
+
+            map[plasmaName]->setAdditionalParams(additionalParams);
+        }
 
       }
       else {
@@ -1019,6 +1039,7 @@ void jsonParser::setPlasmas(Json::Value &document, std::map<std::string, PLASMA*
     }
   }
 }
+
 
 bool jsonParser::checkSpecEssentials(Json::Value &child, std::map<std::string, PLASMA*> plasmas) {
   bool isEnambled = false;

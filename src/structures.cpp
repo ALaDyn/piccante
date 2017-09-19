@@ -88,7 +88,8 @@ const std::string PLASMA::dFNames[] = {
   "fftplasma",
   "cylinder",
   "left_grating_exp_ramp",
-  "rand_wires"
+  "rand_wires",
+  "pillars3D"
 };
 const distrib_function PLASMA::dFPoint[] = {
   box,
@@ -120,7 +121,8 @@ const distrib_function PLASMA::dFPoint[] = {
   fftplasma,
   cylinder,
   left_grating_exp_ramp,
-  rand_wires
+  rand_wires,
+  pillars3D
 };
 
 bool PLASMA::isRndWir(int dfIndex){
@@ -184,6 +186,13 @@ bool PLASMA::isUser2(int dfIndex) {
     return true;
   else
     return false;
+}
+
+bool PLASMA::isPillar3D(int dfIndex){
+    if (dfIndex == 30)
+      return true;
+    else
+      return false;
 }
 
 
@@ -1279,6 +1288,41 @@ void PLASMA::trimWirs(double llimits[3], double rlimits[3]){
 
 }
 
+
+double pillars3D (double x, double y, double z, PLASMAparams plist, double Z, double A){
+    double *paramlist = (double*)plist.additional_params;
+    double dy = paramlist[0];
+    double dz = paramlist[1];
+    double r = paramlist[2];
+    double h = paramlist[3];
+    double rhoDefault = -1;
+
+    double middleY = 0.5*(plist.rminbox[1]+plist.rmaxbox[1]);
+    double middleZ = 0.5*(plist.rminbox[2]+plist.rmaxbox[2]);
+
+    if ( (plist.rminbox[0] <= x) && (x <= plist.rmaxbox[0]) &&
+         (plist.rminbox[1] <= y) && (y <= plist.rmaxbox[1]) &&
+         (plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2]) ){
+
+        if((plist.rmaxbox[0]-x) > h)
+            return rhoDefault;
+
+        double yy = y - middleY;
+        double zz = z - middleZ;
+
+        yy = yy - (dy)*round(yy/(dz));
+        zz = zz - (dz)*round(zz/(dy));
+
+        double rad2 = (yy - 0.5*dy)*(yy - 0.5*dy) + (zz - 0.5*dz)*(zz - 0.5*dz);
+
+        if(rad2 <= r)
+            return plist.density_coefficient;
+        else
+            return rhoDefault;
+
+    }
+    return rhoDefault;
+}
 
 
 //*************************END_PLASMA*****************************

@@ -23,7 +23,7 @@
 //IMPORTANT! "preproc_defs.h" to be included as VERY FIRST
 #include "preproc_defs.h"
 
-#define NUMBER_OF_PLASMA_FUNCTIONS 30
+#define NUMBER_OF_PLASMA_FUNCTIONS 31
 
 #include <math.h>
 #include "commons.h"
@@ -191,6 +191,7 @@ public:
   static bool isUser2(int dfIndex);
   static bool isr1r1(int dfIndex);
   static bool isRndWir(int dfIndex);
+  static bool isPillar3D(int dfIndex);
 
 
 
@@ -245,6 +246,8 @@ double fftplasma(double x, double y, double z, PLASMAparams plist, double Z, dou
 double cylinder(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 double rand_wires(double x, double y, double z, PLASMAparams plist, double Z, double A);
+
+double pillars3D(double x, double y, double z, PLASMAparams plist, double Z, double A);
 
 //************** LASER PULSE TYPES *******
 enum laserPulseType { DEFAULT_PULSE, GAUSSIAN, PLANE_WAVE, COS2_PLANE_WAVE, COS2_PLATEAU_PLANE_WAVE, LAGUERRE_GAUSSIAN, CONST_FIELD};
