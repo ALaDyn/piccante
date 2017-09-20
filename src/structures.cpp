@@ -1310,12 +1310,12 @@ double pillars3D (double x, double y, double z, PLASMAparams plist, double Z, do
         double yy = y - middleY;
         double zz = z - middleZ;
 
-        yy = yy - (dy)*round(yy/(dz));
-        zz = zz - (dz)*round(zz/(dy));
+        yy = yy - (dy)*round(yy/(dy));
+        zz = zz - (dz)*round(zz/(dz));
 
-        double rad2 = (yy - 0.5*dy)*(yy - 0.5*dy) + (zz - 0.5*dz)*(zz - 0.5*dz);
+        double rad2 = yy*yy + zz*zz;
 
-        if(rad2 <= r)
+        if(rad2 <= r*r)
             return plist.density_coefficient;
         else
             return rhoDefault;
