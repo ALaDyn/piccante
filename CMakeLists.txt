@@ -3,9 +3,18 @@ project(piccante)
 enable_language(CXX)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-## use C++11 if you can, otherwise, add the NO_CXX11 definition to correctly build piccante (in this case, boost 1.47+ is required for RNG)
+## use C++11 if you can, otherwise boost 1.47+ is required for RNG)
+set (CXX11_DISABLED OFF CACHE BOOL "C++11 DISABLED")
+
+
+
+
+if (CXX11_DISABLED)
+add_definitions(-DNO_CXX11)
+else()
 set(CMAKE_CXX_STANDARD 11)
-#add_definitions(-DNO_CXX11)
+endif()
+
 
 # make sure that the default is a RELEASE
 if(NOT CMAKE_BUILD_TYPE)
@@ -30,7 +39,7 @@ if(Boost_FOUND)
   add_definitions(-DUSE_BOOST)
   include_directories(${Boost_INCLUDE_DIR})
 endif()
-if(NOT Boost_FOUND AND NO_CXX11)
+if(NOT Boost_FOUND AND CXX11_DISABLED)
   message(FATAL_ERROR "Without C++11 available, the system must provide Boost Libraries 1.47+")
 endif()
 
@@ -56,7 +65,7 @@ endif()
 
 find_package(JsonCpp)
 if(NOT JsonCpp_FOUND)
-  if(NO_CXX11)
+  if(CXX11_DISABLED)
     message(FATAL_ERROR "Without C++11 available, the system must provide an already built jsoncpp library")
   endif()
   message(STATUS "  --> JsonCpp will be built as an external project")
