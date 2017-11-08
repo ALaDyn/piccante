@@ -49,5 +49,7 @@ install:
 
 
 script:
-  - mkdir build && cd build && cmake .. -DBUILD_EXAMPLES=ON && cmake --build . --target install
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir build && cd build && cmake .. -DBUILD_EXAMPLES=ON && cmake --build . --target install   ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then mkdir build && cd build && cmake .. && cmake --build . --target install                       ;fi
+  
 
