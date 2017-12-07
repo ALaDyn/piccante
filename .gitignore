@@ -1,8 +1,9 @@
 
 #VS Code
-.vs/
-.vscode/
+/.vs/*
+/.vscode/*
 !.vscode/settings.json
+!.vscode/c_cpp_properties.json
 
 #doc temp files
 *.synctex.gz

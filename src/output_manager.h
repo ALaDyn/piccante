@@ -267,9 +267,9 @@ private:
   void findNumberOfProcsWithinSubdomain(int *Nproc, int imin[3], int imax[3], int remains[3]);
   void findGlobalSubdomainUniquePointsNumber(int *uniqueN, int imin[3], int imax[3], int remains[3]);
   void findLocalSubdomainUniquePointsNumber(int *uniqueLocN, int locimin[3], int locimax[3], int remains[3]);
-  int findSpecIndexInMyspeciesVector(std::string name);
-  int findProbeIndexInMyprobeVector(emProbe *newProbe);
-  int findDomainIndexInMydomainsVector(outDomain *newDomain);
+  int findSpecIndexInMySpeciesVector(std::string name);
+  int findProbeIndexInMyProbeVector(emProbe *newProbe);
+  int findDomainIndexInMyDomainsVector(outDomain *newDomain);
   std::string diagFileName;
   std::string extremaFieldFileName;
   std::vector<std::string> extremaSpecFileNames;
@@ -340,8 +340,8 @@ private:
 
   void callDiag(request req);
 
-  int findLeftNeightbourPoint(double val, double* coords, int numcoords);
-  int findRightNeightbourPoint(double val, double* coords, int numcoords);
+  int findLeftNeighbourPoint(double val, double* coords, int numcoords);
+  int findRightNeighbourPoint(double val, double* coords, int numcoords);
 
   void prepareIntegerBigHeader(int *itodo, int uniqueN[3], int slice_rNproc[3], int Ncomp);
   void prepareFloatCoordinatesHeader(float *fcir[3], int uniqueN[3], int imin[3]);
@@ -366,4 +366,3 @@ private:
 };
 
 #endif
-

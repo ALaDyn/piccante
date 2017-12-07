@@ -405,7 +405,7 @@ int OUTPUT_MANAGER::getIntegerTime(double dtime) {
   return (step <= Nsteps) ? (step) : (-1);
 }
 
-int OUTPUT_MANAGER::findSpecIndexInMyspeciesVector(std::string name) {
+int OUTPUT_MANAGER::findSpecIndexInMySpeciesVector(std::string name) {
   int pos = 0;
   for (std::vector<SPECIE*>::iterator it = myspecies.begin(); it != myspecies.end(); it++) {
     if ((*it)->getName() == name) {
@@ -418,7 +418,7 @@ int OUTPUT_MANAGER::findSpecIndexInMyspeciesVector(std::string name) {
   }
   return -1;
 }
-int OUTPUT_MANAGER::findProbeIndexInMyprobeVector(emProbe *newProbe) {
+int OUTPUT_MANAGER::findProbeIndexInMyProbeVector(emProbe *newProbe) {
   int pos = 0;
   for (std::vector<emProbe*>::iterator it = myEMProbes.begin(); it != myEMProbes.end(); it++) {
     if ((*it)->compareProbes(newProbe)) {
@@ -429,7 +429,7 @@ int OUTPUT_MANAGER::findProbeIndexInMyprobeVector(emProbe *newProbe) {
   return -1;
 
 }
-int OUTPUT_MANAGER::findDomainIndexInMydomainsVector(outDomain *newDomain) {
+int OUTPUT_MANAGER::findDomainIndexInMyDomainsVector(outDomain *newDomain) {
   int pos = 0;
   for (std::vector<outDomain*>::iterator it = myDomains.begin(); it != myDomains.end(); it++) {
     if ((*it)->compareDomains(newDomain)) {
@@ -536,7 +536,7 @@ void OUTPUT_MANAGER::addEBField(outDomain* _domain, double startTime, double fre
 
   int domainID = 0;
   if (_domain != NULL) {
-    domainID = findDomainIndexInMydomainsVector(_domain);
+    domainID = findDomainIndexInMyDomainsVector(_domain);
     if (domainID < 0) {
       myDomains.push_back(_domain);
       domainID = (int)myDomains.size() - 1;
@@ -571,7 +571,7 @@ void OUTPUT_MANAGER::addEBFieldProbeFromTo(emProbe* Probe, double startTime, dou
 void OUTPUT_MANAGER::addEBFieldProbe(emProbe* Probe, double startTime, double frequency, double endTime) {
   if (!(checkGrid() && checkEMField()))
     return;
-  int domainID = findProbeIndexInMyprobeVector(Probe);
+  int domainID = findProbeIndexInMyProbeVector(Probe);
   if (domainID < 0) {
     myEMProbes.push_back(Probe);
     isThereEMProbe = true;
@@ -608,12 +608,12 @@ void OUTPUT_MANAGER::addSpeciesDensityFromTo(outDomain* domain_in, std::string n
 void OUTPUT_MANAGER::addSpeciesDensity(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime) {
   if (!(checkGrid() && checkSpecies() && checkCurrent()))
     return;
-  int specNum = findSpecIndexInMyspeciesVector(name);
+  int specNum = findSpecIndexInMySpeciesVector(name);
   if (specNum < 0)
     return;
   int domainID = 0;
   if (domain_in != NULL) {
-    domainID = findDomainIndexInMydomainsVector(domain_in);
+    domainID = findDomainIndexInMyDomainsVector(domain_in);
     if (domainID < 0) {
       myDomains.push_back(domain_in);
       domainID = (int)myDomains.size() - 1;
@@ -653,7 +653,7 @@ void OUTPUT_MANAGER::addCurrent(outDomain* domain_in, double startTime, double f
 
   if (domain_in != NULL) {
 
-    domainID = findDomainIndexInMydomainsVector(domain_in);
+    domainID = findDomainIndexInMyDomainsVector(domain_in);
     if (domainID < 0) {
       myDomains.push_back(domain_in);
       domainID = (int)myDomains.size() - 1;
@@ -690,13 +690,13 @@ void OUTPUT_MANAGER::addSpeciesPhaseSpaceFromTo(outDomain* domain_in, std::strin
 void OUTPUT_MANAGER::addSpeciesPhaseSpace(outDomain* domain_in, std::string name, double startTime, double frequency, double endTime) {
   if (!(checkGrid() && checkSpecies()))
     return;
-  int specNum = findSpecIndexInMyspeciesVector(name);
+  int specNum = findSpecIndexInMySpeciesVector(name);
   if (specNum < 0)
     return;
   int domainID = 0;
 
   if (domain_in != NULL) {
-    domainID = findDomainIndexInMydomainsVector(domain_in);
+    domainID = findDomainIndexInMyDomainsVector(domain_in);
     if (domainID < 0) {
       myDomains.push_back(domain_in);
       domainID = (int)myDomains.size() - 1;
@@ -2113,7 +2113,7 @@ void OUTPUT_MANAGER::writeCPUParticlesValuesWritingGroups(std::string  fileName,
         data[c + p*Ncomp] = (float)spec->ru(c, p + particleBufferSize*numPackages);
       }
     }
-#ifndef DEBUG_NO_MPI_FILE_WRITE   
+#ifndef DEBUG_NO_MPI_FILE_WRITE
     MPI_File_write(thefile, data, resto*Ncomp, MPI_FLOAT, &status);
 #endif
     MPI_Status status;
@@ -2648,7 +2648,7 @@ void OUTPUT_MANAGER::nearestInt(double rr[], int *ri, int *globalri) {
     }
   }
 }
-int OUTPUT_MANAGER::findLeftNeightbourPoint(double val, double* coords, int numcoords) {
+int OUTPUT_MANAGER::findLeftNeighbourPoint(double val, double* coords, int numcoords) {
   if (numcoords <= 1)
     return 0;
   if (val <= coords[0])
@@ -2660,7 +2660,7 @@ int OUTPUT_MANAGER::findLeftNeightbourPoint(double val, double* coords, int numc
   return 0;
 }
 
-int OUTPUT_MANAGER::findRightNeightbourPoint(double val, double* coords, int numcoords) {
+int OUTPUT_MANAGER::findRightNeighbourPoint(double val, double* coords, int numcoords) {
   if (numcoords <= 1)
     return 0;
   if (val >= coords[numcoords - 1])
@@ -2684,14 +2684,14 @@ void OUTPUT_MANAGER::setAndCheckRemains(int *remains, bool remainingCoord[3]) {
 
 void OUTPUT_MANAGER::findLocalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax) {
   for (int c = 0; c < 3; c++) {
-    imin[c] = findLeftNeightbourPoint(rmin[c], mygrid->cirloc[c], mygrid->Nloc[c]);
-    imax[c] = findRightNeightbourPoint(rmax[c], mygrid->cirloc[c], mygrid->Nloc[c]);
+    imin[c] = findLeftNeighbourPoint(rmin[c], mygrid->cirloc[c], mygrid->Nloc[c]);
+    imax[c] = findRightNeighbourPoint(rmax[c], mygrid->cirloc[c], mygrid->Nloc[c]);
   }
 }
 void OUTPUT_MANAGER::findGlobalIntegerBoundaries(double rmin[3], double rmax[3], int *imin, int *imax) {
   for (int c = 0; c < 3; c++) {
-    imin[c] = findLeftNeightbourPoint(rmin[c], mygrid->cir[c], mygrid->NGridNodes[c]);
-    imax[c] = findRightNeightbourPoint(rmax[c], mygrid->cir[c], mygrid->NGridNodes[c]);
+    imin[c] = findLeftNeighbourPoint(rmin[c], mygrid->cir[c], mygrid->NGridNodes[c]);
+    imax[c] = findRightNeighbourPoint(rmax[c], mygrid->cir[c], mygrid->NGridNodes[c]);
   }
 }
 void OUTPUT_MANAGER::findNumberOfProcsWithinSubdomain(int *Nproc, int imin[3], int imax[3], int remains[3]) {

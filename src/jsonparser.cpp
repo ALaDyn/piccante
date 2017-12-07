@@ -388,7 +388,7 @@ void jsonParser::setStretchedGrid(Json::Value &document, GRID *grid) {
     std::string  name2;
     Json::Value stretching1D;
 
-    name2 = _JSON_OBJ_X_STTETCHING_;
+    name2 = _JSON_OBJ_X_STRETCHING_;
     if (setValue(stretching1D, stretching, name2.c_str())) {
       std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;
@@ -410,7 +410,7 @@ void jsonParser::setStretchedGrid(Json::Value &document, GRID *grid) {
       }
     }
 
-    name2 = _JSON_OBJ_Y_STTETCHING_;
+    name2 = _JSON_OBJ_Y_STRETCHING_;
     if (setValue(stretching1D, stretching, name2.c_str())) {
       std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;
@@ -432,7 +432,7 @@ void jsonParser::setStretchedGrid(Json::Value &document, GRID *grid) {
       }
     }
 
-    name2 = _JSON_OBJ_Z_STTETCHING_;
+    name2 = _JSON_OBJ_Z_STRETCHING_;
     if (setValue(stretching1D, stretching, name2.c_str())) {
       std::string  name3 = _JSON_OBJ_LEFT_STRETCHING_;
       Json::Value stretchingLeft;

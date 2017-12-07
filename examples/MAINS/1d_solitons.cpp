@@ -250,7 +250,7 @@ int main(int narg, char **args)
     grid.setFrequencyStdoutStatus(FREQUENCY_STDOUT_STATUS);
 
 
-    manager.callDiags(istep);  /// deve tornare all'inizo del ciclo
+    manager.callDiags(istep);  /// deve tornare all'inizio del ciclo
 
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();

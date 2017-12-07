@@ -54,9 +54,9 @@
 #define _JSON_INT_RESTART_FROM_DUMP_  "restartFromDump"
 
 #define _JSON_OBJ_STRETCHED_GRID_ "StretchedGrid"
-#define _JSON_OBJ_X_STTETCHING_ "x"
-#define _JSON_OBJ_Y_STTETCHING_ "y"
-#define _JSON_OBJ_Z_STTETCHING_ "z"
+#define _JSON_OBJ_X_STRETCHING_ "x"
+#define _JSON_OBJ_Y_STRETCHING_ "y"
+#define _JSON_OBJ_Z_STRETCHING_ "z"
 #define _JSON_OBJ_LEFT_STRETCHING_ "left"
 #define _JSON_OBJ_RIGHT_STRETCHING_ "right"
 #define _JSON_INT_NCELL_STRETCHING_ "NCells"

@@ -28,7 +28,7 @@
 #include "structures.h"
 #include "em_field.h"
 #include "particle_species.h"
-#include "json/json.h"
+#include <json/json.h>
 
 #if defined(_MSC_VER)
 #include <cstdint>
@@ -93,4 +93,3 @@ public:
 };
 
 #endif // UTILITIES_H
-

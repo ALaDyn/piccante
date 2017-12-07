@@ -91,30 +91,28 @@ typedef std::normal_distribution<double>  my_normal_distribution;
 #define THIRD 0.333564095
 
 // from simulation units to c.g.s.  (nelle sim. i fields non sono giusti [k, (c)dt])
-#define CONVERT_E2cgs (1e+4)    // da unita' di simulaz -> c.g.s.
-#define CONVERT_B2cgs (1e+4)    // da unita' di simulaz -> c.g.s.
+#define CONVERT_E2cgs (1e+4)    // da unita` di simulazione -> c.g.s.
+#define CONVERT_B2cgs (1e+4)    // da unita` di simulazione -> c.g.s.
 
 // from simulation units to S.I.
-#define CONVERT_E2SI (THREE*1e+8)    
-#define CONVERT_B2SI (1.)             
-#define CONVERT_CHARGE2SI (THIRD*1e-9)  
+#define CONVERT_E2SI (THREE*1e+8)
+#define CONVERT_B2SI (1.)
+#define CONVERT_CHARGE2SI (THIRD*1e-9)
 #define CONVERT_ENERGY2SI (1e-7)
 
 // from c.g.s. to simulation units
-#define CONVERT_cgs2E (1e-4)  // da campi c.g.s. -> unita' di simulaz 
-#define CONVERT_cgs2B (1e-4)  // da campi c.g.s. -> unita' di simulaz 
+#define CONVERT_cgs2E (1e-4)  // da campi c.g.s. -> unita' di simulazione
+#define CONVERT_cgs2B (1e-4)  // da campi c.g.s. -> unita' di simulazione
 
 // from S.I. to simulation units
 #define CONVERT_SI2E (THIRD*1e-8)
-#define CONVERT_SI2B (1)      
+#define CONVERT_SI2B (1)
 #define CONVERT_SI2CHARGE (THREE*1e+9)
 
 #define Dfloat float
 #define MPI_Dfloat MPI_FLOAT
 #define ONE_THIRD 0.333333333333333333
 
-// ************** FIELD TYPE *************** (forse si può togliere)
-//enum fieldType {DUMMY, ELECTRO_MAGNETIC_FIELD,DENSITY_CURRENT_FIELD };
 
 // ************** PARTICLES TYPE ***************
 enum particlesType { ELECTRON, POSITRON, ION };
@@ -193,4 +191,3 @@ typedef union{
 } intdouble;
 
 #endif
-
