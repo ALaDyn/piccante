@@ -240,7 +240,7 @@ int main(int narg, char **args)
 
   int Nstep = grid.getTotalNumberOfTimesteps();
   if (grid.myid == grid.master_proc) {
-    printf("----- START temporal cicle: %i step -----\n", Nstep);
+    printf("----- START temporal cycle: %i step -----\n", Nstep);
     fflush(stdout);
   }
   for (istep = 0; istep <= Nstep; istep++)
@@ -295,8 +295,7 @@ int main(int narg, char **args)
 
   manager.close();
   MPI_Finalize();
-  
+
   return 0;
 
 }
-

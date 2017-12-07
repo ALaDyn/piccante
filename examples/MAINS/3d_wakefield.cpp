@@ -178,7 +178,7 @@ int main(int narg, char **args)
   grid.setDumpPath(DIRECTORY_DUMP);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY!!) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   if (grid.myid == grid.master_proc) {
-    printf("----- START temporal cicle -----\n");
+    printf("----- START temporal cycle -----\n");
     fflush(stdout);
   }
 

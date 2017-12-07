@@ -5,6 +5,12 @@
 %%% Otherwise, just compile as usual and then launch manually "asy piccante_guide-1.asy && asy piccante_guide-2.asy && asy piccante_guide-3.asy"
 %%% and finally recompile it all
 
+% // cSpell:ignore basicstyle, keywordstyle, stringstyle, commentstyle, morecomment, backgroundcolor, htbp, cmyk, bordercolor
+% chktex-file 8
+% chktex-file 18
+% chktex-file 36
+% chktex-file 46
+
 \documentclass[11pt,a4paper]{report}
 \usepackage[utf8x]{inputenc}
 \usepackage{ucs}
@@ -32,7 +38,7 @@
 \definecolor{bordercolor}{cmyk}{1,.60,0,.40}
 %\definecolor{bordercolor}{gray}{0.5}
 
-\lstset{language=C++, 
+\lstset{language=C++,
 basicstyle=\ttfamily,
 keywordstyle=\color{blue}\ttfamily,
 stringstyle=\color{red}\ttfamily,
@@ -70,10 +76,10 @@ Please refer to the \verb+BUILD.md+ document in the project root folder to have 
 \subsection{Ask a contributor}
 If you need further information, ask one of the contributors:
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l l }
     	\textbf{A. Sgattoni}  & andrea.sgattoni@gmail.com    \\
     	\textbf{L. Fedeli}    & luca.fedeli@for.unipi.it     \\
-    	\textbf{S. Sinigardi} & stefano.sinigardi@gmail.com 
+    	\textbf{S. Sinigardi} & stefano.sinigardi@gmail.com
     \end{tabular}
 \end{center}
 
@@ -102,7 +108,7 @@ Other example main files are described in the next chapter.
 #include <iomanip>
 #include <cstring>
 #include <ctime>
-#include <cstdarg> 
+#include <cstdarg>
 #include <vector>
 
 using namespace std;
@@ -146,8 +152,8 @@ ignored). However, since \verb+DO_DUMP+ is \verb+true+, files for a simulation r
 #define NPROC_ALONG_Y 1
 #define NPROC_ALONG_Z 1
 \end{lstlisting}
-\verb+NPROC_ALONG_Y+ and \verb+NPROC_ALONG_Z+ set the number of MPI processes along y and along z. 
-The total number of MPI processes when the application is launched (see chapter \ref{chapter_run}) should be a multiple of \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+. The number of processes along x is \emph{automatically} selected so that [number of processes along x] $\times$ \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+ is equal to the total number of MPI processes.
+\verb+NPROC_ALONG_Y+ and \verb+NPROC_ALONG_Z+ set the number of MPI processes along y and along z.
+The total number of MPI processes when the application is launched (see Chapter~\ref{chapter_run}) should be a multiple of \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+. The number of processes along x is \emph{automatically} selected so that [number of processes along x] $\times$ \verb+NPROC_ALONG_Y+ $\times$ \verb+NPROC_ALONG_Z+ is equal to the total number of MPI processes.
 \begin{lstlisting}
 #define DIRECTORY_OUTPUT "TEST"
 #define DIRECTORY_DUMP "TEST"
@@ -174,7 +180,7 @@ These lines should not be modified.
 
 \verb+current+ is used for current and density deposition.
 
-\verb+species+ is a vector of \verb+SPECIE+ objects. The user is able to define an arbitrary number of species (see section \ref{section_species}).
+\verb+species+ is a vector of \verb+SPECIE+ objects. The user is able to define an arbitrary number of species (see Section~\ref{section_species}).
 
 
 \section{Grid settings}
@@ -201,13 +207,13 @@ Finally \verb+grid.setNProcsAlongY(NPROC_ALONG_Y);+ and \verb+grid.setNProcsAlon
 	// grid.setXandNxRightStretchedGrid(15.0,1000);
 	// grid.setYandNyRightStretchedGrid(5.0, 70);
 \end{lstlisting}
-The stretched grid is commented out in this example (so in this example the simulation grid is not stretched). However, this feature is described in subsection \ref{subsection_stretch}.
+The stretched grid is commented out in this example (so in this example the simulation grid is not stretched). However, this feature is described in Subsection~\ref{subsection_stretch}.
 \begin{lstlisting}
 	grid.setBoundaries(xOpen | yOpen | zPBC);
 \end{lstlisting}
 \verb+grid.setBoundaries(...)+ sets the boundary conditions of the simulation.
 
-The available options at the moment are: \verb+xOpen xPBC yOpen yPBC zPBC+ 
+The available options at the moment are: \verb+xOpen xPBC yOpen yPBC zPBC+
 (so, open boundary conditions are not yet implemented along z).
 
 Boundary conditions may not be compatible with other simulation parameters. For instance, \verb+xPBC+ is incompatible with the moving window. Moreover, while open boundaries are fine for EM fields, if a particle suddenly disappear from the simulation, disruptive numerical instabilities may occur (in this case, using the stretched grid feature is suggested). Of course particles can disappear safely from the left x boundary if there's a moving window with $\beta = 1.0$.
@@ -215,7 +221,7 @@ Boundary conditions may not be compatible with other simulation parameters. For 
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	grid.mpi_grid_initialize(&narg, args);
 \end{lstlisting}
-This line initialises the grid (the user should not modify it). 
+This line initialises the grid (the user should not modify it).
 \begin{lstlisting}
 	grid.setCourantFactor(0.98);
 \end{lstlisting}
@@ -242,7 +248,7 @@ If the first line is commented out, no moving window is set. Instead, the second
 \begin{lstlisting}
 	grid.setMasterProc(0);
 \end{lstlisting}
-\verb+grid.setMasterProc(0)+ sets the master MPI task to zero (if needed the user can properly choose a different MPI ID). 
+\verb+grid.setMasterProc(0)+ sets the master MPI task to zero (if needed the user can properly choose a different MPI ID).
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	srand(time(NULL));
 	grid.initRNG(rng, RANDOM_NUMBER_GENERATOR_SEED);
@@ -271,7 +277,7 @@ These lines (which should not be modified) conclude the initialization of the gr
 These lines set the properties of the stretched grid.
 If the first line is commented no stretched grid is set, no matter the presence of some of the other lines.
 \texttt{grid.setXandNxLeftStretchedGrid(X\_START\_LEFT, NP\_LEFT)}
-sets respectively the coordinate of the left boundary of the uniform grid (i.e. the beginning of the stretching) and the number of grid points in the stretched region.
+sets respectively the coordinate of the left boundary of the uniform grid (i.e.\ the beginning of the stretching) and the number of grid points in the stretched region.
 The same idea is used for the right boundary and for the \verb+Y+ and \verb+Z+
 directions.
 \begin{figure}[h!tb]
@@ -376,13 +382,12 @@ label(scale(1.0)*"Uniform",(0,0.4),align=S);
 \end{asy}
 
 \end{center}
-\caption{Stretching function (left) and inverse derivative (right)}
-\label{pic_stretching}
+\caption{Stretching function (left) and inverse derivative (right)}\label{pic_stretching}
 \end{figure}
 
-The stretched grid is obtained considering a uniform grid in an 
-auxiliary variable $\xi_i=\xi_{min}+\Delta\xi i$ and a piece-wise defined transfer function
-$$
+The stretched grid is obtained considering a uniform grid in an
+auxiliary variable $\xi_i=\xi_{\min}+\Delta\xi i$ and a piece-wise defined transfer function
+\[
 x(\xi) =
 \begin{cases}
 x_{\text{right}}+\alpha_{\text{right}} \tan\left(
@@ -391,8 +396,8 @@ x_{\text{right}}+\alpha_{\text{right}} \tan\left(
 x_{\text{left}}-\alpha_{\text{left}} \tan\left(
 \left|\xi-x_{\text{left}}\right|/\alpha_{\text{left}}\right), & \text{if } \xi<x_{\text{left}}
 \end{cases}
-$$
-See Fig. \ref{pic_stretching}.
+\]
+See Fig.~\ref{pic_stretching}.
 
 
 \section{EM fields}
@@ -438,11 +443,11 @@ Here a 1D laser pulse is added to the EM field.
    	pulse1.setPulseInitialPosition(-6.0);
    	pulse1.setLambda(1.0);
    	pulse1.setNormalizedAmplitude(1.0);
-    
+
 	pulse1.setWaist(3.0);
-	
+
    	pulse1.setFocusPosition(0.0);
-	
+
 	pulse1.setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0);
 
 	myfield.addPulse(&pulse1);
@@ -453,7 +458,7 @@ In addition to the \verb+setCos2PlaneWave()+ pulse, in this case \verb+waist+ an
 
 In 2 or 3 dimensions, if an oblique incidence pulse is required,
 
-\verb+setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0)+ enables rotation and set the angle in radians (first argument) and rotation center on the x axis (second argument) .
+\verb+setRotationAngleAndCenter(2.0*M_PI*(-90.0 / 360.0),0.0)+ enables rotation and set the angle in radians (first argument) and rotation center on the x axis (second argument).
 \subsection{EM field finalization}
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	myfield.boundary_conditions();
@@ -466,15 +471,15 @@ These lines need to be called after pulse generation. They apply boundary condit
 \section{Plasma}
 \begin{lstlisting}
 	PLASMA plasma1;
-	plasma1.density_function = left_soft_ramp;      
-	plasma1.setXRangeBox(0.0,100.0);    
-	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 
+	plasma1.density_function = left_soft_ramp;
+	plasma1.setXRangeBox(0.0,100.0);
+	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
 	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
 	plasma1.setDensityCoefficient(0.01);
 	plasma1.setRampLength(20.0);
-	plasma1.setRampMinDensity(0.0);             
+	plasma1.setRampMinDensity(0.0);
 \end{lstlisting}
-These lines define a plasma profile shaped as in figure \ref{pic_lsrprof}.
+These lines define a plasma profile shaped as in figure~\ref{pic_lsrprof}.
 
 The density function is \verb+left_soft_ramp+ ($\sin^2$ followed by constant density). \verb+set*RangeBox+ calls select the size of the box surrounding the plasma, while \verb+setDensityCoefficient+ sets the density (in units of $n_c$) of the constant density region of the plasma. The length of the ramp is set by \verb+setRampLength+ and \verb+setRampMinDensity+ sets the density before the ramp (0.0 in this example).
 
@@ -518,8 +523,7 @@ label(scale(1.0)*"RampLength",(25,0.4),align=S,red);
 \end{asy}
 
 \end{center}
-\caption{\texttt{left\_soft\_ramp} plasma profile}
-\label{pic_lsrprof}
+\caption{\texttt{left\_soft\_ramp} plasma profile}\label{pic_lsrprof}
 \end{figure}
 
 \subsection{Other simple default plasma functions}
@@ -533,36 +537,36 @@ This plasma function defines a grating target.
 In addition to the settings for the soft ramp target, some additional parameters should be set as follows:
 \begin{lstlisting}
 	PLASMA plasma1;
-	plasma1.density_function = left_grating;      
-	plasma1.setXRangeBox(0.0,5.0);    
-	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);                 
+	plasma1.density_function = left_grating;
+	plasma1.setXRangeBox(0.0,5.0);
+	plasma1.setYRangeBox(grid.rmin[1],grid.rmax[1]);
 	plasma1.setZRangeBox(grid.rmin[2],grid.rmax[2]);
 	plasma1.setDensityCoefficient(100);
 
 	plasma1.setRampLength(0.05);
 	plasma1.setRampMinDensity(0.0);
-	     
+
 	double grating_peak_to_valley_depth = 1.0;
 	double grating_lambda = 0.5;
 	double grating_phase = 0.0;
-    
+
 	double additionalParams[3];
 	additionalParams[0] = grating_peak_to_valley_depth;
 	additionalParams[1] = grating_lambda;
 	additionalParams[2] = grating_phase ;
-    
+
 	plasma1.setAdditionalParams(additionalParams);
 \end{lstlisting}
-\verb+left_grating+ will be used as an example in subsection \ref{subsection_upfunc}. Please refer to this subsection for further information.
+\verb+left_grating+ will be used as an example in Subsection~\ref{subsection_upfunc}. Please refer to this subsection for further information.
 
 
 \subsection{Other functions}
-There are other plasma functions, such as \texttt{box\_minus\_box} and \texttt{rough\_target}. Please refer to subsection \ref{subsection_upfunc} and to \verb+structures.cpp+ source file for further information.
+There are other plasma functions, such as \texttt{box\_minus\_box} and \texttt{rough\_target}. Please refer to Subsection~\ref{subsection_upfunc} and to \verb+structures.cpp+ source file for further information.
 
 \subsection{How to implement a user-defined plasma function}\label{subsection_upfunc}
-If you want to implement a new plasma function, you have to define it in \verb+main-piccante.cpp+ file before use. In the following lines the definition of \verb+left_grating+ is reported as an example: 
+If you want to implement a new plasma function, you have to define it in \verb+main-piccante.cpp+ file before use. In the following lines the definition of \verb+left_grating+ is reported as an example:
 \begin{lstlisting}
-double left_grating(double x, double y, double z, 
+double left_grating(double x, double y, double z,
 			PLASMAparams plist, int Z, int A){
 	double g_y0 = (plist.rmaxbox[1] - plist.rminbox[1])*0.5;
 	double* paramlist = (double*)plist.additional_params;
@@ -571,7 +575,7 @@ double left_grating(double x, double y, double z,
 	double g_phase = paramlist[2];
 
 	double phase = 2.0 * M_PI * ((y - g_y0) + g_phase) / g_lambda;
-	double xminbound = plist.rminbox[0] + 
+	double xminbound = plist.rminbox[0] +
 		g_depth*(1.0 - cos(phase));
 
 	if ((xminbound <= x) && (x <= plist.rmaxbox[0]) &&
@@ -579,7 +583,7 @@ double left_grating(double x, double y, double z,
 	(plist.rminbox[2] <= z) && (z <= plist.rmaxbox[2])){
 		if ((x - xminbound) <= plist.ramp_length){
 	return (plist.density_coefficient-plist.ramp_min_density)*
-			(x - xminbound) / plist.ramp_length + 
+			(x - xminbound) / plist.ramp_length +
 			plist.ramp_min_density;
 		}
 		else{
@@ -597,15 +601,15 @@ It is worth to mention that, during the particle creation phase, the number of p
 \begin{lstlisting}
 	SPECIE  electrons1(&grid);
 	electrons1.plasma = plasma1;
-	electrons1.setParticlesPerCellXYZ(100, 1, 1);       
+	electrons1.setParticlesPerCellXYZ(100, 1, 1);
 	electrons1.setName("ELE1");
 	electrons1.type = ELECTRON;
-	electrons1.creation();                            
+	electrons1.creation();
 	species.push_back(&electrons1);
 \end{lstlisting}
 These lines create and initialize an electron species. A \verb+PLASMA+ object should be passed to define the plasma shape (in this case the plasma will be a \verb+left_soft_ramp+).
 
-\verb+setParticlesPerCellXYZ+ sets the number of particles per cell along x, y and z (100x1x1 in this case).
+\verb+setParticlesPerCellXYZ+ sets the number of particles per cell along x, y and z ($100 \times 1 \times 1$ in this case).
 
 \verb+setName+ sets the species name. Each species should have a different name, or part of the simulation output may be overwritten.
 
@@ -613,10 +617,10 @@ These lines create and initialize an electron species. A \verb+PLASMA+ object sh
 
 Finally, the lines
 \begin{lstlisting}
-	electrons1.creation();                            
+	electrons1.creation();
 	species.push_back(&electrons1);
 \end{lstlisting}
-create the species \verb+electrons1+ and add it to the species vector. 
+create the species \verb+electrons1+ and add it to the species vector.
 \begin{lstlisting}
 	SPECIE ions1(&grid);
 	ions1.plasma = plasma1;
@@ -627,7 +631,7 @@ create the species \verb+electrons1+ and add it to the species vector.
 	ions1.A = 12.0;
 	ions1.creation();
 	species.push_back(&ions1);
-\end{lstlisting}  
+\end{lstlisting}
 Here, carbon ions are created, with the same plasma profile of \verb+electrons1+. In addition to the previous options, here \verb+Z+ and \verb+A+ should be set. Actually, only the ratio of \verb+Z+ over \verb+A+ is important.
 \begin{lstlisting}
 	tempDistrib distribution;
@@ -644,7 +648,7 @@ It is also possible to add a momentum to each particle. In this case, momenta ex
 \end{lstlisting}
 The available distribution functions are listed hereunder:
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l  l }
     	\verb+setWaterbag(p0)+                    & Waterbag distribution (momenta between $-p_0$ and $p_0$)                \\
     	\verb+setWaterbag3Temp(p0_x, p0_y,p0_z)+  & the same, but with three different momenta on x,y,z                     \\
     	\verb+setUnifSphere(p0)+                  & momentum distribution is a uniform sphere of radius $p_0$               \\
@@ -652,9 +656,9 @@ The available distribution functions are listed hereunder:
     	\verb+setMaxwell(temp)+                   & Maxwell distribution                                                    \\
     \end{tabular}
 \end{center}
-\textbf{WARNING: } multiple assignments of a temperature distribution to a species will result in the last assignment overwriting the previous ones.
+\textbf{WARNING:} multiple assignments of a temperature distribution to a species will result in the last assignment overwriting the previous ones.
 
-\textbf{WARNING: } at the moment, if the moving window is activated, new particles entering in the simulation area are cold and with no drift. This will be fixed in future releases of the code.
+\textbf{WARNING:} at the moment, if the moving window is activated, new particles entering in the simulation area are cold and with no drift. This will be fixed in future releases of the code.
 
 
 \section{Diagnostics}
@@ -669,13 +673,13 @@ An \verb+OUTPUT_MANAGER+ object is deputed to manage all the diagnostics of the 
 
 	manager.addSpeciesDensityFrom(electrons1.name, 0.0, 2.0);
 	manager.addSpeciesDensityFrom(ions1.name, 0.0, 2.0);
-	
+
 	manager.addCurrentFrom(0.0, 5.0);
-	
+
 	manager.addSpeciesPhaseSpaceFrom(electrons1.name, 0.0, 5.0);
-	
+
 	manager.addDiagFrom(0.0, 1.0);
-	
+
 \end{lstlisting}
 These lines of code can be modified by the user according to its needs: they define exactly which diagnostics will be saved on disk and how frequently this will be done.
 \begin{lstlisting}
@@ -689,18 +693,18 @@ It is also possible to ask for the output between two times with a given frequen
 	manager.addEFieldFromTo(START, FREQUENCY, END);
 	manager.addEFieldAt(TIME);
 \end{lstlisting}
-For the density output and the phase space output, it is necessary to specify also the name of the target species, as defined in section \ref{section_species}. Make sure that the name is written correctly, or the requested output will be ignored (a warning message is displayed in this case).
+For the density output and the phase space output, it is necessary to specify also the name of the target species, as defined in Section~\ref{section_species}. Make sure that the name is written correctly, or the requested output will be ignored (a warning message is displayed in this case).
 
 If two output requests overlap, this is automatically detected by the output manager and no duplicated output is saved on disk.
 
 A quick reference of the available diagnostics is given in the following table.
-A more detailed discussion about how to handle the output files can be found in chapter \ref{chapter_howtoanalyse}
+A more detailed discussion about how to handle the output files can be found in Chapter~\ref{chapter_howtoanalyse}
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l  l }
     	\textbf{EField}            & binary output of the E field                                                          \\
     	\textbf{BField}            & binary output of the B field                                                          \\
     	\textbf{EBField}           & binary output of the E and B fields (separate files)                                  \\
-    	\textbf{EBFieldProbe}      & text output: EB fields time evolution on a given point (one file) see \ref{em_probe}  \\
+    	\textbf{EBFieldProbe}      & text output: EB fields time evolution on a given point (one file) see~\ref{em_probe}  \\
     	\textbf{SpeciesDensity}    & binary output of the charge density of a given species                                \\
     	\textbf{SpeciesPhaseSpace} & binary output of the phase space of a given species                                   \\
     	\textbf{Current}           & binary output of the total current density                                            \\
@@ -709,7 +713,7 @@ A more detailed discussion about how to handle the output files can be found in 
 \end{center}
 
 \subsubsection{Output domains}
-For grid based output (fields current and densities) it is possible to select an output subdomain (i.e. a plane or a lineout). This is accomplished by ``freezing'' one or more dimensions (i.e. in a 3D simulation the $x,y$ plane is selected by freezing the "$z$ dimension).
+For grid based output (fields current and densities) it is possible to select an output subdomain (i.e.\ a plane or a lineout). This is accomplished by ``freezing'' one or more dimensions (i.e.\ in a 3D simulation the $x,y$ plane is selected by freezing the "$z$ dimension).
 The prototype call for the $\mathbf{E}$ on a  $x,y$ plane passing through the point $(1,2,3)$ is as follows.
 
 \begin{lstlisting}
@@ -735,13 +739,13 @@ The prototype call for a probe on the point $(1,2,3)$is as follows which will ou
 	manager.initialize(DIRECTORY_OUTPUT);
 \end{lstlisting}
 The output manager should always be initialized passing \verb+DIRECTORY_OUTPUT+
-as an argument. 
+as an argument.
 
 \section{Temporal cycle}
 The user should not modify the temporal cycle without a good reason. Anyway, the code is described here for reference purposes.
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 if (grid.myid == grid.master_proc){
-  printf("----- START temporal cicle -----\n");
+  printf("----- START temporal cycle -----\n");
   fflush(stdout);
  }
 
@@ -757,48 +761,48 @@ if (_DO_RESTART){
  }
 while(grid.istep <= Nstep)
   {
-			
+
     grid.printTStepEvery(FREQUENCY_STDOUT_STATUS);
-			
-			
-    manager.callDiags(grid.istep); 
-			
+
+
+    manager.callDiags(grid.istep);
+
     myfield.openBoundariesE_1();
     myfield.new_halfadvance_B();
     myfield.boundary_conditions();
-			
+
     current.setAllValuesToZero();
-			
+
     for (spec_iterator = species.begin();
     spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->current_deposition_standard(&current);
     }
-			
+
     current.pbc();
-			
+
     for (spec_iterator = species.begin();
     spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->position_parallel_pbc();
-    }	
-			
+    }
+
     myfield.openBoundariesB();
     myfield.new_advance_E(&current);
-			
+
     myfield.boundary_conditions();
-			
+
     myfield.openBoundariesE_2();
     myfield.new_halfadvance_B();
-			
+
     myfield.boundary_conditions();
-			
+
     for (spec_iterator = species.begin();
     spec_iterator != species.end(); spec_iterator++){
       (*spec_iterator)->momenta_advance(&myfield);
     }
-			
+
     grid.time += grid.dt;
-			
-			
+
+
     moveWindow(&grid, &myfield, species);
 
     grid.istep++;
@@ -815,7 +819,7 @@ while(grid.istep <= Nstep)
 \begin{lstlisting}[backgroundcolor=\color{no_modify}]
 	manager.close();
 	MPI_Finalize();
-	
+
 	return 0;
 
 }
@@ -839,17 +843,17 @@ $ ./piccante
 You should get something like:
 
 \begin{verbatim}
-         d8b                                    888                
-         Y8P                                    888                
-                                                888                
-88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.      
+         d8b                                    888
+         Y8P                                    888
+                                                888
+88888b.  888  .d8888b .d8888b  8888b.  88888b.  888888 .d88b.
 888 "88b 888 d88P"   d88P"        "88b 888 "88b 888   d8P  Y8b
-888  888 888 888     888      .d888888 888  888 888   88888888     
-888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.         
+888  888 888 888     888      .d888888 888  888 888   88888888
+888 d88P 888 Y88b.   Y88b.    888  888 888  888 Y88b. Y8b.
 88888P"  888  "Y8888P "Y8888P "Y888888 888  888  "Y888 "Y8888
-888                                                                
-888                                                                
-888                                                                
+888
+888
+888
 ================   version 1.5.0  ================
 ========== GRID_INITIALIZATION ==========
 master_proc=0:
@@ -865,9 +869,9 @@ dx=0.020000
 dy=2.000000
 dz=2.000000
 Nstep=3063
-Boundaries (X,Y,Z) : OPEN , PBC , PBC 
+Boundaries (X,Y,Z) : OPEN , PBC , PBC
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
------ START temporal cicle -----
+----- START temporal cycle -----
      0/3063  0.000000   12:04:39  (03/06/2014)          1 sec.
      5/3063  0.098000   12:04:39  (03/06/2014)          1 sec.
     10/3063  0.196000   12:04:39  (03/06/2014)          1 sec.
@@ -907,22 +911,18 @@ $ mpirun -np 8 ./piccante > output.txt &
 Ask one of the contributors for the appropriate compile script.
 
 \chapter{How to analyse the results}\label{chapter_howtoanalyse}
-Most of the output files are in binary format. The code comes with a \emph{reader} tool, which is able to covert the binary file into a text file. Then, the text file can be visualized using \emph{Gnuplot}(\url{http://www.gnuplot.info/}) or \emph{Paraview}(\url{http://www.paraview.org/}). \emph{Paraview} is suggested for 3D plots.
+Most of the output files are in binary format. You can use our \emph{reader} tool, described later, which is able to covert the binary file into a text file. Then, the text file can be visualized using \emph{Gnuplot}(\url{http://www.gnuplot.info/}) or \emph{Paraview}(\url{http://www.paraview.org/}). \emph{Paraview} is suggested for 3D plots.
 
 \section{Get the reader}
-\emph{reader} is available as an open-source repository. To get the reader, simply type (see \ref{section_getcode}):
+Our tools for piccante are available in another open-source repository:
 \begin{verbatim}
 git clone https://github.com/ALaDyn/tools-piccante.git
 \end{verbatim}
 
 \section{Compile the reader}
-To compile \emph{reader}, it should be enough to do a \verb+make+ in the tools-piccante root folder
+To compile the tools, and the \emph{reader} for example, please refer to the instructions inside the tools-piccante repository
 
-Then, you may want to launch \emph{reader} from any location on your system. To make it possible, copy the \emph{reader.exe} executable in the \verb+\usr\bin+ folder.
-\begin{verbatim}
-$ sudo cp reader.exe /usr/bin/reader
-\end{verbatim}
-If you don't want to do this, or you just cannot do it, please refer to your \emph{reader.exe} location in the following guide, instead of just the command \emph{reader} we are going to use.
+You may want to launch \emph{reader} from any location on your system. To make it possible, copy the \emph{reader} executable inside a folder on your system PATH, or add the \verb+tools-piccante\bin+ folder itself to the PATH\@. If you don't want to add \emph{reader} to the system PATH, please use the explicit path to your \emph{reader} location in the following guide, instead of just the command \emph{reader} we are going to use.
 
 \section{Human readable outputs}
 \subsection{diag.dat file}
@@ -1000,9 +1000,9 @@ $ gnuplot
 These files are basically for debug purpose only. They always come in pair with a binary file and they contain some of the information included in the binary header in a human readable format.
 
 \section{Binary outputs}
-Among the binary (\verb+*.bin+) output files, all but the phase space files require \emph{reader} to be analysed. 
+Among the binary (\verb+*.bin+) output files, all but the phase space files require \emph{reader} to be analysed.
 \subsection{EM field files}
-These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) and their subdomains' equivalent (\verb+E_FIELD_DOMAINNAME_DOMAINID_TIME.bin+) contains the EM field of the simulation at a given time-step.
+These files (\verb+Efield_TIME.bin+ and \verb+Bfield_TIME.bin+) and their sub-domains' equivalent (\verb+E_FIELD_DOMAINNAME_DOMAINID_TIME.bin+) contains the EM field of the simulation at a given time-step.
 
 First, launch \emph{reader} passing the file name as an argument (this is usually extremely fast for 1D simulation, while it can take several minutes for 2D or 3D simulations):
 \begin{verbatim}
@@ -1018,7 +1018,7 @@ If you have used the stretched grid feature, plotting with image won't work corr
 > set pm3d map
 > splot "Efield_050.000.bin.txt" u 1:2:4 w pm3d
 \end{verbatim}
-You can avoid launching the reader for every single file implementing some simple \emph{bash} scripts. The following script, for example, plots the 
+You can avoid launching the reader for every single file implementing some simple \emph{bash} scripts. The following script, for example, plots the
 $E_x$ field component and saves it as a \verb+.png+ file for each \emph{Efield} file in the \verb+TEST+ directory:
 \begin{verbatim}
 #!/bin/bash
@@ -1027,27 +1027,27 @@ echo "set size ratio -1">>gnuplot.scr
 for f in TEST/Efield_*.bin
         do reader $f
         echo "set output '${f}_Ex.png'">>gnuplot.scr
-        echo "plot '${f}.txt' u 1:2:4 w image">>gnuplot.scr 
+        echo "plot '${f}.txt' u 1:2:4 w image">>gnuplot.scr
 done
 gnuplot gnuplot.scr
 \end{verbatim}
 For the visualization of 3D data it is strongly suggested to use \emph{paraview}.
 
 \subsection{binary output formats}
-After some analysis it has been decided that netCDF and HDF5 is indeed the path you want to follow for structured - well organized - multiformats output.
-However using libraries, at the very beginning, might appear cumbersome; so while the library output is on its (fast) way, we have also developed an owner format.
+After some analysis it has been decided that netCDF and HDF5 is indeed the path you want to follow for structured --- well organized --- multi-formats output.
+However using libraries, at the very beginning, might appear cumbersome; so while the library output is on its (fast) way, we have also developed our own format.
 
 The binary format has the following structure:
 % \begin{lstlisting}[backgroundcolor=\color{blue}]
-% \end{lstlisting}	
+% \end{lstlisting}
 \begin{verbatim}
-1-line : 1 x INTeger : Endianess : 0-little endian; 1-big endian
-2-line : 3 x INTeger : Nx Ny Nz : total number of cells for the whole simulation
-3-line : 3 x INTeger : Npx Npy Npz : number of processors for each direction (i, j, k)
-4-line : 1 x INTeger : Nc : number of components
+1-line : 1 x INTEGER : Endianness : 0-little endian; 1-big endian
+2-line : 3 x INTEGER : Nx Ny Nz : total number of cells for the whole simulation
+3-line : 3 x INTEGER : Npx Npy Npz : number of processors for each direction (i, j, k)
+4-line : 1 x INTEGER : Nc : number of components
 5-line : -float-           : X,Y,Z : mesh point for X (fast variable), Y and Z
 #--- processor output
-6-line : 6 x INTeger : i0,j0,k0, len_i, len_j, len_k : zero coordinate for the processor - and its extension in the 3 directions
+6-line : 6 x INTEGER : i0,j0,k0, len_i, len_j, len_k : zero coordinate for the processor - and its extension in the 3 directions
 7-line : -float-          : field in (i,j,k)
 \end{verbatim}
 
@@ -1062,10 +1062,10 @@ Suppose that you want the \emph{total charge density} in a simulation where you 
 \end{verbatim}
 
 \subsection{Current files}
-Most of what has been said for \emph{EMfield} files is valid for \emph{Density} files. Their name structure is \verb+J_TIME.bin+ and, once converted with \emph{reader}, they are 6 columns files ($x$, $y$, $z$, $J_x$, $J_y$, $J_z$). 
+Most of what has been said for \emph{EMfield} files is valid for \emph{Density} files. Their name structure is \verb+J_TIME.bin+ and, once converted with \emph{reader}, they are 6 columns files ($x$, $y$, $z$, $J_x$, $J_y$, $J_z$).
 
 \subsection{PhaseSpace files}
-The \emph{PhaseSpace} files (\verb+PHASESPACE_NAME_TIME.bin+) have a very simple structure: for each particle, 7 float numbers are saved. These numbers are, respectively: $x$, $y$, $z$, $p_x$, $p_y$, $p_z$ and the weight of the particle. Due to their simplicity, these files can be plotted with \emph{gnuplot}: 
+The \emph{PhaseSpace} files (\verb+PHASESPACE_NAME_TIME.bin+) have a very simple structure: for each particle, 7 float numbers are saved. These numbers are, respectively: $x$, $y$, $z$, $p_x$, $p_y$, $p_z$ and the weight of the particle. Due to their simplicity, these files can be plotted with \emph{gnuplot}:
 \begin{verbatim}
 > plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" u 1:4 w d
 \end{verbatim}
@@ -1074,16 +1074,16 @@ For example, this command plots the $x-p_x$ projection of the phase space.
 Since these files are usually very large, you may want to plot just a fraction of the particles. Suppose that you want to plot one particle every 100:
 \begin{verbatim}
 > plot "PHASESPACE_ELE1_055.000.bin" binary format="%f%f%f%f%f%f%f" every 100 u 1:4 w d
-\end{verbatim} 
+\end{verbatim}
 
 \chapter{Main files collection}
 In this section, the example main files in the \verb+Example+ directory are briefly discussed. To launch these simulations, you have to copy the corresponding main file in the source directory, rename it \verb+main-piccante.cpp+ and compile the code.
 
-The 2D and 3D simulations provided in the \verb+Example+ folder are designed to be launched on a supercomputer, due to the large computational requirements. However, it is possible to run ``small'' 2D simulations also on personal computers. 
+The 2D and 3D simulations provided in the \verb+Example+ folder are designed to be launched on a supercomputer, due to the large computational requirements. However, it is possible to run ``small'' 2D simulations also on personal computers.
 
 \section{1D wakefield with moving window}
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l l }
     	\textbf{main file name}           & \verb+simple_1d_wakefield.cpp+                                  \\
     	\textbf{short description}        & simple simulation of a nonlinear wakefield with moving window   \\
     	\textbf{dimensionality}           & 1D                                                              \\
@@ -1092,18 +1092,17 @@ The 2D and 3D simulations provided in the \verb+Example+ folder are designed to 
 \end{center}
 In this simulation, a P polarized laser pulse with a normalized amplitude of 1.0 enters in an underdense plasma (density of 0.01, with a soft $\sin^2$ ramp). The moving window feature is used. It is worth to remind that, for the moment, new plasma is added with zero temperature.
 
-Figure \ref{pic_1dwake} reports the phase space of the electrons after 50.0 periods.
-    
+Figure~\ref{pic_1dwake} reports the phase space of the electrons after 50.0 periods.
+
     \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.80\textwidth]{wake.png}
-    \caption{1D wakefield: electrons phase space}
-	\label{pic_1dwake}    
-    \end{figure}    
+    \caption{1D wakefield: electrons phase space}\label{pic_1dwake}
+    \end{figure}
 
 \section{1D simple TNSA simulation}
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l  l }
     	\textbf{main file name}          & \verb+1d_TNSA.cpp+                                     \\
     	\textbf{short description}       & simple simulation of TNSA ion acceleration             \\
     	\textbf{dimensionality}          & 1D                                                     \\
@@ -1112,19 +1111,18 @@ Figure \ref{pic_1dwake} reports the phase space of the electrons after 50.0 peri
     \end{center}
 A P polarized laser pulse with a normalized amplitude of 8.0 interacts with a thin (1.5 $\lambda$) carbon target(``ION1''). There's a very thin layer of hydrogen contaminants on the rear side of the target.
 
-Picture \ref{pic_1dTNSA} shows the phase space of carbon ions.
-    
-    
+Figure~\ref{pic_1dTNSA} shows the phase space of carbon ions.
+
+
     \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.80\textwidth]{TNSA1d.png}
-    \caption{1D TNSA: ion1 phase space}
-	\label{pic_1dTNSA}    
-    \end{figure}    
+    \caption{1D TNSA:\ ion1 phase space}\label{pic_1dTNSA}
+    \end{figure}
 
 \section{2D grating with stretched grid and 2 laser pulses}
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l l }
     	\textbf{main file name}           &  \verb+2d_grating.cpp+                                               \\
     	\textbf{short description}        &  two laser pulses  a grating target                                  \\
     	\textbf{dimensionality}           &  2D                                                                  \\
@@ -1133,25 +1131,24 @@ Picture \ref{pic_1dTNSA} shows the phase space of carbon ions.
     \end{center}
 In this simulations, two inclined laser pulses interact with an overdense grating target.
 
-Several features of emph{piccante} code are used in this simulation, such as the stretched grid, complex target shapes and multiple laser pulses. Figure \ref{pic_2dgrt} shows the initial setup of this simulation.
+Several features of emph{piccante} code are used in this simulation, such as the stretched grid, complex target shapes and multiple laser pulses. Figure~\ref{pic_2dgrt} shows the initial setup of this simulation.
 
 \begin{figure}[htbp]
         \centering
           \begin{subfigure}[c]{0.3\textwidth}
-                \includegraphics[width=\textwidth]{2d.png}                
-                
+                \includegraphics[width=\textwidth]{2d.png}
+
         \end{subfigure}
                   \begin{subfigure}[c]{0.4\textwidth}
-                \includegraphics[width=\textwidth]{2d_field.png}                
-                
+                \includegraphics[width=\textwidth]{2d_field.png}
+
         \end{subfigure}
-        \caption{2D grating: The initial setup (target and Bz field component)}
-        \label{pic_2dgrt}
+        \caption{2D grating: The initial setup (target and Bz field component)}\label{pic_2dgrt}
 \end{figure}
 
 \section{3D two stream instability}
 \begin{center}
-    \begin{tabular}{ l | l }
+    \begin{tabular}{ l l }
     	\textbf{main file name}          & \verb+3d_twostream.cpp+                                          \\
     	\textbf{short description}       & two counter-streaming electron clouds                            \\
     	\textbf{dimensionality}          & 3D                                                               \\
@@ -1162,19 +1159,18 @@ In this simulation there are two counter-streaming electron clouds with normaliz
 
 An instability develops and a significant fraction of the initial kinetic energy is converted into EM field energy.
 
-Figure \ref{pic_3dtwostream} shows the charge density of one of the electron species after a few plasma periods.
+Figure~\ref{pic_3dtwostream} shows the charge density of one of the electron species after a few plasma periods.
  \begin{figure}[htbp!]
     \centering
     \includegraphics[width=0.70\textwidth]{3d_marta.png}
-    \caption{3D twostream: development of the instability(ELE1 charge density)}
-	\label{pic_3dtwostream}    
-\end{figure}    
+    \caption{3D twostream: development of the instability(ELE1 charge density)}\label{pic_3dtwostream}
+\end{figure}
 
- 
 
-\chapter*{Appendix A: code normalization}
-\tikz[remember picture,overlay] {%
-\draw [bordercolor,line width=10mm]
+
+\chapter*{Appendix A:\ code normalization}
+\tikz[remember picture,overlay] {
+\draw[bordercolor,line width=10mm]
 (current page.south west)
 rectangle
 (current page.north east)
@@ -1195,20 +1191,19 @@ l          &=& \widetilde{l}                        \: \ell_0                   
 \end{eqnarray*}
 
 \section*{Normalized Particle equations}
-$$
+\[
 \begin{cases}
     \partial_{\widetilde{t}} \widetilde{p} = & \dfrac{\widetilde{q}}{\widetilde{m}} \left({\widetilde{\mathbf{E}} + \widetilde{\mathbf{v}} \times \widetilde{\mathbf{E}}}\right) \\
    \widetilde{\mathbf{J}} = & \widetilde{q} \sum_n{\dfrac{W_n}{\Delta \widetilde{V}} \widetilde{\mathbf{v}}_n} \\
 \end{cases}
-$$
+\]
 
 \section*{Normalized Maxwell equations}
-$$
+\[
 \begin{cases}
     \partial_{\widetilde{t}} \widetilde{\mathbf{B}} = & - \widetilde{\nabla} \times \widetilde{\mathbf{E}} \\
     \partial_{\widetilde{t}} \widetilde{\mathbf{E}} = & \widetilde{\nabla} \times \widetilde{\mathbf{B}} - 4\pi^2 \widetilde{\mathbf{J}}
 \end{cases}
-$$
+\]
 
 \end{document}
-

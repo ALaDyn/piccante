@@ -138,7 +138,7 @@ int main(int narg, char **args)
   //*******************************************END DIAG DEFINITION**************************************************
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  grid.printMessage("---- START temporal cicle -----\n");
+  grid.printMessage("---- START temporal cycle -----\n");
   UTILITIES::considerRestartFromDump(&grid, &myfield, species);
 
   while (grid.istep <= grid.getTotalNumberOfTimesteps())

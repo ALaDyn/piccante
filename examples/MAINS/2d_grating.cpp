@@ -100,7 +100,7 @@ int main(int narg, char **args)
   grid.visualDiag();
   //********************************************END GRID DEFINITION********************************************************
 
-  //*******************************************BEGIN FIELD DEFINITION*********************************************************	
+  //*******************************************BEGIN FIELD DEFINITION*********************************************************
 
   myfield.allocate(&grid);
   myfield.setAllValuesToZero();
@@ -241,7 +241,7 @@ int main(int narg, char **args)
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   if (grid.myid == grid.master_proc) {
-    printf("----- START temporal cicle -----\n");
+    printf("----- START temporal cycle -----\n");
     fflush(stdout);
   }
 
@@ -341,5 +341,3 @@ int main(int narg, char **args)
   return 0;
 
 }
-
-

@@ -185,7 +185,7 @@ int main(int narg, char **args)
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ MAIN CYCLE (DO NOT MODIFY) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   if (grid.myid == grid.master_proc) {
-    printf("----- START temporal cicle -----\n");
+    printf("----- START temporal cycle -----\n");
     fflush(stdout);
   }
 

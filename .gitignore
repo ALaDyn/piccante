@@ -2,6 +2,7 @@
 #VS Code
 .vs/
 .vscode/
+!.vscode/settings.json
 
 #doc temp files
 *.synctex.gz
