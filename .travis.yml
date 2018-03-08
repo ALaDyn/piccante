@@ -4,7 +4,7 @@ os:
   - linux
   - osx
 
-compiler: 
+compiler:
   - gcc
   - clang
 
@@ -26,13 +26,13 @@ matrix:
       compiler: clang
 
 before_install:
-  # OSX Setup 
+  # OSX Setup
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew update                                                                               ;fi
   # Upgrade cmake, which otherwise has problem in finding HDF5 (CMake 3.6 had a bug in FindHDF5.cmake module)
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew upgrade cmake                                                                        ;fi
   # work-around a problem in XCode 8.3 image
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew cask uninstall oclint                                                                ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew tap homebrew/science                                                                 ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew tap homebrew/science                                                                 ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw --with-mpi                                                              ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install hdf5 --with-mpi --c++11                                                      ;fi
@@ -48,5 +48,5 @@ install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mkdir build && cd build && cmake .. -DBUILD_EXAMPLES=ON && cmake --build . --target install   ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then mkdir build && cd build && cmake .. && cmake --build . --target install                       ;fi
-  
+
 
