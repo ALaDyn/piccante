@@ -7,7 +7,7 @@
                 "/usr/local/include",
                 "${workspaceRoot}",
                 "${workspaceRoot}/src"
-              ],
+            ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
@@ -16,7 +16,7 @@
                     "/usr/local/include",
                     "${workspaceRoot}",
                     "${workspaceRoot}/src"
-              ],
+                ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             },
@@ -32,7 +32,7 @@
                 "/usr/local/include",
                 "${workspaceRoot}",
                 "${workspaceRoot}/src"
-              ],
+            ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
@@ -41,7 +41,7 @@
                     "/usr/local/include",
                     "${workspaceRoot}",
                     "${workspaceRoot}/src"
-              ],
+                ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             }
@@ -81,5 +81,5 @@
             }
         }
     ],
-    "version": 3
+    "version": 4
 }
