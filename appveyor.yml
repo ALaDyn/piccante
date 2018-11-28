@@ -20,11 +20,11 @@ install:
   - cd ..
   - mkdir C:\projects\deps
   - cd C:\projects\deps
-  - ps: if($env:COMPILER -eq "vs") { Invoke-WebRequest https://download.microsoft.com/download/D/B/B/DBB64BA1-7B51-43DB-8BF1-D1FB45EACF7A/MSMpiSetup.exe -OutFile C:\projects\deps\msmpi.exe }
+  - ps: if($env:COMPILER -eq "vs") { Invoke-WebRequest https://download.microsoft.com/download/2/E/C/2EC96D7F-687B-4613-80F6-E10F670A2D97/msmpisetup.exe -OutFile C:\projects\deps\msmpi.exe }
   - if [%COMPILER%]==[vs] C:\projects\deps\msmpi.exe -unattend
   - mkdir cygwin-downloads
   - ps: if($env:COMPILER -eq "cygwin") { Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile C:\projects\deps\cygwin-setup.exe }
-  - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel,libhdf5-devel,libfftw3-devel
+  - if [%COMPILER%]==[cygwin] C:\projects\deps\cygwin-setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root C:\cygwin64 --local-package-dir C:\projects\deps\cygwin-downloads --packages gcc-g++,libopenmpi-devel,cmake,libboost-devel,libhdf5-devel,libfftw3-devel,zlib-devel
   - cd ..
   - git clone https://github.com/Microsoft/vcpkg
   - cd vcpkg
@@ -37,7 +37,7 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - if [%COMPILER%]==[cygwin] cmake .. -G "Unix Makefiles" -DBUILD_EXAMPLES=ON 
+  - if [%COMPILER%]==[cygwin] cmake .. -G "Unix Makefiles" -DBUILD_EXAMPLES=ON
   - if [%COMPILER%]==[cygwin] cmake --build . --target install
   - if [%COMPILER%]==[vs]     cmake .. -G "Visual Studio 15 2017" -DBUILD_EXAMPLES=ON "-DCMAKE_TOOLCHAIN_FILE=C:\projects\vcpkg\scripts\buildsystems\vcpkg.cmake"
   - if [%COMPILER%]==[vs]     cmake --build . --target install --config Release
