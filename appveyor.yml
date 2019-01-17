@@ -20,7 +20,7 @@ install:
   - cd ..
   - mkdir C:\projects\deps
   - cd C:\projects\deps
-  - ps: if($env:COMPILER -eq "vs") { Invoke-WebRequest https://download.microsoft.com/download/2/E/C/2EC96D7F-687B-4613-80F6-E10F670A2D97/msmpisetup.exe -OutFile C:\projects\deps\msmpi.exe }
+  - ps: if($env:COMPILER -eq "vs") { Invoke-WebRequest https://download.microsoft.com/download/A/E/0/AE002626-9D9D-448D-8197-1EA510E297CE/msmpisetup.exe -OutFile C:\projects\deps\msmpi.exe }
   - if [%COMPILER%]==[vs] C:\projects\deps\msmpi.exe -unattend
   - mkdir cygwin-downloads
   - ps: if($env:COMPILER -eq "cygwin") { Invoke-WebRequest https://cygwin.com/setup-x86_64.exe -OutFile C:\projects\deps\cygwin-setup.exe }

@@ -58,7 +58,7 @@ PS Code\vcpkg>     .\bootstrap-vcpkg.bat
 8) Close the Powershell and re-open it with admin privileges
 ```
 PS \>              cd $env:WORKSPACE
-PS Code\>          Invoke-WebRequest https://download.microsoft.com/download/B/2/E/B2EB83FE-98C2-4156-834A-E1711E6884FB/MSMpiSetup.exe -OutFile $env:WORKSPACE\msmpi.exe
+PS Code\>          Invoke-WebRequest https://download.microsoft.com/download/A/E/0/AE002626-9D9D-448D-8197-1EA510E297CE/msmpisetup.exe -OutFile $env:WORKSPACE\msmpi.exe
 PS Code>           .\msmpi -unattend
 PS Code>           cd vcpkg
 PS Code\vcpkg>     .\vcpkg integrate install
@@ -131,6 +131,3 @@ $  cd piccante
 $  mkdir build && cd build
 $  cmake .. ; cmake --build . --target install
 ```
-
-
-
