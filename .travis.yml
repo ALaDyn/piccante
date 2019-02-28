@@ -11,7 +11,6 @@ compiler:
 addons:
   apt:
     packages:
-    - libhdf5-openmpi-dev
     - libfftw3-dev
     - libfftw3-mpi-dev
     - libopenmpi-dev
@@ -26,13 +25,8 @@ matrix:
       compiler: clang
 
 before_install:
-  # OSX Setup
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew update                                                                               ;fi
-  # Upgrade cmake, which otherwise has problem in finding HDF5 (CMake 3.6 had a bug in FindHDF5.cmake module)
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew upgrade cmake                                                                        ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install open-mpi                                                                     ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw --with-mpi                                                              ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install hdf5 --with-mpi --c++11                                                      ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install fftw                                                                         ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then brew install jsoncpp                                                                      ;fi
 
 install:
